@@ -1,3 +1,16 @@
 spring:
-  application:
-    name: koi-breeding
+    application:
+        name: koi-breeding
+    datasource:
+        url: jdbc:postgresql://localhost:5432/koi_breeding
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+    jpa:
+        hibernate:
+            ddl-auto: update
+            naming:
+                physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        properties:
+            hibernate:
+                default_schema: koi_breeding
+        show-sql: true

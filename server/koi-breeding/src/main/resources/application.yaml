@@ -1,10 +1,14 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /koi_breeding
 spring:
     application:
         name: koi-breeding
     datasource:
         url: jdbc:postgresql://localhost:5432/koi_breeding
-        username: ${DB_USERNAME}
-        password: ${DB_PASSWORD}
+        username: postgres
+        password: khoa123
     jpa:
         hibernate:
             ddl-auto: update

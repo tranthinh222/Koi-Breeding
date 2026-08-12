@@ -94,6 +94,10 @@ public class UserController {
     @PostMapping("/users/avatar")
     public ResponseEntity<Map<String, String>> uploadAvatar(@RequestParam Integer id,
             @RequestParam("file") MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")){
+            throw new IllegalArgumentException("Content file must be an image.");
+        }
         String avatarUrl = userService.handleUploadAvatar(id, file);
         return ResponseEntity.ok(Map.of("avatarUrl", avatarUrl));
     }

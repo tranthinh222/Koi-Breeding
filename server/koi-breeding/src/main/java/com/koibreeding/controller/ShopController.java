@@ -31,9 +31,7 @@ public class ShopController {
 
     // @GetMapping("/shop/products/{id}")
     // public ResponseEntity<Page<Item>> getAnItem() {
-    // return
-    // ResponseEntity.status(HttpStatus.OK).body(this.shopService.getItems(category,
-    // page, size));
+
     // }
 
 }

@@ -25,7 +25,7 @@ public class ShopController {
     private final ShopService shopService;
     private final ItemService itemService;
 
-    @GetMapping("/shop/products")
+    @GetMapping("/shop/items")
     public ResponseEntity<Page<Item>> fetchItems(
             @RequestParam(required = false) ItemType category,
             @RequestParam(defaultValue = "0") int page,
@@ -33,7 +33,7 @@ public class ShopController {
         return ResponseEntity.status(HttpStatus.OK).body(this.shopService.getItems(category, page, size));
     }
 
-    @GetMapping("/shop/products/{id}")
+    @GetMapping("/shop/items/{id}")
     public ResponseEntity<Item> fetchAnItem(@RequestParam("id") int id) {
         Item item = this.itemService.findItemById(id);
         if (item == null) {

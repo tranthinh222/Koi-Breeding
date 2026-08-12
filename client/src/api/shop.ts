@@ -34,9 +34,10 @@ interface BackendItem {
 
 const fromBackendItem = (item: BackendItem): ShopProduct => ({
   id: item.id,
-  name: item.itemType === 'CURRENCY'
-    ? `${new Intl.NumberFormat('en-US').format(item.effectValue)} Koins`
-    : item.name,
+  name:
+    item.itemType === 'CURRENCY'
+      ? `${new Intl.NumberFormat('en-US').format(item.effectValue)} Koins`
+      : item.name,
   category: item.itemType,
   price: item.price,
   currency: item.itemType === 'CURRENCY' ? 'USD' : 'KOINS',
@@ -122,30 +123,60 @@ const products: ShopProduct[] = [
     coinAmount: 750,
     description: 'A small Koin package for your pond.',
   },
-  { id: 10, name: '3,000 Koins', category: 'CURRENCY', price: 4.99, currency: 'USD', coinAmount: 3000, description: 'A value pack of Koins for your pond.' },
-  { id: 11, name: '9,000 Koins', category: 'CURRENCY', price: 9.99, currency: 'USD', coinAmount: 9000, description: 'A large Koin package for dedicated players.' },
-  { id: 12, name: '25,000 Koins', category: 'CURRENCY', price: 19.99, currency: 'USD', coinAmount: 25000, description: 'The best-value package of Koins.' },
+  {
+    id: 10,
+    name: '3,000 Koins',
+    category: 'CURRENCY',
+    price: 4.99,
+    currency: 'USD',
+    coinAmount: 3000,
+    description: 'A value pack of Koins for your pond.',
+  },
+  {
+    id: 11,
+    name: '9,000 Koins',
+    category: 'CURRENCY',
+    price: 9.99,
+    currency: 'USD',
+    coinAmount: 9000,
+    description: 'A large Koin package for dedicated players.',
+  },
+  {
+    id: 12,
+    name: '25,000 Koins',
+    category: 'CURRENCY',
+    price: 19.99,
+    currency: 'USD',
+    coinAmount: 25000,
+    description: 'The best-value package of Koins.',
+  },
 ]
 export async function getShopProducts(
   category: ShopCategory,
   signal?: AbortSignal,
 ): Promise<ShopProduct[]> {
   try {
-    const response = await apiClient.get<RestResponse<ShopPageResponse>>('/shop/products', {
-      params: { category, page: 0, size: 20 },
-      signal,
-    })
+    const response = await apiClient.get<RestResponse<ShopPageResponse>>(
+      '/shop/products',
+      {
+        params: { category, page: 0, size: 20 },
+        signal,
+      },
+    )
     return response.data.data.content.map(fromBackendItem)
   } catch (error) {
     if (axios.isCancel(error)) throw error
-    console.error('Shop API request failed. Using demo products instead.', error)
+    console.error(
+      'Shop API request failed. Using demo products instead.',
+      error,
+    )
     return products.filter((product) => product.category === category)
   }
 }
 
-export async function purchaseShopProduct(productId: number): Promise<void> {
+export async function purchaseShopProduct(itemId: number): Promise<void> {
   try {
-    await apiClient.post(`/shop/products/${productId}/purchase`, {
+    await apiClient.post(`/shop/items/${itemId}/purchase`, {
       quantity: 1,
     })
   } catch (error) {

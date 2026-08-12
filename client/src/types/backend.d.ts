@@ -1,4 +1,14 @@
-export interface KoiVarient {
+export interface IModelPagination<T> {
+	meta: {
+		page: number;
+		pageSize: number;
+		totalPages: number;
+		totalElements: number;
+	};
+	result: T[];
+}
+
+export interface IKoiVarient {
 	id: number;
 	name: string;
 	origin: string;
@@ -13,7 +23,7 @@ export interface KoiVarient {
 	alphaPrice: number;
 }
 
-export interface Koi {
+export interface IKoi {
 	id: number;
 	name: string;
 	age: number;
@@ -24,14 +34,14 @@ export interface Koi {
 	cureBar: number;
 	gender: string;
 	price: number;
-	mutation: Mutation | null;
+	mutation: IMutation | null;
 	bornedAt: Date;
 	pond: Pond;
 	lifeStage: string;
 	father: Koi | null;
 	mother: Koi | null;
 	potential: number;
-	dictionary: KoiVarient | null;
+	dictionary: IKoiVarient | null;
 	patternScore: number;
 	colorScore: number;
 	bodyScore: number;
@@ -39,15 +49,7 @@ export interface Koi {
 	scaleScore: number;
 }
 
-export interface PageDTO<T> {
-	page: number;
-	pageSize: number;
-	data: T[];
-	totalPages: number;
-	totalElements: number;
-}
-
-export interface Mutation {
+export interface IMutation {
 	id: number;
 	name: string;
 	rate: number;
@@ -55,9 +57,9 @@ export interface Mutation {
 	description: string;
 }
 
-export interface Pond {
+export interface IPond {
 	id: number;
-	owner: UserData | null;
+	owner: IUserData | null;
 	name: string;
 	level: number;
 	capacity: number;
@@ -69,7 +71,7 @@ export interface Pond {
 	description: string;
 }
 
-export interface User {
+export interface IUser {
 	id: number;
 	username: string;
 	password: string;
@@ -85,7 +87,7 @@ export interface User {
 	avatarUrl: string;
 }
 
-export interface UserData {
+export interface IUserData {
 	id: number;
 	username: string;
 	email: string;

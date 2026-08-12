@@ -141,8 +141,6 @@ class UserServiceProfileTest {
                 new byte[0] // File 0 byte
         );
 
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
-
         // Kiểm tra xem Service có ném ra lỗi (ví dụ: IllegalArgumentException) không
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             userService.handleUploadAvatar(1, emptyFile);
@@ -161,8 +159,6 @@ class UserServiceProfileTest {
                 "text/plain", // Định dạng text chứ không phải image
                 "hacker-content".getBytes()
         );
-
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
 
         // Kiểm tra xem Service có nhận diện và ném lỗi không
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {

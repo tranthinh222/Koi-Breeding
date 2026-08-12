@@ -1,5 +1,7 @@
 package com.koibreeding.controller;
 
+import java.util.Map;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.koibreeding.domain.User;
 import com.koibreeding.domain.response.ResultPaginationDTO;
@@ -69,5 +73,28 @@ public class UserController {
         this.userService.handleDeleteUser(id);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/users/profile")
+    public ResponseEntity<User> getUserProfile(@RequestParam Integer id) throws Exception{
+        if (!userService.isUserExistById(id)){
+            throw new Exception("User with id '" + id + "' is not exist.");
+        }
+        User profile = userService.handleFetchProfileByUserId(id);
+        return ResponseEntity.ok(profile);
+    }
+    @PutMapping("/users/profile")
+    public ResponseEntity<User> updateUserProfile(@RequestParam Integer id, @RequestBody User userUpdate) throws Exception{
+        if (!userService.isUserExistById(id)){
+            throw new Exception("User with id '" + id + "' is not exist.");
+        }
+        User updateUser = userService.handleUpdateProfile(id, userUpdate);
+        return ResponseEntity.ok(updateUser);
+    }
+    @PostMapping("/users/avatar")
+    public ResponseEntity<Map<String, String>> uploadAvatar(@RequestParam Integer id,
+            @RequestParam("file") MultipartFile file) {
+        String avatarUrl = userService.handleUploadAvatar(id, file);
+        return ResponseEntity.ok(Map.of("avatarUrl", avatarUrl));
     }
 }

@@ -17,6 +17,8 @@ import com.koibreeding.domain.User;
 import com.koibreeding.domain.response.ResultPaginationDTO;
 import com.koibreeding.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -80,6 +82,7 @@ public class UserService {
         return this.userRepository.save(currentUser);
     }
 
+    @Transactional
     public String handleUploadAvatar(Integer userId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Avatar file is required.");
@@ -117,6 +120,8 @@ public class UserService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload avatar for user id '" + userId + "'.", e);
         }
+
+        
     }
 
     public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {

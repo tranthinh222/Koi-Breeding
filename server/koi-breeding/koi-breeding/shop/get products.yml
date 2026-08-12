@@ -1,0 +1,19 @@
+info:
+  name: get products
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://localhost:8089/koi_breeding/shop/products?size=2
+  params:
+    - name: size
+      value: "2"
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

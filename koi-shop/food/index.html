@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Koi Shop</title>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+    <!-- ========================= -->
+    <!-- Background -->
+    <!-- ========================= -->
+
+    <div class="background">
+      <div class="grass"></div>
+
+      <div class="trees trees-left"></div>
+
+      <div class="trees trees-right"></div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- HUD -->
+    <!-- ========================= -->
+
+    <header class="hud">
+      <div class="player">
+        <div class="avatar">🧑</div>
+
+        <div>
+          <h3>KoiMaster</h3>
+
+          <p>Level: 18</p>
+        </div>
+      </div>
+
+      <div class="wallet">
+        <div class="gold">🪙 25,800</div>
+
+        <!-- <div class="diamond">💎 135</div> -->
+      </div>
+    </header>
+
+    <nav class="navigation-menu">
+      <button>🏠 Home</button>
+
+      <button>🎒 Inventory</button>
+
+      <button class="active">🛒 Shop</button>
+
+      <button>🏪 Marketplace</button>
+
+      <button>⚙︎ Settings</button>
+    </nav>
+
+    <!-- ========================= -->
+    <!-- Wooden Sign -->
+    <!-- ========================= -->
+
+    <section class="title-section">
+      <div class="wood-sign">
+        <h1>KOI SHOP</h1>
+
+        <p>Items Shop</p>
+      </div>
+    </section>
+
+    <section class="market-tabs">
+      <button class="tab active">🥡 Food</button>
+      <button class="tab">💊 Medicine</button>
+      <button class="tab">🐟 Koi</button>
+      <button class="tab">🪙 Koins</button>
+    </section>
+
+    <!-- ========================= -->
+    <!-- Search -->
+    <!-- ========================= -->
+
+    <!-- <section class="search-panel">
+			<input type="text" placeholder="Search koi..." />
+
+			<select>
+				<option>Breed</option>
+
+				<option>Kohaku</option>
+
+				<option>Showa</option>
+
+				<option>Asagi</option>
+			</select>
+
+			<select>
+				<option>Origin</option>
+
+				<option>Japan</option>
+
+				<option>Vietnam</option>
+			</select>
+
+			<select>
+				<option>Gene</option>
+
+				<option>A+</option>
+
+				<option>A</option>
+
+				<option>B</option>
+			</select>
+
+			<select>
+				<option>Price</option>
+
+				<option>Low → High</option>
+
+				<option>High → Low</option>
+			</select>
+		</section> -->
+
+    <!-- ========================= -->
+    <!-- Fish Grid -->
+    <!-- ========================= -->
+
+    <main class="shop-main">
+      <!-- Fish List -->
+      <div class="fish-grid">
+        <!-- CARD 1 -->
+        <div class="fish-card">
+          <div class="fish-image">
+            <img
+              src="assets/aqua-common-food.svg"
+              alt="Aqua Common Food Icon"
+            />
+          </div>
+
+          <div class="common-rarity">COMMON</div>
+
+          <h3>Koi Food - Aqua Master</h3>
+
+          <div class="price">💰 15 Koins</div>
+
+          <button>Buy</button>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="fish-card">
+          <div class="fish-image">
+            <img
+              src="assets/bethech-standard-food.svg"
+              alt="Bethech Standard Food Icon"
+            />
+          </div>
+
+          <div class="standard-rarity">STANDARD</div>
+
+          <h3>Koi Food - Bethech</h3>
+
+          <div class="price">💰 25 Koins</div>
+
+          <button>Buy</button>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="fish-card">
+          <div class="fish-image">
+            <img
+              src="assets/ipick-premium-food.svg"
+              alt="Ipick Premium Food Icon"
+            />
+          </div>
+
+          <div class="premium-rarity">PREMIUM</div>
+
+          <h3>Koi Food - Ipick</h3>
+
+          <div class="price">💰 45 Koins</div>
+
+          <button>Buy</button>
+        </div>
+
+        <!-- CARD 4 -->
+        <div class="fish-card">
+          <div class="fish-image">
+            <img
+              src="assets/kofu-legendary-food.svg"
+              alt="Kofu Legendary Food Icon"
+            />
+          </div>
+
+          <div class="legendary-rarity">LEGENDARY</div>
+
+          <h3>Koi Food - Kofu</h3>
+
+          <div class="price">💰 75 Koins</div>
+
+          <button>Buy</button>
+        </div>
+      </div>
+
+      <!-- Detail Panel -->
+      <aside class="detail-panel">
+        <div class="detail-header">Selected Item</div>
+
+        <hr />
+
+        <div class="detail-image">
+          <img src="assets/aqua-common-food.svg" alt="Aqua Common Food Icon" />
+        </div>
+
+        <h2>Koi Food - Aqua Master</h2>
+
+        <div class="common-rarity">COMMON</div>
+
+        <div class="description">
+          <p>Recover <b>15</b> 🍖 food points.</p>
+          <p>Common fish food is produced by the Aqua Master corporation.</p>
+        </div>
+
+        <div class="detail-price">💰 15 Koins</div>
+
+        <button class="buy-btn">Buy Now</button>
+      </aside>
+    </main>
+    <!-- ========================= -->
+    <!-- Bottom Menu -->
+    <!-- ========================= -->
+
+    <!-- <footer class="bottom-menu">
+			<button>🎒 Inventory</button>
+
+			<button>📜 History</button>
+
+			<button>🏪 My Listings</button>
+
+			<button>⬅ Back</button>
+		</footer> -->
+
+    <script src="js/script.js"></script>
+  </body>
+</html>

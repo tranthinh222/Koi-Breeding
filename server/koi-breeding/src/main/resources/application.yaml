@@ -1,20 +1,18 @@
 server:
-  port: 8080
+  port: 8090
   servlet:
     context-path: /koi_breeding
 spring:
-    application:
-        name: koi-breeding
-    datasource:
-        url: jdbc:postgresql://localhost:5432/koi_breeding
-        username: postgres
-        password: khoa123
-    jpa:
-        hibernate:
-            ddl-auto: update
-            naming:
-                physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-        properties:
-            hibernate:
-                default_schema: koi_breeding
-        show-sql: true
+  application:
+    name: koi-breeding
+  datasource:
+    url: jdbc:postgresql://localhost:5432/koi_breeding
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    properties:
+      hibernate:
+        default_schema: koi_breeding
+    show-sql: true

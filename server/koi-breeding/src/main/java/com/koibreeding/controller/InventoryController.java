@@ -1,44 +1,26 @@
 package com.koibreeding.controller;
 
-import com.koibreeding.response.ItemResponse;
+import com.koibreeding.domain.Inventory;
 import com.koibreeding.service.InventoryService;
+import com.koibreeding.util.annotation.ApiMessage;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/inventory")
+@RequiredArgsConstructor
 public class InventoryController {
-    private final InventoryService inventoryService;
-    public InventoryController(InventoryService inventoryService){
-        this.inventoryService = inventoryService;
-    }
+        private final InventoryService inventoryService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<ItemResponse>> seeInventory(
-            @PathVariable Integer userId
-    ){
-        return ResponseEntity.ok(
-                inventoryService.seeInventory(userId).stream().toList()
-        );
-    }
-
-    @PostMapping("/addItem/{userId}")
-    public ResponseEntity<ItemResponse> addItem(
-            @PathVariable Integer userId,
-            @RequestBody ItemResponse item
-    ){
-       ItemResponse items = inventoryService.addItemToInventory(userId, item.getId(), item.getQuantity());
-        return ResponseEntity.ok(items);
-    }
-
-    @PostMapping("/useItem/{userId}")
-    public ResponseEntity<ItemResponse> useItem(
-            @PathVariable Integer userId,
-            @RequestBody ItemResponse item
-    ){
-        ItemResponse items = inventoryService.useItem(userId, item.getId(), item.getQuantity());
-        return ResponseEntity.ok(items);
-    }
+        // @GetMapping("/inventories/{id}")
+        // @ApiMessage("fetch an inventory")
+        // public ResponseEntity<Inventory> getInventoryById(@PathVariable("id") Long
+        // id) {
+        // Inventory inventory = this.inventoryService
+        // }
 }

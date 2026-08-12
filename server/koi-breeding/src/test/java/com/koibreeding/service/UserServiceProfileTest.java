@@ -82,7 +82,7 @@ class UserServiceProfileTest {
 
     @Test
     void shouldUploadAvatar_whenFileIsValid() {
-        //Test upload avatar cho user
+        // Test upload avatar cho user
         User user = new User();
         user.setId(1);
         user.setUsername("alice");
@@ -92,8 +92,7 @@ class UserServiceProfileTest {
                 "file",
                 "avatar.png",
                 "image/png",
-                "avatar-content".getBytes()
-        );
+                "avatar-content".getBytes());
 
         when(userRepository.findById(1)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -104,5 +103,70 @@ class UserServiceProfileTest {
         assertTrue(avatarUrl.startsWith("/uploads/avatars/user-1-"));
         assertTrue(avatarUrl.endsWith(".png"));
         assertEquals(avatarUrl, user.getAvatarUrl());
+    }
+
+    @Test
+    void shouldThrowException_whenFetchProfile_andUserDoesNotExist() {
+        // Giả lập database trả về rỗng (Optional.empty()) khi tìm ID 99
+        when(userRepository.findById(99)).thenReturn(Optional.empty());
+
+        // Kiểm tra xem Service có ném ra lỗi RuntimeException hay không
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            userService.handleFetchProfileByUserId(99);
+        });
+    }
+    @Test
+    void shouldThrowException_whenUpdateProfile_andUserDoesNotExist() {
+        User updatedInfo = new User();
+        updatedInfo.setUsername("new_name");
+
+        // Giả lập không tìm thấy người dùng ID 99
+        when(userRepository.findById(99)).thenReturn(Optional.empty());
+
+        // Kiểm tra xem Service có chặn lại và báo lỗi không
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            userService.handleUpdateProfile(99, updatedInfo);
+        });
+    }
+    @Test
+    void shouldThrowException_whenUploadAvatar_andFileIsEmpty() {
+        User user = new User();
+        user.setId(1);
+
+        // Tạo một file Mock rỗng (mảng bytes truyền vào bị trống)
+        MockMultipartFile emptyFile = new MockMultipartFile(
+                "file",
+                "empty.png",
+                "image/png",
+                new byte[0] // File 0 byte
+        );
+
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+
+        // Kiểm tra xem Service có ném ra lỗi (ví dụ: IllegalArgumentException) không
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.handleUploadAvatar(1, emptyFile);
+        });
+    }
+
+    @Test
+    void shouldThrowException_whenUploadAvatar_andFileIsInvalidFormat() {
+        User user = new User();
+        user.setId(1);
+
+        // Tạo một file Mock dạng văn bản thuần túy độc hại
+        MockMultipartFile textFile = new MockMultipartFile(
+                "file",
+                "hacker.txt",
+                "text/plain", // Định dạng text chứ không phải image
+                "hacker-content".getBytes()
+        );
+
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+
+        // Kiểm tra xem Service có nhận diện và ném lỗi không
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.handleUploadAvatar(1, textFile);
+        });
     }
 }

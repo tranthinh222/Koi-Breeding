@@ -1,10 +1,17 @@
 package com.koibreeding.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.koibreeding.domain.User;
 import com.koibreeding.domain.response.ResultPaginationDTO;
@@ -44,6 +51,63 @@ public class UserService {
 
     public User handleFetchUserById(Integer id) {
         return userRepository.findById(id).orElse(null);
+    }
+
+    public User handleFetchProfileByUserId(Integer userId) {
+        return this.userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User with id '" + userId + "' is not exist."));
+    }
+
+    public User handleUpdateProfile(Integer userId, User userUpdate) {
+        User currentUser = this.handleFetchProfileByUserId(userId);
+
+        if (userUpdate.getUsername() != null && !userUpdate.getUsername().isBlank()) {
+            currentUser.setUsername(userUpdate.getUsername());
+        }
+        if (userUpdate.getEmail() != null && !userUpdate.getEmail().isBlank()) {
+            currentUser.setEmail(userUpdate.getEmail());
+        }
+        if (userUpdate.getBirthday() != null) {
+            currentUser.setBirthday(userUpdate.getBirthday());
+        }
+        if (userUpdate.getGender() != null) {
+            currentUser.setGender(userUpdate.getGender());
+        }
+        if (userUpdate.getAvatarUrl() != null && !userUpdate.getAvatarUrl().isBlank()) {
+            currentUser.setAvatarUrl(userUpdate.getAvatarUrl());
+        }
+
+        return this.userRepository.save(currentUser);
+    }
+
+    public String handleUploadAvatar(Integer userId, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Avatar file is required.");
+        }
+
+        User currentUser = this.handleFetchProfileByUserId(userId);
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        if (fileName.isBlank()) {
+            throw new IllegalArgumentException("Avatar file name is invalid.");
+        }
+
+        String extension = StringUtils.getFilenameExtension(fileName);
+        String safeFileName = "user-" + userId + "-" + System.currentTimeMillis() + "." + extension;
+
+        Path uploadDir = Paths.get("uploads", "avatars").toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(uploadDir);
+            Path target = uploadDir.resolve(safeFileName);
+            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+            String avatarUrl = "/uploads/avatars/" + safeFileName;
+            currentUser.setAvatarUrl(avatarUrl);
+            this.userRepository.save(currentUser);
+
+            return avatarUrl;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload avatar for user id '" + userId + "'.", e);
+        }
     }
 
     public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {

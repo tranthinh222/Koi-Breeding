@@ -85,6 +85,11 @@ public class UserService {
             throw new IllegalArgumentException("Avatar file is required.");
         }
 
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.toLowerCase().startsWith("image/")) {
+            throw new IllegalArgumentException("Avatar file format is invalid. Only image files are allowed.");
+        }
+
         User currentUser = this.handleFetchProfileByUserId(userId);
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         if (fileName.isBlank()) {
@@ -92,6 +97,10 @@ public class UserService {
         }
 
         String extension = StringUtils.getFilenameExtension(fileName);
+        if (extension == null || extension.isBlank()) {
+            throw new IllegalArgumentException("Avatar file extension is invalid.");
+        }
+
         String safeFileName = "user-" + userId + "-" + System.currentTimeMillis() + "." + extension;
 
         Path uploadDir = Paths.get("uploads", "avatars").toAbsolutePath().normalize();

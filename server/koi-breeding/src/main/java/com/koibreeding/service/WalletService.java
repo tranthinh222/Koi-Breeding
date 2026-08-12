@@ -3,16 +3,15 @@ package com.koibreeding.service;
 import com.koibreeding.domain.Wallet;
 import com.koibreeding.repository.UserRepository;
 import com.koibreeding.repository.WalletRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Service
+@RequiredArgsConstructor
 public class WalletService {
     private final WalletRepository walletRepository;
-    public WalletService(WalletRepository walletRepository){
-        this.walletRepository = walletRepository;
-    }
 
     public Wallet handleCreateWallet(Wallet wallet){
         return walletRepository.save(wallet);

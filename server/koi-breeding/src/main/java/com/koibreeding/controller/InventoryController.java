@@ -1,26 +1,45 @@
 package com.koibreeding.controller;
 
-import com.koibreeding.domain.Inventory;
+import com.koibreeding.dto.response.ItemInventory;
 import com.koibreeding.service.InventoryService;
-import com.koibreeding.util.annotation.ApiMessage;
-
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(originPatterns = { "http://localhost:*", "http://127.0.0.1:*", "http://127.0.0.2:*" })
 public class InventoryController {
-        private final InventoryService inventoryService;
+    private final InventoryService inventoryService;
+    @GetMapping("/inventory/{userId}")
+    public ResponseEntity<List<ItemInventory>> getInventory(
+            @PathVariable Integer userId
+    ) {
+        List<ItemInventory> inventory = inventoryService.getInventory(userId);
+        return ResponseEntity.ok(inventory);
+    }
 
-        // @GetMapping("/inventories/{id}")
-        // @ApiMessage("fetch an inventory")
-        // public ResponseEntity<Inventory> getInventoryById(@PathVariable("id") Long
-        // id) {
-        // Inventory inventory = this.inventoryService
-        // }
+    @PostMapping("/inventory/{userId}/items/{itemId}/addition")
+    public ResponseEntity<ItemInventory> addItemToInventory(
+            @PathVariable Integer userId,
+            @PathVariable Integer itemId,
+            @RequestBody ItemInventory request
+    ){
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(this.inventoryService
+                        .addItemToInventory(userId, itemId, request.getQuantity()));
+    }
+
+    @PostMapping("/inventory/{userId}/items/{itemId}/usages")
+    public ResponseEntity<ItemInventory> useItemFromInventory(
+            @PathVariable Integer userId,
+            @PathVariable Integer itemId,
+            @RequestBody ItemInventory request
+    ){
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(this.inventoryService
+                        .useItemFromInventory(userId, itemId, request.getQuantity()));
+    }
 }

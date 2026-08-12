@@ -10,13 +10,13 @@ import {
 	X,
 } from "lucide-react";
 import { useState } from "react";
-import type { KoiVarient } from "../../types";
+import type { IKoiVarient } from "../../types/backend";
 import styles from "./KoiForm.module.css";
 
 interface KoiFormProps {
-	koi: KoiVarient | null;
+	koi: IKoiVarient | null;
 	onClose: () => void;
-	onSubmit: (koi: KoiVarient) => void;
+	onSubmit: (koi: IKoiVarient) => void;
 }
 
 interface KoiDataForm {
@@ -218,7 +218,7 @@ function KoiForm({ koi, onClose, onSubmit }: KoiFormProps) {
 			</button>
 			<span className={styles.title}>
 				{koi != null
-					? `Update KoiVarient #${koi.id}`
+					? `Update IKoiVarient #${koi.id}`
 					: "Create A New Koi"}
 			</span>
 			<div className={styles.couple}>

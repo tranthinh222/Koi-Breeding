@@ -1,9 +1,9 @@
 import { ChevronRight, Venus } from "lucide-react";
-import type { Koi } from "../../types";
+import type { IKoi } from "../../types/backend";
 import styles from "./KoiProfile.module.css";
 
 interface KoiProfileProps {
-	koi: Koi;
+	koi: IKoi;
 }
 
 function KoiProfile({ koi }: KoiProfileProps) {

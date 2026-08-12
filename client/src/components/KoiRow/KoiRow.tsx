@@ -9,12 +9,12 @@ import {
 	Weight,
 } from "lucide-react";
 import { useState } from "react";
-import type { KoiVarient } from "../../types";
+import type { IKoiVarient } from "../../types/backend";
 import KoiForm from "../KoiForm/KoiForm";
 import styles from "./KoiRow.module.css";
 
 interface KoiDictionaryCardProps {
-	koi: KoiVarient;
+	koi: IKoiVarient;
 }
 
 function KoiRow({ koi }: KoiDictionaryCardProps) {

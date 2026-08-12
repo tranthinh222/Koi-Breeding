@@ -1,9 +1,9 @@
 import { Ellipsis } from "lucide-react";
-import type { KoiVarient } from "../../types";
+import type { IKoiVarient } from "../../types/backend";
 import styles from "./KoiDictionaryCard.module.css";
 
 interface KoiDictionaryCardProps {
-	koi: KoiVarient;
+	koi: IKoiVarient;
 }
 
 function KoiDictionaryCard({ koi }: KoiDictionaryCardProps) {

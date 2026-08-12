@@ -1,34 +1,11 @@
 import { ArrowLeft, ArrowRight, ArrowUpDown, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { KoiVarient, PageDTO } from "../../types";
+import type { IKoiVarient, IModelPagination } from "../../types/backend";
 import KoiForm from "../KoiForm/KoiForm";
 import KoiRow from "../KoiRow/KoiRow";
 import styles from "./KoiList.module.css";
 
-// export interface KoiVarient {
-// 	id: number;
-// 	name: string;
-// 	origin: string;
-// 	variety: string;
-// 	scaleType: string;
-// 	shape: string;
-// 	baseMaxLength: number;
-// 	baseGrowthRate: number;
-// 	midAge: number;
-// 	alphaWeight: number;
-// 	basePrice: number;
-// 	alphaPrice: number;
-// }
-
-// export interface PageDTO<T> {
-// 	page: number;
-// 	pageSize: number;
-// 	data: T[];
-// 	totalPages: number;
-// 	totalElements: number;
-// }
-
-const kois: KoiVarient[] = [
+const kois: IKoiVarient[] = [
 	{
 		id: 1,
 		name: "Kohaku",
@@ -259,16 +236,16 @@ function KoiList() {
 	const [page, setPage] = useState<number>(1);
 	const [pageSize, setPageSize] = useState<number>(10);
 	const [totalPages, setTotalPages] = useState<number>(1);
-	const [data, setData] = useState<KoiVarient[]>([]);
+	const [data, setData] = useState<IKoiVarient[]>([]);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] =
 		useState<boolean>(false);
 
 	useEffect(() => {
 		const loadData = async () => {
 			try {
-				const pageDTO = await fetchData(page, pageSize);
-				setData(pageDTO.data);
-				setTotalPages(pageDTO.totalPages);
+				const response = await fetchData(page, pageSize);
+				setData(response.result);
+				setTotalPages(response.meta.totalPages);
 			} catch (error) {
 				console.error("Failed to fetch data:", error);
 			}
@@ -287,17 +264,21 @@ function KoiList() {
 	const fetchData = async (
 		page: number,
 		pageSize: number,
-	): Promise<PageDTO<KoiVarient>> => {
+	): Promise<IModelPagination<IKoiVarient>> => {
 		const startIndex = (page - 1) * pageSize;
 		const endIndex = startIndex + pageSize;
 		const pageData = kois.slice(startIndex, endIndex);
 
 		return {
-			page: page,
-			pageSize: pageSize,
-			data: pageData,
-			totalPages: Math.ceil(kois.length / pageSize),
-			totalElements: kois.length,
+			meta: {
+				page: page,
+				pageSize: pageSize,
+
+				totalPages: Math.ceil(kois.length / pageSize),
+				totalElements: kois.length,
+			},
+
+			result: pageData,
 		};
 	};
 

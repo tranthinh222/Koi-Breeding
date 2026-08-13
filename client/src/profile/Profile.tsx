@@ -255,38 +255,51 @@ function Profile() {
               <div className="info-box">
                 <h3>Account</h3>
                 <p>Username: {profile.username}</p>
+
                 <p>
                   <label>
-                    Email:
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange('email')}
-                      disabled={!editing}
-                    />
+                    Email: {editing == false ? <span>{profile.email || 'Not updated.'}</span> : (
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange('email')}
+                      />
+                    )}
                   </label>
                 </p>
+
                 <p>
                   <label>
-                    Birthday:
-                    <input
-                      type="date"
-                      value={formData.birthday ?? ''}
-                      onChange={handleChange('birthday')}
-                      disabled={!editing}
-                    />
+                    Birthday: {editing == false ? <span>{formatISODate(profile.birthday) || 'Not updated.'}</span> : (
+                      <input
+                        type="date"
+                        value={formData.birthday ?? ''}
+                        onChange={handleChange('birthday')}
+                      />
+                    )}
                   </label>
                 </p>
+
                 <p>
                   <label>
-                    Gender:
-                    <select value={formData.gender ?? ''} onChange={handleChange('gender')} disabled={!editing}>
-                      <option value="">Select gender</option>
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
-                    </select>
+                    Gender: {editing == false ? (
+                      <span>
+                        {profile.gender
+                          ? profile.gender === 'MALE'
+                            ? 'Male'
+                            : 'Female'
+                          : 'Not updated.'}
+                      </span>
+                    ) : (
+                      <select value={formData.gender ?? ''} onChange={handleChange('gender')}>
+                        <option value="">Select gender</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                      </select>
+                    )}
                   </label>
                 </p>
+
                 <p>Joined at: {formatISODate(profile.createdAt)}</p>
               </div>
 

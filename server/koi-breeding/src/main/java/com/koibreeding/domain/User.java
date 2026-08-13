@@ -61,7 +61,7 @@ public class User {
     private Boolean isBanned = false;
 
     @Column(nullable = false)
-    private Integer exp = 0;
+    private Integer exp = 1;
 
     @Column(columnDefinition = "TEXT")
     private String avatarUrl;

@@ -5,6 +5,7 @@ export interface HeaderInfo {
   id: number
   username: string
   balance: number
+  exp: number
 }
 
 export async function getUserInfo(userId: number): Promise<HeaderInfo> {
@@ -17,5 +18,6 @@ export async function getUserInfo(userId: number): Promise<HeaderInfo> {
     id: user.id,
     username: user.username,
     balance: wallet.balance,
+    exp: user.exp,
   }
 }

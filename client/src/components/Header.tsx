@@ -5,6 +5,7 @@ const CURRENT_USER_ID = 1
 
 export default function ShopHeader() {
   const [username, setUsername] = useState('')
+  const [exp, setExp] = useState(1)
   const [balance, setBalance] = useState<number>(0)
   const [loading, setLoading] = useState(true)
 
@@ -15,6 +16,7 @@ export default function ShopHeader() {
 
         setUsername(data.username)
         setBalance(data.balance)
+        setExp(data.exp)
       } catch (error) {
         console.error('Failed to load header information:', error)
       } finally {
@@ -31,8 +33,8 @@ export default function ShopHeader() {
         <div className="avatar">🧑</div>
 
         <div>
-          <h3>{loading ? 'Loading...' : username || 'Koi Master'}</h3>
-          <p>Level: 18</p>
+          <h3>{loading ? 'Loading...' : username}</h3>
+          <p>{loading ? 'Loading...' : exp}</p>
         </div>
       </div>
 

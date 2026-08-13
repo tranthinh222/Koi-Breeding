@@ -16,6 +16,8 @@ import com.koibreeding.domain.KoiDictionary;
 import com.koibreeding.domain.response.ResultPaginationDTO;
 import com.koibreeding.service.KoiDictionaryService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1")
 public class KoiDictionaryController {
@@ -26,14 +28,14 @@ public class KoiDictionaryController {
     }
 
     @PostMapping("/dictionaries")
-    public ResponseEntity<KoiDictionary> createNewKoiDictionary(@RequestBody KoiDictionary koiDictionary) {
+    public ResponseEntity<KoiDictionary> createNewKoiDictionary(@Valid @RequestBody KoiDictionary koiDictionary) {
         KoiDictionary newKoiDictionary = this.koiDictionaryService.handleCreateKoiDictionary(koiDictionary);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(newKoiDictionary);
     }
 
     @PutMapping("/dictionaries")
-    public ResponseEntity<KoiDictionary> updateAKoiDictionary(@RequestBody KoiDictionary koiDictionary)
+    public ResponseEntity<KoiDictionary> updateAKoiDictionary(@Valid @RequestBody KoiDictionary koiDictionary)
             throws Exception {
         if (!this.koiDictionaryService.isKoiDictionaryExistById(koiDictionary.getId())) {
             throw new Exception("KoiDictionary with id '" + koiDictionary.getId() + "' is not exist.");

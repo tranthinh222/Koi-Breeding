@@ -18,10 +18,10 @@ import com.koibreeding.service.KoiDictionaryService;
 
 @RestController
 @RequestMapping("/api/v1")
-public class KoiDictionaryDictionaryController {
+public class KoiDictionaryController {
     private final KoiDictionaryService koiDictionaryService;
 
-    public KoiDictionaryDictionaryController(KoiDictionaryService koiDictionaryService) {
+    public KoiDictionaryController(KoiDictionaryService koiDictionaryService) {
         this.koiDictionaryService = koiDictionaryService;
     }
 
@@ -35,7 +35,7 @@ public class KoiDictionaryDictionaryController {
     @PutMapping("/dictionaries")
     public ResponseEntity<KoiDictionary> updateAKoiDictionary(@RequestBody KoiDictionary koiDictionary)
             throws Exception {
-        if (this.koiDictionaryService.isKoiDictionaryExistById(koiDictionary.getId())) {
+        if (!this.koiDictionaryService.isKoiDictionaryExistById(koiDictionary.getId())) {
             throw new Exception("KoiDictionary with id '" + koiDictionary.getId() + "' is not exist.");
         }
 
@@ -55,7 +55,7 @@ public class KoiDictionaryDictionaryController {
     }
 
     @GetMapping("/dictionaries")
-    public ResponseEntity<ResultPaginationDTO> getAllKoiDictionarys(Pageable pageable) {
+    public ResponseEntity<ResultPaginationDTO> getAllKoiDictionaries(Pageable pageable) {
         ResultPaginationDTO koiDictionaryList = koiDictionaryService.handleFetchAllKoiDictionaries(pageable);
 
         return ResponseEntity.ok(koiDictionaryList);

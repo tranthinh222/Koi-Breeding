@@ -1,6 +1,6 @@
 package com.koibreeding.controller;
 
-import com.koibreeding.dto.response.WalletResponse;
+import com.koibreeding.dto.response.ResWalletDto;
 import com.koibreeding.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(originPatterns = { "http://localhost:*", "http://127.0.0.1:*", "http://127.0.0.2:*" })
 public class WalletController {
     private final WalletService walletService;
-    @GetMapping("/wallet")
-    public ResponseEntity<WalletResponse> getBalance(
-//            @PathVariable Integer userId
-    ){
-        Integer userId = 1;
+
+    @GetMapping("/wallet/{userId}")
+    public ResponseEntity<ResWalletDto> getBalance(@PathVariable Integer userId) {
         return ResponseEntity.ok(walletService.getBalanceWallet(userId));
     }
 }

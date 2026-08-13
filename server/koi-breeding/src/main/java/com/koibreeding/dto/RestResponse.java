@@ -1,4 +1,4 @@
-package com.koibreeding.dto.response;
+package com.koibreeding.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

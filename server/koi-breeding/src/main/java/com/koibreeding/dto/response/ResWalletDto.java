@@ -7,12 +7,11 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-public class WalletResponse {
+public class ResWalletDto {
     private BigDecimal balance;
 
-    public WalletResponse(
-            BigDecimal balance
-    ){
+    public ResWalletDto(
+            BigDecimal balance) {
         this.balance = balance;
     }
 

@@ -42,7 +42,7 @@ public class InventoryService {
 
     public ItemInventory addItemToInventory(Integer userId, Integer itemId, Integer quantity) {
         Inventory inventory = inventoryRepository.findByUserIdAndItemId(userId, itemId).orElse(null);
-        User user = userService.handleFetchUser(userId);
+        User user = userService.handleFetchUserById(userId);
         Item item = itemService.findItemById(itemId);
         if (inventory == null) {
             inventory = new Inventory();

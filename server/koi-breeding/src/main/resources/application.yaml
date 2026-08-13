@@ -8,7 +8,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/koi_breeding
     username: postgres
-    password: khoa123
+    password: 123456
   jpa:
     hibernate:
       ddl-auto: update

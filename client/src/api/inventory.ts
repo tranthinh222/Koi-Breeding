@@ -90,9 +90,9 @@ export const mockInventory: ItemInventory[] = [
   },
 ]
 
-export async function getInventory(): Promise<ItemInventory[]> {
+export async function getInventory(userId: number): Promise<ItemInventory[]> {
   try {
-    const response = await apiClient.get(`/inventory`)
+    const response = await apiClient.get(`/inventory`, { params: { userId } })
     console.log('Inventory API:', response.data)
     return response.data.data as ItemInventory[]
   } catch (error) {
@@ -112,9 +112,11 @@ export async function useItemFromInventory(
   quantity: number,
 ): Promise<ItemInventory> {
   try {
-    const response = await apiClient.post(`/inventory/items/${itemId}/usages`, {
-      quantity: (quantity = 1),
-    })
+    const response = await apiClient.post(
+      `/inventory/items/${itemId}/usages`,
+      { quantity },
+      { params: { userId } },
+    )
     return response.data.data as ItemInventory
   } catch (error) {
     if (axios.isCancel(error)) throw error

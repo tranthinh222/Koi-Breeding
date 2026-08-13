@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 
 import { getInventory, useItemFromInventory } from '../../api/inventory'
+import { CURRENT_USER_ID } from '../../api/currentUser'
 import type { ItemInventory, InventoryCategory } from '../../api/inventory'
-
-const CURRENT_USER_ID = 1
 
 export default function Inventory() {
   const [items, setItems] = useState<ItemInventory[]>([])
@@ -20,7 +19,7 @@ export default function Inventory() {
     const loadInventory = async () => {
       setLoading(true)
       try {
-        const data = await getInventory()
+        const data = await getInventory(CURRENT_USER_ID)
         if (!cancelled) {
           setItems(data)
           setSelectedItem(data[0] ?? null)

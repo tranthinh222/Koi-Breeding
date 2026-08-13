@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import type { ShopItem } from '../api/shop'
 import { purchaseShopItem } from '../api/shop'
-
-const CURRENT_USER_ID = 1
+import { CURRENT_USER_ID } from '../api/currentUser'
 
 export function usePurchase() {
   const [buying, setBuying] = useState(false)
@@ -15,7 +14,8 @@ export function usePurchase() {
     setBuySuccess(null)
 
     try {
-      await purchaseShopItem(CURRENT_USER_ID, item.id, quantity)
+      const purchase = await purchaseShopItem(CURRENT_USER_ID, item.id, quantity)
+      window.dispatchEvent(new CustomEvent('wallet:updated', { detail: purchase.balance }))
 
       setBuySuccess(`Bought ${item.name}!`)
     } catch (err) {

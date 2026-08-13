@@ -182,13 +182,10 @@ export async function purchaseShopItem(
   userId: number,
   itemId: number,
   quantity: number,
-): Promise<void> {
-  try {
-    await apiClient.post(`/shop/items/${itemId}/purchase`, {
-      quantity: quantity,
-    })
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) return
-    throw error
-  }
+): Promise<{ balance: number }> {
+  const response = await apiClient.post(`/shop/items/${itemId}/purchase`, {
+    userId,
+    quantity,
+  })
+  return response.data.data as { balance: number }
 }

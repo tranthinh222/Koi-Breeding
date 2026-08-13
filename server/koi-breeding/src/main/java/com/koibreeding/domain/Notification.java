@@ -1,12 +1,10 @@
 package com.koibreeding.domain;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.koibreeding.enums.TransactionStatus;
-import com.koibreeding.enums.TransactionType;
+import com.koibreeding.enums.NotificationType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,38 +21,33 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "notification")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Transaction {
+public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "wallet_id", nullable = false)
-    private Wallet wallet;
-
-    @ManyToOne
-    @JoinColumn(name = "item_id", nullable = false)
-    private Item item;
-
-    @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal amount;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionType transactionType;
+    private NotificationType type;
 
-    @Enumerated(EnumType.STRING)
+    @Column(length = 255)
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String message;
+
     @Column(nullable = false)
-    private TransactionStatus status = TransactionStatus.PENDING;
+    private Boolean isRead = false;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
 }

@@ -24,7 +24,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class KoiDictionary {
+public class Dictionary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -53,13 +53,13 @@ public class KoiDictionary {
     @Column(nullable = false, precision = 5, scale = 4)
     private BigDecimal baseGrowthRate;
 
-    @Column(nullable = false, columnDefinition = "SMALLINT")
+    @Column(nullable = false)
     private Integer midAge;
 
     @Column(nullable = false, precision = 8, scale = 7)
     private BigDecimal alphaWeight;
 
-    @Column(nullable = false, columnDefinition = "SMALLINT")
+    @Column(nullable = false)
     private Integer basePrice;
 
     @Column(nullable = false, precision = 3, scale = 2)

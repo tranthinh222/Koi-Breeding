@@ -19,7 +19,7 @@ function KoiProfile({ koi }: KoiProfileProps) {
 				<div className={styles.header}>
 					<div className={styles.titleBar}>
 						<span className={styles.name}>{koi.name}</span>
-						<Venus size="30" />
+						<Venus size="40" />
 					</div>
 					<div className={styles.ratingType}>
 						<div className={styles.rating}>

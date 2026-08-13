@@ -1421,3 +1421,172 @@ body {
     width: 100%;
   }
 }
+/* ==========================
+   HUD
+========================== */
+.hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.notification-wrapper {
+  position: relative;
+}
+
+.notification-btn {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border: none;
+  border-radius: 50%;
+  background: #f8f4ea;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.18);
+  transition: 0.2s;
+}
+
+.notification-btn:hover {
+  transform: scale(1.08);
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #e53935;
+  color: white;
+
+  border-radius: 20px;
+  border: 2px solid white;
+
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.notification-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+
+  width: 360px;
+
+  background: #f8f4ea;
+  border: 3px solid #c9a26b;
+  border-radius: 16px;
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+
+  z-index: 1000;
+
+  display: none;
+}
+
+.notification-panel.show {
+  display: block;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 15px;
+
+  border-bottom: 2px solid #d7c19b;
+}
+
+.notification-header h3 {
+  color: #5b3a1f;
+}
+
+.notification-header button {
+  border: none;
+  background: transparent;
+
+  color: #5a913b;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.notification-list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  gap: 12px;
+
+  padding: 14px 15px;
+
+  border-bottom: 1px solid #e3dccf;
+
+  transition: 0.2s;
+}
+
+.notification-item:hover {
+  background: #efe8da;
+}
+
+.notification-item.unread {
+  background: #fff8e6;
+}
+
+.notification-icon {
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #d7c19b;
+
+  font-size: 20px;
+}
+
+.notification-item strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #5b3a1f;
+}
+
+.notification-item p {
+  margin: 0;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.notification-item small {
+  display: block;
+  margin-top: 5px;
+  color: #888;
+  font-size: 11px;
+}
+
+@media (max-width: 600px) {
+  .notification-panel {
+    right: -70px;
+    width: 320px;
+  }
+
+  .hud-actions {
+    width: 100%;
+    justify-content: center;
+  }
+}

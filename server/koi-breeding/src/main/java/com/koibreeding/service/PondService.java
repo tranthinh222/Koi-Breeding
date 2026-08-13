@@ -76,7 +76,7 @@ public class PondService {
     }
 
     public ResultPaginationDTO handleFetchPondsByOwner(Integer id, Pageable pageable) {
-        Page<Pond> pagePond = this.pondRepository.findAllByOwner(id, pageable);
+        Page<Pond> pagePond = this.pondRepository.findAllByOwner_Id(id, pageable);
         ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 

@@ -1,7 +1,7 @@
 package com.koibreeding.controller;
 
 import com.koibreeding.domain.Item;
-import com.koibreeding.dto.response.ItemInventory;
+import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.enums.ItemType;
 import com.koibreeding.service.ShopService;
 
@@ -43,7 +43,7 @@ public class ShopController {
     public ResponseEntity<Void> purchaseShopItem(
             // @PathVariable Integer userId,
             @PathVariable Integer itemId,
-            @RequestBody ItemInventory request) {
+            @RequestBody ResItemInventory request) {
         Integer userId = 1;
         shopService.purchaseShopItem(userId, itemId, request.getQuantity());
         return ResponseEntity.ok().build();

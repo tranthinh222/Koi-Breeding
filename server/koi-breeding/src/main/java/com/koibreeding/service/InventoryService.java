@@ -3,7 +3,7 @@ package com.koibreeding.service;
 import com.koibreeding.domain.Inventory;
 import com.koibreeding.domain.Item;
 import com.koibreeding.domain.User;
-import com.koibreeding.dto.response.ItemInventory;
+import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +21,10 @@ public class InventoryService {
     private final UserService userService;
     private final ItemService itemService;
 
-    public List<ItemInventory> getInventory(Integer userId) {
+    public List<ResItemInventory> getInventory(Integer userId) {
         val inventory = inventoryRepository.findByUserId(userId);
         return inventory.stream()
-                .map(item -> new ItemInventory(
+                .map(item -> new ResItemInventory(
                         item.getItem().getId(),
                         item.getItem().getName(),
                         item.getItem().getPrice(),
@@ -41,7 +41,7 @@ public class InventoryService {
         return inventoryRepository.save(inventory);
     }
 
-    public ItemInventory addItemToInventory(Integer userId, Integer itemId, Integer quantity) {
+    public ResItemInventory addItemToInventory(Integer userId, Integer itemId, Integer quantity) {
         Inventory inventory = inventoryRepository.findByUserIdAndItemId(userId, itemId).orElse(null);
         User user = userService.handleFetchUserById(userId);
         Item item = itemService.findItemById(itemId);
@@ -56,7 +56,7 @@ public class InventoryService {
         }
 
         Inventory inventoryNew = handleCreateInventory(inventory);
-        return new ItemInventory(
+        return new ResItemInventory(
                 inventoryNew.getItem().getId(),
                 inventoryNew.getItem().getName(),
                 inventoryNew.getItem().getPrice(),
@@ -69,7 +69,7 @@ public class InventoryService {
 
     }
 
-    public ItemInventory useItemFromInventory(Integer userId, Integer itemId, Integer quantity) {
+    public ResItemInventory useItemFromInventory(Integer userId, Integer itemId, Integer quantity) {
         Inventory inventory = inventoryRepository.findByUserIdAndItemId(userId, itemId)
                 .orElse(null);
         if (inventory == null) {
@@ -82,7 +82,7 @@ public class InventoryService {
         inventory.setQuantity(quantityNew);
 
         Inventory inventoryNew = handleCreateInventory(inventory);
-        return new ItemInventory(
+        return new ResItemInventory(
                 inventoryNew.getItem().getId(),
                 inventoryNew.getItem().getName(),
                 inventoryNew.getItem().getPrice(),

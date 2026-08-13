@@ -1,6 +1,6 @@
 package com.koibreeding.controller;
 
-import com.koibreeding.dto.response.ItemInventory;
+import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,19 +14,19 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @GetMapping("/inventory")
-    public ResponseEntity<List<ItemInventory>> getInventory(
+    public ResponseEntity<List<ResItemInventory>> getInventory(
     // @PathVariable Integer userId
     ) {
         Integer userId = 1;
-        List<ItemInventory> inventory = inventoryService.getInventory(userId);
+        List<ResItemInventory> inventory = inventoryService.getInventory(userId);
         return ResponseEntity.ok(inventory);
     }
 
     @PostMapping("/inventory/items/{itemId}/addition")
-    public ResponseEntity<ItemInventory> addItemToInventory(
+    public ResponseEntity<ResItemInventory> addItemToInventory(
             // @PathVariable Integer userId,
             @PathVariable Integer itemId,
-            @RequestBody ItemInventory request) {
+            @RequestBody ResItemInventory request) {
         Integer userId = 1;
         return ResponseEntity.status(HttpStatus.OK)
                 .body(this.inventoryService
@@ -34,10 +34,10 @@ public class InventoryController {
     }
 
     @PostMapping("/inventory/items/{itemId}/usages")
-    public ResponseEntity<ItemInventory> useItemFromInventory(
+    public ResponseEntity<ResItemInventory> useItemFromInventory(
             // @PathVariable Integer userId,
             @PathVariable Integer itemId,
-            @RequestBody ItemInventory request) {
+            @RequestBody ResItemInventory request) {
         Integer userId = 1;
         return ResponseEntity.status(HttpStatus.OK)
                 .body(this.inventoryService

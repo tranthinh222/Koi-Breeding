@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemInventory {
+public class ResItemInventory {
     private Integer id;
     private String name;
     private BigDecimal price;

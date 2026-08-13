@@ -83,6 +83,10 @@ export default function ShopHeader() {
             </div>
           </div>
         </div>
+
+        <div className="wallet">
+          <div className="gold">🪙 25,800</div>
+        </div>
       </div>
     </header>
   )

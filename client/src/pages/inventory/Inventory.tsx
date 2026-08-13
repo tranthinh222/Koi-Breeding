@@ -1,85 +1,85 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 
-import ShopBackground from "../../components/ShopBackground";
-import ShopHeader from "../../components/ShopHeader";
-import ShopNavigation from "../../components/ShopNavigation";
+import ShopBackground from '../../components/ShopBackground'
+import ShopHeader from '../../components/Header'
+import ShopNavigation from '../../components/ShopNavigation'
 
-import { getInventory, useItemFromInventory } from "../../api/inventory";
-import type { ItemInventory, InventoryCategory } from "../../api/inventory";
+import { getInventory, useItemFromInventory } from '../../api/inventory'
+import type { ItemInventory, InventoryCategory } from '../../api/inventory'
 
-const CURRENT_USER_ID = 1;
+const CURRENT_USER_ID = 1
 
 export default function Inventory() {
-  const [items, setItems] = useState<ItemInventory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedItem, setSelectedItem] = useState<ItemInventory | null>(null);
-  const [activeTab, setActiveTab] = useState<InventoryCategory>("KOI");
-  const [actionLoading, setActionLoading] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
+  const [items, setItems] = useState<ItemInventory[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedItem, setSelectedItem] = useState<ItemInventory | null>(null)
+  const [activeTab, setActiveTab] = useState<InventoryCategory>('KOI')
+  const [actionLoading, setActionLoading] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
 
     const loadInventory = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
-        const data = await getInventory(CURRENT_USER_ID);
+        const data = await getInventory(CURRENT_USER_ID)
         if (!cancelled) {
-          setItems(data);
-          setSelectedItem(data[0] ?? null);
+          setItems(data)
+          setSelectedItem(data[0] ?? null)
         }
       } catch (err) {
-        console.error("getInventory failed:", err);
-        if (!cancelled) setError("Không thể tải kho đồ.");
+        console.error('getInventory failed:', err)
+        if (!cancelled) setError('Không thể tải kho đồ.')
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoading(false)
       }
-    };
+    }
 
-    loadInventory();
+    loadInventory()
 
     return () => {
-      cancelled = true;
-    };
-  }, []);
+      cancelled = true
+    }
+  }, [])
 
-  const filteredItems = items.filter((item) => item.itemType === activeTab);
+  const filteredItems = items.filter((item) => item.itemType === activeTab)
 
   const tabs: [string, InventoryCategory][] = [
-    ["🐟", "KOI"],
-    ["🍖", "FOOD"],
-    ["💊", "MEDICINE"],
-  ];
+    ['🐟', 'KOI'],
+    ['🍖', 'FOOD'],
+    ['💊', 'MEDICINE'],
+  ]
 
   const handleUseItem = async () => {
-    if (!selectedItem || selectedItem.quantity <= 0) return;
+    if (!selectedItem || selectedItem.quantity <= 0) return
 
-    setActionLoading(true);
-    setActionError(null);
+    setActionLoading(true)
+    setActionError(null)
 
     try {
       const updated = await useItemFromInventory(
         CURRENT_USER_ID,
         selectedItem.id,
         1,
-      );
+      )
 
       setItems((prev) => {
         if (updated.quantity <= 0) {
-          return prev.filter((item) => item.id !== updated.id);
+          return prev.filter((item) => item.id !== updated.id)
         }
-        return prev.map((item) => (item.id === updated.id ? updated : item));
-      });
+        return prev.map((item) => (item.id === updated.id ? updated : item))
+      })
 
-      setSelectedItem(updated.quantity > 0 ? updated : null);
+      setSelectedItem(updated.quantity > 0 ? updated : null)
     } catch (err) {
-      console.error("useItemFromInventory failed:", err);
-      setActionError("Không thể dùng vật phẩm này.");
+      console.error('useItemFromInventory failed:', err)
+      setActionError('Không thể dùng vật phẩm này.')
     } finally {
-      setActionLoading(false);
+      setActionLoading(false)
     }
-  };
+  }
 
   return (
     <>
@@ -98,10 +98,10 @@ export default function Inventory() {
         {tabs.map(([icon, category]) => (
           <button
             key={category}
-            className={`inventory-tab ${activeTab === category ? "active" : ""}`}
+            className={`inventory-tab ${activeTab === category ? 'active' : ''}`}
             onClick={() => {
-              setActiveTab(category);
-              setActionError(null);
+              setActiveTab(category)
+              setActionError(null)
             }}
           >
             {icon} {category}
@@ -121,11 +121,11 @@ export default function Inventory() {
                 <div
                   key={item.id}
                   className={`inventory-item ${
-                    selectedItem?.id === item.id ? "selected" : ""
+                    selectedItem?.id === item.id ? 'selected' : ''
                   }`}
                   onClick={() => {
-                    setSelectedItem(item);
-                    setActionError(null);
+                    setSelectedItem(item)
+                    setActionError(null)
                   }}
                 >
                   {item.image && <img src={item.image} alt={item.name} />}
@@ -166,7 +166,7 @@ export default function Inventory() {
               {actionError && <p className="action-error">{actionError}</p>}
 
               <div className="detail-actions">
-                {selectedItem.itemType === "KOI" && (
+                {selectedItem.itemType === 'KOI' && (
                   <button
                     className="equip-btn"
                     disabled
@@ -176,14 +176,14 @@ export default function Inventory() {
                   </button>
                 )}
 
-                {(selectedItem.itemType === "FOOD" ||
-                  selectedItem.itemType === "MEDICINE") && (
+                {(selectedItem.itemType === 'FOOD' ||
+                  selectedItem.itemType === 'MEDICINE') && (
                   <button
                     className="equip-btn"
                     onClick={handleUseItem}
                     disabled={actionLoading}
                   >
-                    {actionLoading ? "Đang dùng..." : "💧 Dùng"}
+                    {actionLoading ? 'Đang dùng...' : '💧 Dùng'}
                   </button>
                 )}
 
@@ -200,5 +200,5 @@ export default function Inventory() {
         </aside>
       </main>
     </>
-  );
+  )
 }

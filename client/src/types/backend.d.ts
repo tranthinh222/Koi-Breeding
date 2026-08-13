@@ -9,10 +9,10 @@ export interface IModelPagination<T> {
 }
 
 export interface IKoiVarient {
-	id: number;
+	id?: number;
 	name: string;
 	origin: string;
-	variety: string;
+	variety?: IVariety;
 	scaleType: string;
 	shape: string;
 	baseMaxLength: number;
@@ -21,6 +21,12 @@ export interface IKoiVarient {
 	alphaWeight: number;
 	basePrice: number;
 	alphaPrice: number;
+}
+
+export interface IVariety {
+	id: number;
+	name: string;
+	description: string;
 }
 
 export interface IKoi {
@@ -34,14 +40,14 @@ export interface IKoi {
 	cureBar: number;
 	gender: string;
 	price: number;
-	mutation: IMutation | null;
+	mutation?: IMutation;
 	bornedAt: Date;
-	pond: Pond;
+	pond?: Pond;
 	lifeStage: string;
-	father: Koi | null;
-	mother: Koi | null;
+	father?: Koi;
+	mother?: Koi;
 	potential: number;
-	dictionary: IKoiVarient | null;
+	dictionary?: IKoiVarient;
 	patternScore: number;
 	colorScore: number;
 	bodyScore: number;
@@ -59,7 +65,7 @@ export interface IMutation {
 
 export interface IPond {
 	id: number;
-	owner: IUserData | null;
+	owner?: IUserData;
 	name: string;
 	level: number;
 	capacity: number;

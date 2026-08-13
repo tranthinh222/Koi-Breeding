@@ -48,8 +48,8 @@ public class MutationService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageMutation.getTotalPages());
-        meta.setTotal(pageMutation.getTotalElements());
+        meta.setTotalPages(pageMutation.getTotalPages());
+        meta.setTotalElements(pageMutation.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 

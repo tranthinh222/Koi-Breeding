@@ -46,8 +46,8 @@ public class VarietyService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageVariety.getTotalPages());
-        meta.setTotal(pageVariety.getTotalElements());
+        meta.setTotalPages(pageVariety.getTotalPages());
+        meta.setTotalElements(pageVariety.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 

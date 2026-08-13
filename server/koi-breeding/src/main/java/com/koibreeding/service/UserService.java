@@ -53,8 +53,8 @@ public class UserService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageUser.getTotalPages());
-        meta.setTotal(pageUser.getTotalElements());
+        meta.setTotalPages(pageUser.getTotalPages());
+        meta.setTotalElements(pageUser.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 

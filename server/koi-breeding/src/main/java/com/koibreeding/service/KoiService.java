@@ -94,8 +94,8 @@ public class KoiService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageKoi.getTotalPages());
-        meta.setTotal(pageKoi.getTotalElements());
+        meta.setTotalPages(pageKoi.getTotalPages());
+        meta.setTotalElements(pageKoi.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 

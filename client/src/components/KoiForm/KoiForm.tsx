@@ -293,9 +293,7 @@ function KoiForm({ koi, onClose, onSubmit }: KoiFormProps) {
 				<X size={30} />
 			</button>
 			<span className={styles.title}>
-				{koi != null
-					? `Update IKoiVarient #${koi.id}`
-					: "Create A New Koi"}
+				{koi != null ? `Update Koi #${koi.id}` : "Create A New Koi"}
 			</span>
 			<div className={styles.couple}>
 				<div className={styles.textField}>

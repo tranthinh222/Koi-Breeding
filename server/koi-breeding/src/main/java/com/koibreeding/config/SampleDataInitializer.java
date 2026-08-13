@@ -1,6 +1,7 @@
 package com.koibreeding.config;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,16 +11,26 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.koibreeding.domain.Inventory;
 import com.koibreeding.domain.Item;
+import com.koibreeding.domain.User;
+import com.koibreeding.domain.Wallet;
 import com.koibreeding.enums.EffectType;
+import com.koibreeding.enums.Gender;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.Role;
+import com.koibreeding.enums.UserStatus;
+import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.ItemRepository;
+import com.koibreeding.repository.UserRepository;
+import com.koibreeding.repository.WalletRepository;
 
 @Configuration
 public class SampleDataInitializer {
 
     @Bean
-    CommandLineRunner seedShopItems(ItemRepository itemRepository) {
+    CommandLineRunner seedSampleData(ItemRepository itemRepository, UserRepository userRepository,
+            WalletRepository walletRepository, InventoryRepository inventoryRepository) {
         return args -> {
             Map<String, Item> existingItemsByName = itemRepository.findAll().stream()
                     .collect(Collectors.toMap(Item::getName, item -> item, (left, right) -> left, LinkedHashMap::new));
@@ -88,6 +99,39 @@ public class SampleDataInitializer {
                         return existingItem;
                     })
                     .toList());
+
+            Map<String, Item> itemsByName = itemRepository.findAll().stream()
+                    .collect(Collectors.toMap(Item::getName, item -> item, (left, right) -> left, LinkedHashMap::new));
+
+            User demoUser = userRepository.findAll().stream()
+                    .filter(user -> "demo_user".equals(user.getUsername()))
+                    .findFirst()
+                    .orElseGet(User::new);
+            demoUser.setUsername("demo_user");
+            demoUser.setEmail("demo_user@koi.local");
+            demoUser.setPassword("123456");
+            demoUser.setBirthday(LocalDate.of(2000, 1, 1));
+            demoUser.setGender(Gender.MALE);
+            demoUser.setStatus(UserStatus.ACTIVE);
+            demoUser.setRole(Role.USER);
+            demoUser.setIsBanned(false);
+            demoUser.setExp(0);
+            demoUser.setAvatarUrl(null);
+            demoUser = userRepository.save(demoUser);
+
+            Wallet wallet = walletRepository.findByUserId(demoUser.getId()).orElseGet(Wallet::new);
+            wallet.setUser(demoUser);
+            wallet.setBalance(new BigDecimal("1000.00"));
+            walletRepository.save(wallet);
+
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Kohaku"), 1);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Showa Sanshoku"), 2);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Asagi"), 1);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Ogon"), 3);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi Food - Aqua Master"), 10);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi Food - Bethech"), 5);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Health Elixir - KAFKA"), 3);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Environment Elixir - KMnO4"), 4);
         };
     }
 
@@ -103,5 +147,18 @@ public class SampleDataInitializer {
         item.setDescription(description);
         item.setItemUrl(itemURL);
         return item;
+    }
+
+    private void seedInventoryRow(InventoryRepository inventoryRepository, User user, Item item, int quantity) {
+        if (item == null) {
+            return;
+        }
+
+        Inventory inventory = inventoryRepository.findByUserIdAndItemId(user.getId(), item.getId())
+                .orElseGet(Inventory::new);
+        inventory.setUser(user);
+        inventory.setItem(item);
+        inventory.setQuantity(quantity);
+        inventoryRepository.save(inventory);
     }
 }

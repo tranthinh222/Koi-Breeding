@@ -10,19 +10,19 @@ import {
 	X,
 } from "lucide-react";
 import { useState } from "react";
-import type { IKoiVarient } from "../../types/backend";
+import type { IKoiVarient, IVariety } from "../../types/backend";
 import styles from "./KoiForm.module.css";
 
 interface KoiFormProps {
 	koi: IKoiVarient | null;
 	onClose: () => void;
-	onSubmit: (koi: IKoiVarient) => void;
+	onSubmit: (koi: IKoiVarient) => Promise<void>;
 }
 
 interface KoiDataForm {
 	name: string;
 	origin: string;
-	variety: string;
+	variety: Partial<IVariety>;
 	scaleType: string;
 	shape: string;
 	baseMaxLength: string;
@@ -35,25 +35,98 @@ interface KoiDataForm {
 
 type KoiFormErrors = Partial<Record<keyof KoiDataForm, string>>;
 
-const varietyList = [
-	"Kohaku",
-	"Tancho",
-	"Taisho Sanke",
-	"Showa Sanshoku",
-	"Goromo",
-	"Utsuri",
-	"Hikari Utsuri",
-	"Bekko",
-	"Karashi",
-	"Benigoi",
-	"Chagoi",
-	"Hikari Muji",
-	"Asagi",
-	"Shusui",
-	"Goshiki",
-	"Ginrin",
-	"Hikarimoyo",
-	"Kawarimono",
+const varietyList: IVariety[] = [
+	{
+		id: 1,
+		name: "Kohaku",
+		description: "lol",
+	},
+	{
+		id: 2,
+		name: "Tancho",
+		description: "lol",
+	},
+	{
+		id: 3,
+		name: "Taisho Sanke",
+		description: "lol",
+	},
+
+	{
+		id: 4,
+		name: "Showa Sanshoku",
+		description: "lol",
+	},
+	{
+		id: 5,
+		name: "Goromo",
+		description: "lol",
+	},
+	{
+		id: 6,
+		name: "Utsuri",
+		description: "lol",
+	},
+	{
+		id: 7,
+		name: "Hikari Utsuri",
+		description: "lol",
+	},
+	{
+		id: 8,
+		name: "Bekko",
+		description: "lol",
+	},
+	{
+		id: 9,
+		name: "Karashi",
+		description: "lol",
+	},
+	{
+		id: 10,
+		name: "Benigoi",
+		description: "lol",
+	},
+	{
+		id: 11,
+		name: "Chagoi",
+		description: "lol",
+	},
+	{
+		id: 12,
+		name: "Hikari Muji",
+		description: "lol",
+	},
+	{
+		id: 13,
+		name: "Asagi",
+		description: "lol",
+	},
+	{
+		id: 14,
+		name: "Shusui",
+		description: "lol",
+	},
+	{
+		id: 15,
+		name: "Goshiki",
+		description: "lol",
+	},
+	{
+		id: 16,
+		name: "Ginrin",
+		description: "lol",
+	},
+	{
+		id: 17,
+		name: "Hikarimoyo",
+		description: "lol",
+	},
+	{
+		id: 18,
+		name: "Kawarimono",
+		description: "lol",
+	},
 ];
 const scaleTypeList = ["Wagoi", "Doitsu", "Ginrin"];
 const shapeList = ["Standard", "Butterfly"];
@@ -77,7 +150,7 @@ function KoiForm({ koi, onClose, onSubmit }: KoiFormProps) {
 
 	const handleSubmit = async () => {
 		setIsProcessing(true);
-		await sleep(10000);
+		await sleep(1000);
 		const fieldErrors: KoiFormErrors = {};
 		if (form.name.trim() == "") {
 			fieldErrors.name = "Name cannot be blank";
@@ -167,13 +240,16 @@ function KoiForm({ koi, onClose, onSubmit }: KoiFormProps) {
 
 		console.log("Submitted");
 
-		onSubmit({
-			id: koi != null ? koi.id : 0,
+		await onSubmit({
 			name: form.name,
 			origin: form.origin,
-			variety: form.variety,
-			scaleType: form.scaleType,
-			shape: form.shape,
+			variety: {
+				id: 1,
+				name: form.variety.name ?? "",
+				description: "lol",
+			},
+			scaleType: form.scaleType.toUpperCase(),
+			shape: form.shape.toUpperCase(),
 			baseMaxLength: baseMaxLength,
 			baseGrowthRate: baseGrowthRate,
 			midAge: midAge,
@@ -279,18 +355,24 @@ function KoiForm({ koi, onClose, onSubmit }: KoiFormProps) {
 				<div className={styles.selectField}>
 					<span>Variety</span>
 					<select
-						value={form.variety}
+						value={form.variety.id}
 						disabled={isProcessing}
 						onChange={(e) => {
 							setForm((prev) => ({
 								...prev,
-								variety: e.target.value,
+								variety: {
+									...varietyList.find(
+										(u) =>
+											u.id ==
+											Number.parseInt(e.target.value),
+									),
+								},
 							}));
 						}}
 					>
 						{varietyList.map((variety, index) => (
-							<option key={index} value={variety}>
-								{variety}
+							<option key={index} value={variety.id}>
+								{variety.name}
 							</option>
 						))}
 					</select>
@@ -304,7 +386,7 @@ function KoiForm({ koi, onClose, onSubmit }: KoiFormProps) {
 						onChange={(e) => {
 							setForm((prev) => ({
 								...prev,
-								variety: e.target.value,
+								scaleType: e.target.value,
 							}));
 						}}
 					>

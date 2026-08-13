@@ -82,7 +82,9 @@ function Profile() {
 
     void fetchProfile()
   }, [])
-
+  const handleViewHome = () => {
+    window.location.href = `/`
+  }
   const handleChange = (field: 'email' | 'birthday' | 'gender') =>
     (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setFormData((current) => ({
@@ -220,7 +222,7 @@ function Profile() {
       </header>
 
       <div className="page-menu">
-        <button>🏠 Home</button>
+        <button onClick={handleViewHome}>🏠 Home</button>
         <button>🏪 Marketplace</button>
         <button>🛒 Shop</button>
         <button>🎒 Inventory</button>

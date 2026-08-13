@@ -2,9 +2,6 @@ import { useState } from 'react'
 
 import type { ShopCategory, ShopItem } from '../../api/shop'
 
-import ShopBackground from '../../components/ShopBackground'
-import ShopHeader from '../../components/Header'
-import ShopNavigation from '../../components/ShopNavigation'
 import ShopTitle from '../../components/ShopTitle'
 import ShopTabs from '../../components/ShopTabs'
 
@@ -20,12 +17,6 @@ export default function Shop() {
 
   return (
     <>
-      <ShopBackground />
-
-      <ShopHeader />
-
-      <ShopNavigation />
-
       <ShopTitle />
 
       <ShopTabs

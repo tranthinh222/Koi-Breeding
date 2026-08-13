@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react'
 
-import ShopBackground from '../../components/ShopBackground'
-import ShopHeader from '../../components/Header'
-import ShopNavigation from '../../components/ShopNavigation'
-
 import { getInventory, useItemFromInventory } from '../../api/inventory'
 import type { ItemInventory, InventoryCategory } from '../../api/inventory'
 
@@ -83,10 +79,6 @@ export default function Inventory() {
 
   return (
     <>
-      <ShopBackground />
-      <ShopHeader />
-      <ShopNavigation />
-
       <section className="title-section">
         <div className="wood-sign">
           <h1>INVENTORY</h1>

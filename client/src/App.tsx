@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./style/global.css";
+import AppLayout from "./components/AppLayout";
 import Shop from "./pages/shop/Shop";
 import Inventory from "./pages/inventory/Inventory";
 
@@ -8,9 +9,10 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/shop" element={<Shop />} />
-
-          <Route path="/inventory" element={<Inventory />} />
+          <Route element={<AppLayout />}>
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/inventory" element={<Inventory />} />
+          </Route>
 
           <Route path="/" element={<Navigate to="/shop" replace />} />
         </Routes>

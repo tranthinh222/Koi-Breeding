@@ -1,26 +1,28 @@
 import { useEffect, useState } from 'react'
-import { getBalanceWallet } from '../api/wallet'
+import { getUserInfo } from '../api/header'
 
 const CURRENT_USER_ID = 1
 
 export default function ShopHeader() {
+  const [username, setUsername] = useState('')
   const [balance, setBalance] = useState<number>(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadBalance = async () => {
+    const loadHeaderInfo = async () => {
       try {
-        const data = await getBalanceWallet(CURRENT_USER_ID)
+        const data = await getUserInfo(CURRENT_USER_ID)
 
+        setUsername(data.username)
         setBalance(data.balance)
       } catch (error) {
-        console.error('Failed to load wallet balance:', error)
+        console.error('Failed to load header information:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    loadBalance()
+    loadHeaderInfo()
   }, [])
 
   return (
@@ -29,7 +31,7 @@ export default function ShopHeader() {
         <div className="avatar">🧑</div>
 
         <div>
-          <h3>Koi Master</h3>
+          <h3>{loading ? 'Loading...' : username || 'Koi Master'}</h3>
           <p>Level: 18</p>
         </div>
       </div>
@@ -85,7 +87,9 @@ export default function ShopHeader() {
         </div>
 
         <div className="wallet">
-          <div className="gold">🪙 25,800</div>
+          <div className="gold">
+            🪙 {loading ? '...' : balance.toLocaleString()}
+          </div>
         </div>
       </div>
     </header>

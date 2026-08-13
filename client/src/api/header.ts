@@ -1,5 +1,5 @@
-import axios from 'axios'
-import { apiClient } from './client'
+import { getUser } from './user'
+import { getBalanceWallet } from './wallet'
 
 export interface HeaderInfo {
   id: number
@@ -7,5 +7,15 @@ export interface HeaderInfo {
   balance: number
 }
 
+export async function getUserInfo(userId: number): Promise<HeaderInfo> {
+  const [user, wallet] = await Promise.all([
+    getUser(userId),
+    getBalanceWallet(userId),
+  ])
 
-export async function get
+  return {
+    id: user.id,
+    username: user.username,
+    balance: wallet.balance,
+  }
+}

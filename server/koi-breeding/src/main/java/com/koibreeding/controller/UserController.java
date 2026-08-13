@@ -21,7 +21,7 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     @ApiMessage("fetch user by id")
-    public ResponseEntity<ResUserDto> getUserById(@PathVariable Long id) throws IdInvalidException {
+    public ResponseEntity<ResUserDto> getUserById(@PathVariable Integer id) throws IdInvalidException {
         User fetchUser = this.userService.handleFetchUserById(id);
         if (fetchUser == null) {
             throw new IdInvalidException("User with id " + id + " not found");

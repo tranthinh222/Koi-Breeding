@@ -144,6 +144,27 @@ public class SampleDataInitializer {
             wallet.setBalance(new BigDecimal("1000.00"));
             walletRepository.save(wallet);
 
+            User sampleUser = userRepository.findAll().stream()
+                    .filter(user -> "koi_enthusiast".equals(user.getUsername()))
+                    .findFirst()
+                    .orElseGet(User::new);
+            sampleUser.setUsername("koi_enthusiast");
+            sampleUser.setEmail("koi_enthusiast@koi.local");
+            sampleUser.setPassword("123456");
+            sampleUser.setBirthday(LocalDate.of(1998, 6, 15));
+            sampleUser.setGender(Gender.FEMALE);
+            sampleUser.setStatus(UserStatus.ACTIVE);
+            sampleUser.setRole(Role.USER);
+            sampleUser.setIsBanned(false);
+            sampleUser.setExp(250);
+            sampleUser.setAvatarUrl(null);
+            sampleUser = userRepository.save(sampleUser);
+
+            Wallet sampleWallet = walletRepository.findByUserId(sampleUser.getId()).orElseGet(Wallet::new);
+            sampleWallet.setUser(sampleUser);
+            sampleWallet.setBalance(new BigDecimal("5000.00"));
+            walletRepository.save(sampleWallet);
+
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Kohaku"), 1);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Showa Sanshoku"), 2);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Asagi"), 1);

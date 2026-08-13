@@ -14,7 +14,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User handleFetchUserById(long userId) {
+    public User handleFetchUserById(Integer userId) {
         return userRepository.findById(userId).orElse(null);
     }
 

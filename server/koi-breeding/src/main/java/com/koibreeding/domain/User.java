@@ -67,8 +67,13 @@ public class User {
     private String avatarUrl;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    @UpdateTimestamp
+    @Column(nullable = false)
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class WalletService {
     private final WalletRepository walletRepository;
+    private final UserRepository userRepository;
 
     public Wallet handleCreateWallet(Wallet wallet) {
         return walletRepository.save(wallet);
@@ -20,10 +21,14 @@ public class WalletService {
 
     public ResWalletDto getBalanceWallet(Integer useId) {
         Wallet balanceWallet = walletRepository.findByUserId(useId)
-                .orElse(null);
-        if (balanceWallet == null) {
-            throw new RuntimeException("User not wallet");
-        }
+                .orElseGet(() -> {
+                    var user = userRepository.findById(useId)
+                            .orElseThrow(() -> new RuntimeException("User not found"));
+                    Wallet newWallet = new Wallet();
+                    newWallet.setUser(user);
+                    newWallet.setBalance(BigDecimal.ZERO);
+                    return walletRepository.save(newWallet);
+                });
 
         return new ResWalletDto(
                 balanceWallet.getBalance());

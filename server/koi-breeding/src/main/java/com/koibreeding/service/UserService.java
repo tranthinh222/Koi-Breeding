@@ -94,6 +94,7 @@ public class UserService {
         }
 
         User currentUser = this.handleFetchProfileByUserId(userId);
+        String oldAvatarUrl = currentUser.getAvatarUrl();
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         if (fileName.isBlank()) {
             throw new IllegalArgumentException("Avatar file name is invalid.");
@@ -115,6 +116,7 @@ public class UserService {
             String avatarUrl = "/uploads/avatars/" + safeFileName;
             currentUser.setAvatarUrl(avatarUrl);
             this.userRepository.save(currentUser);
+            deleteOldAvatar(oldAvatarUrl, avatarUrl, uploadDir);
 
             return avatarUrl;
         } catch (IOException e) {
@@ -122,6 +124,27 @@ public class UserService {
         }
 
         
+    }
+
+    private void deleteOldAvatar(String oldAvatarUrl, String newAvatarUrl, Path uploadDir) throws IOException {
+        if (oldAvatarUrl == null || oldAvatarUrl.isBlank() || oldAvatarUrl.equals(newAvatarUrl)) {
+            return;
+        }
+
+        String avatarPrefix = "/uploads/avatars/";
+        if (!oldAvatarUrl.startsWith(avatarPrefix)) {
+            return;
+        }
+
+        String oldFileName = StringUtils.cleanPath(oldAvatarUrl.substring(avatarPrefix.length()));
+        if (oldFileName.isBlank() || oldFileName.contains("..")) {
+            return;
+        }
+
+        Path oldAvatarPath = uploadDir.resolve(oldFileName).normalize();
+        if (oldAvatarPath.startsWith(uploadDir)) {
+            Files.deleteIfExists(oldAvatarPath);
+        }
     }
 
     public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {

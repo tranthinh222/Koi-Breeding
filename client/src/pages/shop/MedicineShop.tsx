@@ -47,19 +47,19 @@ export default function MedicineShop({ selectedItem, onSelect }: Props) {
   if (items.length === 0) {
     return <main className="shop-main">No medicine available.</main>;
   }
-  const currentItem = selectedItem ?? items[0];
+  const currentItem = selectedItem;
 
   return (
     <main className="shop-main">
       <ShopGrid items={items} selectedItem={currentItem} onSelect={onSelect} />
 
-      <DetailPanel
+      {currentItem && <DetailPanel
         item={currentItem}
         onBuy={() => buyItem(currentItem)}
         buying={buying}
         buyError={buyError}
         buySuccess={buySuccess}
-      />
+      />}
     </main>
   );
 }

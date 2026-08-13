@@ -124,7 +124,7 @@ export default function Inventory() {
       <main className="inventory-main">
         <section className="inventory-container">
           {loading ? (
-            <div>Đang tải...</div>
+            <div>Loading...</div>
           ) : error ? (
             <div>{error}</div>
           ) : (

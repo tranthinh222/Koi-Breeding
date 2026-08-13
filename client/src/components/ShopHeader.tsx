@@ -5,8 +5,8 @@ export default function ShopHeader() {
         <div className="avatar">🧑</div>
 
         <div>
-          <h3>Player Lv.18</h3>
-          <p>ID: Player123</p>
+          <h3>Koi Master</h3>
+          <p>Level: 18</p>
         </div>
       </div>
 

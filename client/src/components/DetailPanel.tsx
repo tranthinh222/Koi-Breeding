@@ -1,11 +1,11 @@
-import type { ShopItem } from "../api/shop";
+import type { ShopItem } from '../api/shop'
 
 interface DetailPanelProps {
-  item: ShopItem;
-  onBuy?: () => void;
-  buying?: boolean;
-  buyError?: string | null;
-  buySuccess?: string | null;
+  item: ShopItem
+  onBuy?: () => void
+  buying?: boolean
+  buyError?: string | null
+  buySuccess?: string | null
 }
 
 export default function DetailPanel({
@@ -40,16 +40,16 @@ export default function DetailPanel({
       </div>
 
       <div className="detail-price">
-        {item.currency === "USD" ? "💵" : "💰"} {item.price}{" "}
-        {item.currency === "USD" ? "USD" : "Koins"}
+        {item.currency === 'USD' ? '💵' : '💰'} {item.price}{' '}
+        {item.currency === 'USD' ? 'USD' : 'Koins'}
       </div>
 
       {buyError && <p className="buy-error">{buyError}</p>}
       {buySuccess && <p className="buy-success">{buySuccess}</p>}
 
       <button className="buy-btn" onClick={onBuy} disabled={buying}>
-        {buying ? "Đang mua..." : "Buy Now"}
+        {buying ? 'Buying...' : 'Buy Now'}
       </button>
     </aside>
-  );
+  )
 }

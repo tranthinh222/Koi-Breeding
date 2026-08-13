@@ -19,8 +19,7 @@ public class UserService {
     }
 
     public ResUserDto convertToResUserDto(User user) {
-        ResUserDto resUser = new ResUserDto();
-        resUser.builder()
+        return ResUserDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
@@ -29,9 +28,8 @@ public class UserService {
                 .avatarUrl(user.getAvatarUrl())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
-                .exp(user.getExp());
-
-        return resUser;
+                .exp(user.getExp())
+                .build();
     }
 
 }

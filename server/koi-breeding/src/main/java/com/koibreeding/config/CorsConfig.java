@@ -14,7 +14,7 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(
-                Arrays.asList("http://localhost:5173", "https://movie-ticket-booking-frontend-po3d.onrender.com/"));
+                Arrays.asList("http://localhost:*", "http://127.0.0.1:*", "http://127.0.0.2:*"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         configuration.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE"));
         configuration.setAllowCredentials(true);

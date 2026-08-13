@@ -3,10 +3,7 @@ package com.koibreeding.controller;
 import com.koibreeding.domain.Item;
 import com.koibreeding.dto.response.ItemInventory;
 import com.koibreeding.enums.ItemType;
-import com.koibreeding.repository.ItemRepository;
-import com.koibreeding.service.ItemService;
 import com.koibreeding.service.ShopService;
-import com.koibreeding.util.error.IdInvalidException;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +18,9 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = { "http://localhost:*", "http://127.0.0.1:*", "http://127.0.0.2:*" })
 public class ShopController {
     private final ShopService shopService;
-//    private final ItemService itemService;
+    // private final ItemService itemService;
 
     @GetMapping("/shop/items")
     public ResponseEntity<Page<Item>> fetchItems(
@@ -34,21 +30,20 @@ public class ShopController {
         return ResponseEntity.status(HttpStatus.OK).body(this.shopService.getItems(category, page, size));
     }
 
-//    @GetMapping("/shop/items/{itemId}")
-//    public ResponseEntity<Item> fetchAnItem(@RequestParam("itemId") int id) {
-//        Item item = this.itemService.findItemById(id);
-//        if (item == null) {
-//            throw new IdInvalidException("item with id " + id + " not found");
-//        }
-//        return ResponseEntity.status(HttpStatus.OK).body(item);
-//    }
+    // @GetMapping("/shop/items/{itemId}")
+    // public ResponseEntity<Item> fetchAnItem(@RequestParam("itemId") int id) {
+    // Item item = this.itemService.findItemById(id);
+    // if (item == null) {
+    // throw new IdInvalidException("item with id " + id + " not found");
+    // }
+    // return ResponseEntity.status(HttpStatus.OK).body(item);
+    // }
 
     @PostMapping("/shop/items/{itemId}/purchase")
     public ResponseEntity<Void> purchaseShopItem(
-//            @PathVariable Integer userId,
+            // @PathVariable Integer userId,
             @PathVariable Integer itemId,
-            @RequestBody ItemInventory request
-    ){
+            @RequestBody ItemInventory request) {
         Integer userId = 1;
         shopService.purchaseShopItem(userId, itemId, request.getQuantity());
         return ResponseEntity.ok().build();

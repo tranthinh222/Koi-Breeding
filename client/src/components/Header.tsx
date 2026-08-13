@@ -34,7 +34,7 @@ export default function ShopHeader() {
 
         <div>
           <h3>{loading ? 'Loading...' : username}</h3>
-          <p>{loading ? 'Loading...' : exp}</p>
+          <p>{loading ? 'Loading...' : `Level: ${exp}`}</p>
         </div>
       </div>
 

@@ -329,7 +329,7 @@ body {
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
 }
 
-.profile-avatar {
+.home-profile-avatar {
   width: 112px;
   height: 112px;
   margin: 0 auto 22px;
@@ -345,7 +345,7 @@ body {
   font-weight: 800;
 }
 
-.profile-avatar img {
+.home-profile-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;

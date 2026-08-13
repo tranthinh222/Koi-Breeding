@@ -166,7 +166,7 @@ const Home: React.FC = () => {
           )}
         </article>
         <aside className="profile-panel">
-          <div className="profile-avatar">
+          <div className="home-profile-avatar">
             {data?.user.avatarUrl ? (
               <img src={data.user.avatarUrl} alt={data.user.username} />
             ) : (

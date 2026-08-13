@@ -179,6 +179,7 @@ export async function getShopItem(
 }
 
 export async function purchaseShopItem(
+  userId: number,
   itemId: number,
   quantity: number,
 ): Promise<void> {

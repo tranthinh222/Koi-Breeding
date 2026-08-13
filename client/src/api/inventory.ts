@@ -106,47 +106,14 @@ export async function getInventory(): Promise<ItemInventory[]> {
   }
 }
 
-export async function addItemToInventory(
-  itemId: number,
-  quantity: number,
-): Promise<ItemInventory> {
-  try {
-    const response = await apiClient.post(
-      `/inventory/items/${itemId}/addition`,
-      {
-        quantity: quantity,
-      },
-    )
-    return response.data.data as ItemInventory
-  } catch (error) {
-    if (axios.isCancel(error)) throw error
-    console.error(
-      'Shop API request failed. Using demo products instead.',
-      error,
-    )
-    // throw error;
-    const item = mockInventory.find((item) => item.id === itemId)
-
-    if (!item) {
-      throw new Error('Item không tồn tại')
-    }
-
-    const updatedItem: ItemInventory = {
-      ...item,
-      quantity: Math.max(0, item.quantity + quantity),
-    }
-
-    return updatedItem
-  }
-}
-
 export async function useItemFromInventory(
+  userId: number,
   itemId: number,
   quantity: number,
 ): Promise<ItemInventory> {
   try {
     const response = await apiClient.post(`/inventory/items/${itemId}/usages`, {
-      quantity: quantity,
+      quantity: (quantity = 1),
     })
     return response.data.data as ItemInventory
   } catch (error) {
@@ -159,7 +126,7 @@ export async function useItemFromInventory(
     const item = mockInventory.find((item) => item.id === itemId)
 
     if (!item) {
-      throw new Error('Item không tồn tại')
+      throw new Error('Item does not exist')
     }
 
     const updatedItem: ItemInventory = {

@@ -20,7 +20,7 @@ export default function Inventory() {
     const loadInventory = async () => {
       setLoading(true)
       try {
-        const data = await getInventory(CURRENT_USER_ID)
+        const data = await getInventory()
         if (!cancelled) {
           setItems(data)
           setSelectedItem(data[0] ?? null)
@@ -150,7 +150,7 @@ export default function Inventory() {
 
               <div className="item-effect">
                 <p>Effect: +{selectedItem.effectValue}</p>
-                <p>Quantity: x{selectedItem.quantity}</p>
+                <p>Quantity: {selectedItem.quantity}</p>
               </div>
 
               <div className="item-description">{selectedItem.description}</div>

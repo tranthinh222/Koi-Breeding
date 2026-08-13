@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getUserInfo } from '../api/header'
 
-const CURRENT_USER_ID = 1
+const CURRENT_USER_ID = 3
 
 export default function ShopHeader() {
   const [username, setUsername] = useState('')

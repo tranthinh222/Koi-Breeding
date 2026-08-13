@@ -90,7 +90,7 @@ export const mockInventory: ItemInventory[] = [
   },
 ]
 
-export async function getInventory(userId: number): Promise<ItemInventory[]> {
+export async function getInventory(): Promise<ItemInventory[]> {
   try {
     const response = await apiClient.get(`/inventory`)
     console.log('Inventory API:', response.data)

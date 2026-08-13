@@ -9,6 +9,7 @@ import {
 	Weight,
 } from "lucide-react";
 import { useState } from "react";
+import { callUpdateKoiVarient } from "../../config/api";
 import type { IKoiVarient } from "../../types/backend";
 import KoiForm from "../KoiForm/KoiForm";
 import styles from "./KoiRow.module.css";
@@ -21,6 +22,46 @@ function KoiRow({ koi }: KoiDictionaryCardProps) {
 	const [isUpdateDialogOpen, setIsUpdateDialogOpen] =
 		useState<boolean>(false);
 
+	const handleUpdateKoiVarient = async (requestKoi: IKoiVarient) => {
+		const koiToUpdate: IKoiVarient = {
+			id: koi.id,
+			name: requestKoi.name,
+			origin: requestKoi.origin,
+			variety: requestKoi.variety,
+			scaleType: requestKoi.scaleType,
+			shape: requestKoi.shape,
+			baseMaxLength: requestKoi.baseMaxLength,
+			baseGrowthRate: requestKoi.baseGrowthRate,
+			midAge: requestKoi.midAge,
+			alphaWeight: requestKoi.alphaWeight,
+			basePrice: requestKoi.basePrice,
+			alphaPrice: requestKoi.alphaPrice,
+		};
+
+		await callUpdateKoiVarient(koiToUpdate);
+
+		handleUpdateAttributes(requestKoi);
+	};
+
+	const handleUpdateAttributes = (requestKoi: IKoiVarient) => {
+		koi.name = requestKoi.name;
+		koi.origin = requestKoi.origin;
+		koi.variety = requestKoi.variety;
+		koi.scaleType = requestKoi.scaleType;
+		koi.shape = requestKoi.shape;
+		koi.baseMaxLength = requestKoi.baseMaxLength;
+		koi.baseGrowthRate = requestKoi.baseGrowthRate;
+		koi.midAge = requestKoi.midAge;
+		koi.alphaWeight = requestKoi.alphaWeight;
+		koi.basePrice = requestKoi.basePrice;
+		koi.alphaPrice = requestKoi.alphaPrice;
+	};
+
+	const toCapitalString = (text: string) => {
+		const firstCharacter = text.at(0)?.toUpperCase();
+		return firstCharacter + text.toLowerCase().slice(1);
+	};
+
 	return (
 		<>
 			<div className={styles.card}>
@@ -28,6 +69,9 @@ function KoiRow({ koi }: KoiDictionaryCardProps) {
 					<img
 						src={`/kois/${koi.name.toLowerCase().replace(" ", "-")}.png`}
 						alt="koi"
+						onError={(e) => {
+							e.currentTarget.src = "/kois/koi-empty.png";
+						}}
 					/>
 				</section>
 				<div className={styles.content}>
@@ -59,7 +103,7 @@ function KoiRow({ koi }: KoiDictionaryCardProps) {
 									Variety:
 								</span>
 								<span className={styles.varietyBadge}>
-									{koi.variety}
+									{koi.variety?.name || ""}
 								</span>
 							</div>
 							<div className={styles.fieldWrapper}>
@@ -67,7 +111,7 @@ function KoiRow({ koi }: KoiDictionaryCardProps) {
 									Scale Type:
 								</span>
 								<span className={styles.scaleBadge}>
-									{koi.scaleType}
+									{toCapitalString(koi.scaleType)}
 								</span>
 							</div>
 							<div className={styles.fieldWrapper}>
@@ -75,7 +119,7 @@ function KoiRow({ koi }: KoiDictionaryCardProps) {
 									Shape:
 								</span>
 								<span className={styles.shapeBadge}>
-									{koi.shape}
+									{toCapitalString(koi.shape)}
 								</span>
 							</div>
 						</section>
@@ -131,19 +175,7 @@ function KoiRow({ koi }: KoiDictionaryCardProps) {
 					<KoiForm
 						koi={koi}
 						onClose={() => setIsUpdateDialogOpen(false)}
-						onSubmit={(requestKoi) => {
-							koi.name = requestKoi.name;
-							koi.origin = requestKoi.origin;
-							koi.variety = requestKoi.variety;
-							koi.scaleType = requestKoi.scaleType;
-							koi.shape = requestKoi.shape;
-							koi.baseMaxLength = requestKoi.baseMaxLength;
-							koi.baseGrowthRate = requestKoi.baseGrowthRate;
-							koi.midAge = requestKoi.midAge;
-							koi.alphaWeight = requestKoi.alphaWeight;
-							koi.basePrice = requestKoi.basePrice;
-							koi.alphaPrice = requestKoi.alphaPrice;
-						}}
+						onSubmit={handleUpdateKoiVarient}
 					/>
 				</div>
 			) : null}

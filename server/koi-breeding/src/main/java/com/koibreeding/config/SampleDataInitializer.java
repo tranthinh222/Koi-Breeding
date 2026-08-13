@@ -13,15 +13,22 @@ import org.springframework.context.annotation.Configuration;
 
 import com.koibreeding.domain.Inventory;
 import com.koibreeding.domain.Item;
+import com.koibreeding.domain.Notification;
+import com.koibreeding.domain.Transaction;
 import com.koibreeding.domain.User;
 import com.koibreeding.domain.Wallet;
 import com.koibreeding.enums.EffectType;
 import com.koibreeding.enums.Gender;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.NotificationType;
 import com.koibreeding.enums.Role;
+import com.koibreeding.enums.TransactionStatus;
+import com.koibreeding.enums.TransactionType;
 import com.koibreeding.enums.UserStatus;
 import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.ItemRepository;
+import com.koibreeding.repository.NotificationRepository;
+import com.koibreeding.repository.TransactionRepository;
 import com.koibreeding.repository.UserRepository;
 import com.koibreeding.repository.WalletRepository;
 
@@ -30,7 +37,8 @@ public class SampleDataInitializer {
 
     @Bean
     CommandLineRunner seedSampleData(ItemRepository itemRepository, UserRepository userRepository,
-            WalletRepository walletRepository, InventoryRepository inventoryRepository) {
+            WalletRepository walletRepository, InventoryRepository inventoryRepository,
+            TransactionRepository transactionRepository, NotificationRepository notificationRepository) {
         return args -> {
             Map<String, Item> existingItemsByName = itemRepository.findAll().stream()
                     .collect(Collectors.toMap(Item::getName, item -> item, (left, right) -> left, LinkedHashMap::new));
@@ -166,13 +174,16 @@ public class SampleDataInitializer {
             walletRepository.save(sampleWallet);
 
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Kohaku"), 1);
-            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Showa Sanshoku"), 2);
-            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Asagi"), 1);
-            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Ogon"), 3);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Tancho"), 2);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Taisho Sanke"), 1);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi Food - Aqua Master"), 10);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi Food - Bethech"), 5);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Health Elixir - KAFKA"), 3);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Environment Elixir - KMnO4"), 4);
+
+            backfillTransactionsWithoutItem(transactionRepository, itemsByName.get("Koi Food - Aqua Master"));
+            seedTransactions(transactionRepository, wallet, itemsByName);
+            seedNotifications(notificationRepository, demoUser);
         };
     }
 
@@ -201,5 +212,62 @@ public class SampleDataInitializer {
         inventory.setItem(item);
         inventory.setQuantity(quantity);
         inventoryRepository.save(inventory);
+    }
+
+    private void backfillTransactionsWithoutItem(TransactionRepository transactionRepository, Item fallbackItem) {
+        if (fallbackItem == null) {
+            return;
+        }
+        List<Transaction> orphanTransactions = transactionRepository.findByItemIsNull();
+        orphanTransactions.forEach(transaction -> transaction.setItem(fallbackItem));
+        transactionRepository.saveAll(orphanTransactions);
+    }
+
+    private void seedTransactions(TransactionRepository transactionRepository, Wallet wallet, Map<String, Item> itemsByName) {
+        if (!transactionRepository.findByWalletUserIdOrderByCreatedAtDesc(wallet.getUser().getId()).isEmpty()) {
+            return;
+        }
+
+        seedTransaction(transactionRepository, wallet, itemsByName.get("Koi - Kohaku"), "100.00",
+                TransactionType.BUY_FISH, "Bought 1 Koi - Kohaku");
+        seedTransaction(transactionRepository, wallet, itemsByName.get("Koi Food - Aqua Master"), "30.00",
+                TransactionType.BUY_FOOD, "Bought 2 Koi Food - Aqua Master");
+        seedTransaction(transactionRepository, wallet, itemsByName.get("Koins Pack - 750"), "2.99",
+                TransactionType.DEPOSIT, "Added 750 Koins from Koins Pack - 750");
+    }
+
+    private void seedTransaction(TransactionRepository transactionRepository, Wallet wallet, Item item, String amount,
+            TransactionType type, String description) {
+        if (item == null) {
+            return;
+        }
+        Transaction transaction = new Transaction();
+        transaction.setWallet(wallet);
+        transaction.setItem(item);
+        transaction.setAmount(new BigDecimal(amount));
+        transaction.setTransactionType(type);
+        transaction.setStatus(TransactionStatus.SUCCESSED);
+        transaction.setDescription(description);
+        transactionRepository.save(transaction);
+    }
+
+    private void seedNotifications(NotificationRepository notificationRepository, User user) {
+        if (!notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId()).isEmpty()) {
+            return;
+        }
+        seedNotification(notificationRepository, user, NotificationType.PURCHASE_SUCCESS, "Purchase successful",
+                "Bought 1 Koi - Kohaku.");
+        seedNotification(notificationRepository, user, NotificationType.DEPOSIT_SUCCESS, "Koins added",
+                "750 Koins were added to your wallet.");
+    }
+
+    private void seedNotification(NotificationRepository notificationRepository, User user, NotificationType type,
+            String title, String message) {
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setType(type);
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notificationRepository.save(notification);
     }
 }

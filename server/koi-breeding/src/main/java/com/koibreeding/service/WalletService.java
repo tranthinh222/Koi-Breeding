@@ -46,4 +46,11 @@ public class WalletService {
         Wallet walletNew = handleCreateWallet(wallet);
         return walletNew;
     }
+
+    public Wallet credit(Integer userId, BigDecimal amount) {
+        Wallet wallet = walletRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Not found wallet"));
+        wallet.setBalance(wallet.getBalance().add(amount));
+        return handleCreateWallet(wallet);
+    }
 }

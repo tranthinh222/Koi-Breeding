@@ -70,14 +70,24 @@ public class InventoryService {
     }
 
     public ResItemInventory useItemFromInventory(Integer userId, Integer itemId, Integer quantity) {
+        if (quantity == null || quantity < 1) {
+            throw new IllegalArgumentException("Quantity must be at least 1");
+        }
         Inventory inventory = inventoryRepository.findByUserIdAndItemId(userId, itemId)
                 .orElse(null);
         if (inventory == null) {
             throw new RuntimeException("not found item");
         }
         int quantityNew = inventory.getQuantity() - quantity;
+        if (quantityNew < 0) {
+            throw new RuntimeException("Insufficient item quantity");
+        }
         if (quantityNew == 0) {
             inventoryRepository.delete(inventory);
+            return new ResItemInventory(
+                    inventory.getItem().getId(), inventory.getItem().getName(), inventory.getItem().getPrice(),
+                    inventory.getItem().getItemType(), inventory.getItem().getEffectValue(), inventory.getItem().getEffectType(),
+                    inventory.getItem().getDescription(), 0, inventory.getItem().getItemUrl());
         }
         inventory.setQuantity(quantityNew);
 

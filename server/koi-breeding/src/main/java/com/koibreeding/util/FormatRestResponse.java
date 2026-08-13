@@ -8,6 +8,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.koibreeding.dto.RestResponse;
 
@@ -29,7 +30,7 @@ public class FormatRestResponse implements ResponseBodyAdvice<Object> {
         RestResponse<Object> restResponse = new RestResponse<Object>();
         restResponse.setStatusCode(status);
 
-        if (body instanceof String) {
+        if (body instanceof String || body instanceof SseEmitter) {
             return body;
         }
         // case error

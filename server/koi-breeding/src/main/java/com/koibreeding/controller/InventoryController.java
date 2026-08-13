@@ -14,20 +14,16 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @GetMapping("/inventory")
-    public ResponseEntity<List<ResItemInventory>> getInventory(
-    // @PathVariable Integer userId
-    ) {
-        Integer userId = 1;
+    public ResponseEntity<List<ResItemInventory>> getInventory(@RequestParam Integer userId) {
         List<ResItemInventory> inventory = inventoryService.getInventory(userId);
         return ResponseEntity.ok(inventory);
     }
 
     @PostMapping("/inventory/items/{itemId}/addition")
     public ResponseEntity<ResItemInventory> addItemToInventory(
-            // @PathVariable Integer userId,
+            @RequestParam Integer userId,
             @PathVariable Integer itemId,
             @RequestBody ResItemInventory request) {
-        Integer userId = 1;
         return ResponseEntity.status(HttpStatus.OK)
                 .body(this.inventoryService
                         .addItemToInventory(userId, itemId, request.getQuantity()));
@@ -35,10 +31,9 @@ public class InventoryController {
 
     @PostMapping("/inventory/items/{itemId}/usages")
     public ResponseEntity<ResItemInventory> useItemFromInventory(
-            // @PathVariable Integer userId,
+            @RequestParam Integer userId,
             @PathVariable Integer itemId,
             @RequestBody ResItemInventory request) {
-        Integer userId = 1;
         return ResponseEntity.status(HttpStatus.OK)
                 .body(this.inventoryService
                         .useItemFromInventory(userId, itemId, request.getQuantity()));

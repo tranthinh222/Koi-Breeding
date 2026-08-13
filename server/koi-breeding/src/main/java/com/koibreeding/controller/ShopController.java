@@ -1,7 +1,8 @@
 package com.koibreeding.controller;
 
 import com.koibreeding.domain.Item;
-import com.koibreeding.dto.response.ResItemInventory;
+import com.koibreeding.dto.request.PurchaseRequest;
+import com.koibreeding.dto.response.ResPurchaseDto;
 import com.koibreeding.enums.ItemType;
 import com.koibreeding.service.ShopService;
 
@@ -13,11 +14,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(originPatterns = { "http://localhost:*", "http://127.0.0.1:*", "http://127.0.0.2:*" })
 public class ShopController {
     private final ShopService shopService;
     // private final ItemService itemService;
@@ -40,12 +43,9 @@ public class ShopController {
     // }
 
     @PostMapping("/shop/items/{itemId}/purchase")
-    public ResponseEntity<Void> purchaseShopItem(
-            // @PathVariable Integer userId,
+    public ResponseEntity<ResPurchaseDto> purchaseShopItem(
             @PathVariable Integer itemId,
-            @RequestBody ResItemInventory request) {
-        Integer userId = 1;
-        shopService.purchaseShopItem(userId, itemId, request.getQuantity());
-        return ResponseEntity.ok().build();
+            @Valid @RequestBody PurchaseRequest request) {
+        return ResponseEntity.ok(shopService.purchaseShopItem(request.getUserId(), itemId, request.getQuantity()));
     }
 }

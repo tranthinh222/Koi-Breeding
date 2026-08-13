@@ -28,7 +28,7 @@ body {
 
 /* Sky */
 .background::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -80,7 +80,7 @@ body {
 }
 
 .cloud::before {
-  content: "";
+  content: '';
   position: absolute;
   width: 80px;
   height: 80px;
@@ -91,7 +91,7 @@ body {
 }
 
 .cloud::after {
-  content: "";
+  content: '';
   position: absolute;
   width: 70px;
   height: 70px;
@@ -309,14 +309,18 @@ body {
 .shop-main {
   width: 90%;
   margin: auto;
-
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-
   gap: 30px;
   align-items: start;
-
   margin-bottom: 60px;
+}
+
+.shop-main.has-detail {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.shop-main.no-detail {
+  grid-template-columns: 1fr;
 }
 
 /* =========================
@@ -356,7 +360,7 @@ body {
 }
 
 .shop-main .fish-card::before {
-  content: "";
+  content: '';
 
   position: absolute;
 

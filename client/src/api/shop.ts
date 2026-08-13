@@ -23,6 +23,7 @@ const fromBackendItem = (item: BackendItem): ShopItem => ({
   currency: item.itemType === 'CURRENCY' ? 'USD' : 'KOINS',
   coinAmount: item.itemType === 'CURRENCY' ? item.effectValue : undefined,
   description: item.description,
+  image: item.image,
 })
 const products: ShopItem[] = [
   {
@@ -149,6 +150,7 @@ interface BackendItem {
   itemType: ShopCategory
   effectValue: number
   description: string
+  image?: string
   quantity: number
 }
 

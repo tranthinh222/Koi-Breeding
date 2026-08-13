@@ -50,7 +50,7 @@ export default function KoiShop({ selectedItem, onSelect }: Props) {
   const currentItem = selectedItem
 
   return (
-    <main className="shop-main">
+    <main className={`shop-main ${currentItem ? 'has-detail' : 'no-detail'}`}>
       <ShopGrid items={items} selectedItem={currentItem} onSelect={onSelect} />
 
       {currentItem && (

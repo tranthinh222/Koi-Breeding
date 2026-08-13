@@ -7,18 +7,6 @@ import ShopNavigation from "../../components/ShopNavigation";
 import { getInventory, useItemFromInventory } from "../../api/inventory";
 import type { ItemInventory, InventoryCategory } from "../../api/inventory";
 
-import kohaku from "../../assets/koi/kohaku.svg";
-import showa from "../../assets/koi/showa_sanshoku.svg";
-import asagi from "../../assets/koi/tancho.svg";
-import ogon from "../../assets/koi/goromo.svg";
-
-const imageByName: Record<string, string> = {
-  "Koi - Kohaku": kohaku,
-  "Koi - Showa Sanshoku": showa,
-  "Koi - Asagi": asagi,
-  "Koi - Ogon": ogon,
-};
-
 const CURRENT_USER_ID = 1;
 
 export default function Inventory() {
@@ -61,7 +49,7 @@ export default function Inventory() {
   const tabs: [string, InventoryCategory][] = [
     ["🐟", "KOI"],
     ["🍖", "FOOD"],
-    ["🌱", "MEDICINE"],
+    ["💊", "MEDICINE"],
   ];
 
   const handleUseItem = async () => {
@@ -140,9 +128,8 @@ export default function Inventory() {
                     setActionError(null);
                   }}
                 >
-                  {imageByName[item.name] && (
-                    <img src={imageByName[item.name]} alt={item.name} />
-                  )}
+                  {item.image && <img src={item.image} alt={item.name} />}
+
                   <span className="item-count">x{item.quantity}</span>
                 </div>
               ))}
@@ -161,12 +148,9 @@ export default function Inventory() {
 
           {selectedItem && (
             <div className="detail-content">
-              {imageByName[selectedItem.name] && (
+              {selectedItem?.image && (
                 <div className="detail-image inventory-koi-image">
-                  <img
-                    src={imageByName[selectedItem.name]}
-                    alt={selectedItem.name}
-                  />
+                  <img src={selectedItem.image} alt={selectedItem.name} />
                 </div>
               )}
 

@@ -56,7 +56,7 @@ public class ShopService {
                 }
         );
         transaction.setStatus(TransactionStatus.SUCCESSED);
-        transaction.setDescription("Buy " + quantity + " " +item.getName());
+        transaction.setDescription("Buy " + quantity + " " + item.getName());
         transactionService.handleCreateTransaction(transaction);
     }
 

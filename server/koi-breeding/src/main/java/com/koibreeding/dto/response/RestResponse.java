@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RestResponse<T> {
     private int statusCode;
-    private String error;
-    private Object message;
+    private String message;
     private T data;
 }

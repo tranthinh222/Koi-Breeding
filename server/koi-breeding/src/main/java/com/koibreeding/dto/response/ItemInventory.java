@@ -19,6 +19,7 @@ public class ItemInventory {
     private EffectType effectType;
     private String description;
     private Integer quantity;
+    private String image;
     public ItemInventory(
         Integer id,
         String name,
@@ -26,7 +27,8 @@ public class ItemInventory {
         ItemType itemType,
         EffectType effectType,
         String description, 
-        Integer quantity) {
+        Integer quantity,
+        String image) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -34,5 +36,6 @@ public class ItemInventory {
         this.effectType = effectType;
         this.description = description;
         this.quantity = quantity;
+        this.image = image;
     }
 }

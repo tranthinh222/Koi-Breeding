@@ -1,11 +1,12 @@
-import type { ShopItem } from '../api/shop'
+import { useEffect, useState } from "react";
+import type { ShopItem } from "../api/shop";
 
 interface DetailPanelProps {
-  item: ShopItem
-  onBuy?: () => void
-  buying?: boolean
-  buyError?: string | null
-  buySuccess?: string | null
+  item: ShopItem;
+  onBuy?: (quantity: number) => void;
+  buying?: boolean;
+  buyError?: string | null;
+  buySuccess?: string | null;
 }
 
 export default function DetailPanel({
@@ -15,6 +16,13 @@ export default function DetailPanel({
   buyError,
   buySuccess,
 }: DetailPanelProps) {
+  const [quantity, setQuantity] = useState(1);
+  // Khi đổi item thì reset số lượng về 1
+  useEffect(() => {
+    setQuantity(1);
+  }, [item.id]);
+
+  const totalPrice = item.price * quantity;
   return (
     <aside className="detail-panel">
       <div className="detail-header">Selected Item</div>
@@ -40,16 +48,53 @@ export default function DetailPanel({
       </div>
 
       <div className="detail-price">
-        {item.currency === 'USD' ? '💵' : '💰'} {item.price}{' '}
-        {item.currency === 'USD' ? 'USD' : 'Koins'}
+        {item.currency === "USD" ? "💵" : "💰"} {item.price}{" "}
+        {item.currency === "USD" ? "USD" : "Koins"}
+      </div>
+
+      <div className="quantity-section">
+        <div className="quantity-header">
+          <span>Quantity</span>
+          <strong>x{quantity}</strong>
+        </div>
+
+        <input
+          type="range"
+          min={1}
+          max={10}
+          step={1}
+          value={quantity}
+          onChange={(event) => {
+            setQuantity(Number(event.target.value));
+          }}
+          disabled={buying}
+        />
+
+        <div className="quantity-range">
+          <span>1</span>
+          <span>10</span>
+        </div>
+      </div>
+
+      {/* Total */}
+      <div className="total-price">
+        Total:{" "}
+        <strong>
+          {item.currency === "USD" ? "💵" : "💰"} {totalPrice}{" "}
+          {item.currency === "USD" ? "USD" : "Koins"}
+        </strong>
       </div>
 
       {buyError && <p className="buy-error">{buyError}</p>}
       {buySuccess && <p className="buy-success">{buySuccess}</p>}
 
-      <button className="buy-btn" onClick={onBuy} disabled={buying}>
-        {buying ? 'Buying...' : 'Buy Now'}
+      <button
+        className="buy-btn"
+        onClick={() => onBuy && onBuy(quantity)}
+        disabled={buying}
+      >
+        {buying ? "Buying..." : "Buy Now"}
       </button>
     </aside>
-  )
+  );
 }

@@ -43,12 +43,13 @@ public class ShopController {
 //        return ResponseEntity.status(HttpStatus.OK).body(item);
 //    }
 
-    @PostMapping("/shop/{userId}/items/{itemId}/purchase")
+    @PostMapping("/shop/items/{itemId}/purchase")
     public ResponseEntity<Void> purchaseShopItem(
-            @PathVariable Integer userId,
+//            @PathVariable Integer userId,
             @PathVariable Integer itemId,
             @RequestBody ItemInventory request
     ){
+        Integer userId = 1;
         shopService.purchaseShopItem(userId, itemId, request.getQuantity());
         return ResponseEntity.ok().build();
     }

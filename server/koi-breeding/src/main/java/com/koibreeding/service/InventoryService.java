@@ -31,7 +31,8 @@ public class InventoryService {
                         item.getItem().getItemType(),
                         item.getItem().getEffectType(),
                         item.getItem().getDescription(),
-                        item.getQuantity()))
+                        item.getQuantity(),
+                        item.getItem().getItemUrl()))
                 .toList();
     }
 
@@ -61,7 +62,8 @@ public class InventoryService {
                 inventoryNew.getItem().getItemType(),
                 inventoryNew.getItem().getEffectType(),
                 inventoryNew.getItem().getDescription(),
-                inventoryNew.getQuantity());
+                inventoryNew.getQuantity(),
+                inventoryNew.getItem().getItemUrl());
 
     }
 
@@ -85,6 +87,7 @@ public class InventoryService {
                 inventoryNew.getItem().getItemType(),
                 inventoryNew.getItem().getEffectType(),
                 inventoryNew.getItem().getDescription(),
-                inventoryNew.getQuantity());
+                inventoryNew.getQuantity(),
+                inventoryNew.getItem().getItemUrl());
     }
 }

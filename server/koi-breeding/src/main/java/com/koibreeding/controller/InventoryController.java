@@ -13,31 +13,34 @@ import java.util.List;
 @CrossOrigin(originPatterns = { "http://localhost:*", "http://127.0.0.1:*", "http://127.0.0.2:*" })
 public class InventoryController {
     private final InventoryService inventoryService;
-    @GetMapping("/inventory/{userId}")
+    @GetMapping("/inventory")
     public ResponseEntity<List<ItemInventory>> getInventory(
-            @PathVariable Integer userId
+//            @PathVariable Integer userId
     ) {
+        Integer userId = 1;
         List<ItemInventory> inventory = inventoryService.getInventory(userId);
         return ResponseEntity.ok(inventory);
     }
 
-    @PostMapping("/inventory/{userId}/items/{itemId}/addition")
+    @PostMapping("/inventory/items/{itemId}/addition")
     public ResponseEntity<ItemInventory> addItemToInventory(
-            @PathVariable Integer userId,
+//            @PathVariable Integer userId,
             @PathVariable Integer itemId,
             @RequestBody ItemInventory request
     ){
+        Integer userId = 1;
         return ResponseEntity.status(HttpStatus.OK)
                 .body(this.inventoryService
                         .addItemToInventory(userId, itemId, request.getQuantity()));
     }
 
-    @PostMapping("/inventory/{userId}/items/{itemId}/usages")
+    @PostMapping("/inventory/items/{itemId}/usages")
     public ResponseEntity<ItemInventory> useItemFromInventory(
-            @PathVariable Integer userId,
+//            @PathVariable Integer userId,
             @PathVariable Integer itemId,
             @RequestBody ItemInventory request
     ){
+        Integer userId = 1;
         return ResponseEntity.status(HttpStatus.OK)
                 .body(this.inventoryService
                         .useItemFromInventory(userId, itemId, request.getQuantity()));

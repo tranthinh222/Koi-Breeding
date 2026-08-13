@@ -10,6 +10,7 @@ export interface ItemInventory {
   price: number;
   description: string;
   quantity: number;
+  image?: string;
 }
 
 export const mockInventory: ItemInventory[] = [
@@ -91,7 +92,8 @@ export const mockInventory: ItemInventory[] = [
 
 export async function getInventory(userId: number): Promise<ItemInventory[]> {
   try {
-    const response = await apiClient.get(`/inventory/${userId}`);
+    const response = await apiClient.get(`/inventory`);
+    console.log("Inventory API:", response.data);
     return response.data.data as ItemInventory[];
   } catch (error) {
     if (axios.isCancel(error)) throw error;
@@ -111,7 +113,7 @@ export async function addItemToInventory(
 ): Promise<ItemInventory> {
   try {
     const response = await apiClient.post(
-      `/inventory/${userId}/items/${itemId}/addition`,
+      `/inventory/items/${itemId}/addition`,
       {
         quantity: quantity,
       },
@@ -145,12 +147,9 @@ export async function useItemFromInventory(
   quantity: number,
 ): Promise<ItemInventory> {
   try {
-    const response = await apiClient.post(
-      `/inventory/${userId}/items/${itemId}/usages`,
-      {
-        quantity: quantity,
-      },
-    );
+    const response = await apiClient.post(`/inventory/items/${itemId}/usages`, {
+      quantity: quantity,
+    });
     return response.data.data as ItemInventory;
   } catch (error) {
     if (axios.isCancel(error)) throw error;

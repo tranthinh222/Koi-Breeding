@@ -1,6 +1,7 @@
 package com.koibreeding.service;
 
 import com.koibreeding.domain.Wallet;
+import com.koibreeding.dto.response.WalletResponse;
 import com.koibreeding.repository.UserRepository;
 import com.koibreeding.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,18 @@ public class WalletService {
 
     public Wallet handleCreateWallet(Wallet wallet){
         return walletRepository.save(wallet);
+    }
+
+    public WalletResponse getBalanceWallet(Integer useId){
+        Wallet balanceWallet = walletRepository.findByUserId(useId)
+                .orElse(null);
+        if(balanceWallet == null){
+            throw new RuntimeException("User not wallet");
+        }
+
+        return new WalletResponse(
+                balanceWallet.getBalance()
+        );
     }
     public Wallet deduct(Integer userId, BigDecimal amount){
         Wallet wallet = walletRepository.findByUserId(userId)

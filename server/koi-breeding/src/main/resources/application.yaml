@@ -11,6 +11,5 @@ spring:
             naming:
                 physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         properties:
-            hibernate:
-                default_schema: koi_breeding
+            "[hibernate.default_schema]": koi_breeding
         show-sql: true

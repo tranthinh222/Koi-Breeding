@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import type { ShopItem } from "../../api/shop";
 import { getShopItem } from "../../api/shop";
 import { usePurchase } from "../../hooks/usePurchase";
@@ -14,7 +15,7 @@ interface Props {
 export default function KoinShop({ selectedItem, onSelect }: Props) {
   const [items, setItems] = useState<ShopItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { buyItem, buying, buyError, buySuccess } = usePurchase();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let cancelled = false;
@@ -57,10 +58,7 @@ export default function KoinShop({ selectedItem, onSelect }: Props) {
       {currentItem && (
         <DetailPanel
           item={selectedItem}
-          onBuy={(quantity) => buyItem(selectedItem, quantity)}
-          buying={buying}
-          buyError={buyError}
-          buySuccess={buySuccess}
+          onBuy={() => navigate(`/payment/${selectedItem.id}`)}
         />
       )}
     </main>

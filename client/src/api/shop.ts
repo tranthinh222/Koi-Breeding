@@ -8,7 +8,7 @@ export interface ShopItem {
   image?: string
   category: ShopCategory
   price: number
-  currency: 'KOINS' | 'USD'
+  currency: 'KOINS' | 'VND'
   rarity?: 'COMMON' | 'STANDARD' | 'PREMIUM' | 'LEGENDARY'
   description: string
   detailDescription?: string
@@ -20,7 +20,7 @@ const fromBackendItem = (item: BackendItem): ShopItem => ({
   name: item.name,
   category: item.itemType,
   price: item.price,
-  currency: item.itemType === 'CURRENCY' ? 'USD' : 'KOINS',
+  currency: item.itemType === 'CURRENCY' ? 'VND' : 'KOINS',
   coinAmount: item.itemType === 'CURRENCY' ? item.effectValue : undefined,
   description: item.description,
   image: item.itemUrl,
@@ -90,8 +90,8 @@ const products: ShopItem[] = [
     id: 8,
     name: '250 Koins',
     category: 'CURRENCY',
-    price: 0.99,
-    currency: 'USD',
+    price: 25000,
+    currency: 'VND',
     coinAmount: 250,
     description: 'A starter Koin package for new players.',
   },
@@ -99,8 +99,8 @@ const products: ShopItem[] = [
     id: 9,
     name: '750 Koins',
     category: 'CURRENCY',
-    price: 2.99,
-    currency: 'USD',
+    price: 75000,
+    currency: 'VND',
     coinAmount: 750,
     description: 'A small Koin package for your pond.',
   },
@@ -108,8 +108,8 @@ const products: ShopItem[] = [
     id: 10,
     name: '3,000 Koins',
     category: 'CURRENCY',
-    price: 4.99,
-    currency: 'USD',
+    price: 300000,
+    currency: 'VND',
     coinAmount: 3000,
     description: 'A value pack of Koins for your pond.',
   },
@@ -117,8 +117,8 @@ const products: ShopItem[] = [
     id: 11,
     name: '9,000 Koins',
     category: 'CURRENCY',
-    price: 9.99,
-    currency: 'USD',
+    price: 850000,
+    currency: 'VND',
     coinAmount: 9000,
     description: 'A large Koin package for dedicated players.',
   },
@@ -126,8 +126,8 @@ const products: ShopItem[] = [
     id: 12,
     name: '25,000 Koins',
     category: 'CURRENCY',
-    price: 19.99,
-    currency: 'USD',
+    price: 2200000,
+    currency: 'VND',
     coinAmount: 25000,
     description: 'The best-value package of Koins.',
   },

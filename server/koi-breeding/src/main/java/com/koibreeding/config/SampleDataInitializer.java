@@ -95,19 +95,19 @@ public class SampleDataInitializer {
                             "A graceful Koi with white, red, and black patterns.",
                             "https://res.cloudinary.com/djmcluh5n/image/upload/v1786629315/uploads/items/gi7oeh6f4h5fphewfano.svg"),
 
-                    item("Koins Pack - 250", "0.99", ItemType.CURRENCY, null, "250.00",
+                    item("Koins Pack - 250", "25000", ItemType.CURRENCY, null, "250",
                             "Receive 250 Koins after successful payment.",
                             "https://res.cloudinary.com/djmcluh5n/image/upload/v1786618553/uploads/items/d27v3vwzkdp1bj2cpllt.svg"),
-                    item("Koins Pack - 750", "2.99", ItemType.CURRENCY, null, "750.00",
+                    item("Koins Pack - 750", "75000", ItemType.CURRENCY, null, "750",
                             "Receive 750 Koins after successful payment.",
                             "https://res.cloudinary.com/djmcluh5n/image/upload/v1786621657/uploads/items/i2ixkywqfkon8d9dwqvg.svg"),
-                    item("Koins Pack - 3000", "4.99", ItemType.CURRENCY, null, "3000.00",
+                    item("Koins Pack - 3000", "300000", ItemType.CURRENCY, null, "3000",
                             "Receive 3,000 Koins after successful payment.",
                             "https://res.cloudinary.com/djmcluh5n/image/upload/v1786629378/uploads/items/f5y9pbvqldhcixknvysf.svg"),
-                    item("Koins Pack - 9000", "9.99", ItemType.CURRENCY, null, "9000.00",
+                    item("Koins Pack - 9000", "850000", ItemType.CURRENCY, null, "9000",
                             "Receive 9,000 Koins after successful payment.",
                             "https://res.cloudinary.com/djmcluh5n/image/upload/v1786629408/uploads/items/u5u9yoemfldk9ppndwbv.svg"),
-                    item("Koins Pack - 25000", "19.99", ItemType.CURRENCY, null, "25000.00",
+                    item("Koins Pack - 25000", "2200000", ItemType.CURRENCY, null, "25000",
                             "Receive 25,000 Koins after successful payment.",
                         "https://res.cloudinary.com/djmcluh5n/image/upload/v1786629525/uploads/items/xhaaz1lvc5jqmolrqo4t.svg"));
             itemRepository.saveAll(seededItems.stream()
@@ -149,7 +149,7 @@ public class SampleDataInitializer {
 
             Wallet wallet = walletRepository.findByUserId(demoUser.getId()).orElseGet(Wallet::new);
             wallet.setUser(demoUser);
-            wallet.setBalance(new BigDecimal("1000.00"));
+            wallet.setBalance(new BigDecimal("1000"));
             walletRepository.save(wallet);
 
             User sampleUser = userRepository.findAll().stream()
@@ -170,7 +170,7 @@ public class SampleDataInitializer {
 
             Wallet sampleWallet = walletRepository.findByUserId(sampleUser.getId()).orElseGet(Wallet::new);
             sampleWallet.setUser(sampleUser);
-            sampleWallet.setBalance(new BigDecimal("5000.00"));
+            sampleWallet.setBalance(new BigDecimal("5000"));
             walletRepository.save(sampleWallet);
 
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Kohaku"), 1);
@@ -228,11 +228,11 @@ public class SampleDataInitializer {
             return;
         }
 
-        seedTransaction(transactionRepository, wallet, itemsByName.get("Koi - Kohaku"), "100.00",
+        seedTransaction(transactionRepository, wallet, itemsByName.get("Koi - Kohaku"), "100",
                 TransactionType.BUY_FISH, "Bought 1 Koi - Kohaku");
-        seedTransaction(transactionRepository, wallet, itemsByName.get("Koi Food - Aqua Master"), "30.00",
+        seedTransaction(transactionRepository, wallet, itemsByName.get("Koi Food - Aqua Master"), "30",
                 TransactionType.BUY_FOOD, "Bought 2 Koi Food - Aqua Master");
-        seedTransaction(transactionRepository, wallet, itemsByName.get("Koins Pack - 750"), "2.99",
+        seedTransaction(transactionRepository, wallet, itemsByName.get("Koins Pack - 750"), "750",
                 TransactionType.DEPOSIT, "Added 750 Koins from Koins Pack - 750");
     }
 

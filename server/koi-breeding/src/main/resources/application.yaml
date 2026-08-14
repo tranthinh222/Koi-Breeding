@@ -22,3 +22,11 @@ cloudinary:
   cloud-name: djmcluh5n
   api-key: 867291126632944
   api-secret: FyXaVv6j5PUJqL-sNtlydQVZFj0
+vietqr:
+  bank-id: 970418
+  account-no: 8824121090
+  account-name: TRAN QUOC THINH
+  template: compact2
+
+sepay:
+  api-key: ${SEPAY_API_KEY:}

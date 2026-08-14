@@ -23,6 +23,8 @@ export default function DetailPanel({
   }, [item.id]);
 
   const totalPrice = item.price * quantity;
+  const isVnd = item.currency === 'VND'
+  const formatPrice = (value: number) => value.toLocaleString('vi-VN')
   return (
     <aside className="detail-panel">
       <div className="detail-header">Selected Item</div>
@@ -48,8 +50,8 @@ export default function DetailPanel({
       </div>
 
       <div className="detail-price">
-        {item.currency === "USD" ? "💵" : "💰"} {item.price}{" "}
-        {item.currency === "USD" ? "USD" : "Koins"}
+        {isVnd ? '₫' : '💰'} {formatPrice(item.price)}{' '}
+        {isVnd ? 'VNĐ' : 'Koins'}
       </div>
 
       <div className="quantity-section">
@@ -80,8 +82,8 @@ export default function DetailPanel({
       <div className="total-price">
         Total:{" "}
         <strong>
-          {item.currency === "USD" ? "💵" : "💰"} {totalPrice}{" "}
-          {item.currency === "USD" ? "USD" : "Koins"}
+          {isVnd ? '₫' : '💰'} {formatPrice(totalPrice)}{' '}
+          {isVnd ? 'VNĐ' : 'Koins'}
         </strong>
       </div>
 
@@ -93,7 +95,7 @@ export default function DetailPanel({
         onClick={() => onBuy && onBuy(quantity)}
         disabled={buying}
       >
-        {buying ? "Buying..." : "Buy Now"}
+        {buying ? 'Processing...' : isVnd ? 'Pay with VietQR' : 'Buy Now'}
       </button>
     </aside>
   );

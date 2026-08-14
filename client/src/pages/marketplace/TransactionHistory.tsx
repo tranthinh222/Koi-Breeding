@@ -80,7 +80,7 @@ export default function TransactionHistory() {
                 <p>{new Date(transaction.createdAt).toLocaleString()}</p>
               </div>
               <div className={`history-price ${isDeposit ? 'income' : ''}`}>
-                {isDeposit ? '+' : '-'}{transaction.amount.toLocaleString()} {isDeposit ? 'USD' : 'Koins'}
+                {isDeposit ? '+' : '-'}{transaction.amount.toLocaleString('vi-VN')} Koins
               </div>
             </article>
           )

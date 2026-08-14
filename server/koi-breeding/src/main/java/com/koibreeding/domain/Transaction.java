@@ -40,7 +40,7 @@ public class Transaction {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(nullable = false, precision = 15, scale = 0)
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)

@@ -24,8 +24,8 @@ export default function ShopCard({ item, selected, onSelect }: ShopCardProps) {
 
       <h3>{item.name}</h3>
       <div className="price">
-        {item.currency === 'USD' ? '💵' : '💰'} {item.price}{' '}
-        {item.currency === 'USD' ? 'USD' : 'Koins'}
+        {item.currency === 'VND' ? '₫' : '💰'} {item.price.toLocaleString('vi-VN')}{' '}
+        {item.currency === 'VND' ? 'VNĐ' : 'Koins'}
       </div>
       <button
         onClick={(event) => {

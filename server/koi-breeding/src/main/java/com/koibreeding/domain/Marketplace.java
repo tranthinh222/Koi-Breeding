@@ -39,7 +39,7 @@ public class Marketplace {
     private User seller;
 
     @Column(nullable = false)
-    private Integer price;
+    private Long price;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

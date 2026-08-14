@@ -8,13 +8,16 @@ export interface IModelPagination<T> {
 	result: T[];
 }
 
+export type KoiShape = "STANDARD" | "BUTTERFLY";
+export type ScaleType = "WAGOI" | "DOITSU" | "GINRIN";
+
 export interface IKoiVarient {
 	id?: number;
 	name: string;
 	origin: string;
 	variety?: IVariety;
-	scaleType: string;
-	shape: string;
+	scaleType: ScaleType;
+	shape: KoiShape;
 	baseMaxLength: number;
 	baseGrowthRate: number;
 	midAge: number;
@@ -24,7 +27,7 @@ export interface IKoiVarient {
 }
 
 export interface IVariety {
-	id: number;
+	id?: number;
 	name: string;
 	description: string;
 }

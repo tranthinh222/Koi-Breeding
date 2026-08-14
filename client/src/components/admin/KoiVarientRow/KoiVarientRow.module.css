@@ -1,0 +1,184 @@
+@import url("https://fonts.googleapis.com/css2?family=Grandstander:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+.overlay {
+	position: fixed;
+	inset: 0;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	background: rgba(0, 0, 0, 0.45);
+
+	z-index: 1000;
+}
+
+.card {
+	width: 90vw;
+	height: 350px;
+	background-color: rgba(253, 229, 173, 0.95);
+	border: 4px solid #c9a26b;
+	border-radius: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 10px 10px 10px 10px;
+	box-sizing: border-box;
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+
+	transition: all 0.2s ease;
+}
+
+.card:hover {
+	transform: translateY(-2px);
+}
+
+.content {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: start;
+}
+
+.titleBar {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.name {
+	font-family: "Grandstander";
+	font-weight: bold;
+	font-size: 30px;
+	background-color: #faf8f8;
+	border-radius: 10px;
+	padding: 10px 10px 10px 10px;
+}
+
+.editButton {
+	color: white;
+	background-color: #2778d8;
+	border: none;
+	border-radius: 5px;
+	padding: 6px 20px;
+	transition: all 0.2s ease;
+}
+
+.editButton:hover {
+	background-color: #2d8cff;
+	transform: translateY(-2px);
+}
+
+.editButton:active {
+	transform: translateY(1px);
+}
+
+.attributes {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #faf8f8;
+	border-radius: 10px;
+}
+
+.fieldWrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 10px;
+}
+
+.fieldWrapper > svg {
+	margin-right: 10px;
+}
+
+.fieldWrapper > span {
+	font-family: "Grandstander";
+	font-size: 20px;
+}
+
+.fieldLabel {
+	font-family: "Grandstander";
+	font-weight: bold;
+	font-size: 30px;
+}
+
+.image {
+	width: 50%;
+	height: 100%;
+	background: radial-gradient(circle, #49a5d6, #377394);
+	border: 2px solid white;
+	border-radius: 5px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-right: 20px;
+}
+
+.image > img {
+	width: 80%;
+	box-sizing: border-box;
+	transition: all 0.2s ease;
+}
+
+.image > img:hover {
+	transform: scale(1.1);
+}
+
+.varietyBadge {
+	background-color: #3485b1;
+	color: white;
+	border-radius: 20px;
+	padding: 5px 10px 5px 10px;
+	margin-left: 10px;
+}
+
+.scaleBadge {
+	background-color: #c85df3;
+	color: white;
+	border-radius: 20px;
+	padding: 5px 10px 5px 10px;
+	margin-left: 10px;
+}
+
+.shapeBadge {
+	background-color: #eb8e36;
+	color: white;
+	border-radius: 20px;
+	padding: 5px 10px 5px 10px;
+	margin-left: 10px;
+}
+
+.leftSection {
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+	justify-content: start;
+	align-items: start;
+	padding: 0px 0px 10px 20px;
+	margin-right: 10px;
+	box-sizing: border-box;
+}
+
+.rightSection {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: start;
+	border-left: 1px dashed #c9a26b;
+	padding: 0px 10px 10px 20px;
+	box-sizing: border-box;
+}
+
+.couple {
+	width: 100%;
+	display: flex;
+	justify-content: start;
+	align-items: center;
+}

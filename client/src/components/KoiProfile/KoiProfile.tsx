@@ -7,6 +7,11 @@ interface KoiProfileProps {
 }
 
 function KoiProfile({ koi }: KoiProfileProps) {
+	const toCapitalString = (text: string) => {
+		const firstCharacter = text.at(0)?.toUpperCase();
+		return firstCharacter + text.toLowerCase().slice(1);
+	};
+
 	return (
 		<div className={styles.card}>
 			<div className={styles.section1}>
@@ -41,11 +46,11 @@ function KoiProfile({ koi }: KoiProfileProps) {
 				</span>
 				<span>
 					Scale Type: <br />
-					{koi.dictionary?.scaleType || ""}
+					{toCapitalString(koi.dictionary?.scaleType || "")}
 				</span>
 				<span>
 					Shape: <br />
-					{koi.dictionary?.shape || ""}
+					{toCapitalString(koi.dictionary?.shape || "")}
 				</span>
 				<span>
 					Age: <br />

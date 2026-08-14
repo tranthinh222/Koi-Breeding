@@ -23,6 +23,9 @@ public class InventoryService {
 
     public List<ResItemInventory> getInventory(Integer userId) {
         val inventory = inventoryRepository.findByUserId(userId);
+        if(inventory == null){
+            throw new RuntimeException("not found inventory");
+        }
         return inventory.stream()
                 .map(item -> new ResItemInventory(
                         item.getItem().getId(),
@@ -44,7 +47,14 @@ public class InventoryService {
     public ResItemInventory addItemToInventory(Integer userId, Integer itemId, Integer quantity) {
         Inventory inventory = inventoryRepository.findByUserIdAndItemId(userId, itemId).orElse(null);
         User user = userService.handleFetchUserById(userId);
+        if(user == null){
+            throw new RuntimeException("not found user");
+        }
+
         Item item = itemService.findItemById(itemId);
+        if(item == null){
+            throw new RuntimeException("not found item");
+        }
         if (inventory == null) {
             inventory = new Inventory();
             inventory.setUser(user);

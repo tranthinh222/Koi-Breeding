@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
@@ -17,8 +19,9 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public java.util.List<ResTransactionDto> getTransactions(Integer userId) {
-        return transactionRepository.findByWalletUserIdOrderByCreatedAtDesc(userId).stream()
+    public List<ResTransactionDto> getTransactions(Integer userId) {
+        return transactionRepository.findByWalletUserIdOrderByCreatedAtDesc(userId)
+                .stream()
                 .map(this::toDto)
                 .toList();
     }

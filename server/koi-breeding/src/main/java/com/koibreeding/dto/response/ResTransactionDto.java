@@ -8,10 +8,11 @@ import com.koibreeding.enums.TransactionType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
-public class ResTransactionDto {
+public class ResTransactionDto{
     private Integer id;
     private Integer itemId;
     private String itemName;

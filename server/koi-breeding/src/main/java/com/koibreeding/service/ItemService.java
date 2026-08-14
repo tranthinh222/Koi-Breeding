@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class ItemService {
     private final ItemRepository itemRepository;
 
-    public Item findItemById(int id) {
+    public Item findItemById(Integer id) {
         return this.itemRepository.findById(id).orElse(null);
 
     }

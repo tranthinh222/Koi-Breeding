@@ -23,8 +23,8 @@ export default function DetailPanel({
   }, [item.id]);
 
   const totalPrice = item.price * quantity;
-  const isVnd = item.currency === 'VND'
-  const formatPrice = (value: number) => value.toLocaleString('vi-VN')
+  const isVnd = item.currency === "VND";
+  const formatPrice = (value: number) => value.toLocaleString("vi-VN");
   return (
     <aside className="detail-panel">
       <div className="detail-header">Selected Item</div>
@@ -50,14 +50,32 @@ export default function DetailPanel({
       </div>
 
       <div className="detail-price">
-        {isVnd ? '₫' : '💰'} {formatPrice(item.price)}{' '}
-        {isVnd ? 'VNĐ' : 'Koins'}
+        {isVnd ? "₫" : "💰"} {formatPrice(item.price)} {isVnd ? "VNĐ" : "Koins"}
       </div>
 
       <div className="quantity-section">
         <div className="quantity-header">
           <span>Quantity</span>
-          <strong>x{quantity}</strong>
+
+          <div className="stepper">
+            <button
+              type="button"
+              onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+              disabled={buying || quantity <= 1}
+            >
+              −
+            </button>
+
+            <span className="stepper-value">{quantity}</span>
+
+            <button
+              type="button"
+              onClick={() => setQuantity((prev) => Math.min(10, prev + 1))}
+              disabled={buying || quantity >= 10}
+            >
+              +
+            </button>
+          </div>
         </div>
 
         <input
@@ -66,24 +84,18 @@ export default function DetailPanel({
           max={10}
           step={1}
           value={quantity}
-          onChange={(event) => {
-            setQuantity(Number(event.target.value));
-          }}
+          onChange={(event) => setQuantity(Number(event.target.value))}
           disabled={buying}
+          className="quantity-slider"
         />
-
-        <div className="quantity-range">
-          <span>1</span>
-          <span>10</span>
-        </div>
       </div>
 
       {/* Total */}
       <div className="total-price">
         Total:{" "}
         <strong>
-          {isVnd ? '₫' : '💰'} {formatPrice(totalPrice)}{' '}
-          {isVnd ? 'VNĐ' : 'Koins'}
+          {isVnd ? "₫" : "💰"} {formatPrice(totalPrice)}{" "}
+          {isVnd ? "VNĐ" : "Koins"}
         </strong>
       </div>
 
@@ -95,7 +107,7 @@ export default function DetailPanel({
         onClick={() => onBuy && onBuy(quantity)}
         disabled={buying}
       >
-        {buying ? 'Processing...' : isVnd ? 'Pay with VietQR' : 'Buy Now'}
+        {buying ? "Processing..." : isVnd ? "Pay with VietQR" : "Buy Now"}
       </button>
     </aside>
   );

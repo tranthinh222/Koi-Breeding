@@ -83,3 +83,5 @@ target/
 # Gradle nếu sau này dùng
 .gradle/
 build/
+
+**/application.yaml

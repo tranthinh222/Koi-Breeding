@@ -28,7 +28,7 @@ body {
 
 /* Sky */
 .background::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -80,7 +80,7 @@ body {
 }
 
 .cloud::before {
-  content: '';
+  content: "";
   position: absolute;
   width: 80px;
   height: 80px;
@@ -91,7 +91,7 @@ body {
 }
 
 .cloud::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 70px;
   height: 70px;
@@ -360,7 +360,7 @@ body {
 }
 
 .shop-main .fish-card::before {
-  content: '';
+  content: "";
 
   position: absolute;
 
@@ -1726,6 +1726,72 @@ body {
 
 .history-price.income {
   color: #4caf50;
+}
+
+/* Quantity */
+.quantity-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quantity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Stepper gộp thành 1 khối liền, bo tròn, đồng bộ với buy-btn */
+.stepper {
+  display: flex;
+  align-items: center;
+  background: #fff4de;
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.stepper button {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: #f5b942;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.stepper button:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepper-value {
+  min-width: 28px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Slider đồng bộ tông màu vàng cam, bỏ label 1/10 rời */
+.quantity-slider {
+  width: 100%;
+  accent-color: #f5b942;
+  cursor: pointer;
+}
+
+.quantity-slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 800px) {

@@ -6,13 +6,11 @@ import com.koibreeding.domain.Item;
 import com.koibreeding.enums.EffectType;
 import com.koibreeding.enums.ItemType;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResItemInventory {

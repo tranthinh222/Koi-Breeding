@@ -143,7 +143,7 @@ class ShopControllerTest {
     }
 
     @Test
-    void purchaseShopItem_invalidQuantity_shouldPropagateException() {
+    void purchaseShopItem_invalidQuantity() {
         // GIVEN
         purchaseRequest.setQuantity(0);
         when(shopService.purchaseShopItem(1, 1, 0))

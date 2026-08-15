@@ -1,9 +1,14 @@
 package com.koibreeding.dto.response;
 
-public record ResCreatePaymentDto(
-        Integer paymentId,
-        Long orderCode,
-        Long amount,
-        String qrUrl,
-        String status) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class ResCreatePaymentDto{
+        Integer paymentId;
+        Long orderCode;
+        Long amount;
+        String qrUrl;
+        String status;
 }

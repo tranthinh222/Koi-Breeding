@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.domain.KoiDictionary;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.service.KoiDictionaryService;
+import com.koibreeding.util.annotation.ApiMessage;
 
 import jakarta.validation.Valid;
 
@@ -27,6 +28,7 @@ public class KoiDictionaryController {
         this.koiDictionaryService = koiDictionaryService;
     }
 
+    @ApiMessage("Create a new koi varient in dictionary")
     @PostMapping("/dictionaries")
     public ResponseEntity<KoiDictionary> createNewKoiDictionary(@Valid @RequestBody KoiDictionary koiDictionary) {
         KoiDictionary newKoiDictionary = this.koiDictionaryService.handleCreateKoiDictionary(koiDictionary);
@@ -34,6 +36,7 @@ public class KoiDictionaryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newKoiDictionary);
     }
 
+    @ApiMessage("Update a koi varient in dictionary")
     @PutMapping("/dictionaries")
     public ResponseEntity<KoiDictionary> updateAKoiDictionary(@Valid @RequestBody KoiDictionary koiDictionary)
             throws Exception {
@@ -46,6 +49,7 @@ public class KoiDictionaryController {
         return ResponseEntity.ok(updatedKoiDictionary);
     }
 
+    @ApiMessage("Get a koi varient in dictionary")
     @GetMapping("/dictionaries/{id}")
     public ResponseEntity<KoiDictionary> getKoiDictionaryById(@PathVariable Integer id) throws Exception {
         KoiDictionary fetchedKoiDictionary = koiDictionaryService.handleFetchKoiDictionaryById(id);
@@ -56,6 +60,7 @@ public class KoiDictionaryController {
         return ResponseEntity.ok(fetchedKoiDictionary);
     }
 
+    @ApiMessage("Get all koi varients in dictionary with pagination")
     @GetMapping("/dictionaries")
     public ResponseEntity<ResultPaginationDTO> getAllKoiDictionaries(Pageable pageable) {
         ResultPaginationDTO koiDictionaryList = koiDictionaryService.handleFetchAllKoiDictionaries(pageable);
@@ -63,6 +68,7 @@ public class KoiDictionaryController {
         return ResponseEntity.ok(koiDictionaryList);
     }
 
+    @ApiMessage("Delete a koi varient in dictionary")
     @DeleteMapping("/dictionaries/{id}")
     public ResponseEntity<Void> deleteKoiDictionary(@PathVariable Integer id) throws Exception {
         if (!koiDictionaryService.isKoiDictionaryExistById(id)) {

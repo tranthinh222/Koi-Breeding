@@ -1,3 +1,9 @@
+export interface IRestResponse<T> {
+	statusCode: number;
+	message: string;
+	data?: T;
+}
+
 export interface IModelPagination<T> {
 	meta: {
 		page: number;

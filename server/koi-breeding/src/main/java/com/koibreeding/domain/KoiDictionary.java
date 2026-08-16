@@ -39,7 +39,7 @@ public class KoiDictionary {
 
     @NotBlank(message = "Name cannot be blank")
     @Size(max = 100, message = "Maximum name's length is 100 characters")
-    @Column(nullable = false, length = 100)
+    @Column(unique = true, nullable = false, length = 100)
     private String name;
 
     @NotNull(message = "Shape cannot be null")

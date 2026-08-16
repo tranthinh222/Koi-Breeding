@@ -82,7 +82,7 @@ public class UserService {
         return this.userRepository.save(currentUser);
     }
 
-    @Transactional
+
     public String handleUploadAvatar(Integer userId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Avatar file is required.");

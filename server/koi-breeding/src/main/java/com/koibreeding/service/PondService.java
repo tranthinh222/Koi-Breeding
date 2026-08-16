@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.koibreeding.domain.Pond;
 import com.koibreeding.domain.User;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.repository.PondRepository;
 
 @Service

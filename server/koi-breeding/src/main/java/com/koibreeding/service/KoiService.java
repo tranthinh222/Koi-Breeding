@@ -10,7 +10,7 @@ import com.koibreeding.domain.Koi;
 import com.koibreeding.domain.KoiDictionary;
 import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Pond;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.repository.KoiRepository;
 
 @Service

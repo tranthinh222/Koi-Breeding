@@ -22,7 +22,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.koibreeding.domain.KoiDictionary;
 import com.koibreeding.domain.Variety;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.ScaleType;
 import com.koibreeding.enums.Shape;
 import com.koibreeding.repository.KoiDictionaryRepository;

@@ -1,4 +1,4 @@
-package com.koibreeding.domain.response;
+package com.koibreeding.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;

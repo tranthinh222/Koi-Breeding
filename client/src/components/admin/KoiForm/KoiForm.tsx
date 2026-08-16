@@ -48,7 +48,7 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 	const [form, setForm] = useState<KoiDataForm>({
 		name: koi?.name || "",
 		origin: koi?.origin || "",
-		variety: koi?.variety || {},
+		variety: koi?.variety || varietyList[0],
 		scaleType:
 			koi?.scaleType || (scaleTypeList[0].toUpperCase() as ScaleType),
 		shape: koi?.shape || (shapeList[0].toUpperCase() as KoiShape),
@@ -63,6 +63,7 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 	const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
 	const handleSubmit = async () => {
+		console.log(`Variety: ${JSON.stringify(form.variety)}`);
 		setIsProcessing(true);
 		await sleep(1000);
 		const fieldErrors: KoiFormErrors = {};
@@ -152,17 +153,13 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 			return;
 		}
 
-		console.log("Submitted");
-
-		console.log(`koi shape: ${form.shape}`);
-
 		await onSubmit({
 			name: form.name,
 			origin: form.origin,
 			variety: {
-				id: 1,
-				name: form.variety.name ?? "",
-				description: "lol",
+				id: form.variety.id,
+				name: form.variety.name as string,
+				description: form.variety.description as string,
 			},
 			scaleType: form.scaleType,
 			shape: form.shape,
@@ -274,13 +271,11 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 						onChange={(e) => {
 							setForm((prev) => ({
 								...prev,
-								variety: {
-									...varietyList.find(
-										(u) =>
-											u.id ==
-											Number.parseInt(e.target.value),
-									),
-								},
+								variety: varietyList.find(
+									(u) =>
+										u.id ===
+										Number.parseInt(e.target.value),
+								) as IVariety,
 							}));
 						}}
 					>

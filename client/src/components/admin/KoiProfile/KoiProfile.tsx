@@ -1,5 +1,5 @@
 import { ChevronRight, Venus } from "lucide-react";
-import type { IKoi } from "../../types/backend";
+import type { IKoi } from "../../../types/backend";
 import styles from "./KoiProfile.module.css";
 
 interface KoiProfileProps {

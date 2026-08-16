@@ -1,5 +1,5 @@
 import { Ellipsis, Venus } from "lucide-react";
-import type { IKoi } from "../../types/backend";
+import type { IKoi } from "../../../types/backend";
 import styles from "./KoiCard.module.css";
 
 interface KoiCardProps {

@@ -1,5 +1,5 @@
 import { Ellipsis } from "lucide-react";
-import type { IKoiVarient } from "../../types/backend";
+import type { IKoiVarient } from "../../../types/backend";
 import styles from "./KoiDictionaryCard.module.css";
 
 interface KoiDictionaryCardProps {

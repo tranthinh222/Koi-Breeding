@@ -8,10 +8,9 @@ import {
 import { useEffect, useRef, useState } from "react";
 import {
 	callCreateKoiVarient,
-	callCreateVariety,
-	callFetchAllVarieties,
 	callFetchKoiVarient,
-} from "../../../config/api";
+} from "../../../api/koiDictionary";
+import { callCreateVariety, callFetchAllVarieties } from "../../../api/variety";
 import type {
 	IKoiVarient,
 	IModelPagination,
@@ -40,12 +39,16 @@ function KoiVarientList() {
 	useEffect(() => {
 		const loadData = async () => {
 			try {
-				const response = await featchVarieties(1, 30);
-				setVarietyList(
-					response.result.sort(
-						(a, b) => (a.id as number) - (b.id as number),
-					),
-				);
+				const response = await callFetchAllVarieties(`page=0&size=30`);
+
+				if (response && response.data) {
+					const data: IVariety[] = response.data.data?.result || [];
+					setVarietyList(
+						data.sort(
+							(a, b) => (a.id as number) - (b.id as number),
+						),
+					);
+				}
 			} catch (error) {
 				console.error("Failed to fetch data: ", JSON.stringify(error));
 			}
@@ -53,17 +56,6 @@ function KoiVarientList() {
 
 		loadData();
 	}, []);
-
-	const featchVarieties = async (
-		page: number,
-		pageSize: number,
-	): Promise<IModelPagination<IVariety>> => {
-		const response = await callFetchAllVarieties(
-			`page=${page - 1}&size=${pageSize}`,
-		);
-
-		return response.data;
-	};
 
 	// Fetch the page data
 	useEffect(() => {
@@ -95,7 +87,19 @@ function KoiVarientList() {
 			`page=${page - 1}&size=${pageSize}`,
 		);
 
-		return response.data;
+		if (response && response.data) {
+			return response.data.data as IModelPagination<IKoiVarient>;
+		}
+
+		return {
+			meta: {
+				page: page,
+				pageSize: pageSize,
+				totalPages: 0,
+				totalElements: 0,
+			},
+			result: [],
+		};
 	};
 
 	const handlePageChange = (newPage: number) => {
@@ -109,7 +113,7 @@ function KoiVarientList() {
 	const handleCreateKoiVarient = async (requestKoi: IKoiVarient) => {
 		console.log(`List request: ${JSON.stringify(requestKoi)}`);
 		const response = await callCreateKoiVarient(requestKoi);
-		setData((prev) => [response.data, ...prev]);
+		setData((prev) => [response.data.data as IKoiVarient, ...prev]);
 		toast.success(
 			<>
 				<CircleCheckBig size="30" />
@@ -120,7 +124,7 @@ function KoiVarientList() {
 
 	const handleCreateVariety = async (requestVariety: IVariety) => {
 		const response = await callCreateVariety(requestVariety);
-		setVarietyList([response.data, ...varietyList]);
+		setVarietyList([response.data.data as IVariety, ...varietyList]);
 		toast.success(
 			<>
 				<CircleCheckBig size="30" />

@@ -9,7 +9,7 @@ import {
 	Weight,
 } from "lucide-react";
 import { useState } from "react";
-import { callUpdateKoiVarient } from "../../../config/api";
+import { callUpdateKoiVarient } from "../../../api/koiDictionary";
 import type { IKoiVarient, IVariety } from "../../../types/backend";
 import KoiForm from "../KoiForm/KoiForm";
 import styles from "./KoiVarientRow.module.css";

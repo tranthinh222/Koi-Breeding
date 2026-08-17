@@ -43,8 +43,7 @@ class NotificationControllerTest {
                 "Buy fish",
                 "Buy 10 fish",
                 false,
-                createdAt
-        );
+                createdAt);
 
         notification2 = new ResNotificationDto(
                 2,
@@ -52,8 +51,7 @@ class NotificationControllerTest {
                 "Buy food",
                 "Buy 10 food",
                 true,
-                createdAt
-        );
+                createdAt);
     }
 
     @Test
@@ -63,25 +61,44 @@ class NotificationControllerTest {
                 .thenReturn(List.of(notification1, notification2));
 
         // WHEN
-        ResponseEntity<List<ResNotificationDto>> result =
-                notificationController.getNotifications(1);
+        ResponseEntity<List<ResNotificationDto>> result = notificationController.getNotifications(1);
 
         // THEN
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(result.getBody());
         assertEquals(2, result.getBody().size());
 
-        assertEquals(NotificationType.PURCHASE_SUCCESS, result.getBody().get(0).getType());
-        assertEquals("Buy fish", result.getBody().get(0).getTitle());
-        assertEquals("Buy 10 food", result.getBody().get(0).getMessage());
-        assertEquals(createdAt, result.getBody().get(0).getCreatedAt());
-        assertFalse(result.getBody().get(0).getIsRead());
+        // Notification 1
+        assertEquals(
+                NotificationType.PURCHASE_SUCCESS,
+                result.getBody().get(0).getType());
+        assertEquals(
+                "Buy fish",
+                result.getBody().get(0).getTitle());
+        assertEquals(
+                "Buy 10 fish",
+                result.getBody().get(0).getMessage());
+        assertEquals(
+                createdAt,
+                result.getBody().get(0).getCreatedAt());
+        assertFalse(
+                result.getBody().get(0).getIsRead());
 
-        assertEquals(NotificationType.PURCHASE_SUCCESS, result.getBody().get(0).getType());
-        assertEquals("Buy fish", result.getBody().get(0).getTitle());
-        assertEquals("Buy 10 fish", result.getBody().get(0).getMessage());
-        assertEquals(createdAt, result.getBody().get(0).getCreatedAt());
-        assertTrue(result.getBody().get(1).getIsRead());
+        // Notification 2
+        assertEquals(
+                NotificationType.PURCHASE_SUCCESS,
+                result.getBody().get(1).getType());
+        assertEquals(
+                "Buy food",
+                result.getBody().get(1).getTitle());
+        assertEquals(
+                "Buy 10 food",
+                result.getBody().get(1).getMessage());
+        assertEquals(
+                createdAt,
+                result.getBody().get(1).getCreatedAt());
+        assertTrue(
+                result.getBody().get(1).getIsRead());
 
         verify(notificationService).getNotifications(1);
     }
@@ -93,8 +110,7 @@ class NotificationControllerTest {
                 .thenReturn(List.of());
 
         // WHEN
-        ResponseEntity<List<ResNotificationDto>> result =
-                notificationController.getNotifications(1);
+        ResponseEntity<List<ResNotificationDto>> result = notificationController.getNotifications(1);
 
         // THEN
         assertEquals(HttpStatus.OK, result.getStatusCode());

@@ -32,4 +32,15 @@ public class UserService {
                 .build();
     }
 
+    public User handleCreateUser(User user) {
+        return this.userRepository.save(user);
+    }
+
+    public void handleDeleteUser(Integer id) {
+        this.userRepository.deleteById(id);
+    }
+
+    public boolean isUserExistById(Integer id) {
+        return this.userRepository.existsById(id);
+    }
 }

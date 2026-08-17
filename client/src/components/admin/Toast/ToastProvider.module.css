@@ -1,0 +1,42 @@
+.toastContainer {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+
+	width: 380px;
+	min-height: 70px;
+
+	z-index: 9999;
+
+	pointer-events: none;
+}
+
+.toastItem {
+	position: absolute;
+
+	left: 0;
+	bottom: 0;
+
+	width: 100%;
+
+	pointer-events: auto;
+
+	transform-origin: bottom center;
+
+	transform: translateY(calc(var(--index) * -10px))
+		scale(calc(1 - var(--index) * 0.04));
+
+	transition:
+		transform 0.3s ease,
+		opacity 0.3s ease;
+
+	z-index: calc(100 - var(--index));
+}
+
+.toastContainer:hover {
+	height: auto;
+}
+
+.toastContainer:hover .toastItem {
+	transform: translateY(calc(var(--index) * -90px)) scale(1);
+}

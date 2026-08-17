@@ -1,0 +1,154 @@
+@import url("https://fonts.googleapis.com/css2?family=Grandstander:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+.card {
+	width: 250px;
+	height: 350px;
+	/* background: #5c5858; */
+	background-color: #11966e;
+	border-radius: 5px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	transition: all 0.2s ease;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.card:hover {
+	rotate: 1deg;
+	transform: scale(1.02);
+}
+
+.header {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: start;
+	box-sizing: border-box;
+}
+
+.typeBadge {
+	font-family: "Grandstander";
+	font-size: 15px;
+	background-color: #00aaac;
+	color: white;
+	border-radius: 5px;
+	padding: 5px 20px;
+}
+
+.rating {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #faf8f8;
+	border-radius: 5px;
+	padding: 4px 8px;
+}
+
+.rating > img {
+	width: 20px;
+	height: 20px;
+}
+
+.name {
+	width: 90%;
+	height: 30px;
+	background-color: #faf8f8;
+	color: #5c5858;
+	font-family: "Grandstander";
+	font-weight: bold;
+	font-size: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 5px;
+	margin-top: 15px;
+}
+
+.image {
+	position: relative;
+	width: 90%;
+	height: 35%;
+	background: radial-gradient(circle, #49a5d6, #377394);
+	border: 2px solid white;
+	border-radius: 5px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	margin-top: 8px;
+}
+
+.image > img {
+	width: 90%;
+	height: auto;
+	transition: all 0.2s ease;
+}
+
+.image > img:hover {
+	transform: scale(1.1);
+}
+
+.image > svg {
+	position: absolute;
+	bottom: 3px;
+	right: 1px;
+	color: palevioletred;
+}
+
+.scale {
+	width: 90%;
+	height: 30px;
+	background-color: #faf8f8;
+	color: #5c5858;
+	font-family: "Grandstander";
+	font-weight: bold;
+	font-size: 18px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 5px;
+	margin-top: 10px;
+}
+
+.origin {
+	width: 90%;
+	height: 30px;
+	background-color: #faf8f8;
+	color: #5c5858;
+	font-family: "Grandstander";
+	font-weight: bold;
+	font-size: 18px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 5px;
+	margin-top: 10px;
+}
+
+.detailButton {
+	width: 40px;
+	height: 30px;
+	background-color: #acafad;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	align-self: end;
+	margin-top: 12px;
+	margin-right: 12.5px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.detailButton:hover {
+	background-color: #c5c3c3;
+	transform: translateY(-2px);
+}
+
+.detailButton:active {
+	transform: translateY(1px);
+}

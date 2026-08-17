@@ -25,7 +25,7 @@ interface KoiFormProps {
 	koi: IKoiVarient | null;
 	varietyList: IVariety[];
 	onClose: () => void;
-	onSubmit: (koi: IKoiVarient) => Promise<void>;
+	onSubmit: (koi: IKoiVarient, image: File | null) => Promise<void>;
 }
 
 interface KoiDataForm {
@@ -40,6 +40,7 @@ interface KoiDataForm {
 	alphaWeight: string;
 	basePrice: string;
 	alphaPrice: string;
+	image?: File;
 }
 
 type KoiFormErrors = Partial<Record<keyof KoiDataForm, string>>;
@@ -65,7 +66,9 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 	const [errors, setErrors] = useState<KoiFormErrors>({});
 	const [isProcessing, setIsProcessing] = useState<boolean>(false);
 	const [imageFile, setImageFile] = useState<File | null>(null);
-	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+	const [previewUrl, setPreviewUrl] = useState<string | null>(
+		koi && koi.imageUrl ? koi.imageUrl : null,
+	);
 	const [isDragActive, setIsDragActive] = useState<boolean>(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -91,7 +94,7 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 			return;
 		}
 
-		imageFile?.name;
+		console.log(`Filename: ${file?.name}`);
 
 		setImageFile(file);
 		setPreviewUrl(URL.createObjectURL(file));
@@ -226,23 +229,28 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 			return;
 		}
 
-		await onSubmit({
-			name: form.name,
-			origin: form.origin,
-			variety: {
-				id: form.variety.id,
-				name: form.variety.name as string,
-				description: form.variety.description as string,
+		console.log(`Image File: ${JSON.stringify(imageFile?.name)}`);
+
+		await onSubmit(
+			{
+				name: form.name,
+				origin: form.origin,
+				variety: {
+					id: form.variety.id,
+					name: form.variety.name as string,
+					description: form.variety.description as string,
+				},
+				scaleType: form.scaleType,
+				shape: form.shape,
+				baseMaxLength: baseMaxLength,
+				baseGrowthRate: baseGrowthRate,
+				midAge: midAge,
+				alphaWeight: alphaWeight,
+				basePrice: basePrice,
+				alphaPrice: alphaPrice,
 			},
-			scaleType: form.scaleType,
-			shape: form.shape,
-			baseMaxLength: baseMaxLength,
-			baseGrowthRate: baseGrowthRate,
-			midAge: midAge,
-			alphaWeight: alphaWeight,
-			basePrice: basePrice,
-			alphaPrice: alphaPrice,
-		});
+			imageFile,
+		);
 
 		setIsProcessing(false);
 

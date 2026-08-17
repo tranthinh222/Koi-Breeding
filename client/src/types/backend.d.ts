@@ -30,6 +30,7 @@ export interface IKoiVarient {
 	alphaWeight: number;
 	basePrice: number;
 	alphaPrice: number;
+	imageUrl?: string;
 }
 
 export interface IVariety {

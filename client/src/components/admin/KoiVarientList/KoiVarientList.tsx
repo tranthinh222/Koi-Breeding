@@ -3,12 +3,14 @@ import {
 	ArrowRight,
 	ArrowUpDown,
 	CircleCheckBig,
+	CircleX,
 	Search,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
 	callCreateKoiVarient,
 	callFetchKoiVarient,
+	callUploadKoiVarientImage,
 } from "../../../api/koiDictionary";
 import { callCreateVariety, callFetchAllVarieties } from "../../../api/variety";
 import type {
@@ -110,8 +112,24 @@ function KoiVarientList() {
 		setPage(Math.max(1, newPage));
 	};
 
-	const handleCreateKoiVarient = async (requestKoi: IKoiVarient) => {
-		console.log(`List request: ${JSON.stringify(requestKoi)}`);
+	const handleCreateKoiVarient = async (
+		requestKoi: IKoiVarient,
+		image: File | null,
+	) => {
+		if (image) {
+			const imageResponse = await callUploadKoiVarientImage(image);
+			if (imageResponse && imageResponse.data) {
+				requestKoi.imageUrl = imageResponse.data.data?.url as string;
+			} else {
+				toast.error(
+					<>
+						<CircleX size="30" />
+						<span>Failed to upload koi varient's image!</span>
+					</>,
+				);
+			}
+		}
+
 		const response = await callCreateKoiVarient(requestKoi);
 		setData((prev) => [response.data.data as IKoiVarient, ...prev]);
 		toast.success(

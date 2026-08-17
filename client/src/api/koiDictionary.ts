@@ -33,3 +33,17 @@ export const callFetchKoiVarientById = (id: number) => {
 		`/api/v1/dictionaries/${id}`,
 	);
 };
+
+export const callUploadKoiVarientImage = (file: File) => {
+	const formData = new FormData();
+	formData.append("file", file);
+	return apiClient.post<IRestResponse<{ url: string }>>(
+		`/upload/dictionary`,
+		formData,
+		{
+			headers: {
+				"Content-Type": "multipart/form-data",
+			},
+		},
+	);
+};

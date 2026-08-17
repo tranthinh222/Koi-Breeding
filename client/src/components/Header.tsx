@@ -59,12 +59,16 @@ export default function ShopHeader() {
     return () => window.removeEventListener('wallet:updated', updateBalance)
   }, [])
 
-  const unreadCount = notifications.filter((notification) => !notification.isRead).length
+  const unreadCount = notifications.filter(
+    (notification) => !notification.isRead,
+  ).length
 
   const markAllRead = async () => {
     try {
       await markAllNotificationsRead(CURRENT_USER_ID)
-      setNotifications((current) => current.map((notification) => ({ ...notification, isRead: true })))
+      setNotifications((current) =>
+        current.map((notification) => ({ ...notification, isRead: true })),
+      )
     } catch (error) {
       console.error('Failed to mark notifications as read:', error)
     }
@@ -90,28 +94,45 @@ export default function ShopHeader() {
             onClick={() => setNotificationPanelOpen((isOpen) => !isOpen)}
           >
             🔔
-            {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+            {unreadCount > 0 && (
+              <span className="notification-badge">{unreadCount}</span>
+            )}
           </button>
 
-          {isNotificationPanelOpen && <div className="notification-panel show">
-            <div className="notification-header">
-              <h3>Notifications</h3>
-              <button onClick={markAllRead} disabled={unreadCount === 0}>Mark all as read</button>
-            </div>
+          {isNotificationPanelOpen && (
+            <div className="notification-panel show">
+              <div className="notification-header">
+                <h3>Notifications</h3>
+                <button onClick={markAllRead} disabled={unreadCount === 0}>
+                  Mark all as read
+                </button>
+              </div>
 
-            <div className="notification-list">
-              {notifications.length === 0 ? <p className="notification-empty">No notifications yet.</p> : notifications.map((notification) => (
-                <div className={`notification-item ${notification.isRead ? '' : 'unread'}`} key={notification.id}>
-                  <div className="notification-icon">{notification.type === 'PURCHASE_SUCCESS' ? '🛒' : '🔔'}</div>
-                  <div>
-                    <strong>{notification.title}</strong>
-                    <p>{notification.message}</p>
-                    <small>{new Date(notification.createdAt).toLocaleString()}</small>
-                  </div>
-                </div>
-              ))}
+              <div className="notification-list">
+                {notifications.length === 0 ? (
+                  <p className="notification-empty">No notifications yet.</p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      className={`notification-item ${notification.isRead ? '' : 'unread'}`}
+                      key={notification.id}
+                    >
+                      <div className="notification-icon">
+                        {notification.type === 'PURCHASE_SUCCESS' ? '🛒' : '🔔'}
+                      </div>
+                      <div>
+                        <strong>{notification.title}</strong>
+                        <p>{notification.message}</p>
+                        <small>
+                          {new Date(notification.createdAt).toLocaleString()}
+                        </small>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </div>}
+          )}
         </div>
 
         <div className="wallet">

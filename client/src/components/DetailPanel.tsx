@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import type { ShopItem } from "../api/shop";
+import { useEffect, useState } from 'react'
+import type { ShopItem } from '../api/shop'
 
 interface DetailPanelProps {
-  item: ShopItem;
-  onBuy?: (quantity: number) => void;
-  buying?: boolean;
-  buyError?: string | null;
-  buySuccess?: string | null;
+  item: ShopItem
+  onBuy?: (quantity: number) => void
+  buying?: boolean
+  buyError?: string | null
+  buySuccess?: string | null
 }
 
 export default function DetailPanel({
@@ -16,15 +16,15 @@ export default function DetailPanel({
   buyError,
   buySuccess,
 }: DetailPanelProps) {
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(1)
   // Khi đổi item thì reset số lượng về 1
   useEffect(() => {
-    setQuantity(1);
-  }, [item.id]);
+    setQuantity(1)
+  }, [item.id])
 
-  const totalPrice = item.price * quantity;
-  const isVnd = item.currency === "VND";
-  const formatPrice = (value: number) => value.toLocaleString("vi-VN");
+  const totalPrice = item.price * quantity
+  const isVnd = item.currency === 'VND'
+  const formatPrice = (value: number) => value.toLocaleString('vi-VN')
   return (
     <aside className="detail-panel">
       <div className="detail-header">Selected Item</div>
@@ -50,7 +50,7 @@ export default function DetailPanel({
       </div>
 
       <div className="detail-price">
-        {isVnd ? "₫" : "💰"} {formatPrice(item.price)} {isVnd ? "VNĐ" : "Koins"}
+        {isVnd ? '₫' : '💰'} {formatPrice(item.price)} {isVnd ? 'VNĐ' : 'Koins'}
       </div>
 
       <div className="quantity-section">
@@ -92,10 +92,10 @@ export default function DetailPanel({
 
       {/* Total */}
       <div className="total-price">
-        Total:{" "}
+        Total:{' '}
         <strong>
-          {isVnd ? "₫" : "💰"} {formatPrice(totalPrice)}{" "}
-          {isVnd ? "VNĐ" : "Koins"}
+          {isVnd ? '₫' : '💰'} {formatPrice(totalPrice)}{' '}
+          {isVnd ? 'VNĐ' : 'Koins'}
         </strong>
       </div>
 
@@ -107,8 +107,8 @@ export default function DetailPanel({
         onClick={() => onBuy && onBuy(quantity)}
         disabled={buying}
       >
-        {buying ? "Processing..." : isVnd ? "Pay with VietQR" : "Buy Now"}
+        {buying ? 'Processing...' : isVnd ? 'Pay with VietQR' : 'Buy Now'}
       </button>
     </aside>
-  );
+  )
 }

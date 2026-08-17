@@ -2,8 +2,8 @@ import { useState } from 'react'
 
 import type { ShopCategory, ShopItem } from '../../api/shop'
 
-import ShopTitle from '../../components/ShopTitle'
-import ShopTabs from '../../components/ShopTabs'
+import ShopTitle from '../../components/user/ShopTitle'
+import ShopTabs from '../../components/user/ShopTabs'
 
 import FoodShop from './FoodShop'
 import MedicineShop from './MedicineShop'

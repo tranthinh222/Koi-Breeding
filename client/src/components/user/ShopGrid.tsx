@@ -1,4 +1,4 @@
-import type { ShopItem } from '../api/shop'
+import type { ShopItem } from '../../api/shop'
 import ShopCard from './ShopCard'
 
 interface ShopGridProps {

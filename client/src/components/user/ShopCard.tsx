@@ -1,4 +1,4 @@
-import type { ShopItem } from '../api/shop'
+import type { ShopItem } from '../../api/shop'
 
 interface ShopCardProps {
   item: ShopItem
@@ -24,7 +24,8 @@ export default function ShopCard({ item, selected, onSelect }: ShopCardProps) {
 
       <h3>{item.name}</h3>
       <div className="price">
-        {item.currency === 'VND' ? '₫' : '💰'} {item.price.toLocaleString('vi-VN')}{' '}
+        {item.currency === 'VND' ? '₫' : '💰'}{' '}
+        {item.price.toLocaleString('vi-VN')}{' '}
         {item.currency === 'VND' ? 'VNĐ' : 'Koins'}
       </div>
       <button

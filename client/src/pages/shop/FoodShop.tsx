@@ -1,52 +1,52 @@
-import { useEffect, useState } from "react";
-import type { ShopItem } from "../../api/shop";
-import { getShopItem } from "../../api/shop";
-import { usePurchase } from "../../hooks/usePurchase";
+import { useEffect, useState } from 'react'
+import type { ShopItem } from '../../api/shop'
+import { getShopItem } from '../../api/shop'
+import { usePurchase } from '../../hooks/usePurchase'
 
-import ShopGrid from "../../components/ShopGrid";
-import DetailPanel from "../../components/DetailPanel";
+import ShopGrid from '../../components/user/ShopGrid'
+import DetailPanel from '../../components/DetailPanel'
 
 interface Props {
-  selectedItem: ShopItem | null;
-  onSelect: (item: ShopItem) => void;
+  selectedItem: ShopItem | null
+  onSelect: (item: ShopItem) => void
 }
 
 export default function FoodShop({ selectedItem, onSelect }: Props) {
-  const [items, setItems] = useState<ShopItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { buyItem, buying, buyError, buySuccess } = usePurchase();
+  const [items, setItems] = useState<ShopItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const { buyItem, buying, buyError, buySuccess } = usePurchase()
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
 
     const loadItems = async () => {
       try {
-        const data = await getShopItem("FOOD");
-        if (!cancelled) setItems(data);
+        const data = await getShopItem('FOOD')
+        if (!cancelled) setItems(data)
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoading(false)
       }
-    };
+    }
 
-    loadItems();
+    loadItems()
 
     return () => {
-      cancelled = true;
-    };
-  }, []);
+      cancelled = true
+    }
+  }, [])
 
   if (loading) {
-    return <main className="shop-main">Loading food...</main>;
+    return <main className="shop-main">Loading food...</main>
   }
 
   if (items.length === 0) {
-    return <main className="shop-main">No food available.</main>;
+    return <main className="shop-main">No food available.</main>
   }
 
-  const currentItem = selectedItem;
+  const currentItem = selectedItem
 
   return (
-    <main className={`shop-main ${currentItem ? "has-detail" : "no-detail"}`}>
+    <main className={`shop-main ${currentItem ? 'has-detail' : 'no-detail'}`}>
       <ShopGrid items={items} selectedItem={currentItem} onSelect={onSelect} />
 
       {currentItem && (
@@ -59,5 +59,5 @@ export default function FoodShop({ selectedItem, onSelect }: Props) {
         />
       )}
     </main>
-  );
+  )
 }

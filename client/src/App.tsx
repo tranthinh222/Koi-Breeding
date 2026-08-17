@@ -14,7 +14,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/shop" element={<Shop />} />
             <Route path="/inventory" element={<Inventory />} />
-          <Route path="/transactions" element={<TransactionHistory />} />
+            <Route path="/transactions" element={<TransactionHistory />} />
           </Route>
 
           <Route path="/payment/:itemId" element={<Payment />} />

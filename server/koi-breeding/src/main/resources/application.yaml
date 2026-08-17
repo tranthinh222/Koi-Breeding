@@ -8,7 +8,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/koi_breeding
     username: postgres
-    password: khoa123
+    password: 123456
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,7 +24,7 @@ cloudinary:
   api-secret: FyXaVv6j5PUJqL-sNtlydQVZFj0
 vietqr:
   bank-id: 970418
-  account-no: 8824121090
+  account-no: 8824121093
   account-name: TRAN QUOC THINH
   template: compact2
 

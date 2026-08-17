@@ -1,11 +1,13 @@
 package com.koibreeding.domain;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.koibreeding.enums.Gender;
 import com.koibreeding.enums.Role;
 import com.koibreeding.enums.UserStatus;
@@ -48,14 +50,6 @@ public class User {
     @Column(nullable = false)
     private Gender gender;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private OffsetDateTime updatedAt;
-
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
@@ -67,8 +61,21 @@ public class User {
     private Boolean isBanned = false;
 
     @Column(nullable = false)
-    private Integer exp = 0;
+    private Integer exp = 1;
 
     @Column(columnDefinition = "TEXT")
     private String avatarUrl;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
+
 }

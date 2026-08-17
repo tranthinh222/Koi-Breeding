@@ -1,0 +1,384 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #9edb8a;
+  overflow-x: hidden;
+}
+
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+}
+
+.background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 38%;
+  background: #87ceeb;
+}
+
+.grass {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 62%;
+  background: #a9d18e;
+}
+
+.trees {
+  position: absolute;
+  top: 150px;
+  width: 220px;
+  height: 600px;
+  background: linear-gradient(#5d8c44, #487536);
+  border-radius: 30px;
+  opacity: 0.25;
+}
+
+.trees-left {
+  left: 0;
+}
+
+.trees-right {
+  right: 0;
+}
+
+.hud {
+  width: 90%;
+  margin: 25px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.avatar,
+.profile-avatar {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.avatar img,
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-uploadable,
+.profile-avatar {
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-uploadable::after,
+.profile-avatar::after {
+  content: 'Upload';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.avatar-uploadable:hover::after,
+.profile-avatar:hover::after {
+  opacity: 1;
+}
+
+.player h3 {
+  color: black;
+  font-size: 22px;
+}
+
+.player p {
+  color: black;
+}
+
+.wallet {
+  display: flex;
+  gap: 15px;
+}
+
+.wallet div {
+  padding: 12px 22px;
+  border-radius: 15px;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.18);
+}
+
+.gold {
+  background: #ffd54f;
+}
+
+.page-menu {
+  width: 90%;
+  height: 65px;
+  margin: 50px auto;
+  padding: 0 20px;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  background: #174562;
+  border-radius: 18px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.page-menu button {
+  height: 48px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 14px;
+  background: transparent;
+
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+
+  cursor: pointer;
+  transition: 0.25s;
+}
+.page-menu button:hover {
+  transform: translateY(-3px);
+  color: #ffe6a3;
+}
+
+.title-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.wood-sign {
+  width: 420px;
+  padding: 20px;
+  background: #8b5a2b;
+  color: white;
+  border-radius: 18px;
+  border: 8px solid #6d3f16;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.wood-sign h1 {
+  font-size: 42px;
+  letter-spacing: 2px;
+}
+
+.profile-page {
+  width: 90%;
+  margin: 40px auto;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 30px;
+}
+
+.profile-card {
+  background: #f8f4ea;
+  border: 4px solid #c9a26b;
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.profile-avatar {
+  width: 150px;
+  height: 150px;
+  margin: auto auto 20px;
+  background: linear-gradient(135deg, #f8f4e8, #e8f6ff);
+  border: 5px solid #e6c35c;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  font-size: 70px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar::after {
+  content: 'Upload';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.profile-avatar:hover::after {
+  opacity: 1;
+}
+
+.profile-card h2 {
+  margin-bottom: 10px;
+}
+
+.profile-card button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: #5a913b;
+  color: white;
+  cursor: pointer;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-box {
+  background: #f8f4ea;
+  border: 4px solid #c9a26b;
+  border-radius: 18px;
+  padding: 25px;
+}
+
+.info-box h3 {
+  margin-bottom: 15px;
+  color: #5b3a1f;
+}
+
+.info-box p {
+  margin: 8px 0;
+}
+
+.loading-box,
+.error-box {
+  color: #4d2d1a;
+  font-weight: 700;
+}
+
+.favorite-fish {
+  width: 90%;
+  margin: 50px auto;
+}
+
+.favorite-fish h2 {
+  margin-bottom: 25px;
+  color: white;
+}
+
+.fish-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.fish-card {
+  background: #f8f4ea;
+  border: 4px solid #c9a26b;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  transition: 0.25s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.fish-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 14px;
+  background: #8b5a2b;
+}
+
+.fish-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.25);
+}
+
+.fish-image {
+  width: 120px;
+  height: 120px;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  border-radius: 50%;
+  background: #8ed6f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 60px;
+  transition: 0.3s;
+}
+
+.fish-image:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.fish-card:hover .fish-image {
+  transform: scale(1.08) rotate(-5deg);
+}
+
+.fish-card h3 {
+  color: #5b3a1f;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.fish-card p {
+  color: #555;
+  margin: 6px 0;
+}
+
+@media (max-width: 900px) {
+  .profile-page {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,10 +1,32 @@
-import { useState } from 'react'
-import './App.css'
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import AppLayout from "./components/AppLayout";
+import Inventory from "./pages/inventory/Inventory";
+import TransactionHistory from "./pages/marketplace/TransactionHistory";
+import Payment from "./pages/payment/payment";
+import Shop from "./pages/shop/Shop";
+import "./style/global.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+	return (
+		<>
+			<BrowserRouter>
+				<Routes>
+					<Route element={<AppLayout />}>
+						<Route path="/shop" element={<Shop />} />
+						<Route path="/inventory" element={<Inventory />} />
+						<Route
+							path="/transactions"
+							element={<TransactionHistory />}
+						/>
+					</Route>
 
-  return <></>
+					<Route path="/payment/:itemId" element={<Payment />} />
+
+					<Route path="/" element={<Navigate to="/shop" replace />} />
+				</Routes>
+			</BrowserRouter>
+		</>
+	);
 }
 
-export default App
+export default App;

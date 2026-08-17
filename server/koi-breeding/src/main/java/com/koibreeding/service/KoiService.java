@@ -6,8 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.koibreeding.domain.Dictionary;
 import com.koibreeding.domain.Koi;
-import com.koibreeding.domain.KoiDictionary;
 import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Pond;
 import com.koibreeding.dto.response.ResultPaginationDTO;
@@ -17,13 +17,13 @@ import com.koibreeding.repository.KoiRepository;
 public class KoiService {
     private final KoiRepository koiRepository;
     private final MutationService mutationService;
-    private final KoiDictionaryService koiDictionaryService;
+    private final DictionaryService koiDictionaryService;
     private final PondService pondService;
 
     public KoiService(
             KoiRepository koiRepository,
             MutationService mutationService,
-            KoiDictionaryService koiDictionaryService,
+            DictionaryService koiDictionaryService,
             PondService pondService) {
         this.koiRepository = koiRepository;
         this.mutationService = mutationService;
@@ -65,8 +65,8 @@ public class KoiService {
             currentKoi.setPotential(koi.getPotential() != null ? koi.getPotential() : currentKoi.getPotential());
 
             if (koi.getDictionary() != null) {
-                KoiDictionary koiDictionary = this.koiDictionaryService
-                        .handleFetchKoiDictionaryById(koi.getDictionary().getId());
+                Dictionary koiDictionary = this.koiDictionaryService
+                        .handleFetchDictionaryById(koi.getDictionary().getId());
                 currentKoi.setDictionary(koiDictionary);
             }
 

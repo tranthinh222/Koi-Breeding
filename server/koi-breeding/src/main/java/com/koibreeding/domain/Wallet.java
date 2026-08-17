@@ -32,7 +32,7 @@ public class Wallet {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(nullable = false, precision = 15, scale = 0)
     private BigDecimal balance = BigDecimal.ZERO;
 
     @CreationTimestamp

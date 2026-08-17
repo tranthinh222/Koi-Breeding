@@ -1,13 +1,9 @@
 package com.koibreeding.service;
 
-import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.koibreeding.domain.User;
-import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResUserDto;
 import com.koibreeding.repository.UserRepository;
 
 @Service
@@ -16,6 +12,24 @@ public class UserService {
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    public User handleFetchUserById(Integer userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    public ResUserDto convertToResUserDto(User user) {
+        return ResUserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
+                .avatarUrl(user.getAvatarUrl())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .exp(user.getExp())
+                .build();
     }
 
     public User handleCreateUser(User user) {
@@ -40,29 +54,6 @@ public class UserService {
         }
 
         return currentUser;
-    }
-
-    public User handleFetchUserById(Integer id) {
-        return userRepository.findById(id).orElse(null);
-    }
-
-    public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {
-        Page<User> pageUser = this.userRepository.findAll(pageable);
-        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
-        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
-
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setTotalPages(pageUser.getTotalPages());
-        meta.setTotalElements(pageUser.getTotalElements());
-
-        resultPaginationDTO.setMeta(meta);
-
-        List<User> userList = pageUser.getContent();
-
-        resultPaginationDTO.setResult(userList);
-
-        return resultPaginationDTO;
     }
 
     public void handleDeleteUser(Integer id) {

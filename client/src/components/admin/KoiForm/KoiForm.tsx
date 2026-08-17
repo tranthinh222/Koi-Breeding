@@ -91,6 +91,8 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 			return;
 		}
 
+		imageFile?.name;
+
 		setImageFile(file);
 		setPreviewUrl(URL.createObjectURL(file));
 	};

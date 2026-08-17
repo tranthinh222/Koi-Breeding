@@ -30,7 +30,8 @@ public class Item {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    /** Giá Koins của vật phẩm, hoặc giá VNĐ của gói nạp Koins. */
+    @Column(nullable = false, precision = 15, scale = 0)
     private BigDecimal price;
 
     @Column(nullable = false, columnDefinition = "SMALLINT")
@@ -48,4 +49,7 @@ public class Item {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(columnDefinition = "TEXT")
+    private String itemUrl;
 }

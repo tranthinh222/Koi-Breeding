@@ -88,4 +88,7 @@ public class KoiDictionary {
     @DecimalMax(value = "2.0", message = "Alpha Price must be in range 1.5 ~ 2.0")
     @Column(nullable = false, precision = 3, scale = 2)
     private BigDecimal alphaPrice;
+
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl;
 }

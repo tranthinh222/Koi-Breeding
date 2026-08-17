@@ -13,97 +13,101 @@ import com.koibreeding.repository.KoiDictionaryRepository;
 
 @Service
 public class KoiDictionaryService {
-        private final KoiDictionaryRepository koiDictionaryRepository;
-        private final VarietyService varietyService;
+    private final KoiDictionaryRepository koiDictionaryRepository;
+    private final VarietyService varietyService;
 
-        public KoiDictionaryService(
-                        KoiDictionaryRepository koiDictionaryRepository,
-                        VarietyService varietyService) {
-                this.koiDictionaryRepository = koiDictionaryRepository;
-                this.varietyService = varietyService;
+    public KoiDictionaryService(
+            KoiDictionaryRepository koiDictionaryRepository,
+            VarietyService varietyService) {
+        this.koiDictionaryRepository = koiDictionaryRepository;
+        this.varietyService = varietyService;
+    }
+
+    public KoiDictionary handleCreateKoiDictionary(KoiDictionary koiDictionary) {
+        return this.koiDictionaryRepository.save(koiDictionary);
+    }
+
+    public KoiDictionary handleUpdateKoiDictionary(KoiDictionary koiDictionary) {
+        KoiDictionary currentKoiDictionary = this.handleFetchKoiDictionaryById(koiDictionary.getId());
+        if (currentKoiDictionary != null) {
+            currentKoiDictionary.setName(
+                    koiDictionary.getName() != null ? koiDictionary.getName()
+                            : currentKoiDictionary.getName());
+            currentKoiDictionary.setShape(
+                    koiDictionary.getShape() != null ? koiDictionary.getShape()
+                            : currentKoiDictionary.getShape());
+            currentKoiDictionary.setScaleType(
+                    koiDictionary.getScaleType() != null ? koiDictionary.getScaleType()
+                            : currentKoiDictionary.getScaleType());
+
+            if (koiDictionary.getVariety() != null) {
+                Variety variety = this.varietyService
+                        .handleFetchVarietyById(koiDictionary.getVariety().getId());
+                currentKoiDictionary.setVariety(variety);
+            }
+
+            currentKoiDictionary.setOrigin(
+                    koiDictionary.getOrigin() != null ? koiDictionary.getOrigin()
+                            : currentKoiDictionary.getOrigin());
+            currentKoiDictionary
+                    .setBaseMaxLength(koiDictionary.getBaseMaxLength() != null
+                            ? koiDictionary.getBaseMaxLength()
+                            : currentKoiDictionary.getBaseMaxLength());
+            currentKoiDictionary
+                    .setBaseGrowthRate(koiDictionary.getBaseGrowthRate() != null
+                            ? koiDictionary.getBaseGrowthRate()
+                            : currentKoiDictionary.getBaseGrowthRate());
+            currentKoiDictionary.setMidAge(
+                    koiDictionary.getMidAge() != null ? koiDictionary.getMidAge()
+                            : currentKoiDictionary.getMidAge());
+            currentKoiDictionary.setAlphaWeight(
+                    koiDictionary.getAlphaWeight() != null ? koiDictionary.getAlphaWeight()
+                            : currentKoiDictionary.getAlphaWeight());
+            currentKoiDictionary.setBasePrice(
+                    koiDictionary.getBasePrice() != null ? koiDictionary.getBasePrice()
+                            : currentKoiDictionary.getBasePrice());
+            currentKoiDictionary.setAlphaPrice(
+                    koiDictionary.getAlphaPrice() != null ? koiDictionary.getAlphaPrice()
+                            : currentKoiDictionary.getAlphaPrice());
+
+            currentKoiDictionary
+                    .setImageUrl(koiDictionary.getImageUrl() != null ? koiDictionary.getImageUrl()
+                            : currentKoiDictionary.getImageUrl());
+
+            currentKoiDictionary = this.koiDictionaryRepository.save(currentKoiDictionary);
         }
 
-        public KoiDictionary handleCreateKoiDictionary(KoiDictionary koiDictionary) {
-                return this.koiDictionaryRepository.save(koiDictionary);
-        }
+        return currentKoiDictionary;
+    }
 
-        public KoiDictionary handleUpdateKoiDictionary(KoiDictionary koiDictionary) {
-                KoiDictionary currentKoiDictionary = this.handleFetchKoiDictionaryById(koiDictionary.getId());
-                if (currentKoiDictionary != null) {
-                        currentKoiDictionary.setName(
-                                        koiDictionary.getName() != null ? koiDictionary.getName()
-                                                        : currentKoiDictionary.getName());
-                        currentKoiDictionary.setShape(
-                                        koiDictionary.getShape() != null ? koiDictionary.getShape()
-                                                        : currentKoiDictionary.getShape());
-                        currentKoiDictionary.setScaleType(
-                                        koiDictionary.getScaleType() != null ? koiDictionary.getScaleType()
-                                                        : currentKoiDictionary.getScaleType());
+    public KoiDictionary handleFetchKoiDictionaryById(Integer id) {
+        return koiDictionaryRepository.findById(id).orElse(null);
+    }
 
-                        if (koiDictionary.getVariety() != null) {
-                                Variety variety = this.varietyService
-                                                .handleFetchVarietyById(koiDictionary.getVariety().getId());
-                                currentKoiDictionary.setVariety(variety);
-                        }
+    public ResultPaginationDTO handleFetchAllKoiDictionaries(Pageable pageable) {
+        Page<KoiDictionary> pageKoi = this.koiDictionaryRepository.findAll(pageable);
+        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 
-                        currentKoiDictionary.setOrigin(
-                                        koiDictionary.getOrigin() != null ? koiDictionary.getOrigin()
-                                                        : currentKoiDictionary.getOrigin());
-                        currentKoiDictionary
-                                        .setBaseMaxLength(koiDictionary.getBaseMaxLength() != null
-                                                        ? koiDictionary.getBaseMaxLength()
-                                                        : currentKoiDictionary.getBaseMaxLength());
-                        currentKoiDictionary
-                                        .setBaseGrowthRate(koiDictionary.getBaseGrowthRate() != null
-                                                        ? koiDictionary.getBaseGrowthRate()
-                                                        : currentKoiDictionary.getBaseGrowthRate());
-                        currentKoiDictionary.setMidAge(
-                                        koiDictionary.getMidAge() != null ? koiDictionary.getMidAge()
-                                                        : currentKoiDictionary.getMidAge());
-                        currentKoiDictionary.setAlphaWeight(
-                                        koiDictionary.getAlphaWeight() != null ? koiDictionary.getAlphaWeight()
-                                                        : currentKoiDictionary.getAlphaWeight());
-                        currentKoiDictionary.setBasePrice(
-                                        koiDictionary.getBasePrice() != null ? koiDictionary.getBasePrice()
-                                                        : currentKoiDictionary.getBasePrice());
-                        currentKoiDictionary.setAlphaPrice(
-                                        koiDictionary.getAlphaPrice() != null ? koiDictionary.getAlphaPrice()
-                                                        : currentKoiDictionary.getAlphaPrice());
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotalPages(pageKoi.getTotalPages());
+        meta.setTotalElements(pageKoi.getTotalElements());
 
-                        currentKoiDictionary = this.koiDictionaryRepository.save(currentKoiDictionary);
-                }
+        resultPaginationDTO.setMeta(meta);
 
-                return currentKoiDictionary;
-        }
+        List<KoiDictionary> koiDictionaryList = pageKoi.getContent();
 
-        public KoiDictionary handleFetchKoiDictionaryById(Integer id) {
-                return koiDictionaryRepository.findById(id).orElse(null);
-        }
+        resultPaginationDTO.setResult(koiDictionaryList);
 
-        public ResultPaginationDTO handleFetchAllKoiDictionaries(Pageable pageable) {
-                Page<KoiDictionary> pageKoi = this.koiDictionaryRepository.findAll(pageable);
-                ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
-                ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        return resultPaginationDTO;
+    }
 
-                meta.setPage(pageable.getPageNumber() + 1);
-                meta.setPageSize(pageable.getPageSize());
-                meta.setTotalPages(pageKoi.getTotalPages());
-                meta.setTotalElements(pageKoi.getTotalElements());
+    public void handleDeleteKoiDictionary(Integer id) {
+        this.koiDictionaryRepository.deleteById(id);
+    }
 
-                resultPaginationDTO.setMeta(meta);
-
-                List<KoiDictionary> koiDictionaryList = pageKoi.getContent();
-
-                resultPaginationDTO.setResult(koiDictionaryList);
-
-                return resultPaginationDTO;
-        }
-
-        public void handleDeleteKoiDictionary(Integer id) {
-                this.koiDictionaryRepository.deleteById(id);
-        }
-
-        public boolean isKoiDictionaryExistById(Integer id) {
-                return this.koiDictionaryRepository.existsById(id);
-        }
+    public boolean isKoiDictionaryExistById(Integer id) {
+        return this.koiDictionaryRepository.existsById(id);
+    }
 }

@@ -39,4 +39,14 @@ public class UploadController {
 
         return ResponseEntity.ok(Map.of("url", url));
     }
+
+    @PostMapping("/upload/dictionary")
+    @ApiMessage("upload koi varient's image")
+    public ResponseEntity<?> uploadDictionaryImage(
+            @RequestParam("file") MultipartFile file) throws IOException {
+        String url = uploadService.uploadImage(file, "uploads/dictionaries");
+
+        return ResponseEntity.ok(Map.of("url", url));
+    }
+
 }

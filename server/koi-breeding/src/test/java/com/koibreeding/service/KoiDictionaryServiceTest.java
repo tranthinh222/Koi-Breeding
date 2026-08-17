@@ -53,7 +53,7 @@ public class KoiDictionaryServiceTest {
                 400,
                 BigDecimal.valueOf(0.000015),
                 100,
-                BigDecimal.valueOf(1.68));
+                BigDecimal.valueOf(1.68), null);
 
         KoiDictionary outputKoiDictionary = new KoiDictionary(
                 1,
@@ -67,7 +67,7 @@ public class KoiDictionaryServiceTest {
                 400,
                 BigDecimal.valueOf(0.000015),
                 100,
-                BigDecimal.valueOf(1.68));
+                BigDecimal.valueOf(1.68), null);
 
         when(this.koiDictionaryRepository.save(inputKoiDictionary)).thenReturn(outputKoiDictionary);
 
@@ -93,7 +93,7 @@ public class KoiDictionaryServiceTest {
                 400,
                 BigDecimal.valueOf(0.000015),
                 100,
-                BigDecimal.valueOf(1.68));
+                BigDecimal.valueOf(1.68), null);
 
         KoiDictionary oldKoiDictionary = new KoiDictionary(
                 1,
@@ -107,7 +107,7 @@ public class KoiDictionaryServiceTest {
                 400,
                 BigDecimal.valueOf(0.000015),
                 100,
-                BigDecimal.valueOf(1.68));
+                BigDecimal.valueOf(1.68), null);
 
         when(this.koiDictionaryRepository.findById(1)).thenReturn(Optional.of(oldKoiDictionary));
         when(this.varietyService.handleFetchVarietyById(1)).thenReturn(mockVariety);
@@ -136,7 +136,7 @@ public class KoiDictionaryServiceTest {
                 400,
                 BigDecimal.valueOf(0.000015),
                 100,
-                BigDecimal.valueOf(1.68));
+                BigDecimal.valueOf(1.68), null);
 
         when(this.koiDictionaryRepository.findById(0)).thenReturn(Optional.empty());
 
@@ -162,7 +162,7 @@ public class KoiDictionaryServiceTest {
                 400,
                 BigDecimal.valueOf(0.000015),
                 100,
-                BigDecimal.valueOf(1.68));
+                BigDecimal.valueOf(1.68), null);
 
         when(this.koiDictionaryRepository.findById(validId)).thenReturn(Optional.of(outputKoiDictionary));
 
@@ -204,7 +204,7 @@ public class KoiDictionaryServiceTest {
                     400,
                     BigDecimal.valueOf(0.000015),
                     100,
-                    BigDecimal.valueOf(1.68)));
+                    BigDecimal.valueOf(1.68), null));
         }
 
         int pageNumber = 0;

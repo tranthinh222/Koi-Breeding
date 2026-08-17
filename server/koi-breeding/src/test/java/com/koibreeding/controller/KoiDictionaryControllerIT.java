@@ -25,6 +25,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.koibreeding.IntergrationTest;
 import com.koibreeding.domain.KoiDictionary;
 import com.koibreeding.domain.Variety;
+import com.koibreeding.dto.RestResponse;
 import com.koibreeding.enums.ScaleType;
 import com.koibreeding.enums.Shape;
 import com.koibreeding.repository.KoiDictionaryRepository;
@@ -72,20 +73,25 @@ public class KoiDictionaryControllerIT {
                 400,
                 BigDecimal.valueOf(0.000015),
                 100,
-                BigDecimal.valueOf(1.68));
+                BigDecimal.valueOf(1.68), null);
 
         String resultString = this.mockMvc
                 .perform(post("/api/v1/dictionaries").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(inputKoiDictionary)))
                 .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
 
-        KoiDictionary response = objectMapper.readValue(resultString, new TypeReference<KoiDictionary>() {
-        });
+        RestResponse<KoiDictionary> response = objectMapper.readValue(resultString,
+                new TypeReference<RestResponse<KoiDictionary>>() {
+                });
 
-        assertNotNull(response, "Data cannot be null");
-        assertTrue(response instanceof KoiDictionary, "Expected data must be 'KoiDictionary', but received '"
+        assertEquals(201, response.getStatusCode(), "Status code must be 201");
+        assertNotNull(response.getMessage(), "Message cannot be null");
+        assertNotNull(response.getData(), "Data cannot be null");
+        assertTrue(response.getData() instanceof KoiDictionary, "Expected data must be 'KoiDictionary', but received '"
                 + resultString.getClass().getSimpleName() + "'");
-        assertThat(response).usingRecursiveComparison().ignoringFields("id", "variety").isEqualTo(inputKoiDictionary);
-        assertEquals(inputKoiDictionary.getVariety().getId(), response.getVariety().getId(), "Variety is not matched");
+        assertThat(response.getData()).usingRecursiveComparison().ignoringFields("id", "variety")
+                .isEqualTo(inputKoiDictionary);
+        assertEquals(inputKoiDictionary.getVariety().getId(), response.getData().getVariety().getId(),
+                "Variety is not matched");
     }
 }

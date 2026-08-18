@@ -9,6 +9,7 @@
 }
 
 body {
+
   font-family: Arial, Helvetica, sans-serif;
   background: #9edb8a;
   overflow-x: hidden;
@@ -263,6 +264,278 @@ body {
   margin-top: 10px;
   color: #ffe9b7;
 }
+/* =========================================================
+   HOME
+========================================================= */
+
+.home-content {
+  width: 90%;
+  margin: 0 auto 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 30px;
+  align-items: start;
+}
+
+.game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.home-welcome {
+  padding: 24px;
+  background: #f8f4ea;
+  border: 4px solid #c9a26b;
+  border-radius: 18px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.home-welcome h2 {
+  margin-top: 6px;
+  color: #5b3a1f;
+  font-size: 34px;
+}
+
+.home-eyebrow {
+  color: #5a913b;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.home-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.home-stat-card,
+.home-card,
+.profile-panel,
+.home-message {
+  background: #f8f4ea;
+  border: 4px solid #c9a26b;
+  border-radius: 18px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.home-stat-card {
+  min-height: 92px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.home-stat-card > span {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #8ed6f7;
+  font-size: 24px;
+}
+
+.home-stat-card p {
+  color: #666;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.home-stat-card strong {
+  color: #5b3a1f;
+  font-size: 28px;
+}
+
+.home-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.home-card {
+  padding: 22px;
+}
+
+.marketplace-card {
+  grid-column: 1 / -1;
+}
+
+.home-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.home-card-header h3 {
+  margin-top: 6px;
+  color: #5b3a1f;
+  font-size: 24px;
+}
+
+.home-card-header > strong {
+  color: #d97706;
+  font-size: 18px;
+}
+
+.pond-metrics,
+.breeding-content,
+.featured-koi-list {
+  display: grid;
+  gap: 14px;
+}
+
+.pond-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pond-metrics div,
+.breeding-content div,
+.featured-koi {
+  padding: 14px;
+  background: #fff8e8;
+  border-radius: 14px;
+}
+
+.pond-metrics span,
+.breeding-content span,
+.featured-koi p,
+.home-muted {
+  color: #666;
+}
+
+.pond-metrics strong,
+.breeding-content strong,
+.featured-koi strong {
+  display: block;
+  margin-top: 4px;
+  color: #5b3a1f;
+}
+
+.home-action-button,
+.view-profile-button {
+  border: none;
+  border-radius: 12px;
+  background: #5a913b;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.25s;
+}
+
+.home-action-button {
+  min-width: 86px;
+  height: 42px;
+  padding: 0 18px;
+}
+
+.home-action-button:hover,
+.view-profile-button:hover {
+  background: #44742b;
+  transform: translateY(-2px);
+}
+
+.featured-koi {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  align-items: center;
+  gap: 14px;
+}
+
+.featured-koi img,
+.featured-koi > span {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #8ed6f7;
+}
+
+.featured-koi img {
+  object-fit: contain;
+  padding: 6px;
+}
+
+.featured-koi > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.profile-panel {
+  position: sticky;
+  top: 22px;
+  padding: 24px;
+  text-align: center;
+}
+
+.home-profile-avatar {
+  width: 118px;
+  height: 118px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: #8ed6f7;
+  border: 5px solid #fff8e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #174562;
+  font-size: 46px;
+  font-weight: bold;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
+.home-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-details {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.profile-details .username {
+  color: #5b3a1f;
+  font-size: 24px;
+}
+
+.profile-details .level {
+  color: #666;
+  font-weight: bold;
+}
+
+.view-profile-button {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 16px;
+  font-size: 16px;
+}
+
+.home-message {
+  grid-column: 1 / -1;
+  padding: 28px;
+  color: #5b3a1f;
+  font-weight: bold;
+  text-align: center;
+}
+
+.home-message.error {
+  border-color: #d66a4d;
+  color: #9b2f1d;
+}
+
+/* =========================================================
 
 /* =========================================================
    PROFILE
@@ -303,6 +576,7 @@ body {
   background: #8ed6f7;
   color: #174562;
   cursor: pointer;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,6 +595,31 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.profile-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(21, 34, 42, 0.42);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  pointer-events: none;
+}
+
+.profile-avatar-button:hover .profile-avatar-overlay,
+.profile-avatar-button:focus-visible .profile-avatar-overlay {
+  opacity: 1;
+}
+
+.profile-avatar-button:hover .profile-avatar-overlay {
+  background: rgba(21, 34, 42, 0.55);
 }
 
 .profile-hero-content h2 {

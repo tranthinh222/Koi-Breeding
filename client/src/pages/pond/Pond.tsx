@@ -29,84 +29,7 @@ function makeFish(width: number, height: number): FishState {
 	};
 }
 
-// function drawKoi(
-// 	ctx: CanvasRenderingContext2D,
-// 	fish: FishState,
-// 	image: HTMLImageElement,
-// 	time: number,
-// ) {
-// 	const { x, y, angle, size, phase } = fish;
-// 	const sway = Math.sin(time * 0.008 + phase);
-// 	const tailWag = Math.sin(time * 0.018 + phase) * 0.22;
-// 	const finWag = Math.sin(time * 0.014 + phase + 0.8) * 0.12;
-// 	const scale = size / 836;
-// 	ctx.save();
-// 	ctx.translate(
-// 		x + Math.cos(angle + Math.PI / 2) * sway * 2,
-// 		y + Math.sin(angle + Math.PI / 2) * sway * 2,
-// 	);
-// 	// The Figma fish points left; rotate 180° to make it face its travel direction.
-// 	ctx.rotate(angle + Math.PI + sway * 0.06);
-// 	ctx.scale(scale, scale);
-
-// 	// The tail occupies the far-right end of the source SVG. Draw it first from
-// 	// its joint, so it can wag independently under the body.
-// 	ctx.save();
-// 	ctx.translate(282, 0); // source joint (x: 700, y: 170)
-// 	ctx.rotate(tailWag);
-// 	ctx.drawImage(image, 690, 88, 146, 104, -10, -82, 146, 104);
-// 	ctx.restore();
-
-// 	// Draw the rest of the fish without its tail area; this avoids a double tail.
-// 	ctx.save();
-// 	ctx.beginPath();
-// 	ctx.rect(-418, -170, 710, 340);
-// 	// Cut out only the fin silhouettes from the static body; rectangle crops
-// 	// would pull a block of the body along with a moving fin.
-// 	ctx.moveTo(-267, -95);
-// 	ctx.bezierCurveTo(-242, -137, -222, -158, -211, -150);
-// 	ctx.bezierCurveTo(-188, -160, -165, -170, -159, -140);
-// 	ctx.lineTo(-185, -86);
-// 	ctx.closePath();
-// 	ctx.moveTo(-265, 95);
-// 	ctx.lineTo(-185, 86);
-// 	ctx.bezierCurveTo(-175, 126, -150, 156, -172, 167);
-// 	ctx.bezierCurveTo(-193, 168, -237, 134, -265, 95);
-// 	ctx.closePath();
-// 	ctx.clip("evenodd");
-// 	ctx.drawImage(image, -418, -170, 836, 340);
-// 	ctx.restore();
-
-// 	// Upper and lower fins have their own slower, softer rhythm than the tail.
-// 	ctx.save();
-// 	ctx.translate(-253, -92);
-// 	ctx.rotate(finWag);
-// 	ctx.beginPath();
-// 	ctx.moveTo(-14, -3);
-// 	ctx.bezierCurveTo(11, -45, 31, -66, 42, -58);
-// 	ctx.bezierCurveTo(65, -68, 88, -78, 94, -48);
-// 	ctx.lineTo(68, 6);
-// 	ctx.closePath();
-// 	ctx.clip();
-// 	ctx.drawImage(image, -165, -78, 836, 340);
-// 	ctx.restore();
-
-// 	ctx.save();
-// 	ctx.translate(-253, 93);
-// 	ctx.rotate(-finWag * 0.85);
-// 	ctx.beginPath();
-// 	ctx.moveTo(-12, 2);
-// 	ctx.lineTo(68, -7);
-// 	ctx.bezierCurveTo(78, 33, 103, 63, 81, 74);
-// 	ctx.bezierCurveTo(60, 75, 16, 41, -12, 2);
-// 	ctx.closePath();
-// 	ctx.clip();
-// 	ctx.drawImage(image, -165, -263, 836, 340);
-// 	ctx.restore();
-// 	ctx.restore();
-// }
-
-// Draw upper fin function
+// Draw upper fin function (Bao, Thinh's style)
 function traceUpperFin(ctx: CanvasRenderingContext2D) {
 	ctx.moveTo(-14, -3);
 	ctx.bezierCurveTo(5, -50, 31, -66, 40, -60);
@@ -115,7 +38,7 @@ function traceUpperFin(ctx: CanvasRenderingContext2D) {
 	ctx.closePath();
 }
 
-// Draw lower fin function
+// Draw lower fin function (Bao, Thinh's style)
 function traceLowerFin(ctx: CanvasRenderingContext2D) {
 	ctx.moveTo(-14, 3);
 	ctx.bezierCurveTo(5, 50, 31, 66, 40, 60);
@@ -124,6 +47,25 @@ function traceLowerFin(ctx: CanvasRenderingContext2D) {
 	ctx.closePath();
 }
 
+// Draw upper fin function (Khoa's style)
+function traceNewUpperFin(ctx: CanvasRenderingContext2D) {
+	ctx.moveTo(61, 2);
+	ctx.lineTo(-1, 2);
+	ctx.lineTo(28, -72);
+	ctx.lineTo(61, -72);
+	ctx.closePath();
+}
+
+// Draw lower fin function (Khoa's style)
+function traceNewLowerFin(ctx: CanvasRenderingContext2D) {
+	ctx.moveTo(61, -2);
+	ctx.lineTo(-1, -2);
+	ctx.lineTo(28, 72);
+	ctx.lineTo(61, 72);
+	ctx.closePath();
+}
+
+// Bao, Thinh's style
 function drawKoi(
 	ctx: CanvasRenderingContext2D,
 	fish: FishState,
@@ -134,9 +76,40 @@ function drawKoi(
 	const sway = Math.sin(time * 0.008 + phase);
 	const tailWag = Math.sin(time * 0.018 + phase) * 0.22;
 	const finWag = Math.sin(time * 0.014 + phase + 0.8) * 0.12;
-	const scale = size / 836;
+
+	// --- CONFIGURATION PARAMETERS FOR KHOA'S STYLE ---
+	// 1. Overall dimensions of image
+	const IMG_W = 836;
+	const IMG_H = 340;
+
+	// 2. Tail joint coordinates (Tail pivot) - Relative to fish center
+	const TAIL_PIVOT_X = 282;
+	const TAIL_PIVOT_Y = 0;
+	// Tail crop coordinates from source image (sx, sy, sw, sh) and draw (dx, dy, dw, dh)
+	const TAIL_CROP = {
+		sx: 690,
+		sy: 88,
+		sw: 146,
+		sh: 104,
+		dx: -10,
+		dy: -82,
+		dw: 146,
+		dh: 104,
+	};
+
+	// 3. Upper & Lower fin joint coordinates - Relative to fish center
+	const FIN_UP_PIVOT_X = -253;
+	const FIN_UP_PIVOT_Y = -92;
+
+	const FIN_DOWN_PIVOT_X = -253;
+	const FIN_DOWN_PIVOT_Y = 93;
+	// -----------------------------------------
+
+	// Calculate scale ratio based on new width
+	const scale = size / IMG_W;
 
 	ctx.save();
+	// Body sway motion
 	ctx.translate(
 		x + Math.cos(angle + Math.PI / 2) * sway * 2,
 		y + Math.sin(angle + Math.PI / 2) * sway * 2,
@@ -144,50 +117,109 @@ function drawKoi(
 	ctx.rotate(angle + Math.PI + sway * 0.06);
 	ctx.scale(scale, scale);
 
-	// 1. Draw tail
+	// ==========================================
+	// 1. DRAW TAIL
+	// ==========================================
 	ctx.save();
-	ctx.translate(282, 0);
-	ctx.rotate(tailWag);
-	ctx.drawImage(image, 690, 88, 146, 104, -10, -82, 146, 104);
+	ctx.translate(TAIL_PIVOT_X, TAIL_PIVOT_Y);
+	ctx.rotate(tailWag); // remember to recover this
+	// ctx.rotate(0); // remember to remove this
+	ctx.drawImage(
+		image,
+		TAIL_CROP.sx,
+		TAIL_CROP.sy,
+		TAIL_CROP.sw,
+		TAIL_CROP.sh, // Crop from source image
+		TAIL_CROP.dx,
+		TAIL_CROP.dy,
+		TAIL_CROP.dw,
+		TAIL_CROP.dh, // Place at pivot
+	);
+
+	// ==========================================
+	// ENABLE DEBUG FOR THE TAIL HERE
+	// ==========================================
+	// 1. Draw a magenta border showing the exact rectangle containing the tail
+	ctx.strokeStyle = "magenta";
+	ctx.lineWidth = 2;
+	ctx.strokeRect(TAIL_CROP.dx, TAIL_CROP.dy, TAIL_CROP.dw, TAIL_CROP.dh);
+
+	// 2. Draw a red dot right at the rotation center (Tail joint)
+	ctx.fillStyle = "red";
+	ctx.beginPath();
+	ctx.arc(0, 0, 5, 0, Math.PI * 2); // Red dot with radius 5px
+	ctx.fill();
+	// ==========================================
+
 	ctx.restore();
 
-	// 2. Draw body
+	// ==========================================
+	// 2. DRAW BODY (CUT FINS)
+	// ==========================================
 	ctx.save();
 	ctx.beginPath();
-	ctx.rect(-418, -170, 710, 340); // Rectangle frame surrounds body
+	// Rectangle frame surrounding the entire fish
+	ctx.rect(-IMG_W / 2, -IMG_H / 2, IMG_W - 126, IMG_H);
 
+	// ==========================================
+	// ENABLE DEBUG FOR BODY HERE
+	// ==========================================
+	// Draw yellow border showing exact rectangle containing the body
+	ctx.strokeStyle = "yellow";
+	ctx.lineWidth = 2;
+	ctx.strokeRect(-IMG_W / 2, -IMG_H / 2, IMG_W - 126, IMG_H);
+	// ==========================================
+
+	// Cut hole for upper fin
 	ctx.save();
-	ctx.translate(-253, -92); // Shift center to upper fin joint
-	traceUpperFin(ctx); // Cut a hole in the upper fin
+	ctx.translate(FIN_UP_PIVOT_X, FIN_UP_PIVOT_Y);
+	traceUpperFin(ctx);
 	ctx.restore();
 
+	// Cut hole for lower fin
 	ctx.save();
-	ctx.translate(-253, 93); // DShift center to lower fin joint
-	traceLowerFin(ctx); // Cut a hole in the lower fin
+	ctx.translate(FIN_DOWN_PIVOT_X, FIN_DOWN_PIVOT_Y);
+	traceLowerFin(ctx);
 	ctx.restore();
 
+	// Apply cut and draw body
 	ctx.clip("evenodd");
-	ctx.drawImage(image, -418, -170, 836, 340);
+	ctx.drawImage(image, -IMG_W / 2, -IMG_H / 2, IMG_W, IMG_H);
 	ctx.restore();
 
-	// 3. Draw upper fin
+	// ==========================================
+	// 3. DRAW UPPER FIN
+	// ==========================================
 	ctx.save();
-	ctx.translate(-253, -92);
+	ctx.translate(FIN_UP_PIVOT_X, FIN_UP_PIVOT_Y);
 	ctx.rotate(finWag); // remember to recover this
 	// ctx.rotate(0); // remember to remove this
 	ctx.beginPath();
 	traceUpperFin(ctx);
 
-	// USE THIS LINE TO DEBUG (Show red stroke around the upper fin):
-	// ctx.strokeStyle = "red";
+	// ==========================================
+	// ENABLE DEBUG FOR THE UPPER FIN HERE
+	// ==========================================
+	// Show red stroke around the upper fin
+	ctx.strokeStyle = "red";
 	ctx.lineWidth = 2;
 	ctx.stroke();
+	// ==========================================
 
 	ctx.clip();
-	ctx.drawImage(image, -165, -78, 836, 340);
+	// Translate back to draw at correct original position
+	ctx.drawImage(
+		image,
+		-IMG_W / 2 - FIN_UP_PIVOT_X,
+		-IMG_H / 2 - FIN_UP_PIVOT_Y,
+		IMG_W,
+		IMG_H,
+	);
 	ctx.restore();
 
-	// 4. Draw lower fin
+	// ==========================================
+	// 4. DRAW LOWER FIN
+	// ==========================================
 	ctx.save();
 	ctx.translate(-253, 93);
 	ctx.rotate(-finWag * 0.85); // remember to recover this
@@ -195,13 +227,208 @@ function drawKoi(
 	ctx.beginPath();
 	traceLowerFin(ctx);
 
-	// USE THIS LINE TO DEBUG (Show red stroke around the lower fin):
-	// ctx.strokeStyle = "blue";
+	// ==========================================
+	// ENABLE DEBUG FOR THE LOWER FIN HERE
+	// ==========================================
+	// Show blue stroke around the lower fin
+	ctx.strokeStyle = "blue";
 	ctx.lineWidth = 2;
 	ctx.stroke();
+	// ==========================================
 
 	ctx.clip();
-	ctx.drawImage(image, -165, -263, 836, 340);
+	// Translate back to draw at correct original position
+	ctx.drawImage(
+		image,
+		-IMG_W / 2 - FIN_DOWN_PIVOT_X,
+		-IMG_H / 2 - FIN_DOWN_PIVOT_Y,
+		IMG_W,
+		IMG_H,
+	);
+	ctx.restore();
+
+	ctx.restore();
+}
+
+// Khoa's style
+function drawNewKoi(
+	ctx: CanvasRenderingContext2D,
+	fish: FishState,
+	image: HTMLImageElement,
+	time: number,
+) {
+	const { x, y, angle, size, phase } = fish;
+	const sway = Math.sin(time * 0.008 + phase);
+	const tailWag = Math.sin(time * 0.018 + phase) * 0.22;
+	const finWag = Math.sin(time * 0.014 + phase + 0.8) * 0.12;
+
+	// --- CONFIGURATION PARAMETERS FOR KHOA'S STYLE ---
+	// 1. Overall dimensions of image
+	const IMG_W = 441;
+	const IMG_H = 252;
+
+	// 2. Tail joint coordinates (Tail pivot) - Relative to fish center
+	const TAIL_PIVOT_X = 146;
+	const TAIL_PIVOT_Y = 0;
+	// Tail crop coordinates from source image (sx, sy, sw, sh) and draw (dx, dy, dw, dh)
+	const TAIL_CROP = {
+		sx: 369,
+		sy: 61,
+		sw: 90,
+		sh: 130,
+		dx: 0,
+		dy: -65,
+		dw: 90,
+		dh: 130,
+	};
+
+	// 3. Upper & Lower fin joint coordinates - Relative to fish center
+	const FIN_UP_PIVOT_X = -130;
+	const FIN_UP_PIVOT_Y = -55;
+
+	const FIN_DOWN_PIVOT_X = -130;
+	const FIN_DOWN_PIVOT_Y = 55;
+	// -----------------------------------------
+
+	// Calculate scale ratio based on new width
+	const scale = size / IMG_W;
+
+	ctx.save();
+	// Body sway motion
+	ctx.translate(
+		x + Math.cos(angle + Math.PI / 2) * sway * 2,
+		y + Math.sin(angle + Math.PI / 2) * sway * 2,
+	);
+	ctx.rotate(angle + Math.PI + sway * 0.06);
+	ctx.scale(scale, scale);
+
+	// ==========================================
+	// 1. DRAW TAIL
+	// ==========================================
+	ctx.save();
+	ctx.translate(TAIL_PIVOT_X, TAIL_PIVOT_Y);
+	ctx.rotate(tailWag); // remember to recover this
+	// ctx.rotate(0); // remember to remove this
+	ctx.drawImage(
+		image,
+		TAIL_CROP.sx,
+		TAIL_CROP.sy,
+		TAIL_CROP.sw,
+		TAIL_CROP.sh, // Crop from source image
+		TAIL_CROP.dx,
+		TAIL_CROP.dy,
+		TAIL_CROP.dw,
+		TAIL_CROP.dh, // Place at pivot
+	);
+
+	// ==========================================
+	// ENABLE DEBUG FOR TAIL HERE
+	// ==========================================
+	// // 1. Draw magenta border showing exact rectangle containing the tail
+	// ctx.strokeStyle = "magenta";
+	// ctx.lineWidth = 2;
+	// ctx.strokeRect(TAIL_CROP.dx, TAIL_CROP.dy, TAIL_CROP.dw, TAIL_CROP.dh);
+	// // 2. Draw a red dot at the rotation center (Tail joint)
+	// ctx.fillStyle = "red";
+	// ctx.beginPath();
+	// ctx.arc(0, 0, 5, 0, Math.PI * 2); /// Red dot radius 5px
+	// ctx.fill();
+	// ==========================================
+
+	ctx.restore();
+
+	// ==========================================
+	// 2. DRAW BODY (CUT FINS)
+	// ==========================================
+	ctx.save();
+	ctx.beginPath();
+	// Rectangle frame surrounding the entire fish
+	ctx.rect(-IMG_W / 2, -IMG_H / 2, IMG_W - 73, IMG_H);
+
+	// ==========================================
+	// ENABLE DEBUG FOR BODY HERE
+	// ==========================================
+	// Draw yellow border showing exact rectangle containing the body
+	// ctx.strokeStyle = "yellow";
+	// ctx.lineWidth = 2;
+	// ctx.strokeRect(-IMG_W / 2, -IMG_H / 2, IMG_W - 73, IMG_H);
+	// ==========================================
+
+	// Cut hole for upper fin
+	ctx.save();
+	ctx.translate(FIN_UP_PIVOT_X, FIN_UP_PIVOT_Y);
+	traceNewUpperFin(ctx);
+	ctx.restore();
+
+	// Cut hole for lower fin
+	ctx.save();
+	ctx.translate(FIN_DOWN_PIVOT_X, FIN_DOWN_PIVOT_Y);
+	traceNewLowerFin(ctx);
+	ctx.restore();
+
+	// Apply cut and draw body
+	ctx.clip("evenodd");
+	ctx.drawImage(image, -IMG_W / 2, -IMG_H / 2, IMG_W, IMG_H);
+	ctx.restore();
+
+	// ==========================================
+	// 3. DRAW UPPER FIN
+	// ==========================================
+	ctx.save();
+	ctx.translate(FIN_UP_PIVOT_X, FIN_UP_PIVOT_Y);
+	ctx.rotate(finWag); // remember to recover this
+	// ctx.rotate(0); // remember to remove this
+	ctx.beginPath();
+	traceNewUpperFin(ctx);
+
+	// ==========================================
+	// ENABLE DEBUG FOR THE UPPER FIN HERE
+	// ==========================================
+	// Show red stroke around the upper fin
+	// ctx.strokeStyle = "red";
+	// ctx.lineWidth = 2;
+	// ctx.stroke();
+	// ==========================================
+
+	ctx.clip();
+	// Translate back to draw at correct original position
+	ctx.drawImage(
+		image,
+		-IMG_W / 2 - FIN_UP_PIVOT_X,
+		-IMG_H / 2 - FIN_UP_PIVOT_Y,
+		IMG_W,
+		IMG_H,
+	);
+	ctx.restore();
+
+	// ==========================================
+	// 4. DRAW LOWER FIN
+	// ==========================================
+	ctx.save();
+	ctx.translate(FIN_DOWN_PIVOT_X, FIN_DOWN_PIVOT_Y);
+	ctx.rotate(-finWag * 0.85); // remember to recover this
+	// ctx.rotate(0); // remember to remove this
+	ctx.beginPath();
+	traceNewLowerFin(ctx);
+
+	// ==========================================
+	// ENABLE DEBUG FOR THE LOWER FIN HERE
+	// ==========================================
+	// Show blue stroke around the lower fin
+	// ctx.strokeStyle = "blue";
+	// ctx.lineWidth = 2;
+	// ctx.stroke();
+	// ==========================================
+
+	ctx.clip();
+	// Translate back to draw at correct original position
+	ctx.drawImage(
+		image,
+		-IMG_W / 2 - FIN_DOWN_PIVOT_X,
+		-IMG_H / 2 - FIN_DOWN_PIVOT_Y,
+		IMG_W,
+		IMG_H,
+	);
 	ctx.restore();
 
 	ctx.restore();
@@ -220,7 +447,7 @@ function DebugCanvas() {
 		const koiImage = new Image();
 
 		// LƯU Ý: Chỉnh lại tên file ảnh cho đúng với thực tế của bạn
-		koiImage.src = "/kois/koi-fish-2.svg";
+		koiImage.src = "/kois/new-koi.svg";
 
 		koiImage.onload = () => {
 			// Thiết lập kích thước canvas
@@ -243,7 +470,7 @@ function DebugCanvas() {
 				x: box.width / 2,
 				y: box.height / 2,
 				angle: 0, // Nằm ngang
-				size: 850, // Kích thước cực lớn để dễ soi viền cắt
+				size: 750, // Kích thước cực lớn để dễ soi viền cắt
 				phase: 0,
 				speed: 0,
 				targetAngle: 0,
@@ -251,7 +478,7 @@ function DebugCanvas() {
 			};
 
 			// Gọi hàm vẽ cá. Truyền time = 0 để tắt toàn bộ animation
-			drawKoi(ctx, staticFish, koiImage, 0);
+			drawNewKoi(ctx, staticFish, koiImage, 0);
 		};
 	}, []);
 
@@ -266,7 +493,7 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 		const canvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 		const koiImage = new Image();
-		koiImage.src = "/kois/koi-fish-2.svg";
+		koiImage.src = "/kois/new-koi.svg";
 		let frame: number;
 		let last = performance.now();
 		let dimensions = { width: 0, height: 0 };
@@ -348,7 +575,7 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 				fish.angle += Math.max(-1.2 * dt, Math.min(1.2 * dt, delta));
 				fish.x += Math.cos(fish.angle) * fish.speed * dt;
 				fish.y += Math.sin(fish.angle) * fish.speed * dt;
-				if (koiImage.complete) drawKoi(ctx, fish, koiImage, now);
+				if (koiImage.complete) drawNewKoi(ctx, fish, koiImage, now);
 			});
 			frame = requestAnimationFrame(animate);
 		};

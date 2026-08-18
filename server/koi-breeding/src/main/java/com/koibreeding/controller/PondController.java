@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.domain.Pond;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.service.PondService;
 
 @RestController

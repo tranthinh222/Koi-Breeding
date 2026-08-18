@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.koibreeding.domain.Mutation;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.repository.MutationRepository;
 
 @Service
@@ -48,8 +48,8 @@ public class MutationService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageMutation.getTotalPages());
-        meta.setTotal(pageMutation.getTotalElements());
+        meta.setTotalPages(pageMutation.getTotalPages());
+        meta.setTotalElements(pageMutation.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 

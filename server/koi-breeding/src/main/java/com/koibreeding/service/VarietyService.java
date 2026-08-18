@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.koibreeding.domain.Variety;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.repository.VarietyRepository;
 
 @Service
@@ -46,8 +46,8 @@ public class VarietyService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageVariety.getTotalPages());
-        meta.setTotal(pageVariety.getTotalElements());
+        meta.setTotalPages(pageVariety.getTotalPages());
+        meta.setTotalElements(pageVariety.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 

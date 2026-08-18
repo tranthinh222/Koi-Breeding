@@ -14,10 +14,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.koibreeding.domain.User;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResUserDto;
 import com.koibreeding.repository.UserRepository;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -25,6 +24,24 @@ public class UserService {
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    public User handleFetchUserById(Integer userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    public ResUserDto convertToResUserDto(User user) {
+        return ResUserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
+                .avatarUrl(user.getAvatarUrl())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .exp(user.getExp())
+                .build();
     }
 
     public User handleCreateUser(User user) {
@@ -49,10 +66,6 @@ public class UserService {
         }
 
         return currentUser;
-    }
-
-    public User handleFetchUserById(Integer id) {
-        return userRepository.findById(id).orElse(null);
     }
 
     public User handleFetchProfileByUserId(Integer userId) {
@@ -154,8 +167,8 @@ public class UserService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageUser.getTotalPages());
-        meta.setTotal(pageUser.getTotalElements());
+        meta.setTotalPages(pageUser.getTotalPages());
+        meta.setTotalElements(pageUser.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 

@@ -26,15 +26,15 @@ public class BreedingRate {
 
     @ManyToOne
     @JoinColumn(name = "father_id", nullable = false)
-    private KoiDictionary father;
+    private Dictionary father;
 
     @ManyToOne
     @JoinColumn(name = "mother_id", nullable = false)
-    private KoiDictionary mother;
+    private Dictionary mother;
 
     @ManyToOne
     @JoinColumn(name = "child_id", nullable = false)
-    private KoiDictionary child;
+    private Dictionary child;
 
     @Column(nullable = false, precision = 4, scale = 2)
     private BigDecimal rate;

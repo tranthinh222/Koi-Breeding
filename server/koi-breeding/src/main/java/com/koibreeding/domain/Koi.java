@@ -90,7 +90,7 @@ public class Koi {
 
     @ManyToOne
     @JoinColumn(name = "dictionary_id", nullable = false)
-    private KoiDictionary dictionary;
+    private Dictionary dictionary;
 
     @Column(nullable = false)
     private Integer patternScore = 0;

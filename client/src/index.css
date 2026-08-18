@@ -1,10 +1,7 @@
-html, body, #root {
+html,
+body {
   margin: 0;
-  min-height: 100%;
-  min-width: 100%;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-button, input, select {
-  font: inherit;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }

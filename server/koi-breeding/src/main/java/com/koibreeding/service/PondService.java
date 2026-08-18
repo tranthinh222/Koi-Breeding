@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.koibreeding.domain.Pond;
 import com.koibreeding.domain.User;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.repository.PondRepository;
 
 @Service
@@ -63,8 +63,8 @@ public class PondService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pagePond.getTotalPages());
-        meta.setTotal(pagePond.getTotalElements());
+        meta.setTotalPages(pagePond.getTotalPages());
+        meta.setTotalElements(pagePond.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 
@@ -82,8 +82,8 @@ public class PondService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pagePond.getTotalPages());
-        meta.setTotal(pagePond.getTotalElements());
+        meta.setTotalPages(pagePond.getTotalPages());
+        meta.setTotalElements(pagePond.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 

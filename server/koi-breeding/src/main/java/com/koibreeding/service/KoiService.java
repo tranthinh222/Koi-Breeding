@@ -7,10 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.koibreeding.domain.Koi;
-import com.koibreeding.domain.KoiDictionary;
+import com.koibreeding.domain.Dictionary;
 import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Pond;
-import com.koibreeding.domain.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.repository.KoiRepository;
 
 @Service
@@ -65,7 +65,7 @@ public class KoiService {
             currentKoi.setPotential(koi.getPotential() != null ? koi.getPotential() : currentKoi.getPotential());
 
             if (koi.getDictionary() != null) {
-                KoiDictionary koiDictionary = this.koiDictionaryService
+                Dictionary koiDictionary = this.koiDictionaryService
                         .handleFetchKoiDictionaryById(koi.getDictionary().getId());
                 currentKoi.setDictionary(koiDictionary);
             }
@@ -94,8 +94,8 @@ public class KoiService {
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageKoi.getTotalPages());
-        meta.setTotal(pageKoi.getTotalElements());
+        meta.setTotalPages(pageKoi.getTotalPages());
+        meta.setTotalElements(pageKoi.getTotalElements());
 
         resultPaginationDTO.setMeta(meta);
 

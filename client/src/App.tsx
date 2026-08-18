@@ -5,6 +5,7 @@ import Dictionary from "./pages/dictionary/Dictionary";
 import Inventory from "./pages/inventory/Inventory";
 import TransactionHistory from "./pages/marketplace/TransactionHistory";
 import Payment from "./pages/payment/payment";
+import Pond from "./pages/pond/Pond";
 import Shop from "./pages/shop/Shop";
 import "./style/global.css";
 
@@ -26,6 +27,8 @@ function App() {
 						path="/admin/dictionary"
 						element={<KoiVarientList />}
 					/>
+
+					<Route path="/pond" element={<Pond />} />
 
 					<Route path="/dictionary" element={<Dictionary />} />
 

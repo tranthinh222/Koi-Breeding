@@ -5,9 +5,7 @@ import com.koibreeding.domain.Item;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.repository.InventoryRepository;
-import com.koibreeding.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.val;
 
 import org.springframework.stereotype.Service;
@@ -22,7 +20,7 @@ public class InventoryService {
     private final ItemService itemService;
 
     public List<ResItemInventory> getInventory(Integer userId) {
-        val inventory = inventoryRepository.findByUserId(userId);
+        List<Inventory> inventory = inventoryRepository.findByUserId(userId);
         if(inventory == null){
             throw new RuntimeException("not found inventory");
         }

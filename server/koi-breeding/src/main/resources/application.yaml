@@ -7,8 +7,8 @@ spring:
     name: koi-breeding
   datasource:
     url: jdbc:postgresql://localhost:5432/koi_breeding
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: postgres
+    password: khoa123
   jpa:
     hibernate:
       ddl-auto: update
@@ -30,3 +30,7 @@ vietqr:
 
 sepay:
   api-key: ${SEPAY_API_KEY:}
+jwt:
+  secret: qmrLNfFizjkkTyA3qMRbIRJLSc0JlF4bldJmmJ9rQfF
+  expiration: 900000
+  refresh: 86400000

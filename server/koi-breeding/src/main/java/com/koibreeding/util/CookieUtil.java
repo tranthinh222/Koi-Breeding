@@ -1,0 +1,80 @@
+package com.koibreeding.util;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+
+@Component
+public class CookieUtil {
+
+    private static final String ACCESS_TOKEN_COOKIE = "accessToken";
+    private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
+
+    private static final int ACCESS_TOKEN_MAX_AGE = 15 * 60;          // 15 phút
+    private static final int REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 ngày
+
+    public void addUserTokenCookie(HttpServletResponse response, String token) {
+        ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE, token)
+                .httpOnly(true)
+                .secure(false) // đổi true khi deploy HTTPS
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(ACCESS_TOKEN_MAX_AGE)
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
+
+    public void addRefreshTokenCookie(HttpServletResponse response, String token) {
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE, token)
+                .httpOnly(true)
+                .secure(false)
+                .path("/auth/refresh")
+                .sameSite("Lax")
+                .maxAge(REFRESH_TOKEN_MAX_AGE)
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
+
+    public void clearAuthCookies(HttpServletResponse response) {
+        ResponseCookie clearAccess = ResponseCookie.from(ACCESS_TOKEN_COOKIE, "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(0)
+                .build();
+
+        ResponseCookie clearRefresh = ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/auth/refresh")
+                .sameSite("Lax")
+                .maxAge(0)
+                .build();
+
+        response.addHeader("Set-Cookie", clearAccess.toString());
+        response.addHeader("Set-Cookie", clearRefresh.toString());
+    }
+
+    public Optional<String> getAccessToken(HttpServletRequest request) {
+        return getCookieValue(request, ACCESS_TOKEN_COOKIE);
+    }
+
+    public Optional<String> getRefreshToken(HttpServletRequest request) {
+        return getCookieValue(request, REFRESH_TOKEN_COOKIE);
+    }
+
+    private Optional<String> getCookieValue(HttpServletRequest request, String name) {
+        if (request.getCookies() == null) return Optional.empty();
+        for (Cookie cookie : request.getCookies()) {
+            if (name.equals(cookie.getName())) {
+                return Optional.of(cookie.getValue());
+            }
+        }
+        return Optional.empty();
+    }
+}

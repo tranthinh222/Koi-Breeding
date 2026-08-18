@@ -193,7 +193,7 @@ function ProfilePanel({ user }: { user: HomeUser }) {
         <span className="level">Level {getLevel(user.exp)}</span>
       </div>
 
-      <button className="view-profile-button" onClick={() => navigate(`/users/${getHomeUserId()}`)}>
+      <button className="view-profile-button" onClick={() => navigate(`/profile/${getHomeUserId()}`)}>
         View Profile
       </button>
     </aside>

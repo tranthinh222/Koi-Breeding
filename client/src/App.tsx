@@ -1,5 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import KoiVarientList from "./components/admin/KoiVarientList/KoiVarientList";
 import AppLayout from "./components/AppLayout";
+import Dictionary from "./pages/dictionary/Dictionary";
 import Inventory from "./pages/inventory/Inventory";
 import TransactionHistory from "./pages/marketplace/TransactionHistory";
 import Payment from "./pages/payment/payment";
@@ -19,6 +21,13 @@ function App() {
 							element={<TransactionHistory />}
 						/>
 					</Route>
+
+					<Route
+						path="/admin/dictionary"
+						element={<KoiVarientList />}
+					/>
+
+					<Route path="/dictionary" element={<Dictionary />} />
 
 					<Route path="/payment/:itemId" element={<Payment />} />
 

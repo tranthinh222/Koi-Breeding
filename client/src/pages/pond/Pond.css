@@ -1,0 +1,113 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
+
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	min-width: 320px;
+	color: #f1faf8;
+	background: #052d43;
+	font-family: "DM Sans", sans-serif;
+}
+main {
+	width: min(1100px, calc(100% - 40px));
+	margin: 0 auto;
+	padding: 56px 0 48px;
+}
+.intro {
+	max-width: 590px;
+	margin-bottom: 30px;
+}
+.eyebrow {
+	color: #77d8dc;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+}
+h1 {
+	margin: 8px 0 10px;
+	font:
+		600 clamp(2.3rem, 5vw, 4.4rem)/1 "Fraunces",
+		Georgia,
+		serif;
+}
+.intro p:last-child {
+	margin: 0;
+	color: #b7d4da;
+	line-height: 1.6;
+}
+.pond-shell {
+	height: min(64vw, 590px);
+	min-height: 380px;
+	position: relative;
+	overflow: hidden;
+	border: 9px solid #c8e5dc;
+	border-radius: 48% 52% 45% 55% / 44% 49% 51% 56%;
+	box-shadow:
+		0 0 0 8px #368c8a,
+		0 28px 60px rgba(0, 9, 20, 0.35);
+	background: #087d9d;
+}
+canvas {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.pond-label {
+	position: absolute;
+	top: 22px;
+	left: 25px;
+	padding: 10px 14px;
+	border: 1px solid rgba(255, 255, 255, 0.28);
+	border-radius: 14px;
+	background: rgba(4, 67, 85, 0.55);
+	backdrop-filter: blur(8px);
+	display: grid;
+	gap: 2px;
+}
+.pond-label span {
+	color: #b4e6e2;
+	font-size: 0.73rem;
+}
+.pond-label strong {
+	font-size: 0.9rem;
+}
+.controls {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	max-width: 450px;
+	margin: 32px auto 0;
+	padding: 14px 18px;
+	border: 1px solid rgba(155, 220, 215, 0.22);
+	border-radius: 16px;
+	background: rgba(9, 70, 91, 0.45);
+}
+.controls label {
+	white-space: nowrap;
+	font-weight: 600;
+}
+.controls input {
+	accent-color: #78d8cb;
+	flex: 1;
+}
+output {
+	min-width: 20px;
+	color: #8ceadd;
+	font-weight: 700;
+}
+@media (max-width: 560px) {
+	main {
+		width: min(100% - 28px, 1100px);
+		padding-top: 34px;
+	}
+	.pond-shell {
+		min-height: 330px;
+		border-width: 6px;
+	}
+	.pond-label {
+		left: 14px;
+		top: 14px;
+	}
+}

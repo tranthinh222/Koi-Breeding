@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { CURRENT_USER_ID } from '../../api/currentUser'
 import { getUser } from '../../api/user'
 import { getBalanceWallet } from '../../api/wallet'
+import maleAvatar from '../../assets/avatars/male_blank_avatar.png'
+import femaleAvatar from '../../assets/avatars/female_blank_avatar.png'
 
 type HomeUser = {
   id: number
   username: string
+  gender?: string | null
   email?: string
   birthday?: string | null
   exp?: number
@@ -180,12 +183,25 @@ function MarketplacePreview({ koi }: { koi: FeaturedKoi[] }) {
 
 function ProfilePanel({ user }: { user: HomeUser }) {
   const navigate = useNavigate()
-  const profileInitial = user.username.charAt(0).toUpperCase()
+  const fallbackAvatar = user.gender === 'MALE' ? maleAvatar : femaleAvatar
+  const [avatarSrc, setAvatarSrc] = useState(user.avatarUrl || fallbackAvatar)
+
+  useEffect(() => {
+    setAvatarSrc(user.avatarUrl || fallbackAvatar)
+  }, [user.avatarUrl, fallbackAvatar])
 
   return (
     <aside className="profile-panel">
       <div className="home-profile-avatar">
-        {user.avatarUrl ? <img src={user.avatarUrl} alt={user.username} /> : <span>{profileInitial}</span>}
+        <img
+          src={avatarSrc}
+          alt={user.username}
+          onError={() => {
+            if (avatarSrc !== fallbackAvatar) {
+              setAvatarSrc(fallbackAvatar)
+            }
+          }}
+        />
       </div>
 
       <div className="profile-details">
@@ -257,7 +273,6 @@ export default function Home() {
       <section className="title-section">
         <div className="wood-sign">
           <h1>HOME</h1>
-          <p>Koi Garden</p>
         </div>
       </section>
 

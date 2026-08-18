@@ -7,7 +7,6 @@ import TransactionHistory from './pages/marketplace/TransactionHistory'
 import Payment from './pages/payment/payment'
 import Home from './pages/home/Home'
 import Profile from './pages/profile/Profile'
-
 function App() {
   return (
     <>
@@ -15,7 +14,7 @@ function App() {
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/home" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/transactions" element={<TransactionHistory />} />

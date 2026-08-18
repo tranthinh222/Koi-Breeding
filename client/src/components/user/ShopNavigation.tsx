@@ -4,7 +4,12 @@ export default function ShopNavigation() {
   const location = useLocation();
   return (
     <nav className="navigation-menu">
-      <button onClick={() => navigate("/")}>🏠 Home</button>
+      <button
+        className={location.pathname === "/home" ? "active" : ""}
+        onClick={() => navigate("/home")}
+      >
+        🏠 Home
+      </button>
 
       <button
         className={location.pathname === "/inventory" ? "active" : ""}

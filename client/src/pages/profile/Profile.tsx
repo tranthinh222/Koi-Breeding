@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
+import { useParams } from 'react-router-dom'
 import { CURRENT_USER_ID } from '../../api/currentUser'
 import { apiClient } from '../../api/client'
-import { getUser } from '../../api/user'
+
+import maleAvatar from '../../assets/avatars/male_blank_avatar.png'
+import femaleAvatar from '../../assets/avatars/female_blank_avatar.png'
+
+import ImageEditor from './ImageEditor'
+
 
 type Gender = 'MALE' | 'FEMALE' | ''
 
@@ -23,9 +29,12 @@ type ProfileForm = {
   gender: Gender
 }
 
-type AvatarUploadResponse = {
-  url?: string
-  avatarUrl?: string
+// Avatar upload response handled dynamically; backend may return wrapped or plain object
+
+type ApiResponse<T> = {
+  statusCode: number
+  message: string
+  data: T
 }
 
 const ACCEPTED_AVATAR_TYPES = [
@@ -35,9 +44,11 @@ const ACCEPTED_AVATAR_TYPES = [
   'image/svg+xml',
 ]
 
-function getProfileUserId() {
-  const idFromUrl = new URLSearchParams(window.location.search).get('id')
-  return Number(idFromUrl ?? CURRENT_USER_ID)
+function getProfileUserId(userId?: string) {
+  const idFromRoute = userId ?? new URLSearchParams(window.location.search).get('id')
+  const parsedId = Number(idFromRoute ?? CURRENT_USER_ID)
+
+  return Number.isFinite(parsedId) && parsedId > 0 ? parsedId : CURRENT_USER_ID
 }
 
 function getLevel(exp = 0) {
@@ -89,6 +100,13 @@ function ProfileHero({
   onEditToggle: () => void
   onSave: () => void
 }) {
+  const fallbackAvatar = profile.gender === "MALE" ? maleAvatar : femaleAvatar
+  const [avatarSrc, setAvatarSrc] = useState(avatarUrl ?? profile.avatarUrl ?? fallbackAvatar)
+
+  // Keep local src in sync when parent provides a new avatarUrl (cache-busting query param)
+  useEffect(() => {
+    setAvatarSrc(avatarUrl ?? profile.avatarUrl ?? fallbackAvatar)
+  }, [avatarUrl, profile.avatarUrl, fallbackAvatar])
   const avatarText = profile.username.charAt(0).toUpperCase()
 
   return (
@@ -99,8 +117,12 @@ function ProfileHero({
         onClick={onAvatarClick}
         disabled={uploading}
         aria-label="Upload avatar"
+        title="Upload avatar"
       >
-        {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : <span>{avatarText}</span>}
+        {avatarUrl ? <img src={avatarSrc} alt={profile.username} onError={() => { if (avatarSrc !== fallbackAvatar) { setAvatarSrc(fallbackAvatar) } }} /> : <span>{avatarText}</span>}
+        <span className="profile-avatar-overlay">
+          <span>Upload</span>
+        </span>
       </button>
 
       <div className="profile-hero-content">
@@ -269,6 +291,7 @@ function FavoriteKoiPanel() {
 }
 
 export default function Profile() {
+  const { userId: routeUserId } = useParams()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [form, setForm] = useState<ProfileForm>({
     email: '',
@@ -282,8 +305,30 @@ export default function Profile() {
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [avatarVersion, setAvatarVersion] = useState(0)
+  
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [showEditor, setShowEditor] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const lastObjectUrlRef = useRef<string | null>(null)
+  const previousAvatarRef = useRef<string | null>(null)
+
+  const cleanupSelectedImage = () => {
+    if (lastObjectUrlRef.current) {
+      try {
+        URL.revokeObjectURL(lastObjectUrlRef.current)
+      } catch (e) {
+        // ignore
+      }
+      lastObjectUrlRef.current = null
+    }
+
+    setSelectedImage(null)
+    setShowEditor(false)
+    previousAvatarRef.current = null
+  }
+
+  // expose cleanup to be used when editor cancels
 
   useEffect(() => {
     let cancelled = false
@@ -293,7 +338,11 @@ export default function Profile() {
         setLoading(true)
         setError(null)
 
-        const user = await getUser(getProfileUserId())
+        const userId = getProfileUserId(routeUserId)
+        const response = await apiClient.get<ApiResponse<UserProfile>>('/users/profile', {
+          params: { id: userId },
+        })
+        const user = response.data.data
         if (cancelled) return
 
         setProfile(user)
@@ -316,12 +365,74 @@ export default function Profile() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [routeUserId])
 
   const avatarUrl = profile?.avatarUrl
     ? `${profile.avatarUrl}${profile.avatarUrl.includes('?') ? '&' : '?'}v=${avatarVersion}`
     : undefined
 
+  const handleSaveCroppedImage = async (blob: Blob) => {
+    try {
+      setUploading(true)
+
+      // Lấy định dạng của blob (mặc định là image/jpeg nếu không có)
+      const fileType = blob.type || 'image/jpeg'
+
+      // 1. Kiểm tra xem định dạng file có hợp lệ không
+      if (!ACCEPTED_AVATAR_TYPES.includes(fileType)) {
+        throw new Error('Định dạng file không được hỗ trợ.')
+      }
+
+      // 2. Xác định đuôi file (extension) dựa trên fileType
+      let extension = 'jpg'
+      if (fileType === 'image/png') extension = 'png'
+      else if (fileType === 'image/svg+xml') extension = 'svg'
+      // 'image/jpeg' và 'image/jpg' dùng chung đuôi 'jpg'
+
+      const fileName = `avatar.${extension}`
+
+      // 3. Truyền định dạng và tên file động vào constructor của File
+      const file = new File(
+        [blob],
+        fileName,
+        {
+          type: fileType, 
+        }
+      )
+
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await apiClient.post('/users/avatar', formData, {
+        params: { id: profile!.id },
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+
+      const respData = res.data as any
+      const uploadedUrl = respData?.data?.avatarUrl ?? respData?.data?.url ?? respData?.avatarUrl ?? respData?.url
+      if (!uploadedUrl) throw new Error('Cannot read uploaded avatar URL.')
+
+      setProfile((current) => (current ? { ...current, avatarUrl: uploadedUrl } : current))
+      setAvatarVersion((current) => current + 1)
+
+      // Đóng editor
+      setShowEditor(false)
+      setSelectedImage(null)
+
+      setNotice('Avatar updated successfully.')
+    } catch (error: any) {
+      console.error('Failed to upload avatar:', error)
+
+      // Hiển thị thông báo lỗi cụ thể nếu sai định dạng, ngược lại báo lỗi chung chung
+      const errorMessage = error.message === 'Định dạng file không được hỗ trợ.' 
+        ? error.message 
+        : 'Failed to upload avatar.'
+        
+      setNotice(errorMessage)
+    } finally {
+      setUploading(false)
+    }
+  }
   const handleChange = (field: keyof ProfileForm) =>
     (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setForm((current) => ({
@@ -346,23 +457,38 @@ export default function Profile() {
   const handleSave = () => {
     if (!profile) return
 
-    setSaving(true)
-    setProfile({
-      ...profile,
-      email: form.email,
-      birthday: form.birthday || null,
-      gender: form.gender || null,
-    })
-    setEditing(false)
-    setNotice('Profile changes are updated on this page. Backend update endpoint is not available yet.')
-    setSaving(false)
+    const saveProfile = async () => {
+      try {
+        setSaving(true)
+        setError(null)
+        setNotice(null)
+
+        const response = await apiClient.put<ApiResponse<UserProfile>>('/users/profile', {
+          email: form.email,
+          birthday: form.birthday || null,
+          gender: form.gender || null,
+        }, {
+          params: { id: profile.id },
+        })
+
+        setProfile(response.data.data)
+        setEditing(false)
+        setNotice('Profile updated successfully.')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Cannot save profile.')
+      } finally {
+        setSaving(false)
+      }
+    }
+
+    void saveProfile()
   }
 
   const handleAvatarClick = () => {
     if (!uploading) fileInputRef.current?.click()
   }
 
-  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (event: ChangeEvent<HTMLInputElement>) => {
     if (!profile) return
 
     const file = event.target.files?.[0]
@@ -373,77 +499,97 @@ export default function Profile() {
       return
     }
 
-    try {
-      setUploading(true)
-      setError(null)
-      setNotice(null)
+    const imageUrl = URL.createObjectURL(file)
+    lastObjectUrlRef.current = imageUrl
 
-      const body = new FormData()
-      body.append('file', file)
+    // remember current avatar so underlying UI doesn't show preview
+    previousAvatarRef.current = profile?.avatarUrl ?? null
 
-      const response = await apiClient.post<AvatarUploadResponse>('/upload/avatar', body, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+    setSelectedImage(imageUrl)
+    setShowEditor(true)
 
-      const uploadedUrl = response.data.avatarUrl ?? response.data.url
-      if (!uploadedUrl) throw new Error('Cannot read uploaded avatar URL.')
-
-      setProfile((current) => (current ? { ...current, avatarUrl: uploadedUrl } : current))
-      setAvatarVersion((current) => current + 1)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Cannot upload avatar.')
-    } finally {
-      setUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
+    // clear file input so same file can be re-selected later
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  return (
+    return (
     <>
       <section className="title-section">
         <div className="wood-sign">
           <h1>PROFILE</h1>
-          <p>Koi Garden</p>
         </div>
       </section>
 
       <main className="profile-page">
         {loading ? (
-          <ProfileMessage type="loading" message="Loading user profile..." />
+          <ProfileMessage
+            type="loading"
+            message="Loading user profile..."
+          />
         ) : error ? (
-          <ProfileMessage type="error" message={error} />
+          <ProfileMessage
+            type="error"
+            message={error}
+          />
         ) : profile ? (
           <>
             <input
               ref={fileInputRef}
               type="file"
               accept={ACCEPTED_AVATAR_TYPES.join(',')}
-              onChange={handleFileChange}
+              onChange={handleImageSelect}
               hidden
             />
 
-            <ProfileHero
-              profile={profile}
-              avatarUrl={avatarUrl}
-              editing={editing}
-              uploading={uploading || saving}
-              onAvatarClick={handleAvatarClick}
-              onEditToggle={handleEditToggle}
-              onSave={handleSave}
-            />
+                  <ProfileHero
+                    profile={profile}
+                    avatarUrl={showEditor ? (previousAvatarRef.current ? `${previousAvatarRef.current}${previousAvatarRef.current.includes('?') ? '&' : '?'}v=${avatarVersion}` : undefined) : avatarUrl}
+                    editing={editing}
+                    uploading={uploading || saving}
+                    onAvatarClick={handleAvatarClick}
+                    onEditToggle={handleEditToggle}
+                    onSave={handleSave}
+                  />
 
-            {notice && <ProfileMessage type="info" message={notice} />}
+            {notice && (
+              <ProfileMessage
+                type="info"
+                message={notice}
+              />
+            )}
 
             <div className="profile-dashboard">
-              <AccountPanel profile={profile} form={form} editing={editing} onChange={handleChange} />
+              <AccountPanel
+                profile={profile}
+                form={form}
+                editing={editing}
+                onChange={handleChange}
+              />
+
               <StatisticsPanel profile={profile} />
+
               <AchievementsPanel />
             </div>
 
             <FavoriteKoiPanel />
+
+            {/* Image Editor */}
+            {showEditor && selectedImage && (
+              <ImageEditor
+                image={selectedImage}
+                onCancel={cleanupSelectedImage}
+                onSave={(blob) => {
+                  // when saving, upload and then cleanup object URL
+                  void handleSaveCroppedImage(blob).then(() => cleanupSelectedImage())
+                }}
+              />
+            )}
           </>
         ) : (
-          <ProfileMessage type="info" message="No profile data available." />
+          <ProfileMessage
+            type="info"
+            message="No profile data available."
+          />
         )}
       </main>
     </>

@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import "./Pond.css";
 
+interface PondCanvasProps {
+	fishCount: number;
+}
+
 interface FishState {
 	x: number;
 	y: number;
@@ -10,6 +14,41 @@ interface FishState {
 	turnAt: number;
 	size: number;
 	phase: number;
+}
+
+interface Point2D {
+	x: number;
+	y: number;
+}
+
+interface FinTrace {
+	firstPoint: Point2D;
+	secondPoint: Point2D;
+	thirdPoint: Point2D;
+	fourthPoint: Point2D;
+}
+
+interface FishImageProperties {
+	size: {
+		width: number;
+		height: number;
+	};
+	tailCrop: {
+		sx: number;
+		sy: number;
+		sw: number;
+		sh: number;
+		dx: number;
+		dy: number;
+		dw: number;
+		dh: number;
+	};
+	tailPivot: Point2D;
+	finUpPivot: Point2D;
+	finDownPivot: Point2D;
+	bodyDeviation: number;
+	upperFinTrace: FinTrace;
+	lowerFinTrace: FinTrace;
 }
 
 function makeFish(width: number, height: number): FishState {
@@ -29,80 +68,45 @@ function makeFish(width: number, height: number): FishState {
 	};
 }
 
-// Draw upper fin function (Bao, Thinh's style)
-function traceUpperFin(ctx: CanvasRenderingContext2D) {
-	ctx.moveTo(-14, -3);
-	ctx.bezierCurveTo(5, -50, 31, -66, 40, -60);
-	ctx.bezierCurveTo(70, -92, 108, -75, 95, -55);
-	ctx.lineTo(69, 6);
+// Draw upper/lower fin function
+function traceFin(ctx: CanvasRenderingContext2D, finTrace: FinTrace) {
+	ctx.moveTo(finTrace.firstPoint.x, finTrace.firstPoint.y);
+	ctx.lineTo(finTrace.secondPoint.x, finTrace.secondPoint.y);
+	ctx.lineTo(finTrace.thirdPoint.x, finTrace.thirdPoint.y);
+	ctx.lineTo(finTrace.fourthPoint.x, finTrace.fourthPoint.y);
 	ctx.closePath();
 }
 
-// Draw lower fin function (Bao, Thinh's style)
-function traceLowerFin(ctx: CanvasRenderingContext2D) {
-	ctx.moveTo(-14, 3);
-	ctx.bezierCurveTo(5, 50, 31, 66, 40, 60);
-	ctx.bezierCurveTo(70, 92, 108, 75, 95, 55);
-	ctx.lineTo(69, -6);
-	ctx.closePath();
-}
-
-// Draw upper fin function (Khoa's style)
-function traceNewUpperFin(ctx: CanvasRenderingContext2D) {
-	ctx.moveTo(61, 2);
-	ctx.lineTo(-1, 2);
-	ctx.lineTo(28, -72);
-	ctx.lineTo(61, -72);
-	ctx.closePath();
-}
-
-// Draw lower fin function (Khoa's style)
-function traceNewLowerFin(ctx: CanvasRenderingContext2D) {
-	ctx.moveTo(61, -2);
-	ctx.lineTo(-1, -2);
-	ctx.lineTo(28, 72);
-	ctx.lineTo(61, 72);
-	ctx.closePath();
-}
-
-// Bao, Thinh's style
+// Draw koi function
 function drawKoi(
 	ctx: CanvasRenderingContext2D,
 	fish: FishState,
 	image: HTMLImageElement,
 	time: number,
+	props: FishImageProperties,
 ) {
 	const { x, y, angle, size, phase } = fish;
 	const sway = Math.sin(time * 0.008 + phase);
 	const tailWag = Math.sin(time * 0.018 + phase) * 0.22;
 	const finWag = Math.sin(time * 0.014 + phase + 0.8) * 0.12;
 
-	// --- CONFIGURATION PARAMETERS FOR KHOA'S STYLE ---
+	// --- CONFIGURATION PARAMETERS ---
 	// 1. Overall dimensions of image
-	const IMG_W = 836;
-	const IMG_H = 340;
+	const IMG_W = props.size.width;
+	const IMG_H = props.size.height;
 
 	// 2. Tail joint coordinates (Tail pivot) - Relative to fish center
-	const TAIL_PIVOT_X = 282;
-	const TAIL_PIVOT_Y = 0;
+	const TAIL_PIVOT_X = props.tailPivot.x;
+	const TAIL_PIVOT_Y = props.tailPivot.y;
 	// Tail crop coordinates from source image (sx, sy, sw, sh) and draw (dx, dy, dw, dh)
-	const TAIL_CROP = {
-		sx: 690,
-		sy: 88,
-		sw: 146,
-		sh: 104,
-		dx: -10,
-		dy: -82,
-		dw: 146,
-		dh: 104,
-	};
+	const TAIL_CROP = props.tailCrop;
 
 	// 3. Upper & Lower fin joint coordinates - Relative to fish center
-	const FIN_UP_PIVOT_X = -253;
-	const FIN_UP_PIVOT_Y = -92;
+	const FIN_UP_PIVOT_X = props.finUpPivot.x;
+	const FIN_UP_PIVOT_Y = props.finUpPivot.y;
 
-	const FIN_DOWN_PIVOT_X = -253;
-	const FIN_DOWN_PIVOT_Y = 93;
+	const FIN_DOWN_PIVOT_X = props.finDownPivot.x;
+	const FIN_DOWN_PIVOT_Y = props.finDownPivot.y;
 	// -----------------------------------------
 
 	// Calculate scale ratio based on new width
@@ -139,199 +143,14 @@ function drawKoi(
 	// ==========================================
 	// ENABLE DEBUG FOR THE TAIL HERE
 	// ==========================================
-	// 1. Draw a magenta border showing the exact rectangle containing the tail
-	ctx.strokeStyle = "magenta";
-	ctx.lineWidth = 2;
-	ctx.strokeRect(TAIL_CROP.dx, TAIL_CROP.dy, TAIL_CROP.dw, TAIL_CROP.dh);
-
-	// 2. Draw a red dot right at the rotation center (Tail joint)
-	ctx.fillStyle = "red";
-	ctx.beginPath();
-	ctx.arc(0, 0, 5, 0, Math.PI * 2); // Red dot with radius 5px
-	ctx.fill();
-	// ==========================================
-
-	ctx.restore();
-
-	// ==========================================
-	// 2. DRAW BODY (CUT FINS)
-	// ==========================================
-	ctx.save();
-	ctx.beginPath();
-	// Rectangle frame surrounding the entire fish
-	ctx.rect(-IMG_W / 2, -IMG_H / 2, IMG_W - 126, IMG_H);
-
-	// ==========================================
-	// ENABLE DEBUG FOR BODY HERE
-	// ==========================================
-	// Draw yellow border showing exact rectangle containing the body
-	ctx.strokeStyle = "yellow";
-	ctx.lineWidth = 2;
-	ctx.strokeRect(-IMG_W / 2, -IMG_H / 2, IMG_W - 126, IMG_H);
-	// ==========================================
-
-	// Cut hole for upper fin
-	ctx.save();
-	ctx.translate(FIN_UP_PIVOT_X, FIN_UP_PIVOT_Y);
-	traceUpperFin(ctx);
-	ctx.restore();
-
-	// Cut hole for lower fin
-	ctx.save();
-	ctx.translate(FIN_DOWN_PIVOT_X, FIN_DOWN_PIVOT_Y);
-	traceLowerFin(ctx);
-	ctx.restore();
-
-	// Apply cut and draw body
-	ctx.clip("evenodd");
-	ctx.drawImage(image, -IMG_W / 2, -IMG_H / 2, IMG_W, IMG_H);
-	ctx.restore();
-
-	// ==========================================
-	// 3. DRAW UPPER FIN
-	// ==========================================
-	ctx.save();
-	ctx.translate(FIN_UP_PIVOT_X, FIN_UP_PIVOT_Y);
-	ctx.rotate(finWag); // remember to recover this
-	// ctx.rotate(0); // remember to remove this
-	ctx.beginPath();
-	traceUpperFin(ctx);
-
-	// ==========================================
-	// ENABLE DEBUG FOR THE UPPER FIN HERE
-	// ==========================================
-	// Show red stroke around the upper fin
-	ctx.strokeStyle = "red";
-	ctx.lineWidth = 2;
-	ctx.stroke();
-	// ==========================================
-
-	ctx.clip();
-	// Translate back to draw at correct original position
-	ctx.drawImage(
-		image,
-		-IMG_W / 2 - FIN_UP_PIVOT_X,
-		-IMG_H / 2 - FIN_UP_PIVOT_Y,
-		IMG_W,
-		IMG_H,
-	);
-	ctx.restore();
-
-	// ==========================================
-	// 4. DRAW LOWER FIN
-	// ==========================================
-	ctx.save();
-	ctx.translate(-253, 93);
-	ctx.rotate(-finWag * 0.85); // remember to recover this
-	// ctx.rotate(0); // remember to remove this
-	ctx.beginPath();
-	traceLowerFin(ctx);
-
-	// ==========================================
-	// ENABLE DEBUG FOR THE LOWER FIN HERE
-	// ==========================================
-	// Show blue stroke around the lower fin
-	ctx.strokeStyle = "blue";
-	ctx.lineWidth = 2;
-	ctx.stroke();
-	// ==========================================
-
-	ctx.clip();
-	// Translate back to draw at correct original position
-	ctx.drawImage(
-		image,
-		-IMG_W / 2 - FIN_DOWN_PIVOT_X,
-		-IMG_H / 2 - FIN_DOWN_PIVOT_Y,
-		IMG_W,
-		IMG_H,
-	);
-	ctx.restore();
-
-	ctx.restore();
-}
-
-// Khoa's style
-function drawNewKoi(
-	ctx: CanvasRenderingContext2D,
-	fish: FishState,
-	image: HTMLImageElement,
-	time: number,
-) {
-	const { x, y, angle, size, phase } = fish;
-	const sway = Math.sin(time * 0.008 + phase);
-	const tailWag = Math.sin(time * 0.018 + phase) * 0.22;
-	const finWag = Math.sin(time * 0.014 + phase + 0.8) * 0.12;
-
-	// --- CONFIGURATION PARAMETERS FOR KHOA'S STYLE ---
-	// 1. Overall dimensions of image
-	const IMG_W = 441;
-	const IMG_H = 252;
-
-	// 2. Tail joint coordinates (Tail pivot) - Relative to fish center
-	const TAIL_PIVOT_X = 146;
-	const TAIL_PIVOT_Y = 0;
-	// Tail crop coordinates from source image (sx, sy, sw, sh) and draw (dx, dy, dw, dh)
-	const TAIL_CROP = {
-		sx: 369,
-		sy: 61,
-		sw: 90,
-		sh: 130,
-		dx: 0,
-		dy: -65,
-		dw: 90,
-		dh: 130,
-	};
-
-	// 3. Upper & Lower fin joint coordinates - Relative to fish center
-	const FIN_UP_PIVOT_X = -130;
-	const FIN_UP_PIVOT_Y = -55;
-
-	const FIN_DOWN_PIVOT_X = -130;
-	const FIN_DOWN_PIVOT_Y = 55;
-	// -----------------------------------------
-
-	// Calculate scale ratio based on new width
-	const scale = size / IMG_W;
-
-	ctx.save();
-	// Body sway motion
-	ctx.translate(
-		x + Math.cos(angle + Math.PI / 2) * sway * 2,
-		y + Math.sin(angle + Math.PI / 2) * sway * 2,
-	);
-	ctx.rotate(angle + Math.PI + sway * 0.06);
-	ctx.scale(scale, scale);
-
-	// ==========================================
-	// 1. DRAW TAIL
-	// ==========================================
-	ctx.save();
-	ctx.translate(TAIL_PIVOT_X, TAIL_PIVOT_Y);
-	ctx.rotate(tailWag); // remember to recover this
-	// ctx.rotate(0); // remember to remove this
-	ctx.drawImage(
-		image,
-		TAIL_CROP.sx,
-		TAIL_CROP.sy,
-		TAIL_CROP.sw,
-		TAIL_CROP.sh, // Crop from source image
-		TAIL_CROP.dx,
-		TAIL_CROP.dy,
-		TAIL_CROP.dw,
-		TAIL_CROP.dh, // Place at pivot
-	);
-
-	// ==========================================
-	// ENABLE DEBUG FOR TAIL HERE
-	// ==========================================
-	// // 1. Draw magenta border showing exact rectangle containing the tail
+	// // 1. Draw a magenta border showing the exact rectangle containing the tail
 	// ctx.strokeStyle = "magenta";
 	// ctx.lineWidth = 2;
 	// ctx.strokeRect(TAIL_CROP.dx, TAIL_CROP.dy, TAIL_CROP.dw, TAIL_CROP.dh);
-	// // 2. Draw a red dot at the rotation center (Tail joint)
+	// // 2. Draw a red dot right at the rotation center (Tail joint)
 	// ctx.fillStyle = "red";
 	// ctx.beginPath();
-	// ctx.arc(0, 0, 5, 0, Math.PI * 2); /// Red dot radius 5px
+	// ctx.arc(0, 0, 5, 0, Math.PI * 2); // Red dot with radius 5px
 	// ctx.fill();
 	// ==========================================
 
@@ -343,7 +162,7 @@ function drawNewKoi(
 	ctx.save();
 	ctx.beginPath();
 	// Rectangle frame surrounding the entire fish
-	ctx.rect(-IMG_W / 2, -IMG_H / 2, IMG_W - 73, IMG_H);
+	ctx.rect(-IMG_W / 2, -IMG_H / 2, IMG_W - props.bodyDeviation, IMG_H);
 
 	// ==========================================
 	// ENABLE DEBUG FOR BODY HERE
@@ -351,19 +170,19 @@ function drawNewKoi(
 	// Draw yellow border showing exact rectangle containing the body
 	// ctx.strokeStyle = "yellow";
 	// ctx.lineWidth = 2;
-	// ctx.strokeRect(-IMG_W / 2, -IMG_H / 2, IMG_W - 73, IMG_H);
+	// ctx.strokeRect(-IMG_W / 2, -IMG_H / 2, IMG_W - props.bodyDeviation, IMG_H);
 	// ==========================================
 
 	// Cut hole for upper fin
 	ctx.save();
 	ctx.translate(FIN_UP_PIVOT_X, FIN_UP_PIVOT_Y);
-	traceNewUpperFin(ctx);
+	traceFin(ctx, props.upperFinTrace);
 	ctx.restore();
 
 	// Cut hole for lower fin
 	ctx.save();
 	ctx.translate(FIN_DOWN_PIVOT_X, FIN_DOWN_PIVOT_Y);
-	traceNewLowerFin(ctx);
+	traceFin(ctx, props.lowerFinTrace);
 	ctx.restore();
 
 	// Apply cut and draw body
@@ -379,7 +198,7 @@ function drawNewKoi(
 	ctx.rotate(finWag); // remember to recover this
 	// ctx.rotate(0); // remember to remove this
 	ctx.beginPath();
-	traceNewUpperFin(ctx);
+	traceFin(ctx, props.upperFinTrace);
 
 	// ==========================================
 	// ENABLE DEBUG FOR THE UPPER FIN HERE
@@ -409,7 +228,7 @@ function drawNewKoi(
 	ctx.rotate(-finWag * 0.85); // remember to recover this
 	// ctx.rotate(0); // remember to remove this
 	ctx.beginPath();
-	traceNewLowerFin(ctx);
+	traceFin(ctx, props.lowerFinTrace);
 
 	// ==========================================
 	// ENABLE DEBUG FOR THE LOWER FIN HERE
@@ -434,8 +253,179 @@ function drawNewKoi(
 	ctx.restore();
 }
 
-interface PondCanvasProps {
-	fishCount: number;
+function debugDrawKoi(
+	ctx: CanvasRenderingContext2D,
+	fish: FishState,
+	image: HTMLImageElement,
+	time: number,
+	props: FishImageProperties,
+) {
+	const { x, y, angle, size, phase } = fish;
+	const sway = Math.sin(time * 0.008 + phase);
+	const tailWag = Math.sin(time * 0.018 + phase) * 0.22;
+	const finWag = Math.sin(time * 0.014 + phase + 0.8) * 0.12;
+
+	// --- CONFIGURATION PARAMETERS ---
+	// 1. Overall dimensions of image
+	const IMG_W = props.size.width;
+	const IMG_H = props.size.height;
+
+	// 2. Tail joint coordinates (Tail pivot) - Relative to fish center
+	const TAIL_PIVOT_X = props.tailPivot.x;
+	const TAIL_PIVOT_Y = props.tailPivot.y;
+	// Tail crop coordinates from source image (sx, sy, sw, sh) and draw (dx, dy, dw, dh)
+	const TAIL_CROP = props.tailCrop;
+
+	// 3. Upper & Lower fin joint coordinates - Relative to fish center
+	const FIN_UP_PIVOT_X = props.finUpPivot.x;
+	const FIN_UP_PIVOT_Y = props.finUpPivot.y;
+
+	const FIN_DOWN_PIVOT_X = props.finDownPivot.x;
+	const FIN_DOWN_PIVOT_Y = props.finDownPivot.y;
+	// -----------------------------------------
+
+	// Calculate scale ratio based on new width
+	const scale = size / IMG_W;
+
+	ctx.save();
+	// Body sway motion
+	ctx.translate(
+		x + Math.cos(angle + Math.PI / 2) * sway * 2,
+		y + Math.sin(angle + Math.PI / 2) * sway * 2,
+	);
+	ctx.rotate(angle + Math.PI + sway * 0.06);
+	ctx.scale(scale, scale);
+
+	// ==========================================
+	// 1. DRAW TAIL
+	// ==========================================
+	ctx.save();
+	ctx.translate(TAIL_PIVOT_X, TAIL_PIVOT_Y);
+	// ctx.rotate(tailWag); // remember to recover this
+	ctx.rotate(0); // remember to remove this
+	ctx.drawImage(
+		image,
+		TAIL_CROP.sx,
+		TAIL_CROP.sy,
+		TAIL_CROP.sw,
+		TAIL_CROP.sh, // Crop from source image
+		TAIL_CROP.dx,
+		TAIL_CROP.dy,
+		TAIL_CROP.dw,
+		TAIL_CROP.dh, // Place at pivot
+	);
+
+	// ==========================================
+	// ENABLE DEBUG FOR THE TAIL HERE
+	// ==========================================
+	// 1. Draw a magenta border showing the exact rectangle containing the tail
+	ctx.strokeStyle = "magenta";
+	ctx.lineWidth = 2;
+	ctx.strokeRect(TAIL_CROP.dx, TAIL_CROP.dy, TAIL_CROP.dw, TAIL_CROP.dh);
+	// 2. Draw a red dot right at the rotation center (Tail joint)
+	ctx.fillStyle = "red";
+	ctx.beginPath();
+	ctx.arc(0, 0, 5, 0, Math.PI * 2); // Red dot with radius 5px
+	ctx.fill();
+	// ==========================================
+
+	ctx.restore();
+
+	// ==========================================
+	// 2. DRAW BODY (CUT FINS)
+	// ==========================================
+	ctx.save();
+	ctx.beginPath();
+	// Rectangle frame surrounding the entire fish
+	ctx.rect(-IMG_W / 2, -IMG_H / 2, IMG_W - props.bodyDeviation, IMG_H);
+
+	// ==========================================
+	// ENABLE DEBUG FOR BODY HERE
+	// ==========================================
+	// Draw yellow border showing exact rectangle containing the body
+	ctx.strokeStyle = "yellow";
+	ctx.lineWidth = 2;
+	ctx.strokeRect(-IMG_W / 2, -IMG_H / 2, IMG_W - props.bodyDeviation, IMG_H);
+	// ==========================================
+
+	// Cut hole for upper fin
+	ctx.save();
+	ctx.translate(FIN_UP_PIVOT_X, FIN_UP_PIVOT_Y);
+	traceFin(ctx, props.upperFinTrace);
+	ctx.restore();
+
+	// Cut hole for lower fin
+	ctx.save();
+	ctx.translate(FIN_DOWN_PIVOT_X, FIN_DOWN_PIVOT_Y);
+	traceFin(ctx, props.lowerFinTrace);
+	ctx.restore();
+
+	// Apply cut and draw body
+	ctx.clip("evenodd");
+	ctx.drawImage(image, -IMG_W / 2, -IMG_H / 2, IMG_W, IMG_H);
+	ctx.restore();
+
+	// ==========================================
+	// 3. DRAW UPPER FIN
+	// ==========================================
+	ctx.save();
+	ctx.translate(FIN_UP_PIVOT_X, FIN_UP_PIVOT_Y);
+	// ctx.rotate(finWag); // remember to recover this
+	ctx.rotate(0); // remember to remove this
+	ctx.beginPath();
+	traceFin(ctx, props.upperFinTrace);
+
+	// ==========================================
+	// ENABLE DEBUG FOR THE UPPER FIN HERE
+	// ==========================================
+	// Show red stroke around the upper fin
+	ctx.strokeStyle = "red";
+	ctx.lineWidth = 2;
+	ctx.stroke();
+	// ==========================================
+
+	ctx.clip();
+	// Translate back to draw at correct original position
+	ctx.drawImage(
+		image,
+		-IMG_W / 2 - FIN_UP_PIVOT_X,
+		-IMG_H / 2 - FIN_UP_PIVOT_Y,
+		IMG_W,
+		IMG_H,
+	);
+	ctx.restore();
+
+	// ==========================================
+	// 4. DRAW LOWER FIN
+	// ==========================================
+	ctx.save();
+	ctx.translate(FIN_DOWN_PIVOT_X, FIN_DOWN_PIVOT_Y);
+	// ctx.rotate(-finWag * 0.85); // remember to recover this
+	ctx.rotate(0); // remember to remove this
+	ctx.beginPath();
+	traceFin(ctx, props.lowerFinTrace);
+
+	// ==========================================
+	// ENABLE DEBUG FOR THE LOWER FIN HERE
+	// ==========================================
+	// Show blue stroke around the lower fin
+	ctx.strokeStyle = "blue";
+	ctx.lineWidth = 2;
+	ctx.stroke();
+	// ==========================================
+
+	ctx.clip();
+	// Translate back to draw at correct original position
+	ctx.drawImage(
+		image,
+		-IMG_W / 2 - FIN_DOWN_PIVOT_X,
+		-IMG_H / 2 - FIN_DOWN_PIVOT_Y,
+		IMG_W,
+		IMG_H,
+	);
+	ctx.restore();
+
+	ctx.restore();
 }
 
 // Use this function to debug fish in canvas
@@ -446,11 +436,11 @@ function DebugCanvas() {
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 		const koiImage = new Image();
 
-		// LƯU Ý: Chỉnh lại tên file ảnh cho đúng với thực tế của bạn
-		koiImage.src = "/kois/new-koi.svg";
+		// Source image
+		koiImage.src = "/kois/koi-fish-benigoi.svg";
 
 		koiImage.onload = () => {
-			// Thiết lập kích thước canvas
+			// Configure canvas's size
 			const box = (
 				canvas.parentElement as HTMLElement
 			).getBoundingClientRect();
@@ -461,24 +451,30 @@ function DebugCanvas() {
 			canvas.style.height = `${box.height}px`;
 			ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 
-			// Đổ màu nền tĩnh cho hồ cá dễ nhìn
+			// Fill static background color for pond
 			ctx.fillStyle = "#087d9d";
 			ctx.fillRect(0, 0, box.width, box.height);
 
-			// Tạo 1 con cá khổng lồ nằm im ở giữa màn hình
+			// Create a giant static fish at the center of the pond
 			const staticFish: FishState = {
 				x: box.width / 2,
 				y: box.height / 2,
-				angle: 0, // Nằm ngang
-				size: 750, // Kích thước cực lớn để dễ soi viền cắt
+				angle: 0, // Horizontal
+				size: 550, // Extra-large size to easily inspect the cut edges
 				phase: 0,
 				speed: 0,
 				targetAngle: 0,
 				turnAt: 0,
 			};
 
-			// Gọi hàm vẽ cá. Truyền time = 0 để tắt toàn bộ animation
-			drawNewKoi(ctx, staticFish, koiImage, 0);
+			// Call drawKoi(). Pass time = 0 to turn off all animations
+			debugDrawKoi(
+				ctx,
+				staticFish,
+				koiImage,
+				0,
+				KOI_PROPS_MAP.get("type2") as FishImageProperties,
+			);
 		};
 	}, []);
 
@@ -493,7 +489,7 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 		const canvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 		const koiImage = new Image();
-		koiImage.src = "/kois/new-koi.svg";
+		koiImage.src = "/kois/koi-fish-benigoi.svg";
 		let frame: number;
 		let last = performance.now();
 		let dimensions = { width: 0, height: 0 };
@@ -575,7 +571,14 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 				fish.angle += Math.max(-1.2 * dt, Math.min(1.2 * dt, delta));
 				fish.x += Math.cos(fish.angle) * fish.speed * dt;
 				fish.y += Math.sin(fish.angle) * fish.speed * dt;
-				if (koiImage.complete) drawNewKoi(ctx, fish, koiImage, now);
+				if (koiImage.complete)
+					drawKoi(
+						ctx,
+						fish,
+						koiImage,
+						now,
+						KOI_PROPS_MAP.get("type2") as FishImageProperties,
+					);
 			});
 			frame = requestAnimationFrame(animate);
 		};
@@ -629,3 +632,754 @@ function Pond() {
 }
 
 export default Pond;
+
+const KOI_PROPS_MAP = new Map<string, FishImageProperties>([
+	[
+		"type1", // All koi fishes from Bao, Thinh's style
+		{
+			size: {
+				width: 836,
+				height: 340,
+			},
+			tailCrop: {
+				sx: 690,
+				sy: 88,
+				sw: 146,
+				sh: 104,
+				dx: -10,
+				dy: -82,
+				dw: 146,
+				dh: 104,
+			},
+			tailPivot: {
+				x: 282,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -253,
+				y: -92,
+			},
+			finDownPivot: {
+				x: -253,
+				y: 92,
+			},
+			bodyDeviation: 126,
+			upperFinTrace: {
+				firstPoint: {
+					x: -14,
+					y: -3,
+				},
+				secondPoint: {
+					x: 20,
+					y: -79,
+				},
+				thirdPoint: {
+					x: 105,
+					y: -79,
+				},
+				fourthPoint: {
+					x: 69,
+					y: 6,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: -14,
+					y: 3,
+				},
+				secondPoint: {
+					x: 20,
+					y: 79,
+				},
+				thirdPoint: {
+					x: 105,
+					y: 79,
+				},
+				fourthPoint: {
+					x: 69,
+					y: -6,
+				},
+			},
+		},
+	],
+	[
+		"type2", // All goromo koi fishes, Ginrin Shiro Utsuri, Aka Bekko, Ki Bekko, Karashi, Benigoi (Khoa's style)
+		{
+			size: {
+				width: 441,
+				height: 252,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 146,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -130,
+				y: -55,
+			},
+			finDownPivot: {
+				x: -130,
+				y: 55,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 61,
+					y: 2,
+				},
+				secondPoint: {
+					x: -1,
+					y: 2,
+				},
+				thirdPoint: {
+					x: 28,
+					y: -72,
+				},
+				fourthPoint: {
+					x: 61,
+					y: -72,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 61,
+					y: -2,
+				},
+				secondPoint: {
+					x: -1,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 28,
+					y: 72,
+				},
+				fourthPoint: {
+					x: 61,
+					y: 72,
+				},
+			},
+		},
+	],
+	[
+		"type3", // Ginrin Hi Utsuri
+		{
+			size: {
+				width: 441,
+				height: 257,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 146,
+				y: -2,
+			},
+			finUpPivot: {
+				x: -138,
+				y: -54,
+			},
+			finDownPivot: {
+				x: -138,
+				y: 54,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 61,
+					y: 1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 1,
+				},
+				thirdPoint: {
+					x: -6,
+					y: -75,
+				},
+				fourthPoint: {
+					x: 61,
+					y: -75,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 61,
+					y: -1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 1,
+				},
+				thirdPoint: {
+					x: -6,
+					y: 75,
+				},
+				fourthPoint: {
+					x: 61,
+					y: 75,
+				},
+			},
+		},
+	],
+	[
+		"type4", // Ginrin Ki Utsuri
+		{
+			size: {
+				width: 441,
+				height: 254,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 146,
+				y: -1,
+			},
+			finUpPivot: {
+				x: -133,
+				y: -54,
+			},
+			finDownPivot: {
+				x: -133,
+				y: 54,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: 1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 1,
+				},
+				thirdPoint: {
+					x: 4,
+					y: -74,
+				},
+				fourthPoint: {
+					x: 68,
+					y: -74,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: -1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 1,
+				},
+				thirdPoint: {
+					x: 4,
+					y: 74,
+				},
+				fourthPoint: {
+					x: 68,
+					y: 74,
+				},
+			},
+		},
+	],
+	[
+		"type5", // Shiro Utsuri Doitsu
+		{
+			size: {
+				width: 444,
+				height: 258,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 147,
+				y: -2,
+			},
+			finUpPivot: {
+				x: -128,
+				y: -54,
+			},
+			finDownPivot: {
+				x: -133,
+				y: 54,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: 1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 2,
+				},
+				thirdPoint: {
+					x: 18,
+					y: -75,
+				},
+				fourthPoint: {
+					x: 68,
+					y: -75,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: -1,
+				},
+				secondPoint: {
+					x: -1,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 18,
+					y: 75,
+				},
+				fourthPoint: {
+					x: 68,
+					y: 75,
+				},
+			},
+		},
+	],
+	[
+		"type6", // Hi Utsuri Doitsu
+		{
+			size: {
+				width: 442,
+				height: 258,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 147,
+				y: -2,
+			},
+			finUpPivot: {
+				x: -131,
+				y: -54,
+			},
+			finDownPivot: {
+				x: -135,
+				y: 54,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: 1,
+				},
+				secondPoint: {
+					x: -2,
+					y: 2,
+				},
+				thirdPoint: {
+					x: 18,
+					y: -75,
+				},
+				fourthPoint: {
+					x: 68,
+					y: -75,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: -1,
+				},
+				secondPoint: {
+					x: -2,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 18,
+					y: 75,
+				},
+				fourthPoint: {
+					x: 68,
+					y: 75,
+				},
+			},
+		},
+	],
+	[
+		"type7", // Ki Utsuri Doitsu
+		{
+			size: {
+				width: 441,
+				height: 256,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 146,
+				y: -2,
+			},
+			finUpPivot: {
+				x: -133,
+				y: -54,
+			},
+			finDownPivot: {
+				x: -133,
+				y: 54,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 63,
+					y: 2,
+				},
+				secondPoint: {
+					x: -1,
+					y: 2,
+				},
+				thirdPoint: {
+					x: 4,
+					y: -74,
+				},
+				fourthPoint: {
+					x: 78,
+					y: -74,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 63,
+					y: -1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 0,
+				},
+				thirdPoint: {
+					x: 4,
+					y: 74,
+				},
+				fourthPoint: {
+					x: 78,
+					y: 74,
+				},
+			},
+		},
+	],
+	[
+		"type8", // Hikari Shiro Utsuri
+		{
+			size: {
+				width: 441,
+				height: 257,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 146,
+				y: -2,
+			},
+			finUpPivot: {
+				x: -131,
+				y: -54,
+			},
+			finDownPivot: {
+				x: -126,
+				y: 54,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 58,
+					y: 0,
+				},
+				secondPoint: {
+					x: 0,
+					y: 1,
+				},
+				thirdPoint: {
+					x: -10,
+					y: -75,
+				},
+				fourthPoint: {
+					x: 61,
+					y: -75,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 58,
+					y: 0,
+				},
+				secondPoint: {
+					x: 0,
+					y: 1,
+				},
+				thirdPoint: {
+					x: -10,
+					y: 75,
+				},
+				fourthPoint: {
+					x: 61,
+					y: 75,
+				},
+			},
+		},
+	],
+	[
+		"type9", // Hi Utsuri
+		{
+			size: {
+				width: 442,
+				height: 233,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 147,
+				y: 10,
+			},
+			finUpPivot: {
+				x: -130,
+				y: -54,
+			},
+			finDownPivot: {
+				x: -130,
+				y: 54,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: 1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 2,
+				},
+				thirdPoint: {
+					x: 10,
+					y: -63,
+				},
+				fourthPoint: {
+					x: 72,
+					y: -63,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: -1,
+				},
+				secondPoint: {
+					x: -1,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 10,
+					y: 63,
+				},
+				fourthPoint: {
+					x: 72,
+					y: 63,
+				},
+			},
+		},
+	],
+	[
+		"type10", // Ki Utsuri
+		{
+			size: {
+				width: 443,
+				height: 248,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 147,
+				y: 2,
+			},
+			finUpPivot: {
+				x: -126,
+				y: -54,
+			},
+			finDownPivot: {
+				x: -126,
+				y: 54,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 41,
+					y: 1,
+				},
+				secondPoint: {
+					x: -2,
+					y: 1,
+				},
+				thirdPoint: {
+					x: -1,
+					y: -68,
+				},
+				fourthPoint: {
+					x: 72,
+					y: -68,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 41,
+					y: -1,
+				},
+				secondPoint: {
+					x: 0,
+					y: -1,
+				},
+				thirdPoint: {
+					x: -1,
+					y: 68,
+				},
+				fourthPoint: {
+					x: 72,
+					y: 68,
+				},
+			},
+		},
+	],
+	[
+		"type11", // Shiro Bekko
+		{
+			size: {
+				width: 441,
+				height: 236,
+			},
+			tailCrop: {
+				sx: 369,
+				sy: 61,
+				sw: 90,
+				sh: 130,
+				dx: 0,
+				dy: -65,
+				dw: 90,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 147,
+				y: 10,
+			},
+			finUpPivot: {
+				x: -130,
+				y: -54,
+			},
+			finDownPivot: {
+				x: -130,
+				y: 54,
+			},
+			bodyDeviation: 73,
+			upperFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: 1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 2,
+				},
+				thirdPoint: {
+					x: 10,
+					y: -63,
+				},
+				fourthPoint: {
+					x: 72,
+					y: -63,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 62,
+					y: -1,
+				},
+				secondPoint: {
+					x: -1,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 10,
+					y: 63,
+				},
+				fourthPoint: {
+					x: 72,
+					y: 63,
+				},
+			},
+		},
+	],
+]);

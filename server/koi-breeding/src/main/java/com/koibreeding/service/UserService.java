@@ -18,12 +18,17 @@ import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.dto.response.ResUserDto;
 import com.koibreeding.repository.UserRepository;
 
+import com.koibreeding.service.CloudinaryUploadService;
+import java.util.Map;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final CloudinaryUploadService cloudinaryUploadService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, CloudinaryUploadService cloudinaryUploadService) {
         this.userRepository = userRepository;
+        this.cloudinaryUploadService = cloudinaryUploadService;
     }
 
     public User handleFetchUserById(Integer userId) {
@@ -95,7 +100,37 @@ public class UserService {
         return this.userRepository.save(currentUser);
     }
 
+    public String handleUploadAvatar(Integer userId, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Avatar file is required.");
+        }
 
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.toLowerCase().startsWith("image/")) {
+            throw new IllegalArgumentException("Avatar file format is invalid. Only image files are allowed.");
+        }
+
+        User currentUser = this.handleFetchProfileByUserId(userId);
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        if (fileName.isBlank()) {
+            throw new IllegalArgumentException("Avatar file name is invalid.");
+        }
+
+        String fileExtension = StringUtils.getFilenameExtension(fileName);
+        if (fileExtension == null || fileExtension.isBlank()) {
+            throw new IllegalArgumentException("Avatar file extension is invalid.");
+        }
+
+        try {
+            String avatarUrl = this.cloudinaryUploadService.uploadImage(file);
+            currentUser.setAvatarUrl(avatarUrl);
+            this.userRepository.save(currentUser);
+            return avatarUrl;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload avatar for user id '" + userId + "'.", e);
+        }
+    }
+/* 
     public String handleUploadAvatar(Integer userId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Avatar file is required.");
@@ -138,7 +173,7 @@ public class UserService {
 
         
     }
-
+*/
     private void deleteOldAvatar(String oldAvatarUrl, String newAvatarUrl, Path uploadDir) throws IOException {
         if (oldAvatarUrl == null || oldAvatarUrl.isBlank() || oldAvatarUrl.equals(newAvatarUrl)) {
             return;

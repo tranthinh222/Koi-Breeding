@@ -281,50 +281,7 @@ export default function AuthModal({
             <section className="auth-panel">
               <div className="auth-section-title">Register</div>
 
-              {/* Avatar upload */}
-              <div className="avatar-upload">
-                <div
-                  className="avatar-upload-circle"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {avatarPreview ? (
-                    <img src={avatarPreview} alt="Avatar preview" />
-                  ) : (
-                    <span className="avatar-upload-placeholder">🐟</span>
-                  )}
-                  <div className="avatar-upload-overlay">
-                    <span>📷</span>
-                  </div>
-                </div>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="avatar-upload-input"
-                  onChange={handleAvatarChange}
-                />
-
-                <div className="avatar-upload-actions">
-                  <button
-                    type="button"
-                    className="avatar-upload-btn"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    {avatarPreview ? "Change photo" : "Upload photo"}
-                  </button>
-                  {avatarPreview && (
-                    <button
-                      type="button"
-                      className="avatar-upload-remove"
-                      onClick={handleRemoveAvatar}
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              </div>
-
+              
               <div className="field-group">
                 {/* Username */}
                 <label className="input-field">

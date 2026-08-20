@@ -336,8 +336,6 @@ export default function AuthModal({
                         ? "Male"
                         : gender === "FEMALE"
                           ? "Female"
-                          : gender === "OTHER"
-                            ? "Other"
                             : "Select gender"}
                     </span>
 

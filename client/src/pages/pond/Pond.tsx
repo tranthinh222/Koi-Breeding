@@ -437,7 +437,7 @@ function DebugCanvas() {
 		const koiImage = new Image();
 
 		// Source image
-		koiImage.src = "/kois/koi-fish-benigoi.svg";
+		koiImage.src = "/kois/koi-fish-ginrin-asagi.png";
 
 		koiImage.onload = () => {
 			// Configure canvas's size
@@ -473,7 +473,7 @@ function DebugCanvas() {
 				staticFish,
 				koiImage,
 				0,
-				KOI_PROPS_MAP.get("type2") as FishImageProperties,
+				KOI_PROPS_MAP.get("type28") as FishImageProperties,
 			);
 		};
 	}, []);
@@ -489,7 +489,7 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 		const canvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 		const koiImage = new Image();
-		koiImage.src = "/kois/koi-fish-benigoi.svg";
+		koiImage.src = "/kois/koi-fish-ginrin-asagi.png";
 		let frame: number;
 		let last = performance.now();
 		let dimensions = { width: 0, height: 0 };
@@ -577,7 +577,7 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 						fish,
 						koiImage,
 						now,
-						KOI_PROPS_MAP.get("type2") as FishImageProperties,
+						KOI_PROPS_MAP.get("type28") as FishImageProperties,
 					);
 			});
 			frame = requestAnimationFrame(animate);
@@ -1378,6 +1378,1162 @@ const KOI_PROPS_MAP = new Map<string, FishImageProperties>([
 				fourthPoint: {
 					x: 72,
 					y: 63,
+				},
+			},
+		},
+	],
+	[
+		"type12", //
+		{
+			size: {
+				width: 785,
+				height: 395,
+			},
+			tailCrop: {
+				sx: 662,
+				sy: 108,
+				sw: 130,
+				sh: 130,
+				dx: 0,
+				dy: -90,
+				dw: 130,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 270,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -268,
+				y: -105,
+			},
+			finDownPivot: {
+				x: -264,
+				y: 104,
+			},
+			bodyDeviation: 122,
+			upperFinTrace: {
+				firstPoint: {
+					x: 91,
+					y: 1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 2,
+				},
+				thirdPoint: {
+					x: 20,
+					y: -92,
+				},
+				fourthPoint: {
+					x: 56,
+					y: -92,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 90,
+					y: -3,
+				},
+				secondPoint: {
+					x: -2,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 20,
+					y: 90,
+				},
+				fourthPoint: {
+					x: 56,
+					y: 90,
+				},
+			},
+		},
+	],
+	[
+		"type13", //
+		{
+			size: {
+				width: 785,
+				height: 395,
+			},
+			tailCrop: {
+				sx: 662,
+				sy: 108,
+				sw: 130,
+				sh: 130,
+				dx: 0,
+				dy: -90,
+				dw: 130,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 270,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -274,
+				y: -99,
+			},
+			finDownPivot: {
+				x: -270,
+				y: 110,
+			},
+			bodyDeviation: 122,
+			upperFinTrace: {
+				firstPoint: {
+					x: 91,
+					y: 1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 2,
+				},
+				thirdPoint: {
+					x: 20,
+					y: -95,
+				},
+				fourthPoint: {
+					x: 56,
+					y: -95,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 89,
+					y: -2,
+				},
+				secondPoint: {
+					x: -1,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 20,
+					y: 85,
+				},
+				fourthPoint: {
+					x: 56,
+					y: 85,
+				},
+			},
+		},
+	],
+	[
+		"type14", //
+		{
+			size: {
+				width: 788,
+				height: 395,
+			},
+			tailCrop: {
+				sx: 662,
+				sy: 108,
+				sw: 130,
+				sh: 130,
+				dx: 0,
+				dy: -90,
+				dw: 130,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 270,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -252,
+				y: -102,
+			},
+			finDownPivot: {
+				x: -250,
+				y: 106,
+			},
+			bodyDeviation: 122,
+			upperFinTrace: {
+				firstPoint: {
+					x: 91,
+					y: 1,
+				},
+				secondPoint: {
+					x: -1,
+					y: 0,
+				},
+				thirdPoint: {
+					x: 20,
+					y: -92,
+				},
+				fourthPoint: {
+					x: 56,
+					y: -92,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 89,
+					y: -2,
+				},
+				secondPoint: {
+					x: -1,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 20,
+					y: 85,
+				},
+				fourthPoint: {
+					x: 56,
+					y: 85,
+				},
+			},
+		},
+	],
+	[
+		"type15", //
+		{
+			size: {
+				width: 785,
+				height: 442,
+			},
+			tailCrop: {
+				sx: 662,
+				sy: 125,
+				sw: 130,
+				sh: 130,
+				dx: 0,
+				dy: -96,
+				dw: 130,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 270,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -252,
+				y: -102,
+			},
+			finDownPivot: {
+				x: -250,
+				y: 106,
+			},
+			bodyDeviation: 122,
+			upperFinTrace: {
+				firstPoint: {
+					x: 102,
+					y: 1,
+				},
+				secondPoint: {
+					x: -3,
+					y: 0,
+				},
+				thirdPoint: {
+					x: 40,
+					y: -115,
+				},
+				fourthPoint: {
+					x: 76,
+					y: -115,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 100,
+					y: -6,
+				},
+				secondPoint: {
+					x: -8,
+					y: -6,
+				},
+				thirdPoint: {
+					x: 35,
+					y: 110,
+				},
+				fourthPoint: {
+					x: 76,
+					y: 110,
+				},
+			},
+		},
+	],
+	[
+		"type16", //
+		{
+			size: {
+				width: 788,
+				height: 452,
+			},
+			tailCrop: {
+				sx: 662,
+				sy: 130,
+				sw: 130,
+				sh: 130,
+				dx: 0,
+				dy: -96,
+				dw: 130,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 270,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -252,
+				y: -102,
+			},
+			finDownPivot: {
+				x: -250,
+				y: 106,
+			},
+			bodyDeviation: 122,
+			upperFinTrace: {
+				firstPoint: {
+					x: 102,
+					y: 1,
+				},
+				secondPoint: {
+					x: -11,
+					y: 0,
+				},
+				thirdPoint: {
+					x: 32,
+					y: -120,
+				},
+				fourthPoint: {
+					x: 74,
+					y: -120,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 98,
+					y: -4,
+				},
+				secondPoint: {
+					x: -12,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 30,
+					y: 118,
+				},
+				fourthPoint: {
+					x: 74,
+					y: 118,
+				},
+			},
+		},
+	],
+	[
+		"type17", //
+		{
+			size: {
+				width: 786,
+				height: 376,
+			},
+			tailCrop: {
+				sx: 662,
+				sy: 94,
+				sw: 130,
+				sh: 130,
+				dx: 0,
+				dy: -94,
+				dw: 130,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 265,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -262,
+				y: -102,
+			},
+			finDownPivot: {
+				x: -262,
+				y: 106,
+			},
+			bodyDeviation: 122,
+			upperFinTrace: {
+				firstPoint: {
+					x: 92,
+					y: 2,
+				},
+				secondPoint: {
+					x: -10,
+					y: 0,
+				},
+				thirdPoint: {
+					x: -40,
+					y: -90,
+				},
+				fourthPoint: {
+					x: 70,
+					y: -90,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 92,
+					y: -2,
+				},
+				secondPoint: {
+					x: -10,
+					y: -2,
+				},
+				thirdPoint: {
+					x: -40,
+					y: 90,
+				},
+				fourthPoint: {
+					x: 70,
+					y: 90,
+				},
+			},
+		},
+	],
+	[
+		"type18", //
+		{
+			size: {
+				width: 785,
+				height: 441,
+			},
+			tailCrop: {
+				sx: 662,
+				sy: 125,
+				sw: 130,
+				sh: 130,
+				dx: 0,
+				dy: -96,
+				dw: 130,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 270,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -245,
+				y: -102,
+			},
+			finDownPivot: {
+				x: -245,
+				y: 106,
+			},
+			bodyDeviation: 122,
+			upperFinTrace: {
+				firstPoint: {
+					x: 100,
+					y: 2,
+				},
+				secondPoint: {
+					x: -10,
+					y: 0,
+				},
+				thirdPoint: {
+					x: 32,
+					y: -120,
+				},
+				fourthPoint: {
+					x: 74,
+					y: -120,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 96,
+					y: -5,
+				},
+				secondPoint: {
+					x: -12,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 25,
+					y: 115,
+				},
+				fourthPoint: {
+					x: 74,
+					y: 115,
+				},
+			},
+		},
+	],
+	[
+		"type19", //
+		{
+			size: {
+				width: 1400,
+				height: 693,
+			},
+			tailCrop: {
+				sx: 1185,
+				sy: 185,
+				sw: 220,
+				sh: 220,
+				dx: 0,
+				dy: -167,
+				dw: 220,
+				dh: 220,
+			},
+			tailPivot: {
+				x: 480,
+				y: 5,
+			},
+			finUpPivot: {
+				x: -422,
+				y: -174,
+			},
+			finDownPivot: {
+				x: -414,
+				y: 185,
+			},
+			bodyDeviation: 218,
+			upperFinTrace: {
+				firstPoint: {
+					x: 155,
+					y: 2,
+				},
+				secondPoint: {
+					x: -12,
+					y: -1,
+				},
+				thirdPoint: {
+					x: 29,
+					y: -170,
+				},
+				fourthPoint: {
+					x: 90,
+					y: -170,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 150,
+					y: -5,
+				},
+				secondPoint: {
+					x: -14,
+					y: 1,
+				},
+				thirdPoint: {
+					x: 25,
+					y: 160,
+				},
+				fourthPoint: {
+					x: 85,
+					y: 160,
+				},
+			},
+		},
+	],
+	[
+		"type20", //
+		{
+			size: {
+				width: 1400,
+				height: 703,
+			},
+			tailCrop: {
+				sx: 1185,
+				sy: 185,
+				sw: 220,
+				sh: 220,
+				dx: 0,
+				dy: -175,
+				dw: 220,
+				dh: 220,
+			},
+			tailPivot: {
+				x: 480,
+				y: 10,
+			},
+			finUpPivot: {
+				x: -480,
+				y: -170,
+			},
+			finDownPivot: {
+				x: -470,
+				y: 190,
+			},
+			bodyDeviation: 218,
+			upperFinTrace: {
+				firstPoint: {
+					x: 160,
+					y: 0,
+				},
+				secondPoint: {
+					x: -14,
+					y: -1,
+				},
+				thirdPoint: {
+					x: 29,
+					y: -175,
+				},
+				fourthPoint: {
+					x: 95,
+					y: -175,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 150,
+					y: -2,
+				},
+				secondPoint: {
+					x: -16,
+					y: 1,
+				},
+				thirdPoint: {
+					x: 30,
+					y: 160,
+				},
+				fourthPoint: {
+					x: 85,
+					y: 160,
+				},
+			},
+		},
+	],
+	[
+		"type21", //
+		{
+			size: {
+				width: 1400,
+				height: 703,
+			},
+			tailCrop: {
+				sx: 1185,
+				sy: 205,
+				sw: 220,
+				sh: 220,
+				dx: 0,
+				dy: -175,
+				dw: 220,
+				dh: 220,
+			},
+			tailPivot: {
+				x: 480,
+				y: 28,
+			},
+			finUpPivot: {
+				x: -470,
+				y: -155,
+			},
+			finDownPivot: {
+				x: -450,
+				y: 210,
+			},
+			bodyDeviation: 218,
+			upperFinTrace: {
+				firstPoint: {
+					x: 165,
+					y: 1,
+				},
+				secondPoint: {
+					x: -18,
+					y: -1,
+				},
+				thirdPoint: {
+					x: 22,
+					y: -195,
+				},
+				fourthPoint: {
+					x: 100,
+					y: -195,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 130,
+					y: -2,
+				},
+				secondPoint: {
+					x: -18,
+					y: 1,
+				},
+				thirdPoint: {
+					x: 15,
+					y: 140,
+				},
+				fourthPoint: {
+					x: 80,
+					y: 140,
+				},
+			},
+		},
+	],
+	[
+		"type22", //
+		{
+			size: {
+				width: 1400,
+				height: 808,
+			},
+			tailCrop: {
+				sx: 1185,
+				sy: 245,
+				sw: 220,
+				sh: 220,
+				dx: 0,
+				dy: -170,
+				dw: 220,
+				dh: 220,
+			},
+			tailPivot: {
+				x: 480,
+				y: 13,
+			},
+			finUpPivot: {
+				x: -480,
+				y: -165,
+			},
+			finDownPivot: {
+				x: -478,
+				y: 190,
+			},
+			bodyDeviation: 218,
+			upperFinTrace: {
+				firstPoint: {
+					x: 175,
+					y: -3,
+				},
+				secondPoint: {
+					x: -20,
+					y: -1,
+				},
+				thirdPoint: {
+					x: 42,
+					y: -220,
+				},
+				fourthPoint: {
+					x: 125,
+					y: -220,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 170,
+					y: 2,
+				},
+				secondPoint: {
+					x: -22,
+					y: 1,
+				},
+				thirdPoint: {
+					x: 45,
+					y: 205,
+				},
+				fourthPoint: {
+					x: 110,
+					y: 205,
+				},
+			},
+		},
+	],
+	[
+		"type23", //
+		{
+			size: {
+				width: 1400,
+				height: 776,
+			},
+			tailCrop: {
+				sx: 1185,
+				sy: 220,
+				sw: 230,
+				sh: 220,
+				dx: 0,
+				dy: -167,
+				dw: 230,
+				dh: 220,
+			},
+			tailPivot: {
+				x: 480,
+				y: 0,
+			},
+			finUpPivot: {
+				x: -425,
+				y: -180,
+			},
+			finDownPivot: {
+				x: -410,
+				y: 180,
+			},
+			bodyDeviation: 218,
+			upperFinTrace: {
+				firstPoint: {
+					x: 170,
+					y: 2,
+				},
+				secondPoint: {
+					x: -20,
+					y: -1,
+				},
+				thirdPoint: {
+					x: 45,
+					y: -205,
+				},
+				fourthPoint: {
+					x: 120,
+					y: -205,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 170,
+					y: -5,
+				},
+				secondPoint: {
+					x: -23,
+					y: 1,
+				},
+				thirdPoint: {
+					x: 45,
+					y: 205,
+				},
+				fourthPoint: {
+					x: 110,
+					y: 205,
+				},
+			},
+		},
+	],
+	[
+		"type24", //
+		{
+			size: {
+				width: 1400,
+				height: 787,
+			},
+			tailCrop: {
+				sx: 1185,
+				sy: 245,
+				sw: 220,
+				sh: 220,
+				dx: 0,
+				dy: -166,
+				dw: 220,
+				dh: 220,
+			},
+			tailPivot: {
+				x: 480,
+				y: 17,
+			},
+			finUpPivot: {
+				x: -460,
+				y: -165,
+			},
+			finDownPivot: {
+				x: -452,
+				y: 198,
+			},
+			bodyDeviation: 218,
+			upperFinTrace: {
+				firstPoint: {
+					x: 175,
+					y: 2,
+				},
+				secondPoint: {
+					x: -22,
+					y: -1,
+				},
+				thirdPoint: {
+					x: 42,
+					y: -225,
+				},
+				fourthPoint: {
+					x: 125,
+					y: -225,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 160,
+					y: -2,
+				},
+				secondPoint: {
+					x: -24,
+					y: 1,
+				},
+				thirdPoint: {
+					x: 45,
+					y: 190,
+				},
+				fourthPoint: {
+					x: 110,
+					y: 190,
+				},
+			},
+		},
+	],
+	[
+		"type25", //
+		{
+			size: {
+				width: 930,
+				height: 467,
+			},
+			tailCrop: {
+				sx: 788,
+				sy: 115,
+				sw: 160,
+				sh: 170,
+				dx: 0,
+				dy: -125,
+				dw: 160,
+				dh: 170,
+			},
+			tailPivot: {
+				x: 325,
+				y: 6,
+			},
+			finUpPivot: {
+				x: -305,
+				y: -115,
+			},
+			finDownPivot: {
+				x: -295,
+				y: 125,
+			},
+			bodyDeviation: 140,
+			upperFinTrace: {
+				firstPoint: {
+					x: 92,
+					y: 1,
+				},
+				secondPoint: {
+					x: -23,
+					y: -1,
+				},
+				thirdPoint: {
+					x: 5,
+					y: -115,
+				},
+				fourthPoint: {
+					x: 50,
+					y: -115,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 80,
+					y: 1,
+				},
+				secondPoint: {
+					x: -26,
+					y: 1,
+				},
+				thirdPoint: {
+					x: -5,
+					y: 105,
+				},
+				fourthPoint: {
+					x: 40,
+					y: 105,
+				},
+			},
+		},
+	],
+	[
+		"type26", //
+		{
+			size: {
+				width: 787,
+				height: 452,
+			},
+			tailCrop: {
+				sx: 662,
+				sy: 120,
+				sw: 130,
+				sh: 130,
+				dx: 0,
+				dy: -100,
+				dw: 130,
+				dh: 130,
+			},
+			tailPivot: {
+				x: 270,
+				y: -5,
+			},
+			finUpPivot: {
+				x: -278,
+				y: -108,
+			},
+			finDownPivot: {
+				x: -280,
+				y: 98,
+			},
+			bodyDeviation: 122,
+			upperFinTrace: {
+				firstPoint: {
+					x: 105,
+					y: -2,
+				},
+				secondPoint: {
+					x: -2,
+					y: 0,
+				},
+				thirdPoint: {
+					x: 35,
+					y: -115,
+				},
+				fourthPoint: {
+					x: 76,
+					y: -115,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 108,
+					y: -1,
+				},
+				secondPoint: {
+					x: -3,
+					y: -2,
+				},
+				thirdPoint: {
+					x: 20,
+					y: 125,
+				},
+				fourthPoint: {
+					x: 86,
+					y: 125,
+				},
+			},
+		},
+	],
+	[
+		"type27", //
+		{
+			size: {
+				width: 1400,
+				height: 761,
+			},
+			tailCrop: {
+				sx: 1185,
+				sy: 212,
+				sw: 220,
+				sh: 220,
+				dx: 0,
+				dy: -166,
+				dw: 220,
+				dh: 220,
+			},
+			tailPivot: {
+				x: 480,
+				y: -2,
+			},
+			finUpPivot: {
+				x: -460,
+				y: -182,
+			},
+			finDownPivot: {
+				x: -455,
+				y: 180,
+			},
+			bodyDeviation: 218,
+			upperFinTrace: {
+				firstPoint: {
+					x: 155,
+					y: 2,
+				},
+				secondPoint: {
+					x: -26,
+					y: -1,
+				},
+				thirdPoint: {
+					x: 15,
+					y: -195,
+				},
+				fourthPoint: {
+					x: 90,
+					y: -195,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 155,
+					y: -2,
+				},
+				secondPoint: {
+					x: -26,
+					y: 1,
+				},
+				thirdPoint: {
+					x: 15,
+					y: 195,
+				},
+				fourthPoint: {
+					x: 90,
+					y: 195,
+				},
+			},
+		},
+	],
+	[
+		"type28", //
+		{
+			size: {
+				width: 1400,
+				height: 692,
+			},
+			tailCrop: {
+				sx: 1185,
+				sy: 170,
+				sw: 220,
+				sh: 220,
+				dx: 0,
+				dy: -172,
+				dw: 220,
+				dh: 220,
+			},
+			tailPivot: {
+				x: 490,
+				y: -3,
+			},
+			finUpPivot: {
+				x: -465,
+				y: -182,
+			},
+			finDownPivot: {
+				x: -465,
+				y: 180,
+			},
+			bodyDeviation: 212,
+			upperFinTrace: {
+				firstPoint: {
+					x: 140,
+					y: -3,
+				},
+				secondPoint: {
+					x: -30,
+					y: -1,
+				},
+				thirdPoint: {
+					x: 45,
+					y: -160,
+				},
+				fourthPoint: {
+					x: 120,
+					y: -160,
+				},
+			},
+			lowerFinTrace: {
+				firstPoint: {
+					x: 145,
+					y: -3,
+				},
+				secondPoint: {
+					x: -36,
+					y: -3,
+				},
+				thirdPoint: {
+					x: 35,
+					y: 165,
+				},
+				fourthPoint: {
+					x: 150,
+					y: 165,
 				},
 			},
 		},

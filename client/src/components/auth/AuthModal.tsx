@@ -37,19 +37,23 @@ export default function AuthModal({
 
   const [loginId, setLoginId] = useState(""); // username hoặc email
   const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
+  const PASSWORD_RULES = [
+    { label: "Ít nhất 8 kí tự", test: (value: string) => value.length >= 8 },
+    { label: "Có ít nhất 1 kí tự in hoa", test: (value: string) => /[A-Z]/.test(value) },
+    { label: "Có ít nhất 1 kí tự số", test: (value: string) => /\d/.test(value) },
+    { label: "Có ít nhất 1 kí tự đặc biệt", test: (value: string) => /[^A-Za-z0-9]/.test(value) },
+  ];
+
+  const isPasswordStrong = (value: string) =>
+    PASSWORD_RULES.every((rule) => rule.test(value));
+
   if (!isOpen) return null;
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
-  };
 
   const handleRemoveAvatar = () => {
     if (avatarPreview) URL.revokeObjectURL(avatarPreview);
@@ -81,6 +85,11 @@ export default function AuthModal({
       if (!birthday) throw new Error("Birthday is required");
       if (!gender) throw new Error("Please select gender");
       if (!password) throw new Error("Password is required");
+      if (!isPasswordStrong(password)) {
+        throw new Error(
+          "Password must contain at least 8 characters, 1 uppercase letter, 1 number, and 1 special character",
+        );
+      }
       if (password !== confirmPassword) {
         throw new Error("Password confirmation does not match");
       }
@@ -183,12 +192,19 @@ export default function AuthModal({
                 <label className="input-field">
                   <span className="input-icon">🔒</span>
                   <input
-                    type="password"
+                    type={showLoginPassword ? "text" : "password"}
                     placeholder="Password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                   />
-                  <span className="input-icon">👁️</span>
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowLoginPassword((prev) => !prev)}
+                  >
+                    {showLoginPassword ? "🙈" : "👁️"}
+                  </button>
                 </label>
               </div>
 
@@ -396,26 +412,57 @@ export default function AuthModal({
                 <label className="input-field">
                   <span className="input-icon">🔒</span>
                   <input
-                    type="password"
+                    type={showRegisterPassword ? "text" : "password"}
                     name="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
-                  <span className="input-icon">👁️</span>
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    aria-label={showRegisterPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowRegisterPassword((prev) => !prev)}
+                  >
+                    {showRegisterPassword ? "🙈" : "👁️"}
+                  </button>
                 </label>
+
+                {password && (
+                  <div className="password-checklist-wrapper">
+                    <div className="password-checklist-title">Password must contain:</div>
+                    <ul className="password-checklist">
+                      {PASSWORD_RULES.map((rule) => {
+                        const passed = rule.test(password);
+
+                        return (
+                          <li key={rule.label} className={passed ? "valid" : "invalid"}>
+                            {passed ? "✓" : "•"} {rule.label}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
 
                 {/* Confirm password */}
                 <label className="input-field">
                   <span className="input-icon">🔒</span>
                   <input
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     placeholder="Confirm password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
-                  <span className="input-icon">👁️</span>
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  >
+                    {showConfirmPassword ? "🙈" : "👁️"}
+                  </button>
                 </label>
               </div>
 

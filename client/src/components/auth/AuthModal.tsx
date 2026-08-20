@@ -39,15 +39,15 @@ export default function AuthModal({
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const PASSWORD_RULES = [
-    { label: "Ít nhất 8 kí tự", test: (value: string) => value.length >= 8 },
-    { label: "Có ít nhất 1 kí tự in hoa", test: (value: string) => /[A-Z]/.test(value) },
-    { label: "Có ít nhất 1 kí tự số", test: (value: string) => /\d/.test(value) },
-    { label: "Có ít nhất 1 kí tự đặc biệt", test: (value: string) => /[^A-Za-z0-9]/.test(value) },
+    { label: "At least 8 characters", test: (value: string) => value.length >= 8 },
+    { label: "At least one UPPERCASE character", test: (value: string) => /[A-Z]/.test(value) },
+    { label: "At least one number character", test: (value: string) => /\d/.test(value) },
+    { label: "At least one special characters", test: (value: string) => /[^A-Za-z0-9]/.test(value) },
   ];
 
   const isPasswordStrong = (value: string) =>
@@ -405,66 +405,88 @@ export default function AuthModal({
 
             {/* RIGHT */}
             <aside className="auth-panel">
-              <div className="auth-section-title">Secure password</div>
+              <div className="auth-section-title">Password</div>
 
-              <div className="field-group">
-                {/* Password */}
-                <label className="input-field">
-                  <span className="input-icon">🔒</span>
-                  <input
-                    type={showRegisterPassword ? "text" : "password"}
-                    name="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    aria-label={showRegisterPassword ? "Hide password" : "Show password"}
-                    onClick={() => setShowRegisterPassword((prev) => !prev)}
-                  >
-                    {showRegisterPassword ? "🙈" : "👁️"}
-                  </button>
-                </label>
+            <div className="field-group">
+              {/* Password */}
+              <label className="input-field">
+                <span className="input-icon">🔒</span>
 
-                {password && (
-                  <div className="password-checklist-wrapper">
-                    <div className="password-checklist-title">Password must contain:</div>
-                    <ul className="password-checklist">
-                      {PASSWORD_RULES.map((rule) => {
-                        const passed = rule.test(password);
+                <input
+                  type={showRegisterPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
 
-                        return (
-                          <li key={rule.label} className={passed ? "valid" : "invalid"}>
-                            {passed ? "✓" : "•"} {rule.label}
-                          </li>
-                        );
-                      })}
-                    </ul>
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  aria-label={
+                    showRegisterPassword
+                      ? "Hide passwords"
+                      : "Show passwords"
+                  }
+                  onClick={() =>
+                    setShowRegisterPassword((prev) => !prev)
+                  }
+                >
+                  {showRegisterPassword ? "🙈" : "👁️"}
+                </button>
+              </label>
+
+              {password && (
+                <div className="password-checklist-wrapper">
+                  <div className="password-checklist-title">
+                    Password must contain:
                   </div>
-                )}
 
-                {/* Confirm password */}
-                <label className="input-field">
-                  <span className="input-icon">🔒</span>
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    name="confirmPassword"
-                    placeholder="Confirm password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  >
-                    {showConfirmPassword ? "🙈" : "👁️"}
-                  </button>
-                </label>
-              </div>
+                  <ul className="password-checklist">
+                    {PASSWORD_RULES.map((rule) => {
+                      const passed = rule.test(password);
+
+                      return (
+                        <li
+                          key={rule.label}
+                          className={passed ? "valid" : "invalid"}
+                        >
+                          {passed ? "✓" : "•"} {rule.label}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {/* Confirm password */}
+              <label className="input-field">
+                <span className="input-icon">🔒</span>
+
+                <input
+                  type={showRegisterPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  aria-label={
+                    showRegisterPassword
+                      ? "Hide passwords"
+                      : "Show passwords"
+                  }
+                  onClick={() =>
+                    setShowRegisterPassword((prev) => !prev)
+                  }
+                >
+                  {showRegisterPassword ? "🙈" : "👁️"}
+                </button>
+              </label>
+            </div>
 
               {registerError && (
                 <div className="auth-error-message">{registerError}</div>

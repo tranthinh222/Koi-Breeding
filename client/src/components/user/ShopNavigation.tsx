@@ -6,7 +6,7 @@ export default function ShopNavigation() {
     <nav className="navigation-menu">
       <button
         className={location.pathname === "/home" ? "active" : ""}
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/home")}
       >
         🏠 Home
       </button>

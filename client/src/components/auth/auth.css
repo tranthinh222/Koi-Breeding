@@ -188,6 +188,18 @@
   color: #50505c;
 }
 
+.auth-overlay .auth-success-message {
+  margin-top: 4px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #ebf8f0;
+  border: 1px solid #bce4cc;
+  color: #1b8f5a;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 .auth-overlay .input-icon {
   width: 20px;
   height: 20px;
@@ -286,6 +298,13 @@
 .auth-overlay .secondary-button svg {
   width: 18px;
   height: 18px;
+}
+
+.auth-overlay .auth-helper-text {
+  margin: -6px 0 14px;
+  color: #5f5a67;
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .auth-overlay .link-row {
@@ -395,6 +414,15 @@
 
 .auth-overlay .footer-note a:hover {
   text-decoration: underline;
+}
+
+.auth-overlay .auth-forgot-layout {
+  display: flex;
+  justify-content: center;
+}
+
+.auth-overlay .auth-panel--forgot {
+  width: min(100%, 560px);
 }
 
 /* =========================================================

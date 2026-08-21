@@ -28,7 +28,7 @@ function App() {
 					<Route path="/payment/:itemId" element={<Payment />} />
 
 					<Route path="/landing" element={<Landing />} />
-					<Route path="/" element={<Navigate to="/home" replace />} />
+					<Route path="/" element={<Navigate to="/landing" replace />} />
 				</Routes>
 			</BrowserRouter>
 		</>

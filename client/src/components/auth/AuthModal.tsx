@@ -524,17 +524,7 @@ export default function AuthModal({
                   <span>Female</span>
                 </button>
 
-                <button
-                  type="button"
-                  className="gender-option"
-                  onClick={() => {
-                    setGender("OTHER");
-                    setGenderOpen(false);
-                  }}
-                >
-                  <span>⚪</span>
-                  <span>Other</span>
-                </button>
+
               </div>
             )}
           </div>
@@ -569,7 +559,7 @@ export default function AuthModal({
           <label className="input-field">
             <span className="input-icon">🔒</span>
             <input
-              type={showRegisterConfirmPassword ? "text" : "password"}
+              type={showRegisterPassword ? "text" : "password"}
               name="confirmPassword"
               placeholder="Confirm password"
               value={confirmPassword}
@@ -579,11 +569,11 @@ export default function AuthModal({
               type="button"
               className="password-toggle-btn"
               aria-label={
-                showRegisterConfirmPassword ? "Hide confirm password" : "Show confirm password"
+                showRegisterPassword ? "Hide confirm password" : "Show confirm password"
               }
-              onClick={() => setShowRegisterConfirmPassword((prev) => !prev)}
+              onClick={() => setShowRegisterPassword((prev) => !prev)}
             >
-              {showRegisterConfirmPassword ? "🙈" : "👁️"}
+              {showRegisterPassword ? "🙈" : "👁️"}
             </button>
           </label>
         </div>
@@ -716,13 +706,13 @@ export default function AuthModal({
                 type={showNewPassword ? "text" : "password"}
                 placeholder="Confirm new password"
                 value={confirmNewPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
               />
               <button
                 type="button"
                 className="password-toggle-btn"
                 aria-label={
-                  showConfirmNewPassword
+                  showNewPassword
                     ? "Hide confirm password"
                     : "Show confirm password"
                 }

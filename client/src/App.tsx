@@ -7,6 +7,7 @@ import TransactionHistory from "./pages/history/TransactionHistory";
 import Payment from "./pages/payment/payment";
 import Profile from "./pages/profile/Profile";
 import Shop from "./pages/shop/Shop";
+import Marketplace from "./pages/marketplace/Marketplace";
 import "./style/global.css";
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/inventory" element={<Inventory />} />
+            <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/transactions" element={<TransactionHistory />} />
           </Route>
 

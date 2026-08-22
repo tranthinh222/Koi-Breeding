@@ -1,0 +1,157 @@
+/* ===================================
+   HISTORY
+   (Cần include global.css trước file này)
+=================================== */
+
+.search-panel {
+  width: 90%;
+  margin: 40px auto;
+
+  background: #f8f4ea;
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.search-panel select {
+  padding: 15px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #fff;
+
+  cursor: pointer;
+
+  color: #5b3a1f;
+  font-weight: bold;
+}
+
+.history-tabs .tab {
+  cursor: default;
+}
+
+.history-message {
+  padding: 20px;
+  border-radius: 14px;
+  border: 2px dashed #c9a26b;
+  background: #f8f4ea;
+  color: #5b3a1f;
+}
+
+.history-container {
+  width: 90%;
+
+  margin: 30px auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+.history-card {
+  display: grid;
+
+  grid-template-columns: 90px 1fr 180px;
+
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 20px;
+
+  background: #f8f4ea;
+
+  border: 4px solid #c9a26b;
+
+  border-radius: 18px;
+
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+.history-icon {
+  width: 65px;
+
+  height: 65px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  font-size: 32px;
+
+  color: white;
+}
+
+.history-icon.buy {
+  background: #2196f3;
+}
+
+.history-icon.sell {
+  background: #4caf50;
+}
+
+.history-info h3 {
+  color: #5b3a1f;
+
+  margin-bottom: 8px;
+}
+
+.history-info p {
+  margin: 5px 0;
+
+  color: #666;
+}
+
+.history-price {
+  text-align: right;
+
+  font-size: 24px;
+
+  font-weight: bold;
+
+  color: #e53935;
+}
+
+.history-price.income {
+  color: #4caf50;
+}
+
+/* =========================================================
+   RESPONSIVE - HISTORY
+========================================================= */
+
+@media (max-width: 800px) {
+  .history-card {
+    grid-template-columns: 1fr;
+
+    text-align: center;
+  }
+
+  .history-icon {
+    margin: auto;
+  }
+
+  .history-price {
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .search-panel {
+    flex-direction: column;
+  }
+}

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "./auth.css";
 import { useRef, useState } from "react";
-import { registerUser, uploadAvatar, login } from "../../api/auth";
+import { registerUser, uploadAvatar, Login } from "../../api/auth";
 
 type AuthMode = "login" | "register";
 
@@ -131,11 +131,10 @@ export default function AuthModal({
         ? { email: loginId.trim(), password: loginPassword }
         : { username: loginId.trim(), password: loginPassword };
 
-      const result = await login(payload);
+      const result = await Login(payload);
 
-      // Lưu token — tuỳ bạn dùng localStorage hay context/state quản lý auth
-      localStorage.setItem("accessToken", result.accessToken);
-      localStorage.setItem("refreshToken", result.refreshToken);
+      sessionStorage.setItem("accessToken", result.accessToken);
+      sessionStorage.setItem("refreshToken", result.refreshToken);
 
       onClose();
       navigate("/home");

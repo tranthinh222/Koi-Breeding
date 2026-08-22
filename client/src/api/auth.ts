@@ -53,7 +53,7 @@ export interface LoginResponse {
   refreshToken: string;
 }
 
-export const login = async (data: LoginRequest): Promise<LoginResponse> => {
+export const Login = async (data: LoginRequest): Promise<LoginResponse> => {
   try {
     const response = await apiClient.post("/auth/login", data);
     return response.data.data;

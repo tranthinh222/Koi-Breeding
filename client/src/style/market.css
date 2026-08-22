@@ -1,0 +1,1368 @@
+/* =========================
+   MARKET MAIN
+========================= */
+
+.marketplace-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  align-items: start;
+}
+
+.marketplace-main.no-detail {
+  grid-template-columns: 1fr;
+}
+
+.marketplace-main.has-detail {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+/* =========================
+   MARKET GRID
+========================= */
+
+.market-main .item-grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+
+  gap: 30px;
+}
+
+/* =========================================================
+   MARKETPLACE CARD + DETAIL PANEL
+   ========================================================= */
+
+/* =========================
+   CARD
+========================= */
+
+.marketplace-main .fish-card {
+  position: relative;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+
+  min-height: 470px;
+
+  padding: 18px;
+
+  background: linear-gradient(180deg, #fffdf8 0%, #f8f4ea 100%);
+
+  border: 2px solid #d8bd8e;
+  border-radius: 22px;
+
+  text-align: center;
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 18px rgba(91, 58, 31, 0.1),
+    0 2px 5px rgba(91, 58, 31, 0.06);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* Decorative top line */
+
+.marketplace-main .fish-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 6px;
+
+  background: linear-gradient(90deg, #8b5a2b, #c9a26b, #8b5a2b);
+}
+
+/* Hover */
+
+.marketplace-main .fish-card:hover {
+  transform: translateY(-8px);
+
+  border-color: #b98b4d;
+
+  box-shadow:
+    0 18px 35px rgba(91, 58, 31, 0.18),
+    0 4px 10px rgba(91, 58, 31, 0.08);
+}
+
+/* Selected */
+
+.marketplace-main .fish-card.selected {
+  border-color: #8b5a2b;
+
+  box-shadow:
+    0 0 0 3px rgba(139, 90, 43, 0.16),
+    0 18px 35px rgba(91, 58, 31, 0.18);
+}
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.marketplace-main .fish-image {
+  position: relative;
+
+  width: 190px;
+  height: 190px;
+
+  margin: 14px auto 18px;
+
+  padding: 22px;
+
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle at 35% 30%,
+    #d9f5ff 0%,
+    #a9e2f8 45%,
+    #83cce9 100%
+  );
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border: 5px solid rgba(255, 255, 255, 0.75);
+
+  box-shadow:
+    inset 0 0 25px rgba(255, 255, 255, 0.55),
+    0 8px 20px rgba(62, 133, 163, 0.18);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.marketplace-main .fish-image::after {
+  content: "";
+
+  position: absolute;
+
+  top: 18px;
+  left: 25px;
+
+  width: 35px;
+  height: 18px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  transform: rotate(-25deg);
+
+  filter: blur(1px);
+}
+
+.marketplace-main .fish-image img {
+  width: 125%;
+  height: 125%;
+
+  object-fit: contain;
+
+  position: relative;
+  z-index: 1;
+
+  transition: transform 0.3s ease;
+}
+
+.marketplace-main .fish-card:hover .fish-image {
+  transform: scale(1.04);
+  box-shadow:
+    inset 0 0 30px rgba(255, 255, 255, 0.6),
+    0 12px 28px rgba(62, 133, 163, 0.25);
+}
+
+.marketplace-main .fish-card:hover .fish-image img {
+  transform: scale(1.08) rotate(-3deg);
+}
+
+/* =========================================================
+   RARITY
+========================================================= */
+
+.marketplace-main .fish-card [class$="-rarity"] {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+
+  margin: 0 auto 7px;
+
+  padding: 5px 13px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.8px;
+
+  text-transform: uppercase;
+
+  border: 1px solid transparent;
+}
+
+/* Common */
+
+.marketplace-main .common-rarity {
+  background: #eeeeee;
+  color: #666;
+
+  border-color: #d5d5d5;
+}
+
+/* Premium */
+
+.marketplace-main .premium-rarity {
+  background: linear-gradient(135deg, #e8f4ff, #cce7ff);
+
+  color: #26709f;
+
+  border-color: #a9d4f3;
+}
+
+/* Legendary */
+
+.marketplace-main .legendary-rarity {
+  background: linear-gradient(135deg, #fff3b0, #f7d76c);
+
+  color: #8a6000;
+
+  border-color: #e4bd42;
+
+  box-shadow: 0 2px 8px rgba(224, 181, 45, 0.2);
+}
+
+/* =========================================================
+   NAME
+========================================================= */
+
+.marketplace-main .fish-card h3 {
+  margin: 2px 0 3px;
+
+  color: #4f321d;
+
+  font-size: 21px;
+  font-weight: 800;
+
+  line-height: 1.25;
+}
+
+/* =========================================================
+   BREED + GENDER
+========================================================= */
+
+.marketplace-main .fish-breed {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  margin: 4px 0 10px;
+
+  color: #8a6a47;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.gender-badge {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 23px;
+  height: 23px;
+
+  border-radius: 50%;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.gender-badge.male {
+  background: #d8edfc;
+  color: #24709f;
+
+  border: 1px solid #acd5ef;
+}
+
+.gender-badge.female {
+  background: #fbe0eb;
+  color: #b3467c;
+
+  border: 1px solid #efb7d0;
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.marketplace-main .fish-stats {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 8px;
+
+  margin: 4px 0 10px;
+
+  padding: 9px 0;
+
+  border-top: 1px dashed #d8c5a5;
+  border-bottom: 1px dashed #d8c5a5;
+
+  color: #5b3a1f;
+
+  font-size: 13px;
+}
+
+.marketplace-main .fish-stats span {
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 5px;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  border-radius: 8px;
+}
+
+/* =========================================================
+   SELLER
+========================================================= */
+
+.marketplace-main .fish-seller {
+  margin: 6px 0;
+
+  color: #907556;
+
+  font-size: 13px;
+}
+
+.marketplace-main .fish-seller::before {
+  content: "👤 ";
+
+  opacity: 0.8;
+}
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+.marketplace-main .fish-card .price {
+  margin-top: auto;
+  margin-bottom: 14px;
+
+  padding: 9px;
+
+  color: #c76b00;
+
+  font-size: 22px;
+  font-weight: 900;
+
+  background: rgba(255, 237, 204, 0.55);
+
+  border-radius: 10px;
+
+  border: 1px solid #f0d29f;
+}
+
+/* =========================================================
+   BUY BUTTON
+========================================================= */
+
+.marketplace-main .fish-card button {
+  width: 100%;
+
+  padding: 13px 15px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #6aa647, #4f8835);
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow: 0 5px 12px rgba(74, 126, 48, 0.25);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.marketplace-main .fish-card button:hover {
+  background: linear-gradient(135deg, #76b450, #5a963d);
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 16px rgba(74, 126, 48, 0.3);
+}
+
+.marketplace-main .fish-card button:active {
+  transform: translateY(1px);
+}
+
+/* =========================================================
+   DETAIL PANEL
+========================================================= */
+
+.marketplace-main .detail-panel {
+  position: sticky;
+  top: 20px;
+
+  padding: 22px;
+
+  background: linear-gradient(180deg, #fffdf8 0%, #f8f4ea 100%);
+
+  border: 2px solid #d2b57f;
+
+  border-radius: 24px;
+
+  box-shadow:
+    0 12px 28px rgba(91, 58, 31, 0.15),
+    0 3px 8px rgba(91, 58, 31, 0.07);
+
+  overflow: hidden;
+}
+
+.marketplace-main .detail-panel::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 7px;
+
+  background: linear-gradient(90deg, #8b5a2b, #d3ae6e, #8b5a2b);
+}
+
+/* =========================================================
+   DETAIL HEADER
+========================================================= */
+
+.marketplace-main .detail-panel .detail-header {
+  margin-bottom: 12px;
+
+  color: #5b3a1f;
+
+  text-align: center;
+
+  font-size: 19px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+}
+
+.marketplace-main .detail-panel hr {
+  height: 1px;
+
+  margin: 0 0 18px;
+
+  border: none;
+
+  background: linear-gradient(90deg, transparent, #c9a26b, transparent);
+}
+
+/* =========================================================
+   DETAIL IMAGE
+========================================================= */
+
+.marketplace-main .detail-image {
+  position: relative;
+
+  width: 175px;
+  height: 175px;
+
+  margin: 0 auto 18px;
+
+  border-radius: 50%;
+
+  background: radial-gradient(circle at 35% 30%, #dff7ff, #a7e0f7 55%, #82c8e7);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 6px solid rgba(255, 255, 255, 0.8);
+
+  box-shadow:
+    0 10px 25px rgba(55, 125, 155, 0.2),
+    inset 0 0 25px rgba(255, 255, 255, 0.5);
+}
+
+.marketplace-main .detail-image::after {
+  content: "";
+
+  position: absolute;
+
+  top: 22px;
+  left: 30px;
+
+  width: 40px;
+  height: 20px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  transform: rotate(-25deg);
+}
+
+.marketplace-main .detail-image img {
+  position: relative;
+  z-index: 1;
+
+  width: 78%;
+  height: 78%;
+
+  object-fit: contain;
+
+  transition: transform 0.3s ease;
+}
+
+.marketplace-main .detail-image:hover img {
+  transform: scale(1.08) rotate(-3deg);
+}
+
+/* =========================================================
+   DETAIL NAME
+========================================================= */
+
+.marketplace-main .detail-panel h2 {
+  margin: 5px 0 8px;
+
+  color: #4f321d;
+
+  text-align: center;
+
+  font-size: 25px;
+  font-weight: 900;
+}
+
+/* =========================================================
+   DETAIL RARITY
+========================================================= */
+
+.marketplace-main .detail-panel [class$="-rarity"] {
+  width: fit-content;
+
+  margin: 0 auto 15px;
+
+  padding: 5px 14px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.8px;
+
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   FISH INFO TABLE
+========================================================= */
+
+.marketplace-main .fish-info-table {
+  margin: 15px 0;
+
+  overflow: hidden;
+
+  border: 1px solid #dfcdb0;
+
+  border-radius: 13px;
+
+  box-shadow: 0 3px 8px rgba(91, 58, 31, 0.05);
+}
+
+.marketplace-main .fish-info-row {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 38px;
+
+  padding: 7px 12px;
+
+  color: #776048;
+
+  font-size: 13px;
+}
+
+.marketplace-main .fish-info-row:nth-child(odd) {
+  background: #fffaf1;
+}
+
+.marketplace-main .fish-info-row:nth-child(even) {
+  background: #f8f1e5;
+}
+
+.marketplace-main .fish-info-row span {
+  color: #8a7256;
+}
+
+.marketplace-main .fish-info-row strong {
+  color: #51351f;
+
+  font-weight: 800;
+
+  text-align: right;
+}
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.marketplace-main .detail-panel .description {
+  margin: 14px 0;
+
+  padding: 11px 13px;
+
+  background: rgba(255, 255, 255, 0.45);
+
+  border-left: 4px solid #c8a46b;
+
+  border-radius: 0 10px 10px 0;
+}
+
+.marketplace-main .detail-panel .description p {
+  margin: 0;
+
+  color: #695743;
+
+  font-size: 13px;
+
+  line-height: 1.6;
+}
+
+/* =========================================================
+   DETAIL PRICE
+========================================================= */
+
+.marketplace-main .detail-price {
+  margin: 17px 0 8px;
+
+  padding: 11px;
+
+  text-align: center;
+
+  color: #c76b00;
+
+  font-size: 24px;
+  font-weight: 900;
+
+  background: linear-gradient(135deg, #fff4dc, #ffebc5);
+
+  border: 1px solid #efd09a;
+
+  border-radius: 12px;
+}
+
+/* =========================================================
+   TOTAL PRICE
+========================================================= */
+
+.marketplace-main .total-price {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin: 8px 0 14px;
+
+  padding: 10px 12px;
+
+  color: #6d5942;
+
+  font-size: 14px;
+
+  background: #f3eadb;
+
+  border-radius: 10px;
+}
+
+.marketplace-main .total-price strong {
+  color: #4f321d;
+
+  font-size: 16px;
+}
+
+/* =========================================================
+   ERROR / SUCCESS
+========================================================= */
+
+.marketplace-main .buy-error,
+.marketplace-main .buy-success {
+  padding: 9px 11px;
+
+  border-radius: 9px;
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+.marketplace-main .buy-error {
+  color: #9c2f1f;
+
+  background: #fde8e4;
+
+  border: 1px solid #efb8ae;
+}
+
+.marketplace-main .buy-success {
+  color: #397328;
+
+  background: #e8f5e2;
+
+  border: 1px solid #b8d9aa;
+}
+
+/* =========================================================
+   DETAIL BUY BUTTON
+========================================================= */
+
+.marketplace-main .buy-btn {
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+  border-radius: 13px;
+
+  background: linear-gradient(135deg, #65a344, #4d8733);
+
+  color: white;
+
+  font-size: 17px;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  box-shadow: 0 6px 14px rgba(74, 126, 48, 0.25);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.marketplace-main .buy-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+
+  box-shadow: 0 9px 18px rgba(74, 126, 48, 0.3);
+}
+
+.marketplace-main .buy-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.marketplace-main .buy-btn:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .marketplace-main .fish-image {
+    width: 160px;
+    height: 160px;
+  }
+
+  .marketplace-main .fish-card {
+    min-height: 450px;
+  }
+}
+
+@media (max-width: 900px) {
+  .marketplace-main {
+    grid-template-columns: 1fr;
+  }
+
+  .marketplace-main .detail-panel {
+    position: relative;
+
+    top: auto;
+
+    max-width: 520px;
+
+    width: 100%;
+
+    margin: 10px auto 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .marketplace-main .fish-image {
+    width: 145px;
+    height: 145px;
+
+    padding: 18px;
+  }
+
+  .marketplace-main .fish-card {
+    min-height: 430px;
+
+    padding: 15px;
+  }
+}
+
+@media (max-width: 500px) {
+  .marketplace-main .fish-card {
+    min-height: auto;
+  }
+
+  .marketplace-main .fish-image {
+    width: 160px;
+    height: 160px;
+  }
+
+  .marketplace-main .detail-panel {
+    padding: 17px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE - MARKET
+========================================================= */
+
+@media (max-width: 1100px) {
+  .marketplace-main {
+    grid-template-columns:
+      minmax(0, 1fr)
+      300px;
+
+    gap: 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  .marketplace-main {
+    grid-template-columns: 1fr;
+  }
+
+  .marketplace-main .detail-panel {
+    position: relative;
+    top: auto;
+
+    max-width: 500px;
+
+    width: 100%;
+
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .marketplace-main {
+    width: 94%;
+  }
+
+  .marketplace-main .item-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 15px;
+  }
+}
+
+@media (max-width: 500px) {
+  .marketplace-main {
+    width: 94%;
+  }
+
+  .marketplace-main .item-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   MARKET FILTERS BAR
+========================= */
+
+.marketplace-filters {
+  width: 90%;
+  margin: 0 auto 30px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+
+  background: #f8f4ea;
+
+  border: 4px solid #c9a26b;
+  border-radius: 20px;
+
+  padding: 18px 22px;
+
+  position: relative;
+  overflow: hidden;
+
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.marketplace-filters::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background: #8b5a2b;
+}
+
+/* Search input */
+.marketplace-filters__search {
+  flex: 1 1 220px;
+
+  padding: 12px 16px;
+
+  border: 3px solid #c9a26b;
+  border-radius: 12px;
+
+  background: #fffdf8;
+  color: #5b3a1f;
+
+  font-size: 16px;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.marketplace-filters__search::placeholder {
+  color: #a58b6f;
+}
+
+.marketplace-filters__search:focus {
+  border-color: #8b5a2b;
+  box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.15);
+}
+
+/* Select dropdowns */
+.marketplace-filters__select {
+  flex: 0 1 170px;
+
+  padding: 12px 14px;
+
+  border: 3px solid #c9a26b;
+  border-radius: 12px;
+
+  background: #fffdf8;
+  color: #5b3a1f;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.marketplace-filters__select:focus,
+.marketplace-filters__select:hover {
+  border-color: #8b5a2b;
+}
+
+/* Price range */
+.marketplace-filters__price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  flex: 0 1 auto;
+}
+
+.marketplace-filters__price input {
+  width: 110px;
+
+  padding: 12px 14px;
+
+  border: 3px solid #c9a26b;
+  border-radius: 12px;
+
+  background: #fffdf8;
+  color: #5b3a1f;
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.marketplace-filters__price input:focus {
+  border-color: #8b5a2b;
+  box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.15);
+}
+
+.marketplace-filters__price span {
+  color: #8b5a2b;
+  font-weight: bold;
+}
+
+/* Reset button */
+.marketplace-filters__reset {
+  padding: 12px 18px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #b3462c;
+  color: white;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+
+  white-space: nowrap;
+}
+
+.marketplace-filters__reset:hover {
+  background: #8f3620;
+}
+
+/* =========================
+   SHOP IMAGE
+========================= */
+
+.marketplace-main .fish-image {
+  width: 180px;
+
+  height: 180px;
+
+  margin: auto;
+
+  margin-top: 10px;
+
+  margin-bottom: 15px;
+
+  padding: 50px;
+
+  border-radius: 50%;
+
+  background: #8ed6f7;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  transition: 0.3s;
+}
+
+.marketplace-main .fish-image img {
+  width: 150%;
+  height: 150%;
+
+  object-fit: contain;
+}
+
+.marketplace-main .fish-card:hover .fish-image {
+  transform: scale(1.08) rotate(-5deg);
+}
+
+/* =========================================================
+   MARKET CARD — full update với breed / gender / stats / seller
+========================================================= */
+
+.marketplace-main .item-card,
+.marketplace-main .fish-card {
+  background: #f8f4ea;
+
+  border: 4px solid #c9a26b;
+  border-radius: 20px;
+
+  padding: 20px;
+
+  text-align: center;
+
+  transition: 0.25s;
+
+  cursor: pointer;
+
+  position: relative;
+  overflow: hidden;
+
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.marketplace-main .fish-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 14px;
+  background: #8b5a2b;
+}
+
+.marketplace-main .fish-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.25);
+}
+
+.marketplace-main .fish-card.selected {
+  border-color: #8b5a2b;
+  box-shadow: 0 0 0 4px rgba(139, 90, 43, 0.25);
+}
+
+/* Image */
+.marketplace-main .fish-image {
+  width: 180px;
+  height: 180px;
+
+  margin: 10px auto 15px;
+
+  padding: 50px;
+
+  border-radius: 50%;
+
+  background: #8ed6f7;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: 0.3s;
+}
+
+.marketplace-main .fish-image img {
+  width: 150%;
+  height: 150%;
+  object-fit: contain;
+}
+
+.marketplace-main .fish-card:hover .fish-image {
+  transform: scale(1.08) rotate(-5deg);
+}
+
+/* Rarity badge */
+.marketplace-main .fish-card [class$="-rarity"] {
+  display: inline-block;
+  margin: 0 auto 8px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.marketplace-main .common-rarity {
+  background: #e5e5e5;
+  color: #555;
+}
+
+.marketplace-main .premium-rarity {
+  background: #d7e9ff;
+  color: #1c6ea4;
+}
+
+.marketplace-main .legendary-rarity {
+  background: #fde68a;
+  color: #92640a;
+}
+
+/* Name */
+.marketplace-main .fish-card h3 {
+  color: #5b3a1f;
+  margin-bottom: 2px;
+  font-size: 22px;
+}
+
+/* Breed + gender */
+.marketplace-main .fish-breed {
+  font-size: 14px;
+  color: #7a5c3e;
+  margin: 4px 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.gender-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-weight: bold;
+  font-size: 13px;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.gender-badge.male {
+  background: #cfe8fb;
+  color: #1c6ea4;
+}
+
+.gender-badge.female {
+  background: #fbd6e4;
+  color: #b3467c;
+}
+
+/* Weight / length stats */
+.marketplace-main .fish-stats {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+
+  margin: 6px 0;
+  padding: 6px 0;
+
+  border-top: 1px dashed #d9c6a3;
+  border-bottom: 1px dashed #d9c6a3;
+
+  font-size: 13.5px;
+  color: #5b3a1f;
+}
+
+.marketplace-main .fish-stats span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Seller */
+.marketplace-main .fish-seller {
+  font-size: 13px;
+  color: #8a6f4e;
+  margin: 8px 0 4px;
+}
+
+/* Price */
+.marketplace-main .fish-card .price {
+  margin: 10px 0 16px;
+  font-size: 22px;
+  color: #d97706;
+  font-weight: bold;
+
+  margin-top: auto;
+}
+
+/* Buy button */
+.marketplace-main .fish-card button {
+  width: 100%;
+  padding: 14px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #5a913b;
+  color: white;
+
+  font-size: 18px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+}
+
+.marketplace-main .fish-card button:hover {
+  background: #44742b;
+}
+
+/* Detail panel - info table */
+.marketplace-main .fish-info-table {
+  margin: 15px 0;
+  border: 2px solid #e3d3b8;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.marketplace-main .fish-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: #444;
+}
+
+.marketplace-main .fish-info-row:nth-child(odd) {
+  background: #fdf9f1;
+}
+
+.marketplace-main .fish-info-row strong {
+  color: #5b3a1f;
+}
+
+/* =========================
+   RESPONSIVE - MARKET FILTERS
+========================= */
+
+@media (max-width: 900px) {
+  .marketplace-filters {
+    width: 94%;
+  }
+}
+
+@media (max-width: 700px) {
+  .marketplace-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .marketplace-filters__search,
+  .marketplace-filters__select,
+  .marketplace-filters__price,
+  .marketplace-filters__reset {
+    width: 100%;
+    flex: none;
+  }
+
+  .marketplace-filters__price input {
+    width: 100%;
+  }
+}

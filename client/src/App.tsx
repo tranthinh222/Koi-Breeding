@@ -3,9 +3,10 @@ import "./style/global.css";
 import AppLayout from "./components/AppLayout";
 import Shop from "./pages/shop/Shop";
 import Inventory from "./pages/inventory/Inventory";
-import TransactionHistory from "./pages/marketplace/TransactionHistory";
+import TransactionHistory from "./pages/history/TransactionHistory";
 import Payment from "./pages/payment/payment";
 import Home from "./pages/home/Home";
+import Marketplace from "./pages/marketplace/Marketplace";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/shop" element={<Shop />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/transactions" element={<TransactionHistory />} />
+            <Route path="/marketplace" element={<Marketplace />} />
           </Route>
 
           <Route path="/payment/:itemId" element={<Payment />} />

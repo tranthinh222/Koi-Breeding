@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { getInventory, useItemFromInventory } from "../../api/inventory";
 import { CURRENT_USER_ID } from "../../api/currentUser";
 import type { ItemInventory, InventoryCategory } from "../../api/inventory";
+// import "../../style/global.css";
+import "../../style/inventory.css";
 
 export default function Inventory() {
   const [items, setItems] = useState<ItemInventory[]>([]);
@@ -150,7 +152,7 @@ export default function Inventory() {
           {selectedItem && (
             <div className="detail-content">
               {selectedItem?.image && (
-                <div className="detail-image inventory-koi-image">
+                <div className="inventory-koi-image">
                   <img src={selectedItem.image} alt={selectedItem.name} />
                 </div>
               )}

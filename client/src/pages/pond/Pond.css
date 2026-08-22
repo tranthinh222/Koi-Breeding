@@ -43,7 +43,7 @@ h1 {
 	position: relative;
 	overflow: hidden;
 	border: 9px solid #c8e5dc;
-	border-radius: 48% 52% 45% 55% / 44% 49% 51% 56%;
+	/* border-radius: 48% 52% 45% 55% / 44% 49% 51% 56%; */
 	box-shadow:
 		0 0 0 8px #368c8a,
 		0 28px 60px rgba(0, 9, 20, 0.35);

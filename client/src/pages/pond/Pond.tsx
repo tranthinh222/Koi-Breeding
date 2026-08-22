@@ -16,6 +16,15 @@ interface FishState {
 	phase: number;
 }
 
+interface LotusState {
+	x: number;
+	y: number;
+	size: number;
+	rotation: number;
+	speed: number;
+	angle: number;
+}
+
 interface Point2D {
 	x: number;
 	y: number;
@@ -53,7 +62,7 @@ interface FishImageProperties {
 
 function makeFish(width: number, height: number): FishState {
 	const angle = Math.random() * Math.PI * 2;
-	const speed = 17 + Math.random() * 24;
+	const speed = 23 + Math.random() * 24;
 	const distance = Math.sqrt(Math.random()) * 0.76;
 	const placement = Math.random() * Math.PI * 2;
 	return {
@@ -66,6 +75,38 @@ function makeFish(width: number, height: number): FishState {
 		size: 96 + Math.random() * 54,
 		phase: Math.random() * Math.PI * 2,
 	};
+}
+
+function makeLotus(width: number, height: number): LotusState {
+	return {
+		x: Math.random() * width,
+		y: Math.random() * height,
+		size: 100 + Math.random() * 60,
+		rotation: Math.random() * Math.PI * 2,
+		speed: 5 + Math.random() * 10,
+		angle: Math.PI / 8,
+	};
+}
+
+// Draw lotus
+function drawLotus(
+	ctx: CanvasRenderingContext2D,
+	lotus: LotusState,
+	image: HTMLImageElement,
+) {
+	const { x, y, size, rotation } = lotus;
+	const IMG_W = image.width;
+	const IMG_H = image.height;
+	const scale = size / IMG_W;
+
+	ctx.save();
+	ctx.translate(x, y);
+	ctx.rotate(rotation);
+	ctx.scale(scale, scale);
+
+	ctx.drawImage(image, -IMG_W / 2, -IMG_H / 2, IMG_W, IMG_H);
+
+	ctx.restore();
 }
 
 // Draw upper/lower fin function
@@ -428,6 +469,58 @@ function debugDrawKoi(
 	ctx.restore();
 }
 
+// Handle lotus collision function
+function handleLotusCollisions(lotuses: LotusState[]) {
+	for (let i = 0; i < lotuses.length; i++) {
+		for (let j = i + 1; j < lotuses.length; j++) {
+			const l1 = lotuses[i];
+			const l2 = lotuses[j];
+
+			// Calculate the distance between the centers of two lotus leaves
+			const dx = l2.x - l1.x;
+			const dy = l2.y - l1.y;
+			const distance = Math.hypot(dx, dy);
+
+			// Total radius (multiplied by 0.95 to allow the edges of the leaves to slightly overlap for a natural look)
+			const minDistance = (l1.size / 2 + l2.size / 2) * 0.75;
+
+			if (distance < minDistance && distance > 0) {
+				// 1. ANTI-PENETRATION: Push the two leaves apart so they don’t stick together
+				const overlap = minDistance - distance;
+				const nx = dx / distance; // X direction vector
+				const ny = dy / distance; // Y direction vector
+
+				l1.x -= nx * (overlap / 2);
+				l1.y -= ny * (overlap / 2);
+				l2.x += nx * (overlap / 2);
+				l2.y += ny * (overlap / 2);
+
+				// 2. CHANGE DIRECTION AND SPEED (Elastic collision)
+				// Convert angle and speed into X, Y axes
+				const v1x = Math.cos(l1.angle) * l1.speed;
+				const v1y = Math.sin(l1.angle) * l1.speed;
+				const v2x = Math.cos(l2.angle) * l2.speed;
+				const v2y = Math.sin(l2.angle) * l2.speed;
+
+				// Calculate the pushing force along the line connecting the two centers
+				const p = v1x * nx + v1y * ny - (v2x * nx + v2y * ny);
+
+				// Update the new velocity vectors
+				const newV1x = v1x - p * nx;
+				const newV1y = v1y - p * ny;
+				const newV2x = v2x + p * nx;
+				const newV2y = v2y + p * ny;
+
+				// Update the new speed and drifting angle for the lotus leaves
+				l1.speed = Math.hypot(newV1x, newV1y);
+				l1.angle = Math.atan2(newV1y, newV1x);
+				l2.speed = Math.hypot(newV2x, newV2y);
+				l2.angle = Math.atan2(newV2y, newV2x);
+			}
+		}
+	}
+}
+
 // Use this function to debug fish in canvas
 function DebugCanvas() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -484,12 +577,20 @@ function DebugCanvas() {
 function PondCanvas({ fishCount }: PondCanvasProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fishRef = useRef<FishState[]>([]);
+	const lotusRef = useRef<LotusState[]>([]);
 
 	useEffect(() => {
 		const canvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 		const koiImage = new Image();
 		koiImage.src = "/kois/koi-fish-ginrin-asagi.png";
+
+		const lotusImages: HTMLImageElement[] = [new Image(), new Image()];
+		lotusImages[0].src = "/pond/lotus-1.svg";
+		lotusImages[1].src = "/pond/lotus-2.svg";
+		const backgroundImage = new Image();
+		backgroundImage.src = "/pond/pond-background-2.svg";
+
 		let frame: number;
 		let last = performance.now();
 		let dimensions = { width: 0, height: 0 };
@@ -505,8 +606,13 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 			canvas.style.height = `${box.height}px`;
 			ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 			dimensions = { width: box.width, height: box.height };
-			fishRef.current = Array.from({ length: fishCount }, (_, i) =>
+
+			fishRef.current = Array.from({ length: fishCount }, (_, _i) =>
 				makeFish(box.width, box.height),
+			);
+
+			lotusRef.current = Array.from({ length: 8 }, (_, _i) =>
+				makeLotus(box.width, box.height),
 			);
 		};
 		resize();
@@ -517,12 +623,17 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 			const dt = Math.min((now - last) / 1000, 0.05);
 			last = now;
 			const { width, height } = dimensions;
-			const water = ctx.createLinearGradient(0, 0, width, height);
-			water.addColorStop(0, "#1ea5bd");
-			water.addColorStop(0.52, "#087d9d");
-			water.addColorStop(1, "#045d85");
-			ctx.fillStyle = water;
-			ctx.fillRect(0, 0, width, height);
+
+			backgroundImage.width = width;
+			backgroundImage.height = height;
+			const water = ctx.drawImage(backgroundImage, 0, 0, width, height);
+
+			// const water = ctx.createLinearGradient(0, 0, width, height);
+			// water.addColorStop(0, "#1ea5bd");
+			// water.addColorStop(0.52, "#087d9d");
+			// water.addColorStop(1, "#045d85");
+			// ctx.fillStyle = water;
+			// ctx.fillRect(0, 0, width, height);
 
 			// soft caustic light streaks
 			ctx.strokeStyle = "rgba(197, 250, 245, .13)";
@@ -549,21 +660,41 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 					fish.turnAt = 1.5 + Math.random() * 3.6;
 				}
 				// Keep the entire sprite in an inset ellipse so it never disappears beyond the pond edge.
-				const centerX = width / 2;
-				const centerY = height / 2;
-				const radiusX = width * 0.41 - fish.size * 0.62;
-				const radiusY = height * 0.33 - fish.size * 0.42;
-				const xDistance = fish.x - centerX;
-				const yDistance = fish.y - centerY;
-				const edgeDistance =
-					(xDistance * xDistance) / (radiusX * radiusX) +
-					(yDistance * yDistance) / (radiusY * radiusY);
-				if (edgeDistance > 0.88) {
+				// const centerX = width / 2;
+				// const centerY = height / 2;
+				// const radiusX = width * 0.41 - fish.size * 0.62;
+				// const radiusY = height * 0.33 - fish.size * 0.42;
+				// const xDistance = fish.x - centerX;
+				// const yDistance = fish.y - centerY;
+				// const edgeDistance =
+				// 	(xDistance * xDistance) / (radiusX * radiusX) +
+				// 	(yDistance * yDistance) / (radiusY * radiusY);
+
+				// if (edgeDistance > 0.88) {
+				// 	fish.targetAngle = Math.atan2(
+				// 		centerY - fish.y,
+				// 		centerX - fish.x,
+				// 	);
+				// }
+
+				const marginX = fish.size * 0.6;
+				const marginY = fish.size * 0.6;
+
+				const isOutLeft = fish.x < marginX;
+				const isOutRight = fish.x > width - marginX;
+				const isOutTop = fish.y < marginY;
+				const isOutBottom = fish.y > height - marginY;
+
+				if (isOutLeft || isOutRight || isOutTop || isOutBottom) {
+					const centerX = width / 2;
+					const centerY = height / 2;
+
 					fish.targetAngle = Math.atan2(
 						centerY - fish.y,
 						centerX - fish.x,
 					);
 				}
+
 				let delta = Math.atan2(
 					Math.sin(fish.targetAngle - fish.angle),
 					Math.cos(fish.targetAngle - fish.angle),
@@ -580,6 +711,42 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 						KOI_PROPS_MAP.get("type28") as FishImageProperties,
 					);
 			});
+
+			handleLotusCollisions(lotusRef.current);
+			lotusRef.current.forEach((lotus, i) => {
+				const targetAngle = Math.PI / 8;
+				const baseSpeed = 5; // Lotus's base speed
+
+				let angleDiff = Math.atan2(
+					Math.sin(targetAngle - lotus.angle),
+					Math.cos(targetAngle - lotus.angle),
+				);
+				lotus.angle += angleDiff * 1.5 * dt; // Force rotation toward the water flow
+				lotus.speed += (baseSpeed - lotus.speed) * 2 * dt; // Slow down if drifting too fast
+
+				lotus.rotation += 0.05 * dt;
+				lotus.x += Math.cos(lotus.angle) * lotus.speed * dt;
+				lotus.y += Math.sin(lotus.angle) * lotus.speed * dt;
+
+				const padding = lotus.size / 2;
+
+				if (lotus.x > width + padding) {
+					lotus.x = -padding;
+				} else if (lotus.x < -padding) {
+					lotus.x = width + padding;
+				}
+
+				if (lotus.y > height + padding) {
+					lotus.y = -padding;
+				} else if (lotus.y < -padding) {
+					lotus.y = height + padding;
+				}
+
+				if (lotusImages[0].complete && lotusImages[1].complete) {
+					drawLotus(ctx, lotus, lotusImages[i % 2]);
+				}
+			});
+
 			frame = requestAnimationFrame(animate);
 		};
 		frame = requestAnimationFrame(animate);

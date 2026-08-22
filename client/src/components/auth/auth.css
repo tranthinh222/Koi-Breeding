@@ -178,6 +178,28 @@
   outline: none;
 }
 
+.auth-overlay .password-toggle-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #50505c;
+}
+
+.auth-overlay .auth-success-message {
+  margin-top: 4px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #ebf8f0;
+  border: 1px solid #bce4cc;
+  color: #1b8f5a;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 .auth-overlay .input-icon {
   width: 20px;
   height: 20px;
@@ -221,6 +243,42 @@
   text-align: center;
 }
 
+.auth-overlay .password-checklist-wrapper {
+  margin: -4px 4px 12px;
+}
+
+.auth-overlay .password-checklist-title {
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2a2d3e;
+}
+
+.auth-overlay .password-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  color: #5f5a67;
+  font-size: 0.82rem;
+}
+
+.auth-overlay .password-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-overlay .password-checklist li.valid {
+  color: #1b8f5a;
+  font-weight: 700;
+}
+
+.auth-overlay .password-checklist li.invalid {
+  color: #5f5a67;
+}
+
 .auth-overlay .secondary-button {
   width: 100%;
   display: inline-flex;
@@ -240,6 +298,13 @@
 .auth-overlay .secondary-button svg {
   width: 18px;
   height: 18px;
+}
+
+.auth-overlay .auth-helper-text {
+  margin: -6px 0 14px;
+  color: #5f5a67;
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .auth-overlay .link-row {
@@ -349,6 +414,15 @@
 
 .auth-overlay .footer-note a:hover {
   text-decoration: underline;
+}
+
+.auth-overlay .auth-forgot-layout {
+  display: flex;
+  justify-content: center;
+}
+
+.auth-overlay .auth-panel--forgot {
+  width: min(100%, 560px);
 }
 
 /* =========================================================

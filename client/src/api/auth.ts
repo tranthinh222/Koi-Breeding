@@ -63,3 +63,63 @@ export const Login = async (data: LoginRequest): Promise<LoginResponse> => {
     throw error;
   }
 };
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface VerifyResetCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface VerifyResetCodeResponse {
+  success: boolean;
+  message: string;
+  resetToken?: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export const forgotPassword = async (request: ForgotPasswordRequest): Promise<ForgotPasswordResponse> => {
+  const response = await apiClient.post<ResetPasswordResponse>(
+    "/auth/forgot-password",
+    request
+  );
+
+  return response.data;
+}
+export const resetPassword = async (request: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+  const response = await apiClient.post<ResetPasswordResponse>(
+    "/auth/reset-password",
+    request
+  );
+
+  return response.data;
+};
+
+export const verifyResetCode = async (
+  request: VerifyResetCodeRequest
+): Promise<VerifyResetCodeResponse> => {
+  const response = await apiClient.post<VerifyResetCodeResponse>(
+    "/auth/verify-reset-code",
+    request
+  );
+
+  return response.data;
+};

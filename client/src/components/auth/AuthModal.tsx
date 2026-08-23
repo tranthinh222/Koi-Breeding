@@ -212,7 +212,7 @@ export default function AuthModal({
 
       const result = await Login(payload);
 
-      sessionStorage.setItem("accessToken", result.accessToken);
+      sessionStorage.setItem("userToken", result.userToken);
       sessionStorage.setItem("refreshToken", result.refreshToken);
 
       onClose();

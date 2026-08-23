@@ -8,13 +8,15 @@ import com.koibreeding.dto.response.LoginResponse;
 import com.koibreeding.dto.response.ResAuthDto;
 import com.koibreeding.dto.response.ResUserDto;
 import com.koibreeding.service.AuthService;
+import com.koibreeding.service.UserService;
 import com.koibreeding.util.CookieUtil;
 import com.koibreeding.util.annotation.ApiMessage;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final UserService userService;
     private final CookieUtil cookieUtil;
 
     @PostMapping("/auth/register")
@@ -61,6 +64,24 @@ public class AuthController {
     @ApiMessage("Password reset successfully")
     public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/auth/me")
+    @ApiMessage("Fetch current user successfully")
+    public ResponseEntity<ResUserDto> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Integer userId = Integer.valueOf(authentication.getName());
+        return ResponseEntity.ok(userService.convertToResUserDto(userService.handleFetchProfileByUserId(userId)));
+    }
+
+    @PostMapping("/auth/logout")
+    @ApiMessage("Logout successfully")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        cookieUtil.clearAuthCookies(response);
         return ResponseEntity.ok().build();
     }
 }

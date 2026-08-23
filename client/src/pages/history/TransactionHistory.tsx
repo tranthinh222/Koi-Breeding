@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { CURRENT_USER_ID } from "../../api/currentUser";
 import { getTransactions, type Transaction } from "../../api/transaction";
+import { useAuth } from "../../context/AuthContext";
 import "../../style/history.css";
 
 type TransactionFilter = "ALL" | "BOUGHT" | "SOLD";
 type TransactionSort = "NEWEST" | "OLDEST";
 
 export default function TransactionHistory() {
+  const { currentUserId } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<TransactionFilter>("ALL");
   const [sort, setSort] = useState<TransactionSort>("NEWEST");
@@ -14,14 +15,16 @@ export default function TransactionHistory() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getTransactions(CURRENT_USER_ID)
+    if (!currentUserId) return;
+
+    getTransactions(currentUserId)
       .then(setTransactions)
       .catch((requestError) => {
         console.error("Failed to load transactions:", requestError);
         setError("Unable to load transaction history.");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [currentUserId]);
 
   const filteredTransactions = useMemo(() => {
     const filtered = transactions.filter((transaction) => {

@@ -7,6 +7,7 @@ import {
   resetPassword,
   verifyResetCode,
 } from "../../api/auth";
+import { useAuth } from "../../context/AuthContext";
 import "./auth.css";
 
 type AuthMode = "login" | "register";
@@ -70,6 +71,7 @@ export default function AuthModal({
   onSwitchMode,
 }: AuthModalProps) {
   const navigate = useNavigate();
+  const { refreshCurrentUser } = useAuth();
   const [view, setView] = useState<ViewMode>(mode);
   const [authNotice, setAuthNotice] = useState<string | null>(null);
 
@@ -214,6 +216,10 @@ export default function AuthModal({
 
       sessionStorage.setItem("userToken", result.userToken);
       sessionStorage.setItem("refreshToken", result.refreshToken);
+      localStorage.setItem("accessToken", result.userToken);
+      localStorage.setItem("refreshToken", result.refreshToken);
+
+      await refreshCurrentUser();
 
       onClose();
       navigate("/home");

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CURRENT_USER_ID } from '../../api/currentUser'
 import { getUser } from '../../api/user'
 import { getBalanceWallet } from '../../api/wallet'
 import maleAvatar from '../../assets/avatars/male_blank_avatar.png'
 import femaleAvatar from '../../assets/avatars/female_blank_avatar.png'
+import { useAuth } from '../../context/AuthContext'
 
 type HomeUser = {
   id: number
@@ -50,9 +50,9 @@ type HomeResponse = {
   featuredKoi: FeaturedKoi[]
 }
 
-const getHomeUserId = () => {
+const getHomeUserId = (currentUserId: number | null) => {
   const idFromUrl = new URLSearchParams(window.location.search).get('id')
-  return idFromUrl ?? String(CURRENT_USER_ID)
+  return idFromUrl ? Number(idFromUrl) : currentUserId
 }
 
 function getLevel(exp = 0) {
@@ -209,7 +209,7 @@ function ProfilePanel({ user }: { user: HomeUser }) {
         <span className="level">Level {getLevel(user.exp)}</span>
       </div>
 
-      <button className="view-profile-button" onClick={() => navigate(`/profile/${getHomeUserId()}`)}>
+      <button className="view-profile-button" onClick={() => navigate(`/profile`)}>
         View Profile
       </button>
     </aside>
@@ -217,6 +217,7 @@ function ProfilePanel({ user }: { user: HomeUser }) {
 }
 
 export default function Home() {
+  const { currentUserId } = useAuth()
   const [data, setData] = useState<HomeResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -225,11 +226,13 @@ export default function Home() {
     let cancelled = false
 
     const loadHome = async () => {
+      const userId = getHomeUserId(currentUserId)
+      if (!userId) return
+
       try {
         setLoading(true)
         setError(null)
 
-        const userId = Number(getHomeUserId())
         const [user, wallet] = await Promise.all([
           getUser(userId),
           getBalanceWallet(userId),
@@ -257,7 +260,7 @@ export default function Home() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [currentUserId])
 
   const summary = useMemo(
     () => ({

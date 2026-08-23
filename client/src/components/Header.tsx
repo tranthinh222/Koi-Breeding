@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { CURRENT_USER_ID } from '../api/currentUser'
 import { getUserInfo } from '../api/header'
 import {
   getNotifications,
@@ -7,8 +6,10 @@ import {
   notificationStreamUrl,
   type AppNotification,
 } from '../api/notification'
+import { useAuth } from '../context/AuthContext'
 
 export default function ShopHeader() {
+  const { currentUserId } = useAuth()
   const [username, setUsername] = useState('')
   const [exp, setExp] = useState(1)
   const [balance, setBalance] = useState<number>(0)
@@ -18,8 +19,10 @@ export default function ShopHeader() {
 
   useEffect(() => {
     const loadHeaderInfo = async () => {
+      if (!currentUserId) return
+
       try {
-        const data = await getUserInfo(CURRENT_USER_ID)
+        const data = await getUserInfo(currentUserId)
 
         setUsername(data.username)
         setBalance(data.balance)
@@ -32,14 +35,16 @@ export default function ShopHeader() {
     }
 
     loadHeaderInfo()
-  }, [])
+  }, [currentUserId])
 
   useEffect(() => {
-    getNotifications(CURRENT_USER_ID)
+    if (!currentUserId) return
+
+    getNotifications(currentUserId)
       .then(setNotifications)
       .catch((error) => console.error('Failed to load notifications:', error))
 
-    const eventSource = new EventSource(notificationStreamUrl(CURRENT_USER_ID))
+    const eventSource = new EventSource(notificationStreamUrl(currentUserId))
     eventSource.addEventListener('notification', (event) => {
       const notification = JSON.parse(event.data) as AppNotification
       setNotifications((current) => [notification, ...current])
@@ -49,7 +54,7 @@ export default function ShopHeader() {
     }
 
     return () => eventSource.close()
-  }, [])
+  }, [currentUserId])
 
   useEffect(() => {
     const updateBalance = (event: Event) => {
@@ -65,7 +70,9 @@ export default function ShopHeader() {
 
   const markAllRead = async () => {
     try {
-      await markAllNotificationsRead(CURRENT_USER_ID)
+      if (!currentUserId) return
+
+      await markAllNotificationsRead(currentUserId)
       setNotifications((current) =>
         current.map((notification) => ({ ...notification, isRead: true })),
       )

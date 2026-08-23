@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 
 import { getInventory, useItemFromInventory } from "../../api/inventory";
-import { CURRENT_USER_ID } from "../../api/currentUser";
 import type { ItemInventory, InventoryCategory } from "../../api/inventory";
+import { useAuth } from "../../context/AuthContext";
 // import "../../style/global.css";
 import "../../style/inventory.css";
 
 export default function Inventory() {
+  const { currentUserId } = useAuth();
   const [items, setItems] = useState<ItemInventory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,9 +21,11 @@ export default function Inventory() {
     let cancelled = false;
 
     const loadInventory = async () => {
+      if (!currentUserId) return;
+
       setLoading(true);
       try {
-        const data = await getInventory(CURRENT_USER_ID);
+        const data = await getInventory(currentUserId);
         if (!cancelled) {
           setItems(data);
           setSelectedItem(data[0] ?? null);
@@ -41,7 +44,7 @@ export default function Inventory() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [currentUserId]);
 
   const filteredItems = items.filter((item) => item.itemType === activeTab);
 
@@ -58,8 +61,10 @@ export default function Inventory() {
     setActionError(null);
 
     try {
+      if (!currentUserId) throw new Error("Please login before using items.");
+
       const updated = await useItemFromInventory(
-        CURRENT_USER_ID,
+        currentUserId,
         selectedItem.id,
         quantity,
       );

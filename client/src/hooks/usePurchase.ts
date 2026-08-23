@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import type { ShopItem } from '../api/shop'
 import { purchaseShopItem } from '../api/shop'
-import { CURRENT_USER_ID } from '../api/currentUser'
+import { useAuth } from '../context/AuthContext'
 
 export function usePurchase() {
+  const { currentUserId } = useAuth()
   const [buying, setBuying] = useState(false)
   const [buyError, setBuyError] = useState<string | null>(null)
   const [buySuccess, setBuySuccess] = useState<string | null>(null)
@@ -14,7 +15,11 @@ export function usePurchase() {
     setBuySuccess(null)
 
     try {
-      const purchase = await purchaseShopItem(CURRENT_USER_ID, item.id, quantity)
+      if (!currentUserId) {
+        throw new Error('Please login before buying items.')
+      }
+
+      const purchase = await purchaseShopItem(currentUserId, item.id, quantity)
       window.dispatchEvent(new CustomEvent('wallet:updated', { detail: purchase.balance }))
 
       setBuySuccess(`Bought ${item.name}!`)

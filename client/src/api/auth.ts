@@ -53,6 +53,18 @@ export interface LoginResponse {
   refreshToken: string;
 }
 
+export interface AuthUser {
+  id: number;
+  username: string;
+  email: string;
+  birthday: string | null;
+  gender: "MALE" | "FEMALE" | null;
+  exp: number;
+  avatarUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const Login = async (data: LoginRequest): Promise<LoginResponse> => {
   try {
     const response = await apiClient.post("/auth/login", data);
@@ -62,6 +74,15 @@ export const Login = async (data: LoginRequest): Promise<LoginResponse> => {
     console.error("Auth API request failed.", error);
     throw error;
   }
+};
+
+export const getCurrentUser = async (): Promise<AuthUser> => {
+  const response = await apiClient.get("/auth/me");
+  return response.data.data ?? response.data;
+};
+
+export const logoutRequest = async (): Promise<void> => {
+  await apiClient.post("/auth/logout");
 };
 
 export interface ForgotPasswordRequest {

@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useParams } from 'react-router-dom'
-import { CURRENT_USER_ID } from '../../api/currentUser'
 import { apiClient } from '../../api/client'
+import { useAuth } from '../../context/AuthContext'
 
 import maleAvatar from '../../assets/avatars/male_blank_avatar.png'
 import femaleAvatar from '../../assets/avatars/female_blank_avatar.png'
 
 import ImageEditor from './ImageEditor'
 
+import { useNavigate } from 'react-router-dom'
+
+import {logoutRequest} from '../../api/auth'
 
 type Gender = 'MALE' | 'FEMALE' | ''
 
@@ -21,6 +24,7 @@ type UserProfile = {
   exp: number
   avatarUrl: string | null
   createdAt?: string
+  updatedAt?: string
 }
 
 type ProfileForm = {
@@ -44,11 +48,11 @@ const ACCEPTED_AVATAR_TYPES = [
   'image/svg+xml',
 ]
 
-function getProfileUserId(userId?: string) {
+function getProfileUserId(userId: string | undefined, currentUserId: number | null) {
   const idFromRoute = userId ?? new URLSearchParams(window.location.search).get('id')
-  const parsedId = Number(idFromRoute ?? CURRENT_USER_ID)
+  const parsedId = Number(idFromRoute ?? currentUserId)
 
-  return Number.isFinite(parsedId) && parsedId > 0 ? parsedId : CURRENT_USER_ID
+  return Number.isFinite(parsedId) && parsedId > 0 ? parsedId : currentUserId
 }
 
 function getLevel(exp = 0) {
@@ -102,13 +106,25 @@ function ProfileHero({
 }) {
   const fallbackAvatar = profile.gender === "MALE" ? maleAvatar : femaleAvatar
   const [avatarSrc, setAvatarSrc] = useState(avatarUrl ?? profile.avatarUrl ?? fallbackAvatar)
-
+  const navigate = useNavigate()
   // Keep local src in sync when parent provides a new avatarUrl (cache-busting query param)
   useEffect(() => {
     setAvatarSrc(avatarUrl ?? profile.avatarUrl ?? fallbackAvatar)
   }, [avatarUrl, profile.avatarUrl, fallbackAvatar])
   const avatarText = profile.username.charAt(0).toUpperCase()
 
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   return (
     <section className="profile-hero">
       <button
@@ -140,6 +156,11 @@ function ProfileHero({
             Cancel
           </button>
         )}
+        {!editing && (
+        <button type="button" className="secondary" onClick={handleLogout}>
+          Sign out
+        </button>
+  )}
       </div>
     </section>
   )
@@ -292,6 +313,7 @@ function FavoriteKoiPanel() {
 
 export default function Profile() {
   const { userId: routeUserId } = useParams()
+  const { currentUserId, setAuthenticatedUser } = useAuth()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [form, setForm] = useState<ProfileForm>({
     email: '',
@@ -338,7 +360,9 @@ export default function Profile() {
         setLoading(true)
         setError(null)
 
-        const userId = getProfileUserId(routeUserId)
+        const userId = getProfileUserId(routeUserId, currentUserId)
+        if (!userId) return
+
         const response = await apiClient.get<ApiResponse<UserProfile>>('/users/profile', {
           params: { id: userId },
         })
@@ -365,7 +389,7 @@ export default function Profile() {
     return () => {
       cancelled = true
     }
-  }, [routeUserId])
+  }, [currentUserId, routeUserId])
 
   const avatarUrl = profile?.avatarUrl
     ? `${profile.avatarUrl}${profile.avatarUrl.includes('?') ? '&' : '?'}v=${avatarVersion}`
@@ -471,7 +495,16 @@ export default function Profile() {
           params: { id: profile.id },
         })
 
-        setProfile(response.data.data)
+        const updatedProfile = response.data.data
+        setProfile(updatedProfile)
+        if (updatedProfile.id === currentUserId) {
+          setAuthenticatedUser({
+            ...updatedProfile,
+            gender: updatedProfile.gender || null,
+            createdAt: updatedProfile.createdAt ?? '',
+            updatedAt: updatedProfile.updatedAt ?? '',
+          })
+        }
         setEditing(false)
         setNotice('Profile updated successfully.')
       } catch (err) {

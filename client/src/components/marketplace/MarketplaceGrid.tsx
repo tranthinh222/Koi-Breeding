@@ -13,7 +13,7 @@ export default function ShopGrid({
   onSelect,
 }: ShopGridProps) {
   return (
-    <div className="fish-grid">
+    <div className="item-grid">
       {items.map((item) => (
         <MarketplaceCard
           key={item.id}

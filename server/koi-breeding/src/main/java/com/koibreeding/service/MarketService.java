@@ -4,7 +4,6 @@ import com.koibreeding.domain.Dictionary;
 import com.koibreeding.domain.Koi;
 import com.koibreeding.domain.Marketplace;
 import com.koibreeding.domain.Variety;
-import com.koibreeding.dto.request.MarketRequest;
 import com.koibreeding.dto.response.ResMarketDto;
 import com.koibreeding.repository.MarketRepository;
 import jakarta.persistence.criteria.Join;
@@ -44,8 +43,10 @@ public class MarketService {
             String category,
             BigDecimal minPrice,
             BigDecimal maxPrice,
-            String size,
-            String weight,
+            BigDecimal minLength,
+            BigDecimal maxLength,
+            BigDecimal minWeight,
+            BigDecimal maxWeight,
             String gender
     ) {
 
@@ -54,9 +55,10 @@ public class MarketService {
 
         // Chỉ lấy tin đang ACTIVE
         spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("status"), "ACTIVE") // tương đương query where status = 'ACTIVE'
+                cb.equal(root.get("status"), "ACTIVE")
         );
 
+        // Keyword search trong Koi name và Variety name
         if (keyword != null && !keyword.isBlank()) {
 
             String search = "%" + keyword.trim().toLowerCase() + "%";
@@ -85,6 +87,7 @@ public class MarketService {
             });
         }
 
+        // Category filter - match với variety name
         if (category != null && !category.equals("ALL")) {
 
             String varietyName = switch (category) {
@@ -112,8 +115,8 @@ public class MarketService {
             });
         }
 
+        // Price range filter
         if (minPrice != null) {
-
             spec = spec.and((root, query, cb) ->
                     cb.greaterThanOrEqualTo(
                             root.get("price"),
@@ -123,7 +126,6 @@ public class MarketService {
         }
 
         if (maxPrice != null) {
-
             spec = spec.and((root, query, cb) ->
                     cb.lessThanOrEqualTo(
                             root.get("price"),
@@ -132,74 +134,49 @@ public class MarketService {
             );
         }
 
-        if (size != null && !size.equals("ALL")) {
-
+        // Length range filter (cm)
+        if (minLength != null) {
             spec = spec.and((root, query, cb) -> {
-
-                Join<Marketplace, Koi> koi =
-                        root.join("koi");
-
-                return switch (size) {
-
-                    case "SMALL" ->
-                            cb.lessThan(
-                                    koi.get("length"),
-                                    new BigDecimal("20")
-                            );
-
-                    case "MEDIUM" ->
-                            cb.between(
-                                    koi.get("length"),
-                                    new BigDecimal("20"),
-                                    new BigDecimal("40")
-                            );
-
-                    case "LARGE" ->
-                            cb.greaterThan(
-                                    koi.get("length"),
-                                    new BigDecimal("40")
-                            );
-
-                    default ->
-                            cb.conjunction();
-                };
+                Join<Marketplace, Koi> koi = root.join("koi");
+                return cb.greaterThanOrEqualTo(
+                        koi.get("length"),
+                        minLength
+                );
             });
         }
 
-        if (weight != null && !weight.equals("ALL")) {
-
+        if (maxLength != null) {
             spec = spec.and((root, query, cb) -> {
-
-                Join<Marketplace, Koi> koi =
-                        root.join("koi");
-
-                return switch (weight) {
-
-                    case "SMALL" ->
-                            cb.lessThan(
-                                    koi.get("weight"),
-                                    new BigDecimal("1")
-                            );
-
-                    case "MEDIUM" ->
-                            cb.between(
-                                    koi.get("weight"),
-                                    new BigDecimal("1"),
-                                    new BigDecimal("3")
-                            );
-
-                    case "LARGE" ->
-                            cb.greaterThan(
-                                    koi.get("weight"),
-                                    new BigDecimal("3")
-                            );
-
-                    default ->
-                            cb.conjunction();
-                };
+                Join<Marketplace, Koi> koi = root.join("koi");
+                return cb.lessThanOrEqualTo(
+                        koi.get("length"),
+                        maxLength
+                );
             });
         }
 
+        // Weight range filter (kg)
+        if (minWeight != null) {
+            spec = spec.and((root, query, cb) -> {
+                Join<Marketplace, Koi> koi = root.join("koi");
+                return cb.greaterThanOrEqualTo(
+                        koi.get("weight"),
+                        minWeight
+                );
+            });
+        }
+
+        if (maxWeight != null) {
+            spec = spec.and((root, query, cb) -> {
+                Join<Marketplace, Koi> koi = root.join("koi");
+                return cb.lessThanOrEqualTo(
+                        koi.get("weight"),
+                        maxWeight
+                );
+            });
+        }
+
+        // Gender filter
         if (gender != null && !gender.equals("ALL")) {
 
             spec = spec.and((root, query, cb) -> {

@@ -34,10 +34,10 @@ export default function DetailPanel({
       <hr />
 
       <div className="detail-image">
-        <img src={item.image} alt={item.name} />
+        <img src={item.image} alt={item.koiName} />
       </div>
 
-      <h2>{item.name}</h2>
+      <h2>{item.koiName}</h2>
 
       {item.rarity && (
         <div className={`${item.rarity.toLowerCase()}-rarity`}>

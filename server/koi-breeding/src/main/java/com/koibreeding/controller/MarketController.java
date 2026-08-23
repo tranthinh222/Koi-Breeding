@@ -21,8 +21,10 @@ public class MarketController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) String size,
-            @RequestParam(required = false) String weight,
+            @RequestParam(required = false) BigDecimal minLength,
+            @RequestParam(required = false) BigDecimal maxLength,
+            @RequestParam(required = false) BigDecimal minWeight,
+            @RequestParam(required = false) BigDecimal maxWeight,
             @RequestParam(required = false) String gender
     ) {
 
@@ -32,8 +34,10 @@ public class MarketController {
                         category,
                         minPrice,
                         maxPrice,
-                        size,
-                        weight,
+                        minLength,
+                        maxLength,
+                        minWeight,
+                        maxWeight,
                         gender
                 )
         );

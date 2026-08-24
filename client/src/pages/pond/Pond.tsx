@@ -581,6 +581,78 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 	const fishRef = useRef<FishState[]>([]);
 	const lotusRef = useRef<LotusState[]>([]);
 
+	// 1. STATE LƯU TRỮ CON CÁ ĐANG ĐƯỢC CHỌN
+	const [activeFishIndex, setActiveFishIndex] = useState<number | null>(null);
+
+	const activeFishIndexRef = useRef<number | null>(null);
+
+	const popupRef = useRef<HTMLDivElement>(null);
+
+	const menuTimeoutRef = useRef<number | null>(null);
+
+	// 2. HÀM TÍNH TOẠ ĐỘ CHUỘT THỰC TẾ TRÊN CANVAS
+	const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
+		const rect = e.currentTarget.getBoundingClientRect();
+		return {
+			x: e.clientX - rect.left,
+			y: e.clientY - rect.top,
+		};
+	};
+
+	// 3. XỬ LÝ HOVER (Đổi con trỏ thành bàn tay)
+	const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+		const { x, y } = getMousePos(e);
+		let isHovering = false;
+
+		for (let i = 0; i < fishRef.current.length; i++) {
+			const fish = fishRef.current[i];
+			// Tính khoảng cách từ chuột đến tâm con cá (Hitbox hình tròn)
+			const dist = Math.hypot(fish.x - x, fish.y - y);
+			if (dist < fish.size / 2) {
+				isHovering = true;
+				break;
+			}
+		}
+
+		if (canvasRef.current) {
+			canvasRef.current.style.cursor = isHovering ? "pointer" : "default";
+		}
+	};
+
+	// 4. XỬ LÝ CLICK (Mở menu)
+	const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+		const { x, y } = getMousePos(e);
+		let clickedIndex = null;
+
+		// Duyệt ngược mảng để ưu tiên chọn con cá vẽ sau cùng (nổi lên trên cùng) nếu chúng đè lên nhau
+		for (let i = fishRef.current.length - 1; i >= 0; i--) {
+			const fish = fishRef.current[i];
+			const dist = Math.hypot(fish.x - x, fish.y - y);
+			if (dist < fish.size / 2) {
+				clickedIndex = i;
+				break;
+			}
+		}
+
+		setActiveFishIndex(clickedIndex); // Gắn index của con cá hoặc null (ẩn menu)
+		activeFishIndexRef.current = clickedIndex;
+
+		// 1. Hủy bộ đếm giờ cũ (nếu có) để tránh lỗi đóng menu oan
+		if (menuTimeoutRef.current) {
+			clearTimeout(menuTimeoutRef.current);
+			menuTimeoutRef.current = null;
+		}
+
+		// 2. Nếu người dùng thực sự click trúng một con cá, bắt đầu đếm 5 giây
+		if (clickedIndex !== null) {
+			menuTimeoutRef.current = setTimeout(() => {
+				// Sau 5 giây, set cả State và Ref về null để ẩn menu
+				setActiveFishIndex(null);
+				activeFishIndexRef.current = null;
+			}, 5000);
+		}
+	};
+
 	useEffect(() => {
 		const canvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -628,14 +700,7 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 
 			backgroundImage.width = width;
 			backgroundImage.height = height;
-			const water = ctx.drawImage(backgroundImage, 0, 0, width, height);
-
-			// const water = ctx.createLinearGradient(0, 0, width, height);
-			// water.addColorStop(0, "#1ea5bd");
-			// water.addColorStop(0.52, "#087d9d");
-			// water.addColorStop(1, "#045d85");
-			// ctx.fillStyle = water;
-			// ctx.fillRect(0, 0, width, height);
+			ctx.drawImage(backgroundImage, 0, 0, width, height);
 
 			// soft caustic light streaks
 			ctx.strokeStyle = "rgba(197, 250, 245, .13)";
@@ -661,23 +726,6 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 					fish.targetAngle += (Math.random() - 0.5) * 1.8;
 					fish.turnAt = 1.5 + Math.random() * 3.6;
 				}
-				// Keep the entire sprite in an inset ellipse so it never disappears beyond the pond edge.
-				// const centerX = width / 2;
-				// const centerY = height / 2;
-				// const radiusX = width * 0.41 - fish.size * 0.62;
-				// const radiusY = height * 0.33 - fish.size * 0.42;
-				// const xDistance = fish.x - centerX;
-				// const yDistance = fish.y - centerY;
-				// const edgeDistance =
-				// 	(xDistance * xDistance) / (radiusX * radiusX) +
-				// 	(yDistance * yDistance) / (radiusY * radiusY);
-
-				// if (edgeDistance > 0.88) {
-				// 	fish.targetAngle = Math.atan2(
-				// 		centerY - fish.y,
-				// 		centerX - fish.x,
-				// 	);
-				// }
 
 				const marginX = fish.size * 0.6;
 				const marginY = fish.size * 0.6;
@@ -749,6 +797,15 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 				}
 			});
 
+			if (activeFishIndexRef.current !== null && popupRef.current) {
+				const activeFish = fishRef.current[activeFishIndexRef.current];
+				if (activeFish) {
+					// Menu sẽ bám sát cá mượt mà 60 FPS
+					popupRef.current.style.left = `${activeFish.x + 20}px`;
+					popupRef.current.style.top = `${activeFish.y - 40}px`;
+				}
+			}
+
 			frame = requestAnimationFrame(animate);
 		};
 		frame = requestAnimationFrame(animate);
@@ -758,7 +815,54 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 		};
 	}, [fishCount]);
 
-	return <canvas ref={canvasRef} aria-label="Hồ cá koi đang chuyển động" />;
+	useEffect(() => {
+		return () => {
+			if (menuTimeoutRef.current) {
+				clearTimeout(menuTimeoutRef.current);
+			}
+		};
+	}, []);
+
+	return (
+		<>
+			<canvas
+				ref={canvasRef}
+				aria-label="Koi pond is moving"
+				onMouseMove={handleMouseMove}
+				onClick={handleClick}
+			/>
+
+			{/* MENU HTML HIỆN LÊN KHI CLICK VÀO CÁ */}
+			{activeFishIndex !== null && (
+				<div ref={popupRef} className="fish-menu">
+					<button
+						className="fish-info-button"
+						onClick={() =>
+							alert(`Xem thông tin cá số ${activeFishIndex}`)
+						}
+					>
+						Thông tin
+					</button>
+					<button
+						className="fish-menu-close-button"
+						onClick={() => {
+							// Ẩn menu
+							setActiveFishIndex(null);
+							activeFishIndexRef.current = null;
+
+							// Xóa bộ đếm giờ
+							if (menuTimeoutRef.current) {
+								clearTimeout(menuTimeoutRef.current);
+								menuTimeoutRef.current = null;
+							}
+						}}
+					>
+						X
+					</button>
+				</div>
+			)}
+		</>
+	);
 }
 
 function Pond() {
@@ -768,14 +872,6 @@ function Pond() {
 	return (
 		<>
 			<main>
-				<section className="intro">
-					<p className="eyebrow">KOI BREEDING · PROTOTYPE</p>
-					<h1>Hồ cá koi</h1>
-					<p>
-						Những chú koi tự chọn hướng, quay đầu ở mép hồ và vẫy
-						đuôi theo nhịp bơi.
-					</p>
-				</section>
 				<section className="pond-shell">
 					<PondCanvas fishCount={fishCount} />
 					{/* <DebugCanvas /> */}
@@ -816,7 +912,24 @@ function Pond() {
 							/>
 						</button>
 					</div>
-					<div className="inventory">
+					<div className="footer">
+						<button
+							type="button"
+							className="nav-button"
+							title="information"
+						>
+							<img
+								src="/pond/information-button.png"
+								alt="pond info"
+							/>
+						</button>
+						<button
+							type="button"
+							className="nav-button"
+							title="all ponds"
+						>
+							<img src="/pond/pond-list.svg" alt="pond list" />
+						</button>
 						<button
 							type="button"
 							className="nav-button"
@@ -826,6 +939,7 @@ function Pond() {
 							<img src="/pond/school-bag.svg" alt="inventory" />
 						</button>
 					</div>
+
 					<div className="back">
 						<button
 							type="button"
@@ -857,18 +971,6 @@ function Pond() {
 						</button>
 					</div>
 				</section>
-				<div className="controls">
-					<label htmlFor="fish">Số lượng cá</label>
-					<input
-						id="fish"
-						type="range"
-						min="4"
-						max="28"
-						value={fishCount}
-						onChange={(e) => setFishCount(Number(e.target.value))}
-					/>
-					<output>{fishCount}</output>
-				</div>
 			</main>
 		</>
 	);

@@ -11,20 +11,12 @@ body {
 	font-family: "DM Sans", sans-serif;
 }
 main {
-	width: min(1100px, calc(100% - 40px));
+	/* width: min(1100px, calc(100% - 40px)); */
+	width: 100%;
+	height: 100vh;
 	margin: 0 auto;
-	padding: 56px 0 48px;
 }
-.intro {
-	max-width: 590px;
-	margin-bottom: 30px;
-}
-.eyebrow {
-	color: #77d8dc;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.16em;
-}
+
 h1 {
 	margin: 8px 0 10px;
 	font:
@@ -32,13 +24,10 @@ h1 {
 		Georgia,
 		serif;
 }
-.intro p:last-child {
-	margin: 0;
-	color: #b7d4da;
-	line-height: 1.6;
-}
+
 .pond-shell {
-	height: min(64vw, 590px);
+	/* height: min(64vw, 590px); */
+	height: 100%;
 	min-height: 380px;
 	position: relative;
 	overflow: hidden;
@@ -117,10 +106,14 @@ canvas {
 	cursor: not-allowed;
 }
 
-.inventory {
+.footer {
 	position: absolute;
 	bottom: 22px;
 	left: 22px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
 }
 
 .back {
@@ -172,30 +165,7 @@ canvas {
 .pond-label strong {
 	font-size: 0.9rem;
 }
-.controls {
-	display: flex;
-	align-items: center;
-	gap: 14px;
-	max-width: 450px;
-	margin: 32px auto 0;
-	padding: 14px 18px;
-	border: 1px solid rgba(155, 220, 215, 0.22);
-	border-radius: 16px;
-	background: rgba(9, 70, 91, 0.45);
-}
-.controls label {
-	white-space: nowrap;
-	font-weight: 600;
-}
-.controls input {
-	accent-color: #78d8cb;
-	flex: 1;
-}
-output {
-	min-width: 20px;
-	color: #8ceadd;
-	font-weight: 700;
-}
+
 @media (max-width: 560px) {
 	main {
 		width: min(100% - 28px, 1100px);
@@ -209,4 +179,35 @@ output {
 		left: 14px;
 		top: 14px;
 	}
+}
+
+.fish-menu {
+	position: absolute;
+	z-index: 100;
+	transform: translate(0, -100%);
+	background-color: rgba(4, 67, 85, 0.8);
+	backdrop-filter: blur(4px);
+	padding: 8px;
+	border-radius: 12px;
+	display: flex;
+	gap: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.fish-info-button {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #f2e943;
+	font-weight: bold;
+}
+
+.fish-menu-close-button {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #e74c3c;
+	color: white;
 }

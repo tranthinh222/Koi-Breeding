@@ -5,17 +5,17 @@ info:
 
 http:
   method: POST
-  url: ""
+  url: localhost:8090/koi_breeding/auth/register
   body:
     type: json
     data: |-
       {
-        "username": "safekoi",
+        "username": "safekoi1",
         "email": "nguyenvanphuoc1172@gmail.com",
         "birthday": "2005-12-21",
         "gender": "MALE",
-        "password": "SafeKoi@0",
-        "confirmPassword": "SafeKoi@0",
+        "password": "SafeKoi@1",
+        "confirmPassword": "SafeKoi@1",
         "avatarUrl": ""
       }
   auth: inherit

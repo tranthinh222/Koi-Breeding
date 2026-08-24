@@ -54,6 +54,105 @@ canvas {
 	width: 100%;
 	height: 100%;
 }
+
+.coins {
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	padding: 10px 14px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+}
+
+.coins > img {
+	width: 50px;
+}
+
+.coins > span {
+	font-family: "Grandstander";
+	font-size: 30px;
+	font-weight: bold;
+	color: #f2e943;
+}
+
+.header {
+	position: absolute;
+	top: 22px;
+	right: 22px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+}
+
+.nav-button {
+	width: 80px;
+	height: 80px;
+	background: none;
+	border: none;
+
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+.nav-button:hover {
+	transform: translateY(-2px);
+}
+
+.nav-button:active {
+	transform: translateY(1px);
+}
+
+.nav-button > img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.nav-button:disabled {
+	transform: none;
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.inventory {
+	position: absolute;
+	bottom: 22px;
+	left: 22px;
+}
+
+.back {
+	position: absolute;
+	bottom: 12px;
+	right: 12px;
+}
+
+.next-pond {
+	position: absolute;
+	right: 12px;
+	top: 45%;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.pagination svg {
+	color: #79ffff;
+}
+
+.pagination:hover {
+	opacity: 1;
+}
+
+.prev-pond {
+	position: absolute;
+	left: 12px;
+	top: 45%;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
 .pond-label {
 	position: absolute;
 	top: 22px;

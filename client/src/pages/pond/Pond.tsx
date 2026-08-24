@@ -1,4 +1,6 @@
+import { CircleArrowLeft, CircleArrowRight, Undo2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Pond.css";
 
 interface PondCanvasProps {
@@ -761,6 +763,7 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 
 function Pond() {
 	const [fishCount, setFishCount] = useState(12);
+	const navigate = useNavigate();
 
 	return (
 		<>
@@ -776,9 +779,82 @@ function Pond() {
 				<section className="pond-shell">
 					<PondCanvas fishCount={fishCount} />
 					{/* <DebugCanvas /> */}
-					<div className="pond-label">
+					{/* <div className="pond-label">
 						<span>Đàn koi</span>
 						<strong>{fishCount} con</strong>
+					</div> */}
+					<div className="coins">
+						<img src="/pond/coin.svg" alt="coin" />
+						<span>9.000</span>
+					</div>
+					<div className="header">
+						<button
+							className="nav-button"
+							type="button"
+							title="marketplace"
+							onClick={() => navigate("/transactions")}
+						>
+							<img src="/pond/store.svg" alt="store" />
+						</button>
+						<button
+							className="nav-button"
+							type="button"
+							title="dictionary"
+							onClick={() => navigate("/dictionary")}
+						>
+							<img src="/pond/open-book.svg" alt="dictionary" />
+						</button>
+						<button
+							className="nav-button"
+							type="button"
+							title="shop"
+							onClick={() => navigate("/shop")}
+						>
+							<img
+								src="/pond/shopping-cart.svg"
+								alt="marketplace"
+							/>
+						</button>
+					</div>
+					<div className="inventory">
+						<button
+							type="button"
+							className="nav-button"
+							title="inventory"
+							onClick={() => navigate("/inventory")}
+						>
+							<img src="/pond/school-bag.svg" alt="inventory" />
+						</button>
+					</div>
+					<div className="back">
+						<button
+							type="button"
+							className="nav-button"
+							title="back"
+							onClick={() => navigate("/")}
+						>
+							<Undo2 size={50} />
+						</button>
+					</div>
+					<div className="prev-pond pagination">
+						<button
+							type="button"
+							className="nav-button"
+							title="previous"
+							disabled={true}
+						>
+							<CircleArrowLeft size={50} />
+						</button>
+					</div>
+					<div className="next-pond pagination">
+						<button
+							type="button"
+							className="nav-button"
+							title="next"
+							disabled={true}
+						>
+							<CircleArrowRight size={50} />
+						</button>
 					</div>
 				</section>
 				<div className="controls">

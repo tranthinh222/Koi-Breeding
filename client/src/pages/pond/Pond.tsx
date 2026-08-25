@@ -1,10 +1,14 @@
 import { CircleArrowLeft, CircleArrowRight, Undo2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Toaster from "../../components/admin/Toast/Toaster";
+import PondInformation from "../../components/user/pond/PondInformation/PondInformation";
+import type { IPond } from "../../types/backend";
 import "./Pond.css";
 
 interface PondCanvasProps {
 	fishCount: number;
+	pond: IPond;
 }
 
 interface FishState {
@@ -865,15 +869,23 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 	);
 }
 
-function Pond() {
-	const [fishCount, setFishCount] = useState(12);
+interface PondProps {
+	pond: IPond;
+	onClose: () => void;
+	onFetchPond: (page: "next" | "prev") => void;
+	onUpdatePond: (name: string, description: string) => void;
+}
+
+function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 	const navigate = useNavigate();
+	const [isInformationDialogOpen, setIsInformationDialogOpen] =
+		useState<boolean>(false);
 
 	return (
 		<>
 			<main>
 				<section className="pond-shell">
-					<PondCanvas fishCount={fishCount} />
+					<PondCanvas fishCount={12} pond={pond} />
 					{/* <DebugCanvas /> */}
 					{/* <div className="pond-label">
 						<span>Đàn koi</span>
@@ -890,7 +902,7 @@ function Pond() {
 							title="marketplace"
 							onClick={() => navigate("/transactions")}
 						>
-							<img src="/pond/store.svg" alt="store" />
+							<img src="/pond/store.png" alt="store" />
 						</button>
 						<button
 							className="nav-button"
@@ -898,7 +910,7 @@ function Pond() {
 							title="dictionary"
 							onClick={() => navigate("/dictionary")}
 						>
-							<img src="/pond/open-book.svg" alt="dictionary" />
+							<img src="/pond/dictionary.svg" alt="dictionary" />
 						</button>
 						<button
 							className="nav-button"
@@ -907,7 +919,7 @@ function Pond() {
 							onClick={() => navigate("/shop")}
 						>
 							<img
-								src="/pond/shopping-cart.svg"
+								src="/pond/shopping-cart.png"
 								alt="marketplace"
 							/>
 						</button>
@@ -917,26 +929,34 @@ function Pond() {
 							type="button"
 							className="nav-button"
 							title="information"
+							onClick={() => setIsInformationDialogOpen(true)}
 						>
 							<img
 								src="/pond/information-button.png"
 								alt="pond info"
 							/>
 						</button>
-						<button
+						{/* <button
 							type="button"
 							className="nav-button"
 							title="all ponds"
 						>
-							<img src="/pond/pond-list.svg" alt="pond list" />
-						</button>
+							<img src="/pond/pond-list-1.svg" alt="pond list" />
+						</button> */}
 						<button
 							type="button"
 							className="nav-button"
 							title="inventory"
 							onClick={() => navigate("/inventory")}
 						>
-							<img src="/pond/school-bag.svg" alt="inventory" />
+							<img src="/pond/backpack.png" alt="inventory" />
+						</button>
+						<button
+							type="button"
+							className="nav-button"
+							title="add koi"
+						>
+							<img src="/pond/add-koi.svg" alt="add koi" />
 						</button>
 					</div>
 
@@ -945,7 +965,7 @@ function Pond() {
 							type="button"
 							className="nav-button"
 							title="back"
-							onClick={() => navigate("/")}
+							onClick={() => onClose()}
 						>
 							<Undo2 size={50} />
 						</button>
@@ -955,7 +975,8 @@ function Pond() {
 							type="button"
 							className="nav-button"
 							title="previous"
-							disabled={true}
+							// disabled={true}
+							onClick={() => onFetchPond("prev")}
 						>
 							<CircleArrowLeft size={50} />
 						</button>
@@ -965,13 +986,24 @@ function Pond() {
 							type="button"
 							className="nav-button"
 							title="next"
-							disabled={true}
+							// disabled={true}
+							onClick={() => onFetchPond("next")}
 						>
 							<CircleArrowRight size={50} />
 						</button>
 					</div>
 				</section>
 			</main>
+			{isInformationDialogOpen && (
+				<div className="overlay">
+					<PondInformation
+						pond={pond}
+						onClose={() => setIsInformationDialogOpen(false)}
+						onEdit={onUpdatePond}
+					/>
+				</div>
+			)}
+			<Toaster />
 		</>
 	);
 }

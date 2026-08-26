@@ -1,6 +1,8 @@
 package com.koibreeding.controller;
 
+import com.koibreeding.dto.request.*;
 import com.koibreeding.dto.response.ResMarketDto;
+import com.koibreeding.dto.response.ResTradeDto;
 import com.koibreeding.service.MarketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,5 +43,44 @@ public class MarketController {
                         gender
                 )
         );
+    }
+
+    @GetMapping("/marketplace/listKoi")
+    public ResponseEntity<List<ResMarketListKoi>> getMarketListKois(
+            @RequestParam Integer userId
+
+    ){
+        return ResponseEntity.ok(marketService.getMarketListKois(userId));
+    }
+
+    @GetMapping("/marketplace/koiPurchase")
+    public ResponseEntity<List<ResMarketKois>> getMarketBuyKois(
+            @RequestParam Integer userId
+    ){
+        return ResponseEntity.ok(marketService.getMarketListBuyKois(userId));
+    }
+
+    @PostMapping("/marketplace/saleKoi")
+    public ResponseEntity<ResMarketDto> sellKoi(
+            @RequestParam Integer userId,
+            @RequestBody ResMarketSellKoi request
+            ){
+         return ResponseEntity.ok(marketService.sellKoi(userId, request));
+    }
+
+    @DeleteMapping("/marketplace/deletionKoi")
+    public ResponseEntity<Void> deleteKoi(
+            @RequestBody ReqMarketDeleteKoi request
+            ){
+        this.marketService.deleteKoi(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/marketplace/purchase")
+    public ResponseEntity<ResTradeDto> buyKoiInMarket(
+            @RequestParam Integer userId,
+            @RequestBody ReqBuyKoi request
+    ){
+        return ResponseEntity.ok(marketService.buyKoi(userId, request));
     }
 }

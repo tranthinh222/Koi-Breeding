@@ -1,0 +1,44 @@
+info:
+  name: Get MarketFilter
+  type: http
+  seq: 6
+
+http:
+  method: GET
+  url: http://localhost:5432/koi_breeding/marketplace?keyword=&category=&minPrice=&maxPrice=&minLength=&maxLength=&minWeight=&maxWeight=&gender=
+  params:
+    - name: keyword
+      value: ""
+      type: query
+    - name: category
+      value: ""
+      type: query
+    - name: minPrice
+      value: ""
+      type: query
+    - name: maxPrice
+      value: ""
+      type: query
+    - name: minLength
+      value: ""
+      type: query
+    - name: maxLength
+      value: ""
+      type: query
+    - name: minWeight
+      value: ""
+      type: query
+    - name: maxWeight
+      value: ""
+      type: query
+    - name: gender
+      value: ""
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

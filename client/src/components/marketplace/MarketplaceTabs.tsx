@@ -4,6 +4,69 @@ import "../../style/market.css";
 export type MarketplaceCategory = "ALL" | "KOHAKU" | "SHOWA" | "OGON";
 export type FishGender = "ALL" | "MALE" | "FEMALE";
 
+interface OptionDropdownProps<T extends string> {
+  value: T;
+  options: {
+    value: T;
+    label: string;
+  }[];
+  onChange: (value: T) => void;
+  placeholder: string;
+
+  open: boolean;
+  onToggle: () => void;
+}
+
+function OptionDropdown<T extends string>({
+  value,
+  options,
+  onChange,
+  placeholder,
+  open,
+  onToggle,
+}: OptionDropdownProps<T>) {
+  const selected = options.find((option) => option.value === value);
+
+  return (
+    <div className="marketplace-option-dropdown">
+      <button
+        type="button"
+        className={`marketplace-option-trigger ${open ? "active" : ""}`}
+        onClick={onToggle}
+      >
+        <span>{selected?.label ?? placeholder}</span>
+
+        <span className="option-arrow">{open ? "▲" : "▼"}</span>
+      </button>
+
+      {open && (
+        <div className="marketplace-option-popup">
+          <div className="option-popup-title">{placeholder}</div>
+
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={`marketplace-option-item ${
+                option.value === value ? "selected" : ""
+              }`}
+              onClick={() => {
+                onChange(option.value);
+                onToggle();
+              }}
+            >
+              {option.label}
+
+              {option.value === value && (
+                <span className="option-check">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 // Form filters - tất cả string để bind với input
 export interface ShopFilters {
   category: MarketplaceCategory;
@@ -17,14 +80,20 @@ export interface ShopFilters {
   gender: FishGender;
 }
 
-const categories = [
+const categories: {
+  value: MarketplaceCategory;
+  label: string;
+}[] = [
   { value: "ALL", label: "🐟 Breed" },
   { value: "KOHAKU", label: "🐟 Kohaku" },
   { value: "SHOWA", label: "🐟 Showa" },
   { value: "OGON", label: "🐟 Ogon" },
 ];
 
-const genders = [
+const genders: {
+  value: FishGender;
+  label: string;
+}[] = [
   { value: "ALL", label: "All Genders" },
   { value: "MALE", label: "Male" },
   { value: "FEMALE", label: "Female" },
@@ -55,10 +124,6 @@ export const EMPTY_FILTERS: ShopFilters = {
   gender: "ALL",
 };
 
-/* =========================================================
-   RANGE FIELD — number inputs + dual drag-and-drop slider
-   ========================================================= */
-
 interface RangeFieldProps {
   label: string;
   unit: string;
@@ -69,6 +134,9 @@ interface RangeFieldProps {
   maxValue: string;
   onMinChange: (v: string) => void;
   onMaxChange: (v: string) => void;
+
+  open: boolean;
+  onToggle: () => void;
 }
 
 function RangeField({
@@ -81,83 +149,126 @@ function RangeField({
   maxValue,
   onMinChange,
   onMaxChange,
+  open,
+  onToggle,
 }: RangeFieldProps) {
   const lo = minValue === "" ? min : Number(minValue);
+
   const hi = maxValue === "" ? max : Number(maxValue);
 
   const safeLo = Number.isFinite(lo) ? lo : min;
   const safeHi = Number.isFinite(hi) ? hi : max;
 
   const loPct = ((safeLo - min) / (max - min)) * 100;
+
   const hiPct = ((safeHi - min) / (max - min)) * 100;
 
-  const handleSliderMin = (v: number) => {
-    const clamped = Math.min(Math.max(v, min), safeHi);
-    onMinChange(String(clamped));
+  const displayValue =
+    minValue === "" && maxValue === ""
+      ? label
+      : `${safeLo} - ${safeHi} ${unit}`;
+
+  const handleMinChange = (value: number) => {
+    const newValue = Math.min(value, safeHi);
+    onMinChange(String(newValue));
   };
 
-  const handleSliderMax = (v: number) => {
-    const clamped = Math.max(Math.min(v, max), safeLo);
-    onMaxChange(String(clamped));
+  const handleMaxChange = (value: number) => {
+    const newValue = Math.max(value, safeLo);
+    onMaxChange(String(newValue));
   };
 
   return (
-    <div className="marketplace-filters__range">
-      <span className="marketplace-filters__range-label">{label}</span>
+    <div className="marketplace-range-dropdown">
+      <button
+        type="button"
+        className={`marketplace-range-trigger ${open ? "active" : ""}`}
+        onClick={onToggle}
+      >
+        <span>{displayValue}</span>
 
-      <div className="marketplace-filters__range-inputs">
-        <input
-          type="number"
-          inputMode="decimal"
-          className="marketplace-filters__range-number"
-          placeholder={`Min ${unit}`}
-          min={min}
-          max={safeHi}
-          step={step}
-          value={minValue}
-          onChange={(e) => onMinChange(e.target.value)}
-        />
-        <span className="marketplace-filters__range-sep">-</span>
-        <input
-          type="number"
-          inputMode="decimal"
-          className="marketplace-filters__range-number"
-          placeholder={`Max ${unit}`}
-          min={safeLo}
-          max={max}
-          step={step}
-          value={maxValue}
-          onChange={(e) => onMaxChange(e.target.value)}
-        />
-      </div>
+        <span className="range-arrow">{open ? "▲" : "▼"}</span>
+      </button>
 
-      <div className="marketplace-filters__slider">
-        <div className="marketplace-filters__slider-track" />
-        <div
-          className="marketplace-filters__slider-range"
-          style={{ left: `${loPct}%`, right: `${100 - hiPct}%` }}
-        />
-        <input
-          type="range"
-          aria-label={`${label} minimum`}
-          className="marketplace-filters__slider-thumb marketplace-filters__slider-thumb--min"
-          min={min}
-          max={max}
-          step={step}
-          value={safeLo}
-          onChange={(e) => handleSliderMin(Number(e.target.value))}
-        />
-        <input
-          type="range"
-          aria-label={`${label} maximum`}
-          className="marketplace-filters__slider-thumb marketplace-filters__slider-thumb--max"
-          min={min}
-          max={max}
-          step={step}
-          value={safeHi}
-          onChange={(e) => handleSliderMax(Number(e.target.value))}
-        />
-      </div>
+      {open && (
+        <div className="marketplace-range-popup">
+          <div className="range-popup-title">{label}</div>
+
+          <div className="range-popup-values">
+            <div>
+              <span>Min</span>
+              <strong>
+                {safeLo} {unit}
+              </strong>
+            </div>
+
+            <div>
+              <span>Max</span>
+              <strong>
+                {safeHi} {unit}
+              </strong>
+            </div>
+          </div>
+
+          <div className="range-slider">
+            <div className="range-track" />
+
+            <div
+              className="range-selected"
+              style={{
+                left: `${loPct}%`,
+                right: `${100 - hiPct}%`,
+              }}
+            />
+
+            {/* Min */}
+            <input
+              type="range"
+              min={min}
+              max={max}
+              step={step}
+              value={safeLo}
+              onChange={(e) => handleMinChange(Number(e.target.value))}
+              className="range-input range-input-min"
+            />
+
+            {/* Max */}
+            <input
+              type="range"
+              min={min}
+              max={max}
+              step={step}
+              value={safeHi}
+              onChange={(e) => handleMaxChange(Number(e.target.value))}
+              className="range-input range-input-max"
+            />
+          </div>
+
+          <div className="range-number-inputs">
+            <input
+              type="number"
+              min={min}
+              max={safeHi}
+              step={step}
+              value={minValue}
+              placeholder={String(min)}
+              onChange={(e) => onMinChange(e.target.value)}
+            />
+
+            <span>—</span>
+
+            <input
+              type="number"
+              min={safeLo}
+              max={max}
+              step={step}
+              value={maxValue}
+              placeholder={String(max)}
+              onChange={(e) => onMaxChange(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -176,6 +287,10 @@ export default function ShopFiltersBar({
   onChange,
 }: ShopFiltersBarProps) {
   const [draft, setDraft] = useState<ShopFilters>(filters);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const toggleDropdown = (name: string) => {
+    setOpenDropdown((prev) => (prev === name ? null : name));
+  };
 
   useEffect(() => {
     setDraft(filters);
@@ -214,31 +329,23 @@ export default function ShopFiltersBar({
         onChange={(e) => update("keyword", e.target.value)}
       />
 
-      <select
-        className="marketplace-filters__select"
+      <OptionDropdown
         value={draft.category}
-        onChange={(e) =>
-          update("category", e.target.value as MarketplaceCategory)
-        }
-      >
-        {categories.map((c) => (
-          <option key={c.value} value={c.value}>
-            {c.label}
-          </option>
-        ))}
-      </select>
+        options={categories}
+        placeholder="🐟 Breed"
+        onChange={(value) => update("category", value)}
+        open={openDropdown === "breed"}
+        onToggle={() => toggleDropdown("breed")}
+      />
 
-      <select
-        className="marketplace-filters__select"
+      <OptionDropdown
         value={draft.gender}
-        onChange={(e) => update("gender", e.target.value as FishGender)}
-      >
-        {genders.map((g) => (
-          <option key={g.value} value={g.value}>
-            {g.label}
-          </option>
-        ))}
-      </select>
+        options={genders}
+        placeholder="All Genders"
+        onChange={(value) => update("gender", value)}
+        open={openDropdown === "gender"}
+        onToggle={() => toggleDropdown("gender")}
+      />
 
       <RangeField
         label="Length (cm)"
@@ -250,6 +357,8 @@ export default function ShopFiltersBar({
         maxValue={draft.maxLength}
         onMinChange={(v) => update("minLength", v)}
         onMaxChange={(v) => update("maxLength", v)}
+        open={openDropdown === "length"}
+        onToggle={() => toggleDropdown("length")}
       />
 
       <RangeField
@@ -262,6 +371,8 @@ export default function ShopFiltersBar({
         maxValue={draft.maxWeight}
         onMinChange={(v) => update("minWeight", v)}
         onMaxChange={(v) => update("maxWeight", v)}
+        open={openDropdown === "weight"}
+        onToggle={() => toggleDropdown("weight")}
       />
 
       <RangeField
@@ -274,6 +385,8 @@ export default function ShopFiltersBar({
         maxValue={draft.maxPrice}
         onMinChange={(v) => update("minPrice", v)}
         onMaxChange={(v) => update("maxPrice", v)}
+        open={openDropdown === "price"}
+        onToggle={() => toggleDropdown("price")}
       />
 
       <div className="marketplace-filters__actions">

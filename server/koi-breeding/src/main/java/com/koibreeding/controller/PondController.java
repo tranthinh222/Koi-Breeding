@@ -1,5 +1,6 @@
 package com.koibreeding.controller;
 
+import com.koibreeding.dto.request.PondSelectDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import com.koibreeding.domain.Pond;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.service.PondService;
+
+import java.util.List;
 
 @RestController
 public class PondController {
@@ -61,5 +64,16 @@ public class PondController {
         this.pondService.handleDeletePond(id);
 
         return ResponseEntity.ok().build();
+    }
+
+    // lấy danh sách hồ
+    @GetMapping("/ponds/owner")
+    public ResponseEntity<List<PondSelectDto>> getPondsByOwner(
+            @RequestParam Integer userId
+    ) {
+        List<PondSelectDto> pondList =
+                pondService.selectPond(userId);
+
+        return ResponseEntity.ok(pondList);
     }
 }

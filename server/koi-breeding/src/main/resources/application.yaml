@@ -18,8 +18,8 @@ spring:
             enable: true
   datasource:
     url: jdbc:postgresql://localhost:5432/koi_breeding
-    username: phuoc
-    password: phuocdb
+    username: postgres
+    password: khoa123
   jpa:
     hibernate:
       ddl-auto: update
@@ -42,7 +42,7 @@ vietqr:
 sepay:
   api-key: ${SEPAY_API_KEY:}
 # google:
-  # client-id: ${GOOGLE_CLIENT_ID:452603430996-p2t0cklg5a3t78u6lpf4c1hgau8vbep5.apps.googleusercontent.com}
+# client-id: ${GOOGLE_CLIENT_ID:452603430996-p2t0cklg5a3t78u6lpf4c1hgau8vbep5.apps.googleusercontent.com}
 jwt:
   secret: qmrLNfFizjkkTyA3qMRbIRJLSc0JlF4bldJmmJ9rQfF
   expiration: 900000

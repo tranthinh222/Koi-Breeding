@@ -214,13 +214,13 @@ export default function AuthModal({
 
       const result = await Login(payload);
 
+      // Lưu tokens vào cả sessionStorage và localStorage
       sessionStorage.setItem("userToken", result.userToken);
       sessionStorage.setItem("refreshToken", result.refreshToken);
-      localStorage.setItem("accessToken", result.userToken);
+      localStorage.setItem("userToken", result.userToken);
       localStorage.setItem("refreshToken", result.refreshToken);
 
       await refreshCurrentUser();
-
       onClose();
       navigate("/home");
     } catch (error: any) {

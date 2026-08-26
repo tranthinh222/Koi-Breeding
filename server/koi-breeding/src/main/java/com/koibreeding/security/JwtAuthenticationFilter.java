@@ -46,19 +46,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-    private String resolveToken(HttpServletRequest request) {
-        // Ưu tiên cookie (dùng cho web FE)
-        Optional<String> cookieToken = cookieUtil.getAccessToken(request);
-        if (cookieToken.isPresent()) {
-            return cookieToken.get();
-        }
-
-        // Fallback header Authorization (dùng cho Postman,...)
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-
-        return null;
-    }
+//    private String resolveToken(HttpServletRequest request) {
+//        // Ưu tiên cookie (dùng cho web FE)
+//        Optional<String> cookieToken = cookieUtil.getAccessToken(request);
+//        if (cookieToken.isPresent()) {
+//            return cookieToken.get();
+//        }
+//
+//        // Fallback header Authorization (dùng cho Postman,...)
+//        String authHeader = request.getHeader("Authorization");
+//        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+//            return authHeader.substring(7);
+//        }
+//
+//        return null;
+//    }
 }

@@ -9,6 +9,8 @@ import Profile from "./pages/profile/Profile";
 import Shop from "./pages/shop/Shop";
 import Marketplace from "./pages/marketplace/Marketplace";
 import "./style/global.css";
+import MarketAddList from "./components/marketplace/MarketAddList";
+import MarketListing from "./components/marketplace/MarketListing";
 function App() {
   return (
     <>
@@ -20,6 +22,8 @@ function App() {
             <Route path="/shop" element={<Shop />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/addlist" element={<MarketAddList />} />
+            <Route path="/listings" element={<MarketListing />} />
             <Route path="/transactions" element={<TransactionHistory />} />
           </Route>
 

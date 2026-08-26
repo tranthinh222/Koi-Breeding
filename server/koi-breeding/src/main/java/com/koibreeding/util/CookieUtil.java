@@ -11,14 +11,14 @@ import java.util.Optional;
 @Component
 public class CookieUtil {
 
-    private static final String ACCESS_TOKEN_COOKIE = "accessToken";
+    private static final String USER_TOKEN_COOKIE = "userToken";
     private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
 
     private static final int ACCESS_TOKEN_MAX_AGE = 15 * 60;          // 15 phút
     private static final int REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 ngày
 
     public void addUserTokenCookie(HttpServletResponse response, String token) {
-        ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE, token)
+        ResponseCookie cookie = ResponseCookie.from(USER_TOKEN_COOKIE, token)
                 .httpOnly(true)
                 .secure(false) // đổi true khi deploy HTTPS
                 .path("/")
@@ -40,7 +40,7 @@ public class CookieUtil {
     }
 
     public void clearAuthCookies(HttpServletResponse response) {
-        ResponseCookie clearAccess = ResponseCookie.from(ACCESS_TOKEN_COOKIE, "")
+        ResponseCookie clearAccess = ResponseCookie.from(USER_TOKEN_COOKIE, "")
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
@@ -60,8 +60,8 @@ public class CookieUtil {
         response.addHeader("Set-Cookie", clearRefresh.toString());
     }
 
-    public Optional<String> getAccessToken(HttpServletRequest request) {
-        return getCookieValue(request, ACCESS_TOKEN_COOKIE);
+    public Optional<String> getUserToken(HttpServletRequest request) {
+        return getCookieValue(request, USER_TOKEN_COOKIE);
     }
 
     public Optional<String> getRefreshToken(HttpServletRequest request) {

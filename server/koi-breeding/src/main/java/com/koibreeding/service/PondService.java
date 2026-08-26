@@ -2,6 +2,8 @@ package com.koibreeding.service;
 
 import java.util.List;
 
+import com.koibreeding.dto.request.PondSelectDto;
+import com.koibreeding.repository.KoiRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,10 +17,12 @@ import com.koibreeding.repository.PondRepository;
 public class PondService {
     private final PondRepository pondRepository;
     private final UserService userService;
+    private final KoiRepository koiRepository;
 
-    public PondService(PondRepository pondRepository, UserService userService) {
+    public PondService(PondRepository pondRepository, UserService userService, KoiRepository koiRepository) {
         this.pondRepository = pondRepository;
         this.userService = userService;
+        this.koiRepository = koiRepository;
     }
 
     public Pond handleCreatePond(Pond pond) {
@@ -100,5 +104,19 @@ public class PondService {
 
     public boolean isPondExistById(Integer id) {
         return this.pondRepository.existsById(id);
+    }
+
+    public List<PondSelectDto> selectPond(Integer id){
+        return pondRepository.findByOwnerId(id)
+                .stream()
+                .map(pond ->{
+        long currentKoi = koiRepository.countByPond_Id(pond.getId());
+        return new PondSelectDto(
+                pond.getId(),
+                pond.getName(),
+                pond.getCapacity(),
+                currentKoi
+        );
+        }).toList();
     }
 }

@@ -7,7 +7,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
 import { getCurrentUser, logoutRequest, type AuthUser } from "../api/auth";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 type AuthContextValue = {
   currentUser: AuthUser | null;
@@ -18,43 +20,24 @@ type AuthContextValue = {
   logout: () => Promise<void>;
 };
 
-const AUTH_USER_STORAGE_KEY = "currentUser";
-
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-function readStoredUser() {
-  const rawUser = sessionStorage.getItem(AUTH_USER_STORAGE_KEY);
-  if (!rawUser) return null;
-
-  try {
-    return JSON.parse(rawUser) as AuthUser;
-  } catch {
-    sessionStorage.removeItem(AUTH_USER_STORAGE_KEY);
-    return null;
-  }
-}
 
 function hasAuthToken() {
   return Boolean(
     sessionStorage.getItem("userToken") ||
-      sessionStorage.getItem("accessToken") ||
-      localStorage.getItem("accessToken"),
+    sessionStorage.getItem("accessToken") ||
+    localStorage.getItem("accessToken"),
   );
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() =>
-    readStoredUser(),
-  );
+  // currentUser chỉ tồn tại trong React state
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+
   const [loading, setLoading] = useState(() => hasAuthToken());
 
   const setAuthenticatedUser = useCallback((user: AuthUser | null) => {
     setCurrentUser(user);
-    if (user) {
-      sessionStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
-    } else {
-      sessionStorage.removeItem(AUTH_USER_STORAGE_KEY);
-    }
   }, []);
 
   const refreshCurrentUser = useCallback(async () => {
@@ -63,17 +46,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return null;
     }
 
-    const user = await getCurrentUser();
-    setAuthenticatedUser(user);
-    return user;
+    try {
+      const user = await getCurrentUser();
+
+      setAuthenticatedUser(user);
+
+      return user;
+    } catch (error) {
+      console.error("Failed to load current user:", error);
+      setAuthenticatedUser(null);
+      throw error;
+    }
   }, [setAuthenticatedUser]);
 
   const clearLocalAuth = useCallback(() => {
     sessionStorage.removeItem("userToken");
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("accessToken");
+
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+
     setAuthenticatedUser(null);
   }, [setAuthenticatedUser]);
 
@@ -98,16 +91,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       try {
         const user = await getCurrentUser();
-        if (!cancelled) setAuthenticatedUser(user);
+
+        if (!cancelled) {
+          setAuthenticatedUser(user);
+        }
       } catch (error) {
         console.error("Failed to load authenticated user:", error);
-        if (!cancelled) void logout();
+
+        if (!cancelled) {
+          await logout();
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    bootstrap();
+    void bootstrap();
 
     return () => {
       cancelled = true;
@@ -123,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthenticatedUser,
       logout,
     }),
-    [currentUser, loading, logout, refreshCurrentUser, setAuthenticatedUser],
+    [currentUser, loading, refreshCurrentUser, setAuthenticatedUser, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -131,8 +132,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useAuth must be used inside AuthProvider");
   }
+
   return context;
 }

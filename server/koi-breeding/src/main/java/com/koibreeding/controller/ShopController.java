@@ -5,18 +5,12 @@ import com.koibreeding.dto.request.PurchaseRequest;
 import com.koibreeding.dto.response.ResPurchaseDto;
 import com.koibreeding.enums.ItemType;
 import com.koibreeding.service.ShopService;
-
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

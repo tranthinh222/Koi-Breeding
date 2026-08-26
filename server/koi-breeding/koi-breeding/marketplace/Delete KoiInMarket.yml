@@ -1,0 +1,23 @@
+info:
+  name: Delete KoiInMarket
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: http://localhost:8090/koi_breeding/marketplace/deletionKoi
+  body:
+    type: json
+    data: |-
+      {
+        "userId": 1,
+        "koiId": 19
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

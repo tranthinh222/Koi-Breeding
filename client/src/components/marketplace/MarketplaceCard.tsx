@@ -44,11 +44,7 @@ export default function MarketplaceCard({
 
       <p className="fish-seller">Seller: {item.seller}</p>
 
-      <div className="price">
-        {item.currency === "VND" ? "₫" : "💰"}{" "}
-        {item.price.toLocaleString("vi-VN")}{" "}
-        {item.currency === "VND" ? "VNĐ" : "Koins"}
-      </div>
+      <div className="price">{item.price.toLocaleString("vi-VN")} </div>
 
       <button
         onClick={(event) => {

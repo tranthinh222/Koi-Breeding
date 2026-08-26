@@ -33,6 +33,13 @@ export default function ShopNavigation() {
       </button>
 
       <button
+        className={location.pathname === "/addlist" ? "active" : ""}
+        onClick={() => navigate("/addlist")}
+      >
+        🏪 Add List
+      </button>
+
+      <button
         className={location.pathname === "/transactions" ? "active" : ""}
         onClick={() => navigate("/transactions")}
       >

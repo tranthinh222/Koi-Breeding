@@ -6,21 +6,20 @@ export type MarketplaceCategory = "ALL" | "KOHAKU" | "SHOWA" | "OGON";
 
 export interface MarketplaceItem {
   id: number;
+  koiId: number;
   koiName: string;
   rarity: "Common" | "Premium" | "Legendary";
   image: string;
   price: number;
-  currency: "Koins" | "VND";
   description: string;
+  sellerId: number;
   seller: string;
-
   breed: string;
   gender: FishGender;
-  weight: number; // kg
-  length: number; // cm
+  weight: number;
+  length: number;
 }
 
-// API request params - tất cả optional, number để gửi lên backend
 export interface MarketplaceApiParams {
   category?: MarketplaceCategory;
   keyword?: string;
@@ -94,6 +93,141 @@ export async function getMarketplaceItems(
   } catch (error) {
     if (axios.isCancel(error)) throw error;
     console.error("Marketplace filter API failed.", error);
+    throw error;
+  }
+}
+
+export interface MarketplaceKoi {
+  koiId: number;
+  pondId: number;
+  koiName: string;
+  breed: string;
+  gender: FishGender;
+  weight: number; // kg
+  length: number; // cm
+  rarity: "Common" | "Premium" | "Legendary";
+  imageUrl: string;
+  price: number;
+}
+
+export async function getMarketListKois(
+  userId: number,
+): Promise<MarketplaceKoi[]> {
+  try {
+    const response = await apiClient.get(`/marketplace/listKoi`, {
+      params: { userId },
+    });
+    return response.data.data as MarketplaceKoi[];
+  } catch (error) {
+    if (axios.isCancel(error)) throw error;
+    console.error("Marketplace kois API request failed.", error);
+    throw error;
+  }
+}
+
+export async function getMarketBuyKois(
+  userId: number,
+): Promise<MarketplaceKoi[]> {
+  try {
+    const response = await apiClient.get(`/marketplace/koiPurchase`, {
+      params: { userId },
+    });
+    return response.data.data as MarketplaceKoi[];
+  } catch (error) {
+    if (axios.isCancel(error)) throw error;
+    console.error("Marketplace kois API request failed.", error);
+    throw error;
+  }
+}
+
+export interface SellKoiRequest {
+  koiId: number;
+  price: number;
+}
+
+export async function sellKoi(
+  koiId: number,
+  price: number,
+  userId: number,
+): Promise<MarketplaceKoi> {
+  try {
+    const response = await apiClient.post(
+      "/marketplace/saleKoi",
+      {
+        koiId,
+        price,
+      },
+      {
+        params: {
+          userId,
+        },
+      },
+    );
+
+    return response.data.data as MarketplaceKoi;
+  } catch (error) {
+    if (axios.isCancel(error)) throw error;
+
+    console.error("Sell koi API request failed.", error);
+    throw error;
+  }
+}
+
+export async function deleteKoiFromMarket(
+  koiId: number,
+  userId: number,
+): Promise<void> {
+  try {
+    await apiClient.delete("/marketplace/deletionKoi", {
+      data: {
+        koiId,
+        userId,
+      },
+    });
+  } catch (error) {
+    if (axios.isCancel(error)) throw error;
+
+    console.error("Delete koi API request failed.", error);
+    throw error;
+  }
+}
+
+export interface BuyKoiRequest {
+  userId: number;
+  sellerId: number;
+  koiId: number;
+  price: number;
+  pondId: number;
+}
+
+export async function buyKoi(
+  userId: number,
+  sellerId: number,
+  koiId: number,
+  price: number,
+  pondId: number,
+): Promise<MarketplaceKoi> {
+  try {
+    const response = await apiClient.post(
+      "/marketplace/purchase",
+      {
+        sellerId,
+        koiId,
+        price,
+        pondId,
+      },
+      {
+        params: {
+          userId,
+        },
+      },
+    );
+
+    return response.data.data as MarketplaceKoi;
+  } catch (error) {
+    if (axios.isCancel(error)) throw error;
+
+    console.error("Buy koi API request failed.", error);
     throw error;
   }
 }

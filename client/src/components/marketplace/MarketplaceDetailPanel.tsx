@@ -3,7 +3,7 @@ import type { MarketplaceItem } from "../../api/marketplace";
 
 interface DetailPanelProps {
   item: MarketplaceItem;
-  onBuy?: (quantity: number) => void;
+  onOpenPondDialog?: () => void;
   buying?: boolean;
   buyError?: string | null;
   buySuccess?: string | null;
@@ -11,21 +11,16 @@ interface DetailPanelProps {
 
 export default function DetailPanel({
   item,
-  onBuy,
+  onOpenPondDialog,
   buying,
   buyError,
   buySuccess,
 }: DetailPanelProps) {
-  const [quantity, setQuantity] = useState(1);
+  const totalPrice = item.price;
 
-  useEffect(() => {
-    setQuantity(1);
-  }, [item.id]);
-
-  const totalPrice = item.price * quantity;
-  const isVnd = item.currency === "VND";
   const formatPrice = (value: number) => value.toLocaleString("vi-VN");
-  const genderLabel = item.gender === "MALE" ? "Đực ♂" : "Cái ♀";
+
+  const genderLabel = item.gender === "MALE" ? "Male ♂" : "Female ♀";
 
   return (
     <aside className="detail-panel">
@@ -45,30 +40,30 @@ export default function DetailPanel({
         </div>
       )}
 
-      {/* Bảng thông số cá */}
       <div className="fish-info-table">
         <div className="fish-info-row">
           <span>Breed</span>
           <strong>{item.breed}</strong>
         </div>
+
         <div className="fish-info-row">
           <span>Gender</span>
           <strong>{genderLabel}</strong>
         </div>
+
         <div className="fish-info-row">
           <span>Weight</span>
           <strong>{item.weight} kg</strong>
         </div>
+
         <div className="fish-info-row">
           <span>Length</span>
           <strong>{item.length} cm</strong>
         </div>
+
         <div className="fish-info-row">
           <span>Seller</span>
-          <strong>
-            {item.seller}
-            {/* {item.sellerRating && ` (⭐ ${item.sellerRating})`} */}
-          </strong>
+          <strong>{item.seller}</strong>
         </div>
       </div>
 
@@ -76,27 +71,18 @@ export default function DetailPanel({
         <p>{item.description}</p>
       </div>
 
-      <div className="detail-price">
-        {isVnd ? "₫" : "💰"} {formatPrice(item.price)} {isVnd ? "VNĐ" : "Koins"}
-      </div>
+      <div className="detail-price">💰 {formatPrice(item.price)} Koins</div>
 
       <div className="total-price">
-        Total:{" "}
-        <strong>
-          {isVnd ? "₫" : "💰"} {formatPrice(totalPrice)}{" "}
-          {isVnd ? "VNĐ" : "Koins"}
-        </strong>
+        Total: <strong>💰 {formatPrice(totalPrice)} Koins</strong>
       </div>
 
       {buyError && <p className="buy-error">{buyError}</p>}
+
       {buySuccess && <p className="buy-success">{buySuccess}</p>}
 
-      <button
-        className="buy-btn"
-        onClick={() => onBuy && onBuy(quantity)}
-        disabled={buying}
-      >
-        {buying ? "Processing..." : isVnd ? "Pay with VietQR" : "Buy Now"}
+      <button className="buy-btn" onClick={onOpenPondDialog} disabled={buying}>
+        {buying ? "Processing..." : "Buy Now"}
       </button>
     </aside>
   );

@@ -1,0 +1,500 @@
+.pond-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(23, 69, 98, 0.58);
+  backdrop-filter: blur(4px);
+}
+
+/* =========================
+   DIALOG
+========================= */
+
+.pond-dialog {
+  position: relative;
+
+  width: 100%;
+  max-width: 720px;
+  max-height: 85vh;
+
+  padding: 48px 28px 24px;
+
+  background: #f8f4ea;
+
+  border: 6px solid #6d3f16;
+  border-radius: 20px;
+
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 2px #c9a26b;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================
+   WOOD TITLE
+========================= */
+
+.pond-dialog-title {
+  position: absolute;
+
+  top: -30px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  min-width: 240px;
+
+  padding: 12px 38px;
+
+  background: #8b5a2b;
+
+  border: 6px solid #6d3f16;
+  border-radius: 14px;
+
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+
+  z-index: 2;
+}
+
+.pond-dialog-title h2 {
+  margin: 0;
+
+  color: white;
+
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.pond-title-pin {
+  position: absolute;
+
+  width: 12px;
+  height: 12px;
+
+  background: #c9a26b;
+
+  border: 2px solid #6d3f16;
+  border-radius: 50%;
+
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.pond-title-pin.left {
+  left: 10px;
+}
+
+.pond-title-pin.right {
+  right: 10px;
+}
+
+/* =========================
+   LIST
+========================= */
+
+.pond-dialog-list {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  overflow-y: auto;
+
+  padding: 12px 8px 12px 4px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #835425 #ecefe4;
+}
+
+.pond-dialog-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pond-dialog-list::-webkit-scrollbar-track {
+  background: #ecefe4;
+
+  border-radius: 6px;
+  border: 1px solid #c9a26b;
+}
+
+.pond-dialog-list::-webkit-scrollbar-thumb {
+  background: #835425;
+
+  border-radius: 6px;
+}
+
+.pond-dialog-list::-webkit-scrollbar-thumb:hover {
+  background: #6d3f16;
+}
+
+/* =========================
+   POND CARD
+========================= */
+
+.pond-select-card {
+  min-height: 100px;
+
+  padding: 16px;
+
+  background: #fff8e8;
+
+  border: 3px solid #c9a26b;
+  border-radius: 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.pond-select-card:hover:not(.full) {
+  transform: translateY(-3px);
+
+  border-color: #5a913b;
+
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+.pond-select-card.selected {
+  border-color: #5a913b;
+
+  background: #eef7e8;
+
+  box-shadow:
+    0 0 0 2px rgba(90, 145, 59, 0.2),
+    0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+.pond-select-card.full {
+  opacity: 0.72;
+
+  cursor: not-allowed;
+
+  background: #f1eee6;
+}
+
+/* =========================
+   POND INFO
+========================= */
+
+.pond-select-info {
+  flex: 1;
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pond-select-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.pond-select-header h3 {
+  margin: 0;
+
+  color: #5b3a1f;
+
+  font-size: 21px;
+  font-weight: 800;
+}
+
+/* =========================
+   CAPACITY
+========================= */
+
+.pond-capacity {
+  flex-shrink: 0;
+
+  padding: 6px 10px;
+
+  background: #ecefe4;
+
+  border: 1px solid #c9a26b;
+  border-radius: 999px;
+
+  color: #5b3a1f;
+
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.pond-capacity.full {
+  background: #ba1a1a;
+
+  border-color: #93000a;
+
+  color: white;
+}
+
+/* =========================
+   PROGRESS
+========================= */
+
+.pond-progress {
+  width: 100%;
+  height: 14px;
+
+  overflow: hidden;
+
+  background: #d8dbd0;
+
+  border: 2px solid #6d3f16;
+  border-radius: 999px;
+
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.15);
+}
+
+.pond-progress-fill {
+  height: 100%;
+
+  background: #5a913b;
+
+  border-radius: inherit;
+
+  transition: width 0.25s ease;
+
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+}
+
+.pond-progress-fill.full {
+  background: #ba1a1a;
+}
+
+/* =========================
+   SELECT BUTTON
+========================= */
+
+.pond-select-button {
+  flex-shrink: 0;
+
+  min-width: 110px;
+  min-height: 44px;
+
+  padding: 0 18px;
+
+  border: none;
+  border-bottom: 4px solid #1f5100;
+
+  border-radius: 12px;
+
+  background: #5a913b;
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.2s ease;
+}
+
+.pond-select-button:hover:not(:disabled) {
+  background: #44742b;
+
+  transform: translateY(-2px);
+}
+
+.pond-select-button:active:not(:disabled) {
+  border-bottom-width: 1px;
+
+  transform: translateY(2px);
+}
+
+.pond-select-button.selected {
+  background: #44742b;
+}
+
+.pond-select-button.disabled,
+.pond-select-button:disabled {
+  background: #72796a;
+
+  border-bottom-color: #42493c;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+/* =========================
+   EMPTY / LOADING
+========================= */
+
+.pond-dialog-message {
+  min-height: 160px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: #fff8e8;
+
+  border: 3px dashed #c9a26b;
+  border-radius: 16px;
+
+  color: #5b3a1f;
+
+  font-weight: bold;
+  text-align: center;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.pond-dialog-actions {
+  margin-top: 18px;
+
+  display: flex;
+  justify-content: center;
+
+  gap: 14px;
+}
+
+.pond-dialog-actions button {
+  min-width: 130px;
+  min-height: 46px;
+
+  padding: 0 22px;
+
+  border: none;
+  border-radius: 12px;
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.pond-dialog-cancel {
+  background: #8b5a2b;
+
+  border-bottom: 4px solid #6d3f16 !important;
+}
+
+.pond-dialog-cancel:hover {
+  background: #6d3f16;
+
+  transform: translateY(-2px);
+}
+
+.pond-dialog-confirm {
+  background: #5a913b;
+
+  border-bottom: 4px solid #1f5100 !important;
+}
+
+.pond-dialog-confirm:hover:not(:disabled) {
+  background: #44742b;
+
+  transform: translateY(-2px);
+}
+
+.pond-dialog-confirm:disabled {
+  background: #b5b5ad;
+
+  border-bottom-color: #888880 !important;
+
+  cursor: not-allowed;
+
+  opacity: 0.7;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 600px) {
+  .pond-dialog-overlay {
+    padding: 16px;
+  }
+
+  .pond-dialog {
+    padding: 42px 16px 18px;
+
+    border-width: 4px;
+  }
+
+  .pond-dialog-title {
+    min-width: 200px;
+
+    top: -25px;
+
+    padding: 10px 30px;
+
+    border-width: 4px;
+  }
+
+  .pond-dialog-title h2 {
+    font-size: 21px;
+  }
+
+  .pond-select-card {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 12px;
+  }
+
+  .pond-select-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pond-select-button {
+    width: 100%;
+  }
+
+  .pond-dialog-actions {
+    flex-direction: column;
+  }
+
+  .pond-dialog-actions button {
+    width: 100%;
+  }
+}

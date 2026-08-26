@@ -15,9 +15,9 @@ public class ResMarketDto {
     private String koiName;
     private Integer koiId;
     private String image;
-    private Integer price;
-    private Long currency;
+    private Long price;
     private String description;
+    private Integer sellerId;
     private String seller;
     private Gender gender;
     private BigDecimal weight;

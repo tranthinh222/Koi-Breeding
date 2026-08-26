@@ -81,8 +81,24 @@ export const getCurrentUser = async (): Promise<AuthUser> => {
   return response.data.data ?? response.data;
 };
 
+export const clearAuthStorage = (): void => {
+  // Xóa sessionStorage
+  sessionStorage.removeItem("userToken");
+  sessionStorage.removeItem("refreshToken");
+
+  // Xóa localStorage
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+};
+
 export const logoutRequest = async (): Promise<void> => {
-  await apiClient.post("/auth/logout");
+  try {
+    await apiClient.post("/auth/logout");
+  } finally {
+    clearAuthStorage();
+  }
 };
 
 export interface ForgotPasswordRequest {
@@ -117,29 +133,33 @@ export interface ResetPasswordResponse {
   message: string;
 }
 
-export const forgotPassword = async (request: ForgotPasswordRequest): Promise<ForgotPasswordResponse> => {
+export const forgotPassword = async (
+  request: ForgotPasswordRequest,
+): Promise<ForgotPasswordResponse> => {
   const response = await apiClient.post<ResetPasswordResponse>(
     "/auth/forgot-password",
-    request
+    request,
   );
 
   return response.data;
-}
-export const resetPassword = async (request: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+};
+export const resetPassword = async (
+  request: ResetPasswordRequest,
+): Promise<ResetPasswordResponse> => {
   const response = await apiClient.post<ResetPasswordResponse>(
     "/auth/reset-password",
-    request
+    request,
   );
 
   return response.data;
 };
 
 export const verifyResetCode = async (
-  request: VerifyResetCodeRequest
+  request: VerifyResetCodeRequest,
 ): Promise<VerifyResetCodeResponse> => {
   const response = await apiClient.post<VerifyResetCodeResponse>(
     "/auth/verify-reset-code",
-    request
+    request,
   );
 
   return response.data;

@@ -39,6 +39,9 @@ export interface IVariety {
 	description: string;
 }
 
+export type Gender = "MALE" | "FEMALE";
+export type LifeStage = "EGG" | "LARVA" | "FRY" | "JUVENILE" | "ADULT";
+
 export interface IKoi {
 	id: number;
 	name: string;
@@ -48,12 +51,12 @@ export interface IKoi {
 	health: number;
 	foodBar: number;
 	cureBar: number;
-	gender: string;
+	gender: Gender;
 	price: number;
 	mutation?: IMutation;
 	bornedAt: Date;
 	pond?: Pond;
-	lifeStage: string;
+	lifeStage: LifeStage;
 	father?: Koi;
 	mother?: Koi;
 	potential: number;
@@ -110,4 +113,25 @@ export interface IUserData {
 	birthday: Date;
 	gender: string;
 	avatarUrl: string;
+}
+
+export type ItemType = "FOOD" | "KOI" | "MEDICINE" | "CURRENCY";
+export type EffectType = "GROWTH" | "MUTATION" | "WATER_QUALITY";
+
+export interface IItem {
+	id: number;
+	name: string;
+	price: number;
+	usageLimit: number;
+	itemType: ItemType;
+	effectType: EffectType;
+	effectValue: number;
+	description: string;
+}
+
+export interface IInventory {
+	id: number;
+	user?: IUserData;
+	item?: IItem;
+	quantity: number;
 }

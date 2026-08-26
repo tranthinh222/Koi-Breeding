@@ -1,0 +1,389 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
+
+*::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+	background: #f1f1f1;
+	border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+	background: #888888;
+	border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background: #555555;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+.form {
+	position: relative;
+	width: 70%;
+	min-width: 1000px;
+	height: 700px;
+	background-color: rgba(253, 229, 173, 0.95);
+	border: 4px solid #c9a26b;
+	border-radius: 15px;
+	padding: 40px 20px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: start;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.closeButton {
+	position: absolute;
+	top: 15px;
+	right: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 5px;
+	border: none;
+	background: transparent;
+	color: #6b7280;
+	cursor: pointer;
+	border-radius: 6px;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
+}
+
+.closeButton:hover {
+	background-color: #e5e7eb;
+	color: #111827;
+}
+
+.formHeader {
+	width: 100%;
+	height: 90px;
+	display: flex;
+	justify-content: start;
+	align-items: center;
+	gap: 5px;
+}
+
+.formHeader svg {
+	width: 50px;
+	height: 50px;
+	margin-bottom: 5px;
+}
+
+.formHeader span {
+	font-family: "Grandstander";
+	font-size: 40px;
+	font-weight: bold;
+}
+
+.formBody {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 40px 0px;
+	gap: 20px;
+}
+
+.itemGrid {
+	width: 100%;
+	height: 100%;
+	display: grid;
+	grid-template-columns: repeat(6, minmax(50px, 1fr));
+	gap: 12px;
+	padding: 10px 10px;
+	border: 5px solid #5f3d1a;
+	border-radius: 30px 10px 10px 30px;
+	background-color: #c59361;
+	overflow-y: auto;
+}
+
+.itemCell {
+	aspect-ratio: 1 / 1;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 20px;
+	background-color: #ac6e31;
+	border: 2px solid #5f3d1a;
+	border-radius: 20px;
+	cursor: pointer;
+
+	transition: all 0.2s ease;
+}
+
+.itemCell img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.3));
+	transition: all 0.2s ease;
+}
+
+.itemCell span {
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
+	font-family: "Grandstander";
+	font-size: 20px;
+	font-weight: bold;
+	color: white;
+}
+
+.itemCell:hover {
+	background-color: #c77f38;
+	transform: translateY(-5px);
+}
+
+.itemCell:hover img {
+	transform: rotate(-10deg) scale(1.1);
+}
+
+.itemCell:active {
+	background-color: #b97734;
+	transform: translateY(-1px);
+}
+
+.detailCard {
+	width: 600px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 15px;
+	border: 5px solid #5f3d1a;
+	border-radius: 10px;
+	background-color: white;
+}
+
+.detailTitle {
+	width: 100%;
+	background-color: #be8e5d;
+	border-bottom: 5px solid #5f3d1a;
+	border-radius: 4px 4px 0px 0px;
+	text-align: center;
+	padding: 15px 0px;
+}
+
+.detailTitle span {
+	font-family: "Grandstander";
+	font-size: 30px;
+	font-weight: bold;
+	color: white;
+}
+
+.detailContent {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+	padding: 0px 20px;
+}
+
+.detailImage {
+	width: 150px;
+	height: 150px;
+	border-radius: 100%;
+	padding: 20px;
+	background-color: #9fd8f7;
+	position: relative;
+	box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3);
+	animation: float 3s ease-in-out infinite;
+}
+
+.detailImage img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.3));
+	transition: all 0.2s ease;
+}
+
+@keyframes float {
+	0% {
+		transform: translateY(0);
+	}
+
+	50% {
+		transform: translateY(-15px);
+	}
+
+	100% {
+		transform: translateY(0);
+	}
+}
+
+.detailContent h2 {
+	font-family: "Grandstander";
+	font-size: 30px;
+	font-weight: bold;
+}
+
+.itemDescription {
+}
+
+.itemDescription {
+	width: 100%;
+	height: 85px;
+	overflow-y: auto;
+	/* background-color: rgba(255, 255, 255, 0.6); */
+	border-left: 5px solid #9fd8f7;
+	border-radius: 0px 8px 8px 0px;
+	padding: 12px 16px;
+	box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.06);
+}
+
+.itemDescription p {
+	font-family: "Grandstander";
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 1.6;
+	color: #374151;
+	margin: 0 0 10px 0;
+}
+
+.itemDescription p:last-child {
+	margin-bottom: 0;
+}
+
+.detailQuantity {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: start;
+	gap: 5px;
+}
+
+.quantitySection {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.quantitySection > span {
+	font-family: "Grandstander";
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.quantityModifier {
+	/* width: 100%; */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+}
+
+.quantityModifier span {
+	font-family: "Grandstander";
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.quantityModifier button {
+	width: 30px;
+	height: 30px;
+	font-family: "Grandstander";
+	font-weight: bold;
+	background-color: #f5b942;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: none;
+	border-radius: 100%;
+	transition: all 0.2s ease;
+}
+
+.quantityModifier svg {
+	font-size: 10px;
+	color: white;
+}
+
+.quantityModifier button:hover {
+	background-color: #ffcc66;
+	transform: translateY(-2px);
+}
+
+.quantityModifier button:active {
+	background-color: #ffc655;
+	transform: translateY(1px);
+}
+
+.quantityModifier button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.quantityModifier button:disabled:hover {
+	background-color: #f5b942;
+	transform: none;
+}
+
+.quantitySlider {
+	width: 100%;
+	accent-color: #f5b942;
+	cursor: pointer;
+}
+
+.importButton {
+	width: 100%;
+	font-family: "Grandstander";
+	font-size: 30px;
+	font-weight: bold;
+	color: white;
+	background-color: #2778d8;
+	border: none;
+	border-radius: 5px;
+	padding: 10px 20px;
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+.importButton:hover {
+	background-color: #2d8cff;
+	transform: translateY(-2px);
+}
+
+.importButton:active {
+	transform: translateY(1px);
+}
+
+.importButton:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+.importButton:disabled:hover {
+	transform: none;
+}
+
+.toastMessage {
+	width: 100%;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 10px;
+	font-family: "Grandstander", sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.toastMessage svg {
+	flex-shrink: 0;
+	color: white;
+	font-size: 70px;
+}

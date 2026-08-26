@@ -1,0 +1,36 @@
+.pondCanvas {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.fishMenu {
+	position: absolute;
+	z-index: 100;
+	transform: translate(0, -100%);
+	background-color: rgba(4, 67, 85, 0.8);
+	backdrop-filter: blur(4px);
+	padding: 8px;
+	border-radius: 12px;
+	display: flex;
+	gap: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.fishInfoButton {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #f2e943;
+	font-weight: bold;
+}
+
+.fishMenuCloseButton {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #e74c3c;
+	color: white;
+}

@@ -1,13 +1,19 @@
-import { CircleArrowLeft, CircleArrowRight, Undo2 } from "lucide-react";
+import {
+	CircleArrowLeft,
+	CircleArrowRight,
+	CircleCheckBig,
+	Undo2,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Toaster from "../../components/admin/Toast/Toaster";
+import { toast } from "../../components/admin/Toast/toast";
+import ImportKoiForm from "../../components/user/pond/ImportKoiForm/ImportKoiForm";
 import PondInformation from "../../components/user/pond/PondInformation/PondInformation";
-import type { IPond } from "../../types/backend";
-import "./Pond.css";
+import type { IInventory, IKoi, IKoiVarient, IPond } from "../../types/backend";
+import styles from "./Pond.module.css";
 
 interface PondCanvasProps {
-	fishCount: number;
+	pondKoiList: IKoi[];
 	pond: IPond;
 }
 
@@ -20,6 +26,8 @@ interface FishState {
 	turnAt: number;
 	size: number;
 	phase: number;
+	image: HTMLImageElement;
+	spawnProgress: number;
 }
 
 interface LotusState {
@@ -66,7 +74,19 @@ interface FishImageProperties {
 	lowerFinTrace: FinTrace;
 }
 
-function makeFish(width: number, height: number): FishState {
+interface RippleState {
+	x: number;
+	y: number;
+	radius: number;
+	alpha: number;
+}
+
+function makeFish(
+	width: number,
+	height: number,
+	image: HTMLImageElement,
+	isNew: boolean = false,
+): FishState {
 	const angle = Math.random() * Math.PI * 2;
 	const speed = 23 + Math.random() * 24;
 	const distance = Math.sqrt(Math.random()) * 0.76;
@@ -80,6 +100,8 @@ function makeFish(width: number, height: number): FishState {
 		turnAt: 1 + Math.random() * 5,
 		size: 96 + Math.random() * 54,
 		phase: Math.random() * Math.PI * 2,
+		image: image,
+		spawnProgress: isNew ? 0 : 1,
 	};
 }
 
@@ -132,7 +154,7 @@ function drawKoi(
 	time: number,
 	props: FishImageProperties,
 ) {
-	const { x, y, angle, size, phase } = fish;
+	const { x, y, angle, size, phase, spawnProgress } = fish;
 	const sway = Math.sin(time * 0.008 + phase);
 	const tailWag = Math.sin(time * 0.018 + phase) * 0.22;
 	const finWag = Math.sin(time * 0.014 + phase + 0.8) * 0.12;
@@ -156,10 +178,12 @@ function drawKoi(
 	const FIN_DOWN_PIVOT_Y = props.finDownPivot.y;
 	// -----------------------------------------
 
-	// Calculate scale ratio based on new width
-	const scale = size / IMG_W;
+	// Calculate scale ratio based on new width and spawn progress
+	const dropScale = 1 + (1 - spawnProgress) * 1.5;
+	const scale = (size / IMG_W) * dropScale;
 
 	ctx.save();
+	ctx.globalAlpha = spawnProgress;
 	// Body sway motion
 	ctx.translate(
 		x + Math.cos(angle + Math.PI / 2) * sway * 2,
@@ -564,6 +588,8 @@ function DebugCanvas() {
 				speed: 0,
 				targetAngle: 0,
 				turnAt: 0,
+				image: koiImage,
+				spawnProgress: 0,
 			};
 
 			// Call drawKoi(). Pass time = 0 to turn off all animations
@@ -580,10 +606,12 @@ function DebugCanvas() {
 	return <canvas ref={canvasRef} aria-label="Khung debug cá tĩnh" />;
 }
 
-function PondCanvas({ fishCount }: PondCanvasProps) {
+function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fishRef = useRef<FishState[]>([]);
+	const latestKoiListRef = useRef<IKoi[]>(pondKoiList);
 	const lotusRef = useRef<LotusState[]>([]);
+	const ripplesRef = useRef<RippleState[]>([]);
 
 	// 1. STATE LƯU TRỮ CON CÁ ĐANG ĐƯỢC CHỌN
 	const [activeFishIndex, setActiveFishIndex] = useState<number | null>(null);
@@ -658,10 +686,12 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 	};
 
 	useEffect(() => {
+		latestKoiListRef.current = pondKoiList;
+	}, [pondKoiList]);
+
+	useEffect(() => {
 		const canvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-		const koiImage = new Image();
-		koiImage.src = "/kois/koi-fish-ginrin-asagi.png";
 
 		const lotusImages: HTMLImageElement[] = [new Image(), new Image()];
 		lotusImages[0].src = "/pond/lotus-1.svg";
@@ -685,14 +715,22 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 			ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 			dimensions = { width: box.width, height: box.height };
 
-			fishRef.current = Array.from({ length: fishCount }, (_, _i) =>
-				makeFish(box.width, box.height),
-			);
+			if (fishRef.current.length === 0) {
+				fishRef.current = latestKoiListRef.current.map((koi) => {
+					const koiImage = new Image();
+					koiImage.src =
+						koi.dictionary?.imageUrl || "/kois/koi-fish-null.svg";
+					return makeFish(box.width, box.height, koiImage, false);
+				});
+			}
 
-			lotusRef.current = Array.from({ length: 8 }, (_, _i) =>
-				makeLotus(box.width, box.height),
-			);
+			if (lotusRef.current.length === 0) {
+				lotusRef.current = Array.from({ length: 8 }, () =>
+					makeLotus(box.width, box.height),
+				);
+			}
 		};
+
 		resize();
 		const observer = new ResizeObserver(resize);
 		observer.observe(canvas.parentElement as HTMLElement);
@@ -702,6 +740,35 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 			last = now;
 			const { width, height } = dimensions;
 
+			// 1. Check and release new fish into the pond
+			if (
+				fishRef.current.length < latestKoiListRef.current.length &&
+				width > 0
+			) {
+				// Cắt lấy những con cá mới được import thêm vào
+				const newFishes = latestKoiListRef.current.slice(
+					fishRef.current.length,
+				);
+				newFishes.forEach((koi) => {
+					const koiImage = new Image();
+					koiImage.src =
+						koi.dictionary?.imageUrl || "/kois/koi-fish-null.svg";
+
+					// isNew = true -> kích hoạt spawnProgress = 0
+					const newFish = makeFish(width, height, koiImage, true);
+					fishRef.current.push(newFish);
+
+					// Tạo hiệu ứng gợn nước ngay tại vị trí thả
+					ripplesRef.current.push({
+						x: newFish.x,
+						y: newFish.y,
+						radius: 10,
+						alpha: 1,
+					});
+				});
+			}
+
+			// Draw background
 			backgroundImage.width = width;
 			backgroundImage.height = height;
 			ctx.drawImage(backgroundImage, 0, 0, width, height);
@@ -724,46 +791,88 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 				ctx.stroke();
 			}
 
+			// 2. UPDATE AND DRAW RIPPLES
+			for (let i = ripplesRef.current.length - 1; i >= 0; i--) {
+				const r = ripplesRef.current[i];
+				r.radius += 60 * dt; // Tốc độ lan rộng
+				r.alpha -= 0.6 * dt; // Tốc độ mờ dần
+
+				if (r.alpha <= 0) {
+					ripplesRef.current.splice(i, 1); // Xóa gợn nước khi đã mờ hẳn
+					continue;
+				}
+
+				ctx.save();
+				// Vòng sóng lớn
+				ctx.beginPath();
+				ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+				ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha})`;
+				ctx.lineWidth = 4;
+				ctx.stroke();
+
+				// Vòng sóng nhỏ bên trong (tạo độ chân thực)
+				ctx.beginPath();
+				ctx.arc(r.x, r.y, r.radius * 0.6, 0, Math.PI * 2);
+				ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha * 0.5})`;
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				ctx.restore();
+			}
+
+			// 3. UPDATE AND DRAW FISHES
 			fishRef.current.forEach((fish) => {
-				fish.turnAt -= dt;
-				if (fish.turnAt <= 0) {
-					fish.targetAngle += (Math.random() - 0.5) * 1.8;
-					fish.turnAt = 1.5 + Math.random() * 3.6;
-				}
-
-				const marginX = fish.size * 0.6;
-				const marginY = fish.size * 0.6;
-
-				const isOutLeft = fish.x < marginX;
-				const isOutRight = fish.x > width - marginX;
-				const isOutTop = fish.y < marginY;
-				const isOutBottom = fish.y > height - marginY;
-
-				if (isOutLeft || isOutRight || isOutTop || isOutBottom) {
-					const centerX = width / 2;
-					const centerY = height / 2;
-
-					fish.targetAngle = Math.atan2(
-						centerY - fish.y,
-						centerX - fish.x,
+				// Fish's spawn progress
+				if (fish.spawnProgress < 1) {
+					fish.spawnProgress = Math.min(
+						1,
+						fish.spawnProgress + dt * 1.5,
 					);
+				} else {
+					fish.turnAt -= dt;
+					if (fish.turnAt <= 0) {
+						fish.targetAngle += (Math.random() - 0.5) * 1.8;
+						fish.turnAt = 1.5 + Math.random() * 3.6;
+					}
+
+					const marginX = fish.size * 0.6;
+					const marginY = fish.size * 0.6;
+
+					const isOutLeft = fish.x < marginX;
+					const isOutRight = fish.x > width - marginX;
+					const isOutTop = fish.y < marginY;
+					const isOutBottom = fish.y > height - marginY;
+
+					if (isOutLeft || isOutRight || isOutTop || isOutBottom) {
+						const centerX = width / 2;
+						const centerY = height / 2;
+
+						fish.targetAngle = Math.atan2(
+							centerY - fish.y,
+							centerX - fish.x,
+						);
+					}
+
+					let delta = Math.atan2(
+						Math.sin(fish.targetAngle - fish.angle),
+						Math.cos(fish.targetAngle - fish.angle),
+					);
+					fish.angle += Math.max(
+						-1.2 * dt,
+						Math.min(1.2 * dt, delta),
+					);
+					fish.x += Math.cos(fish.angle) * fish.speed * dt;
+					fish.y += Math.sin(fish.angle) * fish.speed * dt;
 				}
 
-				let delta = Math.atan2(
-					Math.sin(fish.targetAngle - fish.angle),
-					Math.cos(fish.targetAngle - fish.angle),
-				);
-				fish.angle += Math.max(-1.2 * dt, Math.min(1.2 * dt, delta));
-				fish.x += Math.cos(fish.angle) * fish.speed * dt;
-				fish.y += Math.sin(fish.angle) * fish.speed * dt;
-				if (koiImage.complete)
+				if (fish.image && fish.image.complete) {
 					drawKoi(
 						ctx,
 						fish,
-						koiImage,
+						fish.image,
 						now,
-						KOI_PROPS_MAP.get("type28") as FishImageProperties,
+						KOI_PROPS_MAP.get("type1") as FishImageProperties,
 					);
+				}
 			});
 
 			handleLotusCollisions(lotusRef.current);
@@ -817,7 +926,7 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 			cancelAnimationFrame(frame);
 			observer.disconnect();
 		};
-	}, [fishCount]);
+	}, [pond]);
 
 	useEffect(() => {
 		return () => {
@@ -832,15 +941,16 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 			<canvas
 				ref={canvasRef}
 				aria-label="Koi pond is moving"
+				className={styles.pondCanvas}
 				onMouseMove={handleMouseMove}
 				onClick={handleClick}
 			/>
 
 			{/* MENU HTML HIỆN LÊN KHI CLICK VÀO CÁ */}
 			{activeFishIndex !== null && (
-				<div ref={popupRef} className="fish-menu">
+				<div ref={popupRef} className={styles.fishMenu}>
 					<button
-						className="fish-info-button"
+						className={styles.fishInfoButton}
 						onClick={() =>
 							alert(`Xem thông tin cá số ${activeFishIndex}`)
 						}
@@ -848,7 +958,7 @@ function PondCanvas({ fishCount }: PondCanvasProps) {
 						Thông tin
 					</button>
 					<button
-						className="fish-menu-close-button"
+						className={styles.fishMenuCloseButton}
 						onClick={() => {
 							// Ẩn menu
 							setActiveFishIndex(null);
@@ -880,24 +990,86 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 	const navigate = useNavigate();
 	const [isInformationDialogOpen, setIsInformationDialogOpen] =
 		useState<boolean>(false);
+	const [koiList, setKoiList] = useState<IKoi[]>([]);
+	const [isAddKoiDialogOpen, setIsAddKoiDialogOpen] =
+		useState<boolean>(false);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			const data: IKoi[] = await handleFetchPondKoiList();
+			setKoiList(data);
+		};
+
+		fetchData();
+	}, []);
+
+	const handleFetchPondKoiList = async (): Promise<IKoi[]> => {
+		return MOCK_KOIS;
+	};
+
+	const handleImportKoi = async (koiItem: IInventory, quantity: number) => {
+		const koiVarient: IKoiVarient = MOCK_VARIENT.find(
+			(varient) => varient.id === koiItem.item?.effectValue,
+		) as IKoiVarient;
+		const newMembers: IKoi[] = Array.from({ length: quantity }, (_v, i) => {
+			return {
+				id: koiList.length + i,
+				name: koiVarient.name,
+				age: 50,
+				length: 7.2 + (2 * Math.random() - 1),
+				weight: 0.15 + (0.06 * Math.random() - 0.03),
+				health: 90,
+				foodBar: 80,
+				cureBar: 100,
+				gender: "MALE",
+				price: koiVarient.basePrice,
+				bornedAt: new Date(),
+				lifeStage: "FRY",
+				potential: 0.5 * Math.random() + 0.8,
+				dictionary: koiVarient,
+				patternScore: Math.round(20 * Math.random() + 80),
+				colorScore: Math.round(10 * Math.random() + 90),
+				bodyScore: Math.round(30 * Math.random() + 70),
+				skinScore: Math.round(15 * Math.random() + 85),
+				scaleScore: Math.round(25 * Math.random() + 75),
+			};
+		});
+
+		setTimeout(() => {
+			setKoiList((prev) => [...prev, ...newMembers]);
+			toast.success(
+				<div className={styles.toastMessage}>
+					<CircleCheckBig size="30" />
+					<span>
+						Released x{quantity} {koiVarient.name} to current pond!
+					</span>
+				</div>,
+			);
+		}, 500);
+
+		// setKoiList((prev) => [...prev, ...newMembers]);
+	};
+
+	const sleep = (ms: number) =>
+		new Promise((resolve) => setTimeout(resolve, ms));
 
 	return (
 		<>
-			<main>
-				<section className="pond-shell">
-					<PondCanvas fishCount={12} pond={pond} />
+			<main className={styles.wrapper}>
+				<section className={styles.pondShell}>
+					<PondCanvas pondKoiList={koiList} pond={pond} />
 					{/* <DebugCanvas /> */}
-					{/* <div className="pond-label">
+					{/* <div className={styles.pondLabel}>
 						<span>Đàn koi</span>
 						<strong>{fishCount} con</strong>
 					</div> */}
-					<div className="coins">
+					<div className={styles.coins}>
 						<img src="/pond/coin.svg" alt="coin" />
 						<span>9.000</span>
 					</div>
-					<div className="header">
+					<div className={styles.header}>
 						<button
-							className="nav-button"
+							className={styles.navButton}
 							type="button"
 							title="marketplace"
 							onClick={() => navigate("/transactions")}
@@ -905,7 +1077,7 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 							<img src="/pond/store.png" alt="store" />
 						</button>
 						<button
-							className="nav-button"
+							className={styles.navButton}
 							type="button"
 							title="dictionary"
 							onClick={() => navigate("/dictionary")}
@@ -913,7 +1085,7 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 							<img src="/pond/dictionary.svg" alt="dictionary" />
 						</button>
 						<button
-							className="nav-button"
+							className={styles.navButton}
 							type="button"
 							title="shop"
 							onClick={() => navigate("/shop")}
@@ -924,10 +1096,10 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 							/>
 						</button>
 					</div>
-					<div className="footer">
+					<div className={styles.footer}>
 						<button
 							type="button"
-							className="nav-button"
+							className={styles.navButton}
 							title="information"
 							onClick={() => setIsInformationDialogOpen(true)}
 						>
@@ -938,14 +1110,14 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 						</button>
 						{/* <button
 							type="button"
-							className="nav-button"
+							className={styles.navButton}
 							title="all ponds"
 						>
 							<img src="/pond/pond-list-1.svg" alt="pond list" />
 						</button> */}
 						<button
 							type="button"
-							className="nav-button"
+							className={styles.navButton}
 							title="inventory"
 							onClick={() => navigate("/inventory")}
 						>
@@ -953,27 +1125,28 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 						</button>
 						<button
 							type="button"
-							className="nav-button"
+							className={styles.navButton}
 							title="add koi"
+							onClick={() => setIsAddKoiDialogOpen(true)}
 						>
 							<img src="/pond/add-koi.svg" alt="add koi" />
 						</button>
 					</div>
 
-					<div className="back">
+					<div className={styles.back}>
 						<button
 							type="button"
-							className="nav-button"
+							className={styles.navButton}
 							title="back"
 							onClick={() => onClose()}
 						>
 							<Undo2 size={50} />
 						</button>
 					</div>
-					<div className="prev-pond pagination">
+					<div className={`${styles.prevPond} ${styles.pagination}`}>
 						<button
 							type="button"
-							className="nav-button"
+							className={styles.navButton}
 							title="previous"
 							// disabled={true}
 							onClick={() => onFetchPond("prev")}
@@ -981,10 +1154,10 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 							<CircleArrowLeft size={50} />
 						</button>
 					</div>
-					<div className="next-pond pagination">
+					<div className={`${styles.nextPond} ${styles.pagination}`}>
 						<button
 							type="button"
-							className="nav-button"
+							className={styles.navButton}
 							title="next"
 							// disabled={true}
 							onClick={() => onFetchPond("next")}
@@ -995,7 +1168,7 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 				</section>
 			</main>
 			{isInformationDialogOpen && (
-				<div className="overlay">
+				<div className={styles.overlay}>
 					<PondInformation
 						pond={pond}
 						onClose={() => setIsInformationDialogOpen(false)}
@@ -1003,12 +1176,258 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 					/>
 				</div>
 			)}
-			<Toaster />
+			{isAddKoiDialogOpen && (
+				<div className={styles.overlay}>
+					<ImportKoiForm
+						currentQuantity={koiList.length}
+						pondCapacity={pond.capacity}
+						onClose={() => setIsAddKoiDialogOpen(false)}
+						onSubmit={handleImportKoi}
+					/>
+				</div>
+			)}
 		</>
 	);
 }
 
 export default Pond;
+
+const MOCK_VARIENT: IKoiVarient[] = [
+	{
+		id: 1,
+		name: "Kohaku",
+		origin: "Japan",
+		scaleType: "WAGOI",
+		shape: "STANDARD",
+		baseMaxLength: 90.0,
+		baseGrowthRate: 0.015,
+		midAge: 400,
+		alphaWeight: 0.000015,
+		basePrice: 100,
+		alphaPrice: 1.68,
+		imageUrl: "/kois/koi-fish-kohaku.svg",
+	},
+	{
+		id: 2,
+		name: "Menkaburi Kohaku",
+		origin: "Japan",
+		scaleType: "WAGOI",
+		shape: "STANDARD",
+		baseMaxLength: 90.0,
+		baseGrowthRate: 0.015,
+		midAge: 400,
+		alphaWeight: 0.000015,
+		basePrice: 110,
+		alphaPrice: 1.69,
+		imageUrl: "/kois/koi-fish-menkaburi-kohaku.svg",
+	},
+	{
+		id: 3,
+		name: "Inazuma Kohaku",
+		origin: "Japan",
+		scaleType: "WAGOI",
+		shape: "STANDARD",
+		baseMaxLength: 90.0,
+		baseGrowthRate: 0.015,
+		midAge: 400,
+		alphaWeight: 0.000015,
+		basePrice: 180,
+		alphaPrice: 1.75,
+		imageUrl: "/kois/koi-fish-inazuma-kohaku.svg",
+	},
+];
+
+const MOCK_KOIS: IKoi[] = [
+	{
+		id: 1,
+		name: "Kohaku 1",
+		age: 600,
+		length: 92.5,
+		weight: 5.15,
+		health: 100,
+		foodBar: 100,
+		cureBar: 100,
+		gender: "MALE",
+		price: 5050,
+		bornedAt: new Date(),
+		lifeStage: "ADULT",
+		potential: 1.0,
+		dictionary: MOCK_VARIENT[0],
+		patternScore: 80,
+		colorScore: 90,
+		bodyScore: 70,
+		skinScore: 85,
+		scaleScore: 75,
+	},
+	{
+		id: 2,
+		name: "Menkaburi Kohaku 1",
+		age: 450,
+		length: 85.5,
+		weight: 4.85,
+		health: 90,
+		foodBar: 70,
+		cureBar: 90,
+		gender: "FEMALE",
+		price: 4320,
+		bornedAt: new Date(),
+		lifeStage: "ADULT",
+		potential: 1.1,
+		dictionary: MOCK_VARIENT[1],
+		patternScore: 100,
+		colorScore: 80,
+		bodyScore: 75,
+		skinScore: 65,
+		scaleScore: 95,
+	},
+	{
+		id: 3,
+		name: "Inazuma Kohaku 1",
+		age: 393,
+		length: 68.0,
+		weight: 3.85,
+		health: 90,
+		foodBar: 70,
+		cureBar: 90,
+		gender: "FEMALE",
+		price: 4910,
+		bornedAt: new Date(),
+		lifeStage: "JUVENILE",
+		potential: 1.1,
+		dictionary: MOCK_VARIENT[2],
+		patternScore: 100,
+		colorScore: 80,
+		bodyScore: 75,
+		skinScore: 65,
+		scaleScore: 95,
+	},
+	{
+		id: 4,
+		name: "Kohaku 2",
+		age: 520,
+		length: 88.3,
+		weight: 4.95,
+		health: 90,
+		foodBar: 70,
+		cureBar: 90,
+		gender: "FEMALE",
+		price: 5010,
+		bornedAt: new Date(),
+		lifeStage: "ADULT",
+		potential: 1.1,
+		dictionary: MOCK_VARIENT[0],
+		patternScore: 100,
+		colorScore: 80,
+		bodyScore: 75,
+		skinScore: 65,
+		scaleScore: 95,
+	},
+	{
+		id: 5,
+		name: "Menkaburi Kohaku 2",
+		age: 405,
+		length: 84.7,
+		weight: 4.55,
+		health: 90,
+		foodBar: 70,
+		cureBar: 90,
+		gender: "MALE",
+		price: 4620,
+		bornedAt: new Date(),
+		lifeStage: "ADULT",
+		potential: 1.1,
+		dictionary: MOCK_VARIENT[1],
+		patternScore: 100,
+		colorScore: 80,
+		bodyScore: 75,
+		skinScore: 65,
+		scaleScore: 95,
+	},
+	{
+		id: 6,
+		name: "Inazuma Kohaku 2",
+		age: 490,
+		length: 89.1,
+		weight: 4.85,
+		health: 90,
+		foodBar: 70,
+		cureBar: 90,
+		gender: "MALE",
+		price: 4910,
+		bornedAt: new Date(),
+		lifeStage: "ADULT",
+		potential: 1.1,
+		dictionary: MOCK_VARIENT[2],
+		patternScore: 100,
+		colorScore: 80,
+		bodyScore: 75,
+		skinScore: 65,
+		scaleScore: 95,
+	},
+	{
+		id: 7,
+		name: "Kohaku 3",
+		age: 510,
+		length: 87.3,
+		weight: 4.8,
+		health: 90,
+		foodBar: 70,
+		cureBar: 90,
+		gender: "FEMALE",
+		price: 5010,
+		bornedAt: new Date(),
+		lifeStage: "ADULT",
+		potential: 1.1,
+		dictionary: MOCK_VARIENT[0],
+		patternScore: 100,
+		colorScore: 80,
+		bodyScore: 75,
+		skinScore: 65,
+		scaleScore: 95,
+	},
+	{
+		id: 8,
+		name: "Menkaburi Kohaku 3",
+		age: 205,
+		length: 84.7,
+		weight: 4.55,
+		health: 90,
+		foodBar: 70,
+		cureBar: 90,
+		gender: "FEMALE",
+		price: 4620,
+		bornedAt: new Date(),
+		lifeStage: "JUVENILE",
+		potential: 1.05,
+		dictionary: MOCK_VARIENT[1],
+		patternScore: 100,
+		colorScore: 80,
+		bodyScore: 75,
+		skinScore: 65,
+		scaleScore: 95,
+	},
+	{
+		id: 9,
+		name: "Inazuma Kohaku 3",
+		age: 358,
+		length: 80.5,
+		weight: 3.85,
+		health: 90,
+		foodBar: 70,
+		cureBar: 90,
+		gender: "MALE",
+		price: 4910,
+		bornedAt: new Date(),
+		lifeStage: "JUVENILE",
+		potential: 1.1,
+		dictionary: MOCK_VARIENT[2],
+		patternScore: 100,
+		colorScore: 80,
+		bodyScore: 75,
+		skinScore: 65,
+		scaleScore: 95,
+	},
+];
 
 const KOI_PROPS_MAP = new Map<string, FishImageProperties>([
 	[

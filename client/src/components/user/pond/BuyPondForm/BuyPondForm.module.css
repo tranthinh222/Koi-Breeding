@@ -4,7 +4,7 @@
 	box-sizing: border-box;
 }
 
-form {
+.buyForm {
 	position: relative;
 	width: 65%;
 	min-width: 1000px;
@@ -20,7 +20,7 @@ form {
 	overflow: hidden;
 }
 
-.close-button {
+.closeButton {
 	position: absolute;
 	top: 15px;
 	right: 20px;
@@ -38,25 +38,25 @@ form {
 		color 0.2s ease;
 }
 
-.close-button:hover {
+.closeButton:hover {
 	background-color: #e5e7eb;
 	color: #111827;
 }
 
-.form-header {
+.formHeader {
 	width: 100%;
 	display: flex;
 	justify-content: start;
 	align-items: center;
 }
 
-.form-header span {
+.formHeader span {
 	font-family: "Grandstander";
 	font-size: 30px;
 	font-weight: bold;
 }
 
-.form-body {
+.formBody {
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
@@ -65,7 +65,7 @@ form {
 	box-sizing: border-box;
 }
 
-.image-section {
+.imageSection {
 	width: 50%;
 	display: flex;
 	flex-direction: column;
@@ -74,7 +74,7 @@ form {
 	gap: 20px;
 }
 
-.preview-image {
+.previewImage {
 	width: 450px;
 	height: 253px;
 	border: 10px solid white;
@@ -83,13 +83,13 @@ form {
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-.preview-image img {
+.previewImage img {
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
 }
 
-.preview-image:hover {
+.previewImage:hover {
 	transform: scale(1.03) rotate(-1deg);
 	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
 }
@@ -118,7 +118,7 @@ form {
 	color: #f2e943;
 }
 
-.info-section {
+.infoSection {
 	width: 50%;
 	display: flex;
 	flex-direction: column;
@@ -127,7 +127,7 @@ form {
 	box-sizing: border-box;
 }
 
-.text-field {
+.textField {
 	width: 100%;
 	display: flex;
 	flex-direction: column;
@@ -136,19 +136,19 @@ form {
 	box-sizing: border-box;
 }
 
-.field-label {
+.fieldLabel {
 	font-family: "Grandstander";
 	font-size: 22px;
 	font-weight: 700;
 	margin-top: 25px;
 }
 
-.input-wrapper {
+.inputWrapper {
 	position: relative;
 	width: 100%;
 }
 
-.input-wrapper > svg {
+.inputWrapper > svg {
 	position: absolute;
 	font-size: 30px;
 	color: #377394;
@@ -158,7 +158,7 @@ form {
 	pointer-events: none;
 }
 
-.field-input {
+.fieldInput {
 	font-family: "Grandstander";
 	font-size: 20px;
 	width: 100%;
@@ -178,33 +178,33 @@ form {
 	margin-top: 3px;
 }
 
-.field-input:focus {
+.fieldInput:focus {
 	border-color: #667eea;
 	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 	outline: none;
 }
 
-.field-input:disabled {
+.fieldInput:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
 }
-.field-input:disabled:hover {
+.fieldInput:disabled:hover {
 	transform: none;
 }
 
-.input-error {
+.inputError {
 	border-width: 2px;
 	border-color: #dc2626;
 }
 
-.error-label {
+.errorLabel {
 	font-family: "Grandstander";
 	font-size: 14px;
 	margin-top: 5px;
 	color: #dc2626;
 }
 
-.description-textarea {
+.descriptionTextArea {
 	font-family: "Grandstander";
 	font-size: 20px;
 	width: 100%;
@@ -226,21 +226,21 @@ form {
 	margin-top: 3px;
 }
 
-.description-textarea:focus {
+.descriptionTextArea:focus {
 	border-color: #667eea;
 	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 	outline: none;
 }
 
-.description-textarea:disabled {
+.descriptionTextArea:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
 }
-.description-textarea:disabled:hover {
+.descriptionTextArea:disabled:hover {
 	transform: none;
 }
 
-.form-footer {
+.formFooter {
 	width: 100%;
 	display: flex;
 	justify-content: end;
@@ -249,7 +249,7 @@ form {
 	margin-top: 30px;
 }
 
-.form-footer button {
+.formFooter button {
 	font-family: "Grandstander";
 	font-size: large;
 	font-weight: bold;
@@ -263,12 +263,12 @@ form {
 	cursor: pointer;
 }
 
-.submit-button {
+.submitButton {
 	color: white;
 	background-color: #2778d8;
 }
 
-.loading-icon {
+.loadingIcon {
 	width: 30px;
 	height: 30px;
 	margin-right: 10px;
@@ -276,34 +276,34 @@ form {
 	display: inline-block;
 }
 
-.submit-button:hover {
+.submitButton:hover {
 	background-color: #2d8cff;
 	transform: translateY(-2px);
 }
 
-.submit-button:active {
+.submitButton:active {
 	transform: translateY(1px);
 }
 
-.submit-button:disabled {
+.submitButton:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
 }
-.submit-button:disabled:hover {
+.submitButton:disabled:hover {
 	transform: none;
 }
 
-.cancel-button {
+.cancelButton {
 	color: black;
 	background-color: white;
 }
 
-.cancel-button:hover {
+.cancelButton:hover {
 	background-color: rgb(192, 191, 191);
 	transform: translateY(-2px);
 }
 
-.cancel-button:active {
+.cancelButton:active {
 	transform: translateY(1px);
 }
 

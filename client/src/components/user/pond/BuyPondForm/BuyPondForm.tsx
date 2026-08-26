@@ -1,6 +1,6 @@
 import { PencilLine, X } from "lucide-react";
 import { useState } from "react";
-import "./BuyPondForm.css";
+import styles from "./BuyPondForm.module.css";
 
 interface PondDataForm {
 	name: string;
@@ -61,10 +61,10 @@ function BuyPondForm({ onClose, onSubmit }: BuyPondFormProps) {
 		new Promise((resolve) => setTimeout(resolve, ms));
 
 	return (
-		<form>
+		<form className={styles.buyForm}>
 			<button
 				type="button"
-				className="close-button"
+				className={styles.closeButton}
 				onClick={onClose}
 				aria-label="Close"
 			>
@@ -72,33 +72,33 @@ function BuyPondForm({ onClose, onSubmit }: BuyPondFormProps) {
 			</button>
 
 			{/* Form Header */}
-			<div className="form-header">
+			<div className={styles.formHeader}>
 				<span>Buy A New Pond</span>
 			</div>
 
 			{/* Form Body */}
-			<div className="form-body">
-				<div className="image-section">
-					<div className="preview-image">
+			<div className={styles.formBody}>
+				<div className={styles.imageSection}>
+					<div className={styles.previewImage}>
 						<img src="/pond/pond-item-1.svg" />
 					</div>
-					<div className="price">
+					<div className={styles.price}>
 						<img src="/pond/coin.svg" alt="coin" />
 						<span>100</span>
 					</div>
 				</div>
-				<div className="info-section">
-					<div className="text-field">
-						<span className="field-label">Name</span>
-						<div className="input-wrapper">
+				<div className={styles.infoSection}>
+					<div className={styles.textField}>
+						<span className={styles.fieldLabel}>Name</span>
+						<div className={styles.inputWrapper}>
 							<PencilLine />
 							<input
 								type="text"
 								placeholder="ex. My New Pond"
 								value={formData.name}
 								disabled={isProcessing}
-								className={`field-input ${
-									errors.name ? "input-error" : ""
+								className={`${styles.fieldInput} ${
+									errors.name ? styles.inputError : ""
 								}`}
 								onChange={(e) => {
 									setFormData((prev) => ({
@@ -111,15 +111,17 @@ function BuyPondForm({ onClose, onSubmit }: BuyPondFormProps) {
 							/>
 						</div>
 						{errors.name && (
-							<span className="error-label">{errors.name}</span>
+							<span className={styles.errorLabel}>
+								{errors.name}
+							</span>
 						)}
 					</div>
-					<div className="text-field">
-						<span className="field-label">Description</span>
-						<div className="input-wrapper">
+					<div className={styles.textField}>
+						<span className={styles.fieldLabel}>Description</span>
+						<div className={styles.inputWrapper}>
 							<textarea
-								id="message-input"
-								className="description-textarea"
+								id={styles.messageInput}
+								className={styles.descriptionTextArea}
 								placeholder="Enter some description..."
 								value={formData.description}
 								disabled={isProcessing}
@@ -136,23 +138,23 @@ function BuyPondForm({ onClose, onSubmit }: BuyPondFormProps) {
 			</div>
 
 			{/* Form Footer */}
-			<div className="form-footer">
+			<div className={styles.formFooter}>
 				<button
 					type="button"
-					className="cancel-button"
+					className={styles.cancelButton}
 					onClick={onClose}
 				>
 					Cancel
 				</button>
 				<button
 					type="button"
-					className="submit-button"
+					className={styles.submitButton}
 					disabled={isProcessing}
 					onClick={handleSubmit}
 				>
 					{isProcessing ? (
 						<img
-							className="loading-icon"
+							className={styles.loadingIcon}
 							src="/utilities/fish-loading.png"
 						/>
 					) : null}

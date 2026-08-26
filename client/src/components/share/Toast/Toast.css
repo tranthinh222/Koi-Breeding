@@ -19,8 +19,30 @@
 .toast-success {
 	background-color: #4caf50;
 }
+
+.toast-warning {
+	background-color: #d1b829;
+}
+
 .toast-error {
 	background-color: #f44336;
+}
+
+.toast-content {
+	width: 100%;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 10px;
+	font-family: "Grandstander", sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.toast-content svg {
+	flex-shrink: 0;
+	color: white;
+	font-size: 70px;
 }
 
 .toast-close-btn {

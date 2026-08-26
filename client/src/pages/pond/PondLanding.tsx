@@ -1,8 +1,7 @@
-import { CircleCheckBig } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "../../components/admin/Toast/toast";
-import Toaster from "../../components/admin/Toast/Toaster";
+import { toast } from "../../components/share/Toast/toast";
+import Toaster from "../../components/share/Toast/Toaster";
 import BuyPondForm from "../../components/user/pond/BuyPondForm/BuyPondForm";
 import ShopBackground from "../../components/user/ShopBackground";
 import type { IModelPagination, IPond } from "../../types/backend";
@@ -96,12 +95,7 @@ function PondLanding() {
 
 		setPondList([newPond, ...pondList]);
 		setHasNew((prev) => [newPond.id, ...prev]);
-		toast.success(
-			<>
-				<CircleCheckBig size="30" />
-				<span>Buy new pond successfully!</span>
-			</>,
-		);
+		toast.success("Buy new pond successfully!");
 	};
 
 	const handleUpdatePond = async (name: string, description: string) => {
@@ -130,12 +124,7 @@ function PondLanding() {
 
 		setSelectedPond(newPond);
 
-		toast.success(
-			<>
-				<CircleCheckBig size="30" />
-				<span>Update pond successfully!</span>
-			</>,
-		);
+		toast.success("Update pond successfully!");
 	};
 
 	return (

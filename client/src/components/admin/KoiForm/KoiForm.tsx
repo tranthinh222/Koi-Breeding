@@ -6,7 +6,7 @@ import type {
 	KoiShape,
 	ScaleType,
 } from "../../../types/backend";
-import { toast } from "../Toast/toast";
+import { toast } from "../../share/Toast/toast";
 import KoiFormBody from "./FormBody";
 import FormFooter from "./FormFooter";
 import styles from "./KoiForm.module.css";

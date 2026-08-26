@@ -1,7 +1,7 @@
-import { CircleX, Import, Minus, Plus, X } from "lucide-react";
+import { Import, Minus, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { IInventory } from "../../../../types/backend";
-import { toast } from "../../../admin/Toast/toast";
+import { toast } from "../../../share/Toast/toast";
 import styles from "./ImportKoiForm.module.css";
 
 interface ImportKoiFormProps {
@@ -40,13 +40,7 @@ function ImportKoiForm({
 			selectedQuantity + currentQuantity > pondCapacity
 		) {
 			toast.error(
-				<div className={styles.toastMessage}>
-					<CircleX />
-					<span>
-						The pond is currently full. You can release exactly{" "}
-						{pondCapacity - currentQuantity} more fish.
-					</span>
-				</div>,
+				`The pond is currently full. You can release exactly ${pondCapacity - currentQuantity} more fish(es).`,
 			);
 
 			return;

@@ -6,7 +6,7 @@ interface ToastData {
 	type: ToastType;
 }
 
-type ToastType = "info" | "success" | "error";
+type ToastType = "info" | "success" | "warning" | "error";
 
 type Listener = (toasts: ToastData[]) => void;
 
@@ -47,3 +47,4 @@ export const toast = (message: ReactNode, type: ToastType = "info") => {
 
 toast.success = (message: ReactNode) => toastStore.addToast(message, "success");
 toast.error = (message: ReactNode) => toastStore.addToast(message, "error");
+toast.warning = (message: ReactNode) => toastStore.addToast(message, "warning");

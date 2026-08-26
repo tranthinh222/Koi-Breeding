@@ -1,11 +1,4 @@
-import {
-	ArrowLeft,
-	ArrowRight,
-	ArrowUpDown,
-	CircleCheckBig,
-	CircleX,
-	Search,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpDown, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
 	callCreateKoiVarient,
@@ -19,10 +12,10 @@ import type {
 	IVariety,
 } from "../../../types/backend";
 import Background from "../../share/Background/Background";
+import { toast } from "../../share/Toast/toast";
+import Toaster from "../../share/Toast/Toaster";
 import KoiForm from "../KoiForm/KoiForm";
 import KoiVarientRow from "../KoiVarientRow/KoiVarientRow";
-import { toast } from "../Toast/toast";
-import Toaster from "../Toast/Toaster";
 import VarietyForm from "../VarietyForm/VarietyForm";
 import styles from "./KoiVarientList.module.css";
 
@@ -121,34 +114,19 @@ function KoiVarientList() {
 			if (imageResponse && imageResponse.data) {
 				requestKoi.imageUrl = imageResponse.data.data?.url as string;
 			} else {
-				toast.error(
-					<>
-						<CircleX size="30" />
-						<span>Failed to upload koi varient's image!</span>
-					</>,
-				);
+				toast.error("Failed to upload koi varient's image!");
 			}
 		}
 
 		const response = await callCreateKoiVarient(requestKoi);
 		setData((prev) => [response.data.data as IKoiVarient, ...prev]);
-		toast.success(
-			<>
-				<CircleCheckBig size="30" />
-				<span>Create new koi successfully!</span>
-			</>,
-		);
+		toast.success("Create new koi successfully!");
 	};
 
 	const handleCreateVariety = async (requestVariety: IVariety) => {
 		const response = await callCreateVariety(requestVariety);
 		setVarietyList([response.data.data as IVariety, ...varietyList]);
-		toast.success(
-			<>
-				<CircleCheckBig size="30" />
-				<span>Create new variety successfully!</span>
-			</>,
-		);
+		toast.success("Create new variety successfully!");
 	};
 
 	return (

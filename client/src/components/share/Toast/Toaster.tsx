@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toastStore } from "./toast";
 import Toast from "./Toast";
-import styles from "./ToastProvider.module.css";
+import styles from "./Toaster.module.css";
 
 function Toaster() {
 	const [toasts, setToasts] = useState(toastStore.getSnapshot());

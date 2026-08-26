@@ -1,8 +1,6 @@
 import {
 	BanknoteArrowUp,
 	ChevronsUp,
-	CircleCheckBig,
-	CircleX,
 	ClockArrowUp,
 	Coins,
 	Earth,
@@ -16,9 +14,9 @@ import {
 	callUploadKoiVarientImage,
 } from "../../../api/koiDictionary";
 import type { IKoiVarient, IVariety } from "../../../types/backend";
+import { toast } from "../../share/Toast/toast";
+import Toaster from "../../share/Toast/Toaster";
 import KoiForm from "../KoiForm/KoiForm";
-import { toast } from "../Toast/toast";
-import Toaster from "../Toast/Toaster";
 import styles from "./KoiVarientRow.module.css";
 
 interface KoiDictionaryCardProps {
@@ -39,12 +37,7 @@ function KoiVarientRow({ koi, varietyList }: KoiDictionaryCardProps) {
 			if (imageResponse && imageResponse.data) {
 				requestKoi.imageUrl = imageResponse.data.data?.url as string;
 			} else {
-				toast.error(
-					<>
-						<CircleX size="30" />
-						<span>Failed to update koi varient's image!</span>
-					</>,
-				);
+				toast.error("Failed to update koi varient's image!");
 			}
 		}
 
@@ -68,12 +61,7 @@ function KoiVarientRow({ koi, varietyList }: KoiDictionaryCardProps) {
 
 		handleUpdateAttributes(koiToUpdate);
 
-		toast.success(
-			<>
-				<CircleCheckBig size="30" />
-				<span>Update koi #${koi.id} successfully!</span>
-			</>,
-		);
+		toast.success(`Update koi #${koi.id} successfully!`);
 	};
 
 	const handleUpdateAttributes = (requestKoi: IKoiVarient) => {

@@ -1,0 +1,161 @@
+
+.koi-page-content {
+  width: 90%;
+  margin: 0 auto 60px;
+}
+
+.ponds-toolbar,
+.pond-card {
+  background: #f8f4ea;
+  border: 4px solid #c9a26b;
+  border-radius: 18px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.15);
+}
+
+.ponds-toolbar h2 {
+  color: #5b3a1f;
+  margin: 6px 0 5px;
+  font-size: 32px;
+}
+
+.ponds-toolbar p {
+  color: #666;
+  line-height: 1.6;
+}
+
+.ponds-toolbar {
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.ponds-toolbar h2 {
+  margin: 6px 0 5px;
+  font-size: 32px;
+}
+
+.pond-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.pond-card {
+  overflow: hidden;
+}
+
+.pond-image {
+  height: 210px;
+  position: relative;
+  background: #8ed6f7;
+  overflow: hidden;
+}
+
+.pond-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pond-level {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #8b5a2b;
+  color: white;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.pond-card-body {
+  padding: 22px;
+}
+
+.pond-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.pond-title h3 {
+  color: #5b3a1f;
+  font-size: 24px;
+}
+
+.pond-title button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.pond-population {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e3d8c6;
+  margin-bottom: 16px;
+}
+
+.pond-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #8ed6f7;
+  display: grid;
+  place-items: center;
+}
+
+.pond-population p {
+  color: #666;
+  font-size: 13px;
+}
+
+.pond-population strong {
+  color: #5b3a1f;
+  font-size: 18px;
+}
+
+.pond-population > button {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #5a913b;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pond-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pond-metrics div {
+  background: #fff8e8;
+}
+
+.pond-metrics strong.good { color: #5a913b; }
+.pond-metrics strong.warning { color: #d97706; }
+
+@media (max-width: 900px) {
+  .pond-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .koi-page-content {
+    width: 94%;
+  }
+
+  .ponds-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

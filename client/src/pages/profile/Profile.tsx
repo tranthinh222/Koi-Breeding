@@ -11,8 +11,6 @@ import ImageEditor from './ImageEditor'
 
 import { useNavigate } from 'react-router-dom'
 
-import {logoutRequest} from '../../api/auth'
-
 type Gender = 'MALE' | 'FEMALE' | ''
 
 type UserProfile = {
@@ -113,18 +111,6 @@ function ProfileHero({
   }, [avatarUrl, profile.avatarUrl, fallbackAvatar])
   const avatarText = profile.username.charAt(0).toUpperCase()
 
-  const handleLogout = async () => {
-    try {
-      await logoutRequest();
-
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
-      navigate("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
   return (
     <section className="profile-hero">
       <button
@@ -156,11 +142,6 @@ function ProfileHero({
             Cancel
           </button>
         )}
-        {!editing && (
-        <button type="button" className="secondary" onClick={handleLogout}>
-          Sign out
-        </button>
-  )}
       </div>
     </section>
   )

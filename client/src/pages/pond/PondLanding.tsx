@@ -7,7 +7,7 @@ import BuyPondForm from "../../components/user/pond/BuyPondForm/BuyPondForm";
 import ShopBackground from "../../components/user/ShopBackground";
 import type { IModelPagination, IPond } from "../../types/backend";
 import Pond from "./Pond";
-import "./PondLanding.css";
+import styles from "./PondLanding.module.css";
 
 function PondLanding() {
 	const navigate = useNavigate();
@@ -142,15 +142,15 @@ function PondLanding() {
 		<>
 			{selectedPond == null ? (
 				<>
-					<div className="main-content">
-						<div className="title-section">
+					<div className={styles.mainContent}>
+						<div className={styles.titleSection}>
 							<span>All Ponds</span>
 						</div>
 
-						<div className="buy-pond">
+						<div className={styles.buyPond}>
 							<button
 								type="button"
-								className="buy-pond-button"
+								className={styles.buyPondButton}
 								onClick={() => setIsBuyPondDialogOpen(true)}
 								title="buy pond"
 							>
@@ -163,17 +163,17 @@ function PondLanding() {
 
 						<button
 							type="button"
-							className="back-button"
+							className={styles.backButton}
 							onClick={() => navigate("/")}
 						>
 							Back
 						</button>
 
-						<div className="pond-grid">
+						<div className={styles.pondGrid}>
 							{pondList.slice(0, 6).map((pond, index) => (
 								<div
 									key={pond.id}
-									className="pond-item"
+									className={styles.pondItem}
 									onClick={() => {
 										console.log(
 											`Selected pond: id='${pond.id}' | name='${pond.name}'`,
@@ -186,17 +186,17 @@ function PondLanding() {
 										src={`${hasNew.includes(pond.id) ? "/pond/pond-new.svg" : `/pond/pond-item-${index + 1}.svg`}`}
 										alt={pond.name}
 									/>
-									<span className="pond-label">
+									<span className={styles.pondLabel}>
 										{pond.name}
 									</span>
 								</div>
 							))}
 						</div>
 
-						<div className="pagination-footer">
+						<div className={styles.paginationFooter}>
 							<button
 								type="button"
-								className="prev-button"
+								className={styles.prevButton}
 								disabled={page === 1}
 								onClick={() =>
 									handlePageChange(Math.max(1, page - 1))
@@ -206,7 +206,7 @@ function PondLanding() {
 							</button>
 							<button
 								type="button"
-								className="next-button"
+								className={styles.nextButton}
 								disabled={page === totalPages}
 								onClick={() =>
 									handlePageChange(
@@ -219,9 +219,8 @@ function PondLanding() {
 						</div>
 					</div>
 					<ShopBackground />
-					<Toaster />
 					{isBuyPondDialogOpen && (
-						<div className="overlay">
+						<div className={styles.overlay}>
 							<BuyPondForm
 								onClose={() => setIsBuyPondDialogOpen(false)}
 								onSubmit={handleBuyPond}
@@ -256,6 +255,7 @@ function PondLanding() {
 					onUpdatePond={handleUpdatePond}
 				/>
 			)}
+			<Toaster />
 		</>
 	);
 }
@@ -267,7 +267,7 @@ const mockData: IPond[] = [
 		id: 1,
 		name: "Kohaku Pond",
 		level: 10,
-		capacity: 10,
+		capacity: 15,
 		waterQuality: 70,
 		temperature: 20,
 		pH: 3.6,

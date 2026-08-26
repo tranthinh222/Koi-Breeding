@@ -17,7 +17,7 @@
 	z-index: 1000;
 }
 
-.main-content {
+.mainContent {
 	width: 100%;
 	height: 100vh;
 	display: flex;
@@ -31,7 +31,7 @@
 	z-index: 1;
 }
 
-.title-section {
+.titleSection {
 	width: 40%;
 	height: 120px;
 	border: 10px solid #6d3f16;
@@ -40,16 +40,17 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	margin-top: 15px;
 }
 
-.title-section > span {
+.titleSection > span {
 	font-family: "Grandstander";
 	font-weight: bold;
 	font-size: 60px;
 	color: white;
 }
 
-.buy-pond {
+.buyPond {
 	position: absolute;
 	top: 22px;
 	right: 22px;
@@ -64,7 +65,7 @@
 	transition: all 0.2s ease;
 }
 
-.buy-pond-button {
+.buyPondButton {
 	width: 80px;
 	height: 80px;
 	background: none;
@@ -72,22 +73,22 @@
 	cursor: pointer;
 }
 
-.buy-pond:hover {
+.buyPond:hover {
 	cursor: pointer;
 	transform: translateY(-2px);
 }
 
-.buy-pond:active {
+.buyPond:active {
 	transform: translateY(1px);
 }
 
-.buy-pond-button > img {
+.buyPondButton > img {
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
 }
 
-.pond-grid {
+.pondGrid {
 	width: 100%;
 	height: 80%;
 	display: grid;
@@ -95,11 +96,11 @@
 	grid-template-rows: repeat(2, 1fr);
 	place-items: center;
 	gap: 60px 0px;
-	padding: 0px 40px;
+	padding: 20px 40px;
 	/* background-color: #2f8cff; */
 }
 
-.pond-item {
+.pondItem {
 	position: relative;
 	width: 500px;
 	height: 281px;
@@ -112,12 +113,12 @@
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-.pond-item:hover {
+.pondItem:hover {
 	transform: scale(1.1) rotate(-1deg);
 	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
 }
 
-.pond-label {
+.pondLabel {
 	position: absolute;
 	top: 5px;
 	left: 5px;
@@ -127,7 +128,7 @@
 	color: white;
 }
 
-.pond-price {
+.pondPrice {
 	position: absolute;
 	top: 40%;
 	left: 47%;
@@ -137,13 +138,13 @@
 	color: #f2e943;
 }
 
-.pond-item img {
+.pondItem img {
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
 }
 
-.pagination-footer {
+.paginationFooter {
 	width: 100%;
 	height: 100px;
 	display: flex;
@@ -153,7 +154,7 @@
 	padding: 0px 80px;
 }
 
-.pagination-footer button {
+.paginationFooter button {
 	width: 150px;
 	height: 50px;
 	font-family: "Grandstander";
@@ -166,34 +167,34 @@
 	transition: all 0.2s ease;
 }
 
-.prev-button {
+.prevButton {
 	border-radius: 10px 0px 0px 10px;
 }
 
-.next-button {
+.nextButton {
 	border-radius: 0px 10px 10px 0px;
 }
 
-.pagination-footer button:hover {
+.paginationFooter button:hover {
 	background-color: #2d8cff;
 	transform: translateY(-2px);
 }
 
-.pagination-footer button:active {
+.paginationFooter button:active {
 	transform: translateY(1px);
 }
 
-.pagination-footer button:disabled {
+.paginationFooter button:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
 }
 
-.pagination-footer button:disabled:hover {
+.paginationFooter button:disabled:hover {
 	background-color: #2778d8;
 	transform: none;
 }
 
-.back-button {
+.backButton {
 	position: absolute;
 	top: 22px;
 	left: 22px;
@@ -212,11 +213,11 @@
 	cursor: pointer;
 }
 
-.back-button:hover {
+.backButton:hover {
 	background-color: #2d8cff;
 	transform: translateY(-2px);
 }
 
-.back-button:active {
+.backButton:active {
 	transform: translateY(1px);
 }

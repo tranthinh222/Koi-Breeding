@@ -11,9 +11,13 @@ import ImageEditor from "./ImageEditor";
 
 import { useNavigate } from "react-router-dom";
 
+<<<<<<< HEAD
 import { logoutRequest } from "../../api/auth";
 
 type Gender = "MALE" | "FEMALE" | "";
+=======
+type Gender = 'MALE' | 'FEMALE' | ''
+>>>>>>> e6442972769b1a6ebb1b37bb2252a47375df5071
 
 type UserProfile = {
   id: number;
@@ -119,6 +123,7 @@ function ProfileHero({
   }, [avatarUrl, profile.avatarUrl, fallbackAvatar]);
   const avatarText = profile.username.charAt(0).toUpperCase();
 
+<<<<<<< HEAD
   const handleLogout = async () => {
     try {
       await logoutRequest();
@@ -128,6 +133,8 @@ function ProfileHero({
       navigate("/");
     }
   };
+=======
+>>>>>>> e6442972769b1a6ebb1b37bb2252a47375df5071
   return (
     <section className="profile-hero">
       <button
@@ -175,11 +182,14 @@ function ProfileHero({
             Cancel
           </button>
         )}
+<<<<<<< HEAD
         {!editing && (
           <button type="button" className="secondary" onClick={handleLogout}>
             Sign out
           </button>
         )}
+=======
+>>>>>>> e6442972769b1a6ebb1b37bb2252a47375df5071
       </div>
     </section>
   );

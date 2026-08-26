@@ -234,7 +234,7 @@ body {
 .title-section {
   display: flex;
   justify-content: center;
-
+  margin: 0 auto;
   margin-top: 25px;
   margin-bottom: 30px;
 }
@@ -514,7 +514,8 @@ body {
   font-weight: bold;
 }
 
-.view-profile-button {
+.view-profile-button, 
+.logout-button {
   width: 100%;
   min-height: 46px;
   padding: 0 16px;

@@ -23,7 +23,7 @@
 	box-sizing: border-box;
 }
 
-form {
+.infoForm {
 	position: relative;
 	width: 70%;
 	min-width: 1000px;

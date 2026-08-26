@@ -168,7 +168,7 @@ function PondInformation({ pond, onClose, onEdit }: PondInformationProps) {
 		new Promise((resolve) => setTimeout(resolve, ms));
 
 	return (
-		<form>
+		<form className={styles.infoForm}>
 			<button
 				type="button"
 				className={styles.closeButton}

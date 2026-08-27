@@ -1,18 +1,17 @@
 package com.koibreeding.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.koibreeding.domain.Inventory;
 import com.koibreeding.domain.Item;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.repository.InventoryRepository;
-import com.koibreeding.repository.ItemRepository;
+
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.val;
-
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class InventoryService {
 
     public List<ResItemInventory> getInventory(Integer userId) {
         val inventory = inventoryRepository.findByUserId(userId);
-        if(inventory == null){
+        if (inventory == null) {
             throw new RuntimeException("not found inventory");
         }
         return inventory.stream()
@@ -47,12 +46,12 @@ public class InventoryService {
     public ResItemInventory addItemToInventory(Integer userId, Integer itemId, Integer quantity) {
         Inventory inventory = inventoryRepository.findByUserIdAndItemId(userId, itemId).orElse(null);
         User user = userService.handleFetchUserById(userId);
-        if(user == null){
+        if (user == null) {
             throw new RuntimeException("not found user");
         }
 
         Item item = itemService.findItemById(itemId);
-        if(item == null){
+        if (item == null) {
             throw new RuntimeException("not found item");
         }
         if (inventory == null) {
@@ -96,7 +95,8 @@ public class InventoryService {
             inventoryRepository.delete(inventory);
             return new ResItemInventory(
                     inventory.getItem().getId(), inventory.getItem().getName(), inventory.getItem().getPrice(),
-                    inventory.getItem().getItemType(), inventory.getItem().getEffectValue(), inventory.getItem().getEffectType(),
+                    inventory.getItem().getItemType(), inventory.getItem().getEffectValue(),
+                    inventory.getItem().getEffectType(),
                     inventory.getItem().getDescription(), 0, inventory.getItem().getItemUrl());
         }
         inventory.setQuantity(quantityNew);
@@ -112,5 +112,9 @@ public class InventoryService {
                 inventoryNew.getItem().getDescription(),
                 inventoryNew.getQuantity(),
                 inventoryNew.getItem().getItemUrl());
+    }
+
+    public Inventory handleFetchInventoryById(Integer inventoryId) {
+        return this.inventoryRepository.findById(inventoryId).orElse(null);
     }
 }

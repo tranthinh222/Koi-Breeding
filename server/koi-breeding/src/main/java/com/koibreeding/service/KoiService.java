@@ -1,17 +1,26 @@
 package com.koibreeding.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.koibreeding.domain.Dictionary;
+import com.koibreeding.domain.Inventory;
+import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Koi;
 import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Pond;
+import com.koibreeding.dto.request.RequestReleaseKoiDTO;
+import com.koibreeding.dto.response.ResKoiDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.enums.ItemType;
 import com.koibreeding.repository.KoiRepository;
+import com.koibreeding.util.formulas.KoiFormula;
 
 @Service
 public class KoiService {
@@ -19,20 +28,70 @@ public class KoiService {
     private final MutationService mutationService;
     private final DictionaryService koiDictionaryService;
     private final PondService pondService;
+    private final InventoryService inventoryService;
+    // private final ItemService itemService;
 
     public KoiService(
             KoiRepository koiRepository,
             MutationService mutationService,
             DictionaryService koiDictionaryService,
-            PondService pondService) {
+            PondService pondService,
+            InventoryService inventoryService) {
         this.koiRepository = koiRepository;
         this.mutationService = mutationService;
         this.koiDictionaryService = koiDictionaryService;
         this.pondService = pondService;
+        this.inventoryService = inventoryService;
+        // this.itemService = itemService;
     }
 
     public Koi handleCreateKoi(Koi koi) {
         return this.koiRepository.save(koi);
+    }
+
+    @Transactional
+    public List<ResKoiDTO> handleReleaseKoi(RequestReleaseKoiDTO requestReleaseKoiDTO) throws Exception {
+        Pond requestPond = pondService.handleFetchPondById(requestReleaseKoiDTO.getPondId());
+        if (requestPond == null) {
+            throw new Exception("Pond with id='" + requestReleaseKoiDTO.getPondId() + "' is not exist.");
+        }
+
+        Inventory requestInventory = inventoryService.handleFetchInventoryById(requestReleaseKoiDTO.getInventoryId());
+        if (requestInventory == null) {
+            throw new Exception(
+                    "Item in inventory with id='" + requestReleaseKoiDTO.getInventoryId() + "' is not exist.");
+        }
+
+        if (requestInventory.getQuantity() < requestReleaseKoiDTO.getQuantity()) {
+            throw new Exception("Invalid number of released fish. It must be less than or equal '"
+                    + requestInventory.getQuantity() + "' but received '" + requestReleaseKoiDTO.getQuantity() + "'.");
+        }
+
+        Item requestItem = requestInventory.getItem();
+        if (!requestItem.getItemType().equals(ItemType.KOI)) {
+            throw new Exception("Invalid item type. Item must be a KOI item");
+        }
+
+        Dictionary requestDictionary = this.koiDictionaryService
+                .handleFetchDictionaryById(requestItem.getEffectValue().intValue());
+
+        if (requestDictionary == null) {
+            throw new Exception("Item value does not match any koi varient.");
+        }
+
+        List<Koi> newKoiList = new ArrayList<Koi>();
+
+        for (int i = 0; i < requestReleaseKoiDTO.getQuantity(); ++i) {
+            newKoiList.add(KoiFormula.generateStarterKoi(requestDictionary));
+        }
+
+        List<Koi> resultKoiList = this.koiRepository.saveAll(newKoiList);
+
+        inventoryService.useItemFromInventory(requestPond.getOwner().getId(), requestItem.getId(),
+                requestReleaseKoiDTO.getQuantity());
+
+        return resultKoiList.stream().map(this::convertToResKoiDTO)
+                .collect(Collectors.toList());
     }
 
     public Koi handleUpdateKoi(Koi koi) {
@@ -106,11 +165,53 @@ public class KoiService {
         return resultPaginationDTO;
     }
 
+    public List<ResKoiDTO> handleFetchAllKoisInPond(Integer pondId) {
+        return this.koiRepository.findAllByPond_Id(pondId).stream().map(this::convertToResKoiDTO)
+                .collect(Collectors.toList());
+    }
+
     public void handleDeleteKoi(Integer id) {
         this.koiRepository.deleteById(id);
     }
 
     public boolean isKoiExistById(Integer id) {
         return this.koiRepository.existsById(id);
+    }
+
+    public ResKoiDTO convertToResKoiDTO(Koi koi) {
+        ResKoiDTO resKoiDTO = new ResKoiDTO();
+        ResKoiDTO.KoiMutation koiMutation = null;
+
+        if (koi.getMutation() != null) {
+            koiMutation = new ResKoiDTO.KoiMutation();
+            koiMutation.setId(koi.getMutation().getId());
+            koiMutation.setName(koi.getMutation().getName());
+        }
+
+        resKoiDTO.setId(koi.getId());
+        resKoiDTO.setName(koi.getName());
+        resKoiDTO.setAge(koi.getAge());
+        resKoiDTO.setLength(koi.getLength());
+        resKoiDTO.setWeight(koi.getWeight());
+        resKoiDTO.setHealth(koi.getHealth());
+        resKoiDTO.setFoodBar(koi.getFoodBar());
+        resKoiDTO.setCureBar(koi.getCureBar());
+        resKoiDTO.setGender(koi.getGender());
+        resKoiDTO.setPrice(koi.getPrice());
+        resKoiDTO.setMutation(koiMutation);
+        resKoiDTO.setBornedAt(koi.getBornedAt().toInstant());
+        resKoiDTO.setPondId(koi.getPond().getId());
+        resKoiDTO.setLifeStage(koi.getLifeStage());
+        resKoiDTO.setFatherId(koi.getFather() != null ? koi.getFather().getId() : null);
+        resKoiDTO.setMotherId(koi.getMother() != null ? koi.getMother().getId() : null);
+        resKoiDTO.setPotential(koi.getPotential());
+        resKoiDTO.setDictionary(koi.getDictionary());
+        resKoiDTO.setPatternScore(koi.getPatternScore());
+        resKoiDTO.setColorScore(koi.getColorScore());
+        resKoiDTO.setBodyScore(koi.getBodyScore());
+        resKoiDTO.setSkinScore(koi.getSkinScore());
+        resKoiDTO.setScaleScore(koi.getScaleScore());
+
+        return resKoiDTO;
     }
 }

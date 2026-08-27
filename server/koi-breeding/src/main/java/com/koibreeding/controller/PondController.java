@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.domain.Pond;
+import com.koibreeding.dto.request.RequestBuyPondDTO;
+import com.koibreeding.dto.response.ResPondDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.service.PondService;
 
@@ -26,26 +29,32 @@ public class PondController {
     }
 
     @PostMapping("/ponds")
-    public ResponseEntity<Pond> createNewPond(@RequestBody Pond pond) {
-        Pond newPond = this.pondService.handleCreatePond(pond);
+    public ResponseEntity<ResPondDTO> buyNewPond(@RequestBody RequestBuyPondDTO buyPondRequestDTO)
+            throws Exception {
+        ResPondDTO buyPondResponseDTO = null;
+        try {
+            buyPondResponseDTO = this.pondService.handleBuyPond(buyPondRequestDTO);
+        } catch (Exception e) {
+            throw e;
+        }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(newPond);
+        return ResponseEntity.status(HttpStatus.CREATED).body(buyPondResponseDTO);
     }
 
     @PutMapping("/ponds")
-    public ResponseEntity<Pond> updateAPond(@RequestBody Pond pond) throws Exception {
+    public ResponseEntity<ResPondDTO> updateAPond(@RequestBody Pond pond) throws Exception {
         if (!this.pondService.isPondExistById(pond.getId())) {
             throw new Exception("Pond with id '" + pond.getId() + "' is not exist.");
         }
 
-        Pond updatedPond = this.pondService.handleUpdatePond(pond);
+        ResPondDTO updatedPond = this.pondService.handleUpdatePond(pond);
 
         return ResponseEntity.ok(updatedPond);
     }
 
     @GetMapping("/ponds/{id}")
-    public ResponseEntity<Pond> getPondById(@PathVariable Integer id) throws Exception {
-        Pond fetchedPond = pondService.handleFetchPondById(id);
+    public ResponseEntity<ResPondDTO> getPondById(@PathVariable Integer id) throws Exception {
+        ResPondDTO fetchedPond = pondService.convertToResPondDTO(pondService.handleFetchPondById(id));
         if (fetchedPond == null) {
             throw new Exception("Pond with id '" + id + "' is not exist.");
         }
@@ -54,8 +63,9 @@ public class PondController {
     }
 
     @GetMapping("/ponds")
-    public ResponseEntity<ResultPaginationDTO> getAllPonds(Pageable pageable) {
-        ResultPaginationDTO pondList = pondService.handleFetchAllPonds(pageable);
+    public ResponseEntity<ResultPaginationDTO> getAllPondsByOwner(@RequestParam("owner") Integer ownerId,
+            Pageable pageable) {
+        ResultPaginationDTO pondList = pondService.handleFetchPondsByOwner(ownerId, pageable);
 
         return ResponseEntity.ok(pondList);
     }

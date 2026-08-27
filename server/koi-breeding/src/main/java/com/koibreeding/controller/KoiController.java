@@ -1,6 +1,8 @@
 package com.koibreeding.controller;
 
-import org.springframework.data.domain.Pageable;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,10 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.domain.Koi;
-import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.dto.request.RequestReleaseKoiDTO;
+import com.koibreeding.dto.response.ResKoiDTO;
 import com.koibreeding.service.KoiService;
 
 @RestController
@@ -30,6 +34,19 @@ public class KoiController {
         Koi newKoi = this.koiService.handleCreateKoi(koi);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(newKoi);
+    }
+
+    @PostMapping("/kois/import")
+    public ResponseEntity<List<ResKoiDTO>> releaseKoisToPond(@RequestBody RequestReleaseKoiDTO requestReleaseKoiDTO)
+            throws Exception {
+        List<ResKoiDTO> newKoiList = new ArrayList<>();
+        try {
+            newKoiList = this.koiService.handleReleaseKoi(requestReleaseKoiDTO);
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(newKoiList);
     }
 
     @PutMapping("/kois")
@@ -54,8 +71,8 @@ public class KoiController {
     }
 
     @GetMapping("/kois")
-    public ResponseEntity<ResultPaginationDTO> getAllKois(Pageable pageable) {
-        ResultPaginationDTO koiList = koiService.handleFetchAllKois(pageable);
+    public ResponseEntity<List<ResKoiDTO>> getAllKoisInPond(@RequestParam Integer pondId) {
+        List<ResKoiDTO> koiList = koiService.handleFetchAllKoisInPond(pondId);
 
         return ResponseEntity.ok(koiList);
     }

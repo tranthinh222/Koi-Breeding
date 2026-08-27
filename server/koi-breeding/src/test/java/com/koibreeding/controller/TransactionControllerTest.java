@@ -3,6 +3,7 @@ package com.koibreeding.controller;
 import com.koibreeding.domain.Transaction;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.response.ResTransactionDto;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.TransactionStatus;
 import com.koibreeding.enums.TransactionType;
 import com.koibreeding.service.TransactionService;
@@ -14,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -74,13 +77,16 @@ public class TransactionControllerTest {
 
     @Test
     void getTransactions_success(){
+        Pageable pageable = PageRequest.of(0, 10);
+        ResultPaginationDTO pagination = new ResultPaginationDTO();
+        pagination.setResult(List.of(resTransactionDto, resTransactionDto1));
         //given
-        when(transactionService.getTransactions(1))
-                .thenReturn(List.of(resTransactionDto, resTransactionDto1));
+        when(transactionService.getTransactions(1, pageable))
+                .thenReturn(pagination);
         //when
-        ResponseEntity<List<ResTransactionDto>> result =
-                transactionController.getTransactions(1);
-        assertEquals(2, result.getBody().size());
+        ResponseEntity<ResultPaginationDTO> result =
+                transactionController.getTransactions(1, pageable);
+        assertEquals(2, ((List<?>) result.getBody().getResult()).size());
 
         assertEquals(1,resTransactionDto.getId());
         assertEquals("Food", resTransactionDto.getItemName());

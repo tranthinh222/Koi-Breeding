@@ -5,6 +5,7 @@ import com.koibreeding.domain.Transaction;
 import com.koibreeding.domain.User;
 import com.koibreeding.domain.Wallet;
 import com.koibreeding.dto.response.ResTransactionDto;
+import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.TransactionStatus;
 import com.koibreeding.enums.TransactionType;
 import com.koibreeding.repository.TransactionRepository;
@@ -14,6 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -85,17 +89,23 @@ public class TransactionServiceTest {
 
     @Test
     void getTransactions_shouldReturnListOfDto() {
+        Pageable pageable = PageRequest.of(0, 10);
         // given
-        when(transactionRepository.findByWalletUserIdOrderByCreatedAtDesc(user.getId()))
-                .thenReturn(List.of(transaction1, transaction2));
+        when(transactionRepository.findByWalletUserId(user.getId(), pageable))
+                .thenReturn(new PageImpl<>(List.of(transaction1, transaction2), pageable, 2));
 
         // when
-        List<ResTransactionDto> result = transactionService.getTransactions(user.getId());
+        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), pageable);
+        @SuppressWarnings("unchecked")
+        List<ResTransactionDto> transactions = (List<ResTransactionDto>) result.getResult();
 
         // then
-        assertThat(result).hasSize(2);
+        assertThat(transactions).hasSize(2);
+        assertThat(result.getMeta().getPage()).isEqualTo(1);
+        assertThat(result.getMeta().getPageSize()).isEqualTo(10);
+        assertThat(result.getMeta().getTotalElements()).isEqualTo(2);
 
-        ResTransactionDto dto1 = result.get(0);
+        ResTransactionDto dto1 = transactions.get(0);
         assertThat(dto1.getId()).isEqualTo(1);
         assertThat(dto1.getItemId()).isEqualTo(1);
         assertThat(dto1.getItemName()).isEqualTo("Food");
@@ -105,12 +115,13 @@ public class TransactionServiceTest {
         assertThat(dto1.getDescription()).isEqualTo("Koi Food");
         assertThat(dto1.getCreatedAt()).isEqualTo(createdAt);
 
-        ResTransactionDto dto2 = result.get(1);
+        ResTransactionDto dto2 = transactions.get(1);
         assertThat(dto2.getItemName()).isEqualTo("Fish");
     }
 
     @Test
     void getTransactions_shouldReturnUnknownItem_whenItemIsNull() {
+        Pageable pageable = PageRequest.of(0, 10);
         // given
         Transaction txWithoutItem = new Transaction();
         txWithoutItem.setId(3);
@@ -122,28 +133,33 @@ public class TransactionServiceTest {
         txWithoutItem.setDescription("No item tx");
         txWithoutItem.setCreatedAt(createdAt);
 
-        when(transactionRepository.findByWalletUserIdOrderByCreatedAtDesc(user.getId()))
-                .thenReturn(List.of(txWithoutItem));
+        when(transactionRepository.findByWalletUserId(user.getId(), pageable))
+                .thenReturn(new PageImpl<>(List.of(txWithoutItem), pageable, 1));
 
         // when
-        List<ResTransactionDto> result = transactionService.getTransactions(user.getId());
+        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), pageable);
+        @SuppressWarnings("unchecked")
+        List<ResTransactionDto> transactions = (List<ResTransactionDto>) result.getResult();
 
         // then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getItemId()).isNull();
-        assertThat(result.get(0).getItemName()).isEqualTo("Unknown item");
+        assertThat(transactions).hasSize(1);
+        assertThat(transactions.get(0).getItemId()).isNull();
+        assertThat(transactions.get(0).getItemName()).isEqualTo("Unknown item");
     }
 
     @Test
     void getTransactions_shouldReturnEmptyList_whenNoTransactionFound() {
+        Pageable pageable = PageRequest.of(0, 10);
         // given
-        when(transactionRepository.findByWalletUserIdOrderByCreatedAtDesc(user.getId()))
-                .thenReturn(List.of());
+        when(transactionRepository.findByWalletUserId(user.getId(), pageable))
+                .thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
         // when
-        List<ResTransactionDto> result = transactionService.getTransactions(user.getId());
+        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), pageable);
+        @SuppressWarnings("unchecked")
+        List<ResTransactionDto> transactions = (List<ResTransactionDto>) result.getResult();
 
         // then
-        assertThat(result).isEmpty();
+        assertThat(transactions).isEmpty();
     }
 }

@@ -295,7 +295,7 @@ export default function Home() {
           getPonds(0, 100),
         ])
         const ownedPonds = pondPage.result.filter(
-          (pond) => !pond.owner || pond.owner.id === userId,
+          (pond: IPond) => !pond.owner || pond.owner.id === userId,
         )
 
         const homeData: HomeResponse = {

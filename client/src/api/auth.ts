@@ -59,6 +59,7 @@ export interface AuthUser {
   email: string;
   birthday: string | null;
   gender: "MALE" | "FEMALE" | null;
+  role: "USER" | "ADMIN" | null;
   exp: number;
   avatarUrl: string | null;
   createdAt: string;

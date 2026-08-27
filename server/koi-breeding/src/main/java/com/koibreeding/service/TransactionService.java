@@ -3,6 +3,7 @@ package com.koibreeding.service;
 import com.koibreeding.domain.Transaction;
 import com.koibreeding.dto.response.ResTransactionDto;
 import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.enums.TransactionType;
 import com.koibreeding.repository.TransactionRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,18 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public ResultPaginationDTO getTransactions(Integer userId, Pageable pageable) {
-        Page<Transaction> transactionPage = transactionRepository.findByWalletUserId(userId, pageable);
+    public ResultPaginationDTO getTransactions(Integer userId, String filter, Pageable pageable) {
+        Page<Transaction> transactionPage = switch (filter.toUpperCase()) {
+            case "BOUGHT" -> transactionRepository.findByWalletUserIdAndTransactionTypeIn(
+                    userId,
+                    List.of(TransactionType.BUY_FOOD, TransactionType.BUY_FISH),
+                    pageable);
+            case "SOLD" -> transactionRepository.findByWalletUserIdAndTransactionTypeIn(
+                    userId,
+                    List.of(TransactionType.DEPOSIT, TransactionType.SELL_FISH),
+                    pageable);
+            default -> transactionRepository.findByWalletUserId(userId, pageable);
+        };
         List<ResTransactionDto> transactions = transactionPage.getContent().stream()
                 .map(this::toDto)
                 .toList();

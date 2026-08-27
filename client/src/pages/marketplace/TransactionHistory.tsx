@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CURRENT_USER_ID } from '../../api/currentUser'
 import { getTransactions, type Transaction } from '../../api/transaction'
 
@@ -22,7 +22,7 @@ export default function TransactionHistory() {
   const [sort, setSort] = useState<TransactionSort>('NEWEST')
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const [pageSize, setPageSize] = useState(5)
   const [isPageSizeOpen, setIsPageSizeOpen] = useState(false)
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
@@ -63,7 +63,13 @@ export default function TransactionHistory() {
   useEffect(() => {
     setLoading(true)
     setError(null)
-    getTransactions(CURRENT_USER_ID, page, pageSize, sort === 'NEWEST' ? 'desc' : 'asc')
+    getTransactions(
+      CURRENT_USER_ID,
+      page,
+      pageSize,
+      sort === 'NEWEST' ? 'desc' : 'asc',
+      filter,
+    )
       .then((response) => {
         setTransactions(response.result)
         setTotalPages(response.meta.totalPages)
@@ -74,27 +80,14 @@ export default function TransactionHistory() {
         setError('Unable to load transaction history.')
       })
       .finally(() => setLoading(false))
-  }, [page, pageSize, sort])
-
-  const filteredTransactions = useMemo(() => {
-    const filtered = transactions.filter((transaction) => {
-      if (filter === 'BOUGHT') return transaction.transactionType.startsWith('BUY_')
-      if (filter === 'SOLD') {
-        return (
-          transaction.transactionType === 'DEPOSIT' ||
-          transaction.transactionType === 'SELL_FISH'
-        )
-      }
-      return true
-    })
-
-    return filtered
-  }, [filter, transactions])
+  }, [filter, page, pageSize, sort])
 
   return (
     <div className="transaction-history-page">
       <section className="title-section">
-        <div className="wood-sign"><h1>TRANSACTION HISTORY</h1></div>
+        <div className="wood-sign">
+          <h1>TRANSACTION HISTORY</h1>
+        </div>
       </section>
 
       <section className="market-tabs history-tabs">
@@ -114,10 +107,16 @@ export default function TransactionHistory() {
             onClick={() => setIsFilterOpen((current) => !current)}
           >
             {FILTER_OPTIONS.find((option) => option.value === filter)?.label}
-            <span className="history-filter-arrow" aria-hidden="true">⌄</span>
+            <span className="history-filter-arrow" aria-hidden="true">
+              ⌄
+            </span>
           </button>
           {isFilterOpen && (
-            <div className="history-filter-menu" role="listbox" aria-label="Filter transactions">
+            <div
+              className="history-filter-menu"
+              role="listbox"
+              aria-label="Filter transactions"
+            >
               {FILTER_OPTIONS.map((option) => (
                 <button
                   type="button"
@@ -138,7 +137,10 @@ export default function TransactionHistory() {
             </div>
           )}
         </div>
-        <div className="history-filter-dropdown history-sort-dropdown" ref={sortDropdownRef}>
+        <div
+          className="history-filter-dropdown history-sort-dropdown"
+          ref={sortDropdownRef}
+        >
           <button
             type="button"
             className="history-filter-trigger"
@@ -147,10 +149,16 @@ export default function TransactionHistory() {
             onClick={() => setIsSortOpen((current) => !current)}
           >
             {SORT_OPTIONS.find((option) => option.value === sort)?.label}
-            <span className="history-filter-arrow" aria-hidden="true">⌄</span>
+            <span className="history-filter-arrow" aria-hidden="true">
+              ⌄
+            </span>
           </button>
           {isSortOpen && (
-            <div className="history-filter-menu" role="listbox" aria-label="Sort transactions">
+            <div
+              className="history-filter-menu"
+              role="listbox"
+              aria-label="Sort transactions"
+            >
               {SORT_OPTIONS.map((option) => (
                 <button
                   type="button"
@@ -175,19 +183,24 @@ export default function TransactionHistory() {
       <section className="history-container">
         {loading && <p className="history-message">Loading transactions...</p>}
         {error && <p className="history-message">{error}</p>}
-        {!loading && !error && filteredTransactions.length === 0 && <p className="history-message">No transactions yet.</p>}
-        {filteredTransactions.map((transaction) => {
+        {!loading && !error && transactions.length === 0 && (
+          <p className="history-message">No transactions yet.</p>
+        )}
+        {transactions.map((transaction) => {
           const isDeposit = transaction.transactionType === 'DEPOSIT'
           return (
             <article className="history-card" key={transaction.id}>
-              <div className={`history-icon ${isDeposit ? 'sell' : 'buy'}`}>{isDeposit ? '💰' : '🛒'}</div>
+              <div className={`history-icon ${isDeposit ? 'sell' : 'buy'}`}>
+                {isDeposit ? '💰' : '🛒'}
+              </div>
               <div className="history-info">
                 <h3>{transaction.itemName}</h3>
                 <p>{transaction.description}</p>
                 <p>{new Date(transaction.createdAt).toLocaleString()}</p>
               </div>
               <div className={`history-price ${isDeposit ? 'income' : ''}`}>
-                {isDeposit ? '+' : '-'}{transaction.amount.toLocaleString('vi-VN')} Koins
+                {isDeposit ? '+' : '-'}
+                {transaction.amount.toLocaleString('vi-VN')} Koins
               </div>
             </article>
           )
@@ -196,7 +209,10 @@ export default function TransactionHistory() {
           <div className="history-pagination">
             <div className="history-page-size">
               <span id="page-size-label">Items per page</span>
-              <div className="history-page-size-dropdown" ref={pageSizeDropdownRef}>
+              <div
+                className="history-page-size-dropdown"
+                ref={pageSizeDropdownRef}
+              >
                 <button
                   type="button"
                   className="history-page-size-trigger"
@@ -206,10 +222,16 @@ export default function TransactionHistory() {
                   onClick={() => setIsPageSizeOpen((current) => !current)}
                 >
                   {pageSize}
-                  <span className="history-page-size-arrow" aria-hidden="true">⌄</span>
+                  <span className="history-page-size-arrow" aria-hidden="true">
+                    ⌄
+                  </span>
                 </button>
                 {isPageSizeOpen && (
-                  <div className="history-page-size-menu" role="listbox" aria-labelledby="page-size-label">
+                  <div
+                    className="history-page-size-menu"
+                    role="listbox"
+                    aria-labelledby="page-size-label"
+                  >
                     {PAGE_SIZE_OPTIONS.map((option) => (
                       <button
                         type="button"
@@ -224,21 +246,33 @@ export default function TransactionHistory() {
                         }}
                       >
                         <span>{option}</span>
-                        {pageSize === option && <span aria-hidden="true">✓</span>}
+                        {pageSize === option && (
+                          <span aria-hidden="true">✓</span>
+                        )}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
             </div>
-            <span className="history-pagination-total">{totalElements} transactions</span>
-            <button type="button" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>
+            <span className="history-pagination-total">
+              {totalElements} transactions
+            </span>
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => setPage((current) => current - 1)}
+            >
               Previous
             </button>
             <span className="history-pagination-status">
               Page <strong>{page}</strong> of {Math.max(totalPages, 1)}
             </span>
-            <button type="button" disabled={page >= totalPages} onClick={() => setPage((current) => current + 1)}>
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => setPage((current) => current + 1)}
+            >
               Next
             </button>
           </div>

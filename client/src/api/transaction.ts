@@ -17,6 +17,7 @@ export async function getTransactions(
   page: number,
   pageSize: number,
   sortDirection: 'asc' | 'desc',
+  filter: 'ALL' | 'BOUGHT' | 'SOLD',
 ): Promise<IModelPagination<Transaction>> {
   const response = await apiClient.get<IRestResponse<IModelPagination<Transaction>>>(
     `/users/${userId}/transactions`,
@@ -25,6 +26,7 @@ export async function getTransactions(
         page: page - 1,
         size: pageSize,
         sort: `createdAt,${sortDirection}`,
+        filter,
       },
     },
   )

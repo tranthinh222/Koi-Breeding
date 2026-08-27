@@ -95,7 +95,7 @@ public class TransactionServiceTest {
                 .thenReturn(new PageImpl<>(List.of(transaction1, transaction2), pageable, 2));
 
         // when
-        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), pageable);
+        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), "ALL", pageable);
         @SuppressWarnings("unchecked")
         List<ResTransactionDto> transactions = (List<ResTransactionDto>) result.getResult();
 
@@ -120,6 +120,21 @@ public class TransactionServiceTest {
     }
 
     @Test
+    void getTransactions_shouldPaginateFilteredTransactions() {
+        Pageable pageable = PageRequest.of(0, 1);
+        List<TransactionType> boughtTypes = List.of(TransactionType.BUY_FOOD, TransactionType.BUY_FISH);
+        when(transactionRepository.findByWalletUserIdAndTransactionTypeIn(
+                user.getId(), boughtTypes, pageable))
+                .thenReturn(new PageImpl<>(List.of(transaction1), pageable, 2));
+
+        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), "BOUGHT", pageable);
+
+        assertThat(result.getMeta().getTotalElements()).isEqualTo(2);
+        assertThat(result.getMeta().getTotalPages()).isEqualTo(2);
+        assertThat(result.getMeta().getPage()).isEqualTo(1);
+    }
+
+    @Test
     void getTransactions_shouldReturnUnknownItem_whenItemIsNull() {
         Pageable pageable = PageRequest.of(0, 10);
         // given
@@ -137,7 +152,7 @@ public class TransactionServiceTest {
                 .thenReturn(new PageImpl<>(List.of(txWithoutItem), pageable, 1));
 
         // when
-        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), pageable);
+        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), "ALL", pageable);
         @SuppressWarnings("unchecked")
         List<ResTransactionDto> transactions = (List<ResTransactionDto>) result.getResult();
 
@@ -155,7 +170,7 @@ public class TransactionServiceTest {
                 .thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
         // when
-        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), pageable);
+        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), "ALL", pageable);
         @SuppressWarnings("unchecked")
         List<ResTransactionDto> transactions = (List<ResTransactionDto>) result.getResult();
 

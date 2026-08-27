@@ -81,11 +81,11 @@ public class TransactionControllerTest {
         ResultPaginationDTO pagination = new ResultPaginationDTO();
         pagination.setResult(List.of(resTransactionDto, resTransactionDto1));
         //given
-        when(transactionService.getTransactions(1, pageable))
+        when(transactionService.getTransactions(1, "ALL", pageable))
                 .thenReturn(pagination);
         //when
         ResponseEntity<ResultPaginationDTO> result =
-                transactionController.getTransactions(1, pageable);
+                transactionController.getTransactions(1, "ALL", pageable);
         assertEquals(2, ((List<?>) result.getBody().getResult()).size());
 
         assertEquals(1,resTransactionDto.getId());

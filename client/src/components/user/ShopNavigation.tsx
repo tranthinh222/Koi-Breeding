@@ -1,33 +1,58 @@
+import {
+  Backpack,
+  House,
+  ReceiptText,
+  Settings,
+  ShoppingCart,
+  Waves,
+} from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 export default function ShopNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
   return (
     <nav className="navigation-menu">
-      <button onClick={() => navigate("/")}>🏠 Home</button>
+      <button onClick={() => navigate("/")}>
+        <House />
+        <span>Home</span>
+      </button>
+
+      <button
+        className={location.pathname.startsWith("/pond") ? "active" : ""}
+        onClick={() => navigate("/pond")}
+      >
+        <Waves />
+        <span>My Ponds</span>
+      </button>
 
       <button
         className={location.pathname === "/inventory" ? "active" : ""}
         onClick={() => navigate("/inventory")}
       >
-        🎒 Inventory
+        <Backpack />
+        <span>Inventory</span>
       </button>
 
       <button
         className={location.pathname === "/shop" ? "active" : ""}
         onClick={() => navigate("/shop")}
       >
-        🛒 Shop
+        <ShoppingCart />
+        <span>Shop</span>
       </button>
 
       <button
         className={location.pathname === "/transactions" ? "active" : ""}
         onClick={() => navigate("/transactions")}
       >
-        🏪 Marketplace
+        <ReceiptText />
+        <span>Marketplace</span>
       </button>
 
-      <button>⚙︎ Settings</button>
+      <button>
+        <Settings />
+        <span>Settings</span>
+      </button>
     </nav>
   );
 }

@@ -5,11 +5,13 @@ import ShopNavigation from './user/ShopNavigation'
 
 export default function AppLayout() {
   return (
-    <>
+    <div className="app-layout">
       <ShopBackground />
       <ShopHeader />
-      <ShopNavigation />
       <Outlet />
-    </>
+      <footer className="app-footer">
+        <ShopNavigation />
+      </footer>
+    </div>
   )
 }

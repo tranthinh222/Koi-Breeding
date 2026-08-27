@@ -179,52 +179,136 @@ body {
    NAVIGATION - COMMON
 ========================================================= */
 
-.navigation-menu {
-  width: 90%;
-  height: 65px;
+.app-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-bottom: 112px;
+}
 
-  margin: 50px auto;
-  padding: 0 20px;
+.app-footer {
+  position: relative;
+  z-index: 800;
+}
+
+.navigation-menu {
+  position: fixed;
+  z-index: 800;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(92%, 880px);
+  height: 78px;
+
+  margin: 0;
+  padding: 8px;
 
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
+  gap: 6px;
 
-  background: #174562;
-  border-radius: 18px;
+  background:
+    linear-gradient(rgba(255, 218, 151, 0.08), rgba(58, 26, 8, 0.1)),
+    linear-gradient(180deg, #9b622f 0%, #754119 52%, #5a2e10 100%);
+  border-radius: 20px 20px 28px 28px;
 
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+  border: 4px solid #4a260d;
+  outline: 2px solid #d09a52;
+  outline-offset: -7px;
+  box-shadow:
+    0 9px 0 #3d1d09,
+    0 16px 28px rgba(42, 22, 8, 0.36),
+    inset 0 3px 0 rgba(255, 224, 168, 0.22),
+    inset 0 -3px 0 rgba(48, 20, 5, 0.25);
+}
+
+.navigation-menu::before,
+.navigation-menu::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffe19b, #9a5c1d 58%, #4a260d 62%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  transform: translateY(-50%);
+}
+
+.navigation-menu::before {
+  left: 10px;
+}
+
+.navigation-menu::after {
+  right: 10px;
 }
 
 .navigation-menu button {
-  height: 48px;
-  padding: 0 18px;
+  position: relative;
+  flex: 1 1 0;
+  max-width: 138px;
+  height: 60px;
+  padding: 7px 10px 6px;
 
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 3px;
 
-  border: none;
-  border-radius: 14px;
+  border: 1px solid rgba(255, 218, 151, 0.2);
+  border-radius: 13px;
 
-  background: transparent;
-  color: white;
+  background: rgba(58, 27, 9, 0.24);
+  color: #f8dfb2;
 
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 12px;
+  font-weight: 700;
 
   cursor: pointer;
-  transition: 0.25s;
+  text-shadow: 0 2px 1px rgba(45, 19, 5, 0.65);
+  box-shadow: inset 0 1px 0 rgba(255, 222, 159, 0.13);
+  transition: transform 0.2s ease, background-color 0.2s ease,
+    color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.navigation-menu button svg {
+  width: 23px;
+  height: 23px;
+  stroke-width: 2.2;
+  filter: drop-shadow(0 2px 1px rgba(45, 19, 5, 0.5));
 }
 
 .navigation-menu button:hover {
-  transform: translateY(-3px);
-  color: #ffe6a3;
+  transform: translateY(-2px);
+  border-color: rgba(255, 221, 151, 0.48);
+  background: rgba(255, 197, 91, 0.15);
+  color: #fff0c9;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 232, 185, 0.22),
+    0 4px 8px rgba(48, 19, 4, 0.2);
 }
 
 .navigation-menu button.active {
-  background: white;
-  color: #174562;
+  transform: translateY(-7px) rotate(-1deg);
+  border: 2px solid #6f3e13;
+  background: linear-gradient(180deg, #ffe29a 0%, #e7a944 100%);
+  color: #54300f;
+  text-shadow: 0 1px 0 rgba(255, 242, 194, 0.75);
+  box-shadow:
+    0 5px 0 #774414,
+    0 9px 14px rgba(45, 19, 5, 0.32),
+    inset 0 2px 0 rgba(255, 245, 205, 0.55);
+}
+
+.navigation-menu button.active::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  background: #6d3a11;
 }
 
 /* =========================================================
@@ -1298,19 +1382,36 @@ body {
 @media (max-width: 700px) {
   /* NAVIGATION */
 
+  .app-layout {
+    padding-bottom: 82px;
+  }
+
   .navigation-menu {
-    height: auto;
+    bottom: 0;
+    width: 100%;
+    height: 76px;
+    justify-content: flex-start;
+    gap: 3px;
+    padding: 8px max(8px, env(safe-area-inset-left))
+      calc(8px + env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-right));
+    border-width: 2px 0 0;
+    border-radius: 20px 20px 0 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
 
-    padding: 10px;
-
-    gap: 8px;
-
-    flex-wrap: wrap;
+  .navigation-menu::-webkit-scrollbar {
+    display: none;
   }
 
   .navigation-menu button {
-    font-size: 15px;
-    height: 42px;
+    flex: 0 0 78px;
+    height: 58px;
+    padding: 6px 8px;
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   /* SHOP */

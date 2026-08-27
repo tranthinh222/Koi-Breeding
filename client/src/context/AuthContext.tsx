@@ -14,6 +14,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 type AuthContextValue = {
   currentUser: AuthUser | null;
   currentUserId: number | null;
+  currentUserRole: AuthUser["role"];
   loading: boolean;
   refreshCurrentUser: () => Promise<AuthUser | null>;
   setAuthenticatedUser: (user: AuthUser | null) => void;
@@ -119,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       currentUser,
       currentUserId: currentUser?.id ?? null,
+      currentUserRole: currentUser?.role ?? null,
       loading,
       refreshCurrentUser,
       setAuthenticatedUser,

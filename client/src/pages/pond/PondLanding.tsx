@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+	callBuyPond,
+	callFetchAllPonds,
+	callUpdatePond,
+	type IRequestBuyPondDTO,
+} from "../../api/pond";
 import { toast } from "../../components/share/Toast/toast";
 import Toaster from "../../components/share/Toast/Toaster";
 import BuyPondForm from "../../components/user/pond/BuyPondForm/BuyPondForm";
 import ShopBackground from "../../components/user/ShopBackground";
-import type { IModelPagination, IPond } from "../../types/backend";
+import type {
+	IModelPagination,
+	IOwner,
+	IPond,
+	IUser,
+} from "../../types/backend";
 import Pond from "./Pond";
 import styles from "./PondLanding.module.css";
 
@@ -37,31 +48,24 @@ function PondLanding() {
 		page: number,
 		pageSize: number,
 	): Promise<IModelPagination<IPond>> => {
-		// const response = await callFetchKoiVarient(
-		//     `page=${page - 1}&size=${pageSize}`,
-		// );
+		const userLogin: IUser = handleGetMockUser();
 
-		// if (response && response.data) {
-		//     return response.data.data as IModelPagination<IKoiVarient>;
-		// }
+		const response = await callFetchAllPonds(
+			`owner=${userLogin.id}&page=${page - 1}&size=${pageSize}`,
+		);
 
-		// return {
-		//     meta: {
-		//         page: page,
-		//         pageSize: pageSize,
-		//         totalPages: 0,
-		//         totalElements: 0,
-		//     },
-		//     result: [],
-		// };
+		if (response && response.data) {
+			return response.data.data as IModelPagination<IPond>;
+		}
+
 		return {
 			meta: {
 				page: page,
 				pageSize: pageSize,
-				totalPages: Math.ceil(mockData.length / 6),
+				totalPages: 0,
 				totalElements: 0,
 			},
-			result: mockData,
+			result: [],
 		};
 	};
 
@@ -77,34 +81,39 @@ function PondLanding() {
 		formData: { name: string; description: string },
 		price: number,
 	) => {
-		// const response = await callCreateVariety(requestVariety);
-		// setVarietyList([response.data.data as IVariety, ...varietyList]);
+		const userLogin: IUser = handleGetMockUser();
 
-		const newPond: IPond = {
-			id: pondList.length,
+		const request: IRequestBuyPondDTO = {
 			name: formData.name,
-			level: 0,
-			capacity: 0,
-			waterQuality: 0,
-			temperature: 0,
-			pH: 0,
-			oxygen: 0,
-			createdAt: new Date(),
 			description: formData.description,
+			price: price,
+			ownerId: userLogin.id,
 		};
 
-		setPondList([newPond, ...pondList]);
-		setHasNew((prev) => [newPond.id, ...prev]);
-		toast.success("Buy new pond successfully!");
+		const response = await callBuyPond(request);
+
+		if (response && response.data) {
+			const newPond: IPond = response.data.data as IPond;
+
+			setPondList([newPond, ...pondList]);
+			setHasNew((prev) => [newPond.id, ...prev]);
+			toast.success("Buy new pond successfully!");
+		} else {
+			toast.error("Failed to buy pond!");
+		}
 	};
 
-	const handleUpdatePond = async (name: string, description: string) => {
+	const handleUpdatePondInformation = async (
+		name: string,
+		description: string,
+	) => {
 		const pondIndex = pondList.findIndex(
 			(item) => item.id === selectedPond?.id,
 		);
 
 		const newPond: IPond = {
 			id: selectedPond?.id as number,
+			owner: selectedPond?.owner as IOwner,
 			name: name,
 			level: selectedPond?.level as number,
 			capacity: selectedPond?.capacity as number,
@@ -116,15 +125,37 @@ function PondLanding() {
 			description: description,
 		};
 
-		setPondList((prev) => {
-			const newList = [...prev];
-			newList[pondIndex] = newPond;
-			return newList;
-		});
+		const response = await callUpdatePond(newPond);
 
-		setSelectedPond(newPond);
+		if (response && response.data) {
+			const updatedPond: IPond = response.data.data as IPond;
 
-		toast.success("Update pond successfully!");
+			setPondList((prev) => {
+				const newList = [...prev];
+				newList[pondIndex] = updatedPond;
+				return newList;
+			});
+
+			setSelectedPond(updatedPond);
+
+			toast.success("Update pond successfully!");
+		} else {
+			toast.error("Failed to update pond information!");
+		}
+	};
+
+	const handleGetMockUser = (): IUser => {
+		return {
+			id: 1,
+			username: "demo_user",
+			email: "demo_user@koi.local",
+			birthday: new Date("2000-01-01"),
+			gender: "MALE",
+			exp: 0,
+			avatarUrl: null,
+			createdAt: new Date("2026-08-17T09:48:06.840540Z"),
+			updatedAt: new Date("2026-08-17T09:48:06.840568Z"),
+		};
 	};
 
 	return (
@@ -241,7 +272,7 @@ function PondLanding() {
 
 						setSelectedPond(newPond);
 					}}
-					onUpdatePond={handleUpdatePond}
+					onUpdatePond={handleUpdatePondInformation}
 				/>
 			)}
 			<Toaster />
@@ -251,78 +282,78 @@ function PondLanding() {
 
 export default PondLanding;
 
-const mockData: IPond[] = [
-	{
-		id: 1,
-		name: "Kohaku Pond",
-		level: 10,
-		capacity: 15,
-		waterQuality: 70,
-		temperature: 20,
-		pH: 3.6,
-		oxygen: 6.2,
-		createdAt: new Date(),
-		description:
-			"This pond is used to raise Kohaku koi fishes.\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes",
-	},
-	{
-		id: 2,
-		name: "Uia Pond",
-		level: 10,
-		capacity: 10,
-		waterQuality: 100,
-		temperature: 24,
-		pH: 7.1,
-		oxygen: 6.2,
-		createdAt: new Date(),
-		description: "This pond is used to raise Kohaku koi fishes",
-	},
-	{
-		id: 3,
-		name: "A Pond",
-		level: 10,
-		capacity: 10,
-		waterQuality: 100,
-		temperature: 24,
-		pH: 7.1,
-		oxygen: 6.2,
-		createdAt: new Date(),
-		description: "This pond is used to raise Kohaku koi fishes",
-	},
-	{
-		id: 4,
-		name: "Showa Pond",
-		level: 10,
-		capacity: 10,
-		waterQuality: 100,
-		temperature: 24,
-		pH: 7.1,
-		oxygen: 6.2,
-		createdAt: new Date(),
-		description: "This pond is used to raise Kohaku koi fishes",
-	},
-	{
-		id: 5,
-		name: "Ronaldo Pond",
-		level: 10,
-		capacity: 10,
-		waterQuality: 100,
-		temperature: 24,
-		pH: 7.1,
-		oxygen: 6.2,
-		createdAt: new Date(),
-		description: "This pond is used to raise Kohaku koi fishes",
-	},
-	{
-		id: 6,
-		name: "Pikachu Pond",
-		level: 10,
-		capacity: 10,
-		waterQuality: 100,
-		temperature: 24,
-		pH: 7.1,
-		oxygen: 6.2,
-		createdAt: new Date(),
-		description: "This pond is used to raise Kohaku koi fishes",
-	},
-];
+// const mockData: IPond[] = [
+// 	{
+// 		id: 1,
+// 		name: "Kohaku Pond",
+// 		level: 10,
+// 		capacity: 15,
+// 		waterQuality: 70,
+// 		temperature: 20,
+// 		pH: 3.6,
+// 		oxygen: 6.2,
+// 		createdAt: new Date(),
+// 		description:
+// 			"This pond is used to raise Kohaku koi fishes.\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes",
+// 	},
+// 	{
+// 		id: 2,
+// 		name: "Uia Pond",
+// 		level: 10,
+// 		capacity: 10,
+// 		waterQuality: 100,
+// 		temperature: 24,
+// 		pH: 7.1,
+// 		oxygen: 6.2,
+// 		createdAt: new Date(),
+// 		description: "This pond is used to raise Kohaku koi fishes",
+// 	},
+// 	{
+// 		id: 3,
+// 		name: "A Pond",
+// 		level: 10,
+// 		capacity: 10,
+// 		waterQuality: 100,
+// 		temperature: 24,
+// 		pH: 7.1,
+// 		oxygen: 6.2,
+// 		createdAt: new Date(),
+// 		description: "This pond is used to raise Kohaku koi fishes",
+// 	},
+// 	{
+// 		id: 4,
+// 		name: "Showa Pond",
+// 		level: 10,
+// 		capacity: 10,
+// 		waterQuality: 100,
+// 		temperature: 24,
+// 		pH: 7.1,
+// 		oxygen: 6.2,
+// 		createdAt: new Date(),
+// 		description: "This pond is used to raise Kohaku koi fishes",
+// 	},
+// 	{
+// 		id: 5,
+// 		name: "Ronaldo Pond",
+// 		level: 10,
+// 		capacity: 10,
+// 		waterQuality: 100,
+// 		temperature: 24,
+// 		pH: 7.1,
+// 		oxygen: 6.2,
+// 		createdAt: new Date(),
+// 		description: "This pond is used to raise Kohaku koi fishes",
+// 	},
+// 	{
+// 		id: 6,
+// 		name: "Pikachu Pond",
+// 		level: 10,
+// 		capacity: 10,
+// 		waterQuality: 100,
+// 		temperature: 24,
+// 		pH: 7.1,
+// 		oxygen: 6.2,
+// 		createdAt: new Date(),
+// 		description: "This pond is used to raise Kohaku koi fishes",
+// 	},
+// ];

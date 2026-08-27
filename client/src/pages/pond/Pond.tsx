@@ -1,6 +1,7 @@
 import { CircleArrowLeft, CircleArrowRight, Undo2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { callFetchKoisInPond, callReleaseKoiToPond } from "../../api/koi";
 import { toast } from "../../components/share/Toast/toast";
 import ImportKoiForm from "../../components/user/pond/ImportKoiForm/ImportKoiForm";
 import { PondCanvas } from "../../components/user/pond/PondCanvas/PondCanvas";
@@ -33,43 +34,65 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 	}, []);
 
 	const handleFetchPondKoiList = async (): Promise<IKoi[]> => {
-		return MOCK_KOIS;
+		const response = await callFetchKoisInPond(pond.id);
+		if (response && response.data) {
+			return response.data.data as IKoi[];
+		}
+
+		toast.error("Failed to fetch current pond's koi list!");
+		return [];
 	};
 
 	const handleImportKoi = async (koiItem: IInventory, quantity: number) => {
 		const koiVarient: IKoiVarient = MOCK_VARIENT.find(
 			(varient) => varient.id === koiItem.item?.effectValue,
 		) as IKoiVarient;
-		const newMembers: IKoi[] = Array.from({ length: quantity }, (_v, i) => {
-			return {
-				id: koiList.length + i,
-				name: koiVarient.name,
-				age: 50,
-				length: 7.2 + (2 * Math.random() - 1),
-				weight: 0.15 + (0.06 * Math.random() - 0.03),
-				health: 90,
-				foodBar: 80,
-				cureBar: 100,
-				gender: "MALE",
-				price: koiVarient.basePrice,
-				bornedAt: new Date(),
-				lifeStage: "FRY",
-				potential: 0.5 * Math.random() + 0.8,
-				dictionary: koiVarient,
-				patternScore: Math.round(20 * Math.random() + 80),
-				colorScore: Math.round(10 * Math.random() + 90),
-				bodyScore: Math.round(30 * Math.random() + 70),
-				skinScore: Math.round(15 * Math.random() + 85),
-				scaleScore: Math.round(25 * Math.random() + 75),
-			};
+
+		const response = await callReleaseKoiToPond({
+			pondId: pond.id,
+			inventoryId: koiItem.id,
+			quantity: quantity,
 		});
 
-		setTimeout(() => {
-			setKoiList((prev) => [...prev, ...newMembers]);
-			toast.success(
-				`Released x${quantity} ${koiVarient.name} to current pond!`,
-			);
-		}, 500);
+		if (response && response.data) {
+			const newMembers: IKoi[] = response.data.data as IKoi[];
+			setTimeout(() => {
+				setKoiList((prev) => [...prev, ...newMembers]);
+				toast.success(
+					`Released x${quantity} ${koiVarient.name} to current pond!`,
+				);
+			}, 500);
+		} else {
+			toast.error("Failed to release koi(s) to the current pond.");
+		}
+
+		// const newMembers: IKoi[] = Array.from({ length: quantity }, (_v, i) => {
+		// 	return {
+		// 		id: koiList.length + i,
+		// 		name: koiVarient.name,
+		// 		age: 50,
+		// 		length: 7.2 + (2 * Math.random() - 1),
+		// 		weight: 0.15 + (0.06 * Math.random() - 0.03),
+		// 		health: 90,
+		// 		foodBar: 80,
+		// 		cureBar: 100,
+		// 		gender: "MALE",
+		// 		price: koiVarient.basePrice,
+		// 		mutation: null,
+		// 		bornedAt: new Date(),
+		// 		pondId: pond.id,
+		// 		lifeStage: "FRY",
+		// 		fatherId: null,
+		// 		motherId: null,
+		// 		potential: 0.5 * Math.random() + 0.8,
+		// 		dictionary: koiVarient,
+		// 		patternScore: Math.round(20 * Math.random() + 80),
+		// 		colorScore: Math.round(10 * Math.random() + 90),
+		// 		bodyScore: Math.round(30 * Math.random() + 70),
+		// 		skinScore: Math.round(15 * Math.random() + 85),
+		// 		scaleScore: Math.round(25 * Math.random() + 75),
+		// 	};
+		// });
 	};
 
 	return (
@@ -253,197 +276,5 @@ const MOCK_VARIENT: IKoiVarient[] = [
 		basePrice: 180,
 		alphaPrice: 1.75,
 		imageUrl: "/kois/koi-fish-inazuma-kohaku.svg",
-	},
-];
-
-const MOCK_KOIS: IKoi[] = [
-	{
-		id: 1,
-		name: "Kohaku 1",
-		age: 600,
-		length: 92.5,
-		weight: 5.15,
-		health: 100,
-		foodBar: 100,
-		cureBar: 100,
-		gender: "MALE",
-		price: 5050,
-		bornedAt: new Date(),
-		lifeStage: "ADULT",
-		potential: 1.0,
-		dictionary: MOCK_VARIENT[0],
-		patternScore: 80,
-		colorScore: 90,
-		bodyScore: 70,
-		skinScore: 85,
-		scaleScore: 75,
-	},
-	{
-		id: 2,
-		name: "Menkaburi Kohaku 1",
-		age: 450,
-		length: 85.5,
-		weight: 4.85,
-		health: 90,
-		foodBar: 70,
-		cureBar: 90,
-		gender: "FEMALE",
-		price: 4320,
-		bornedAt: new Date(),
-		lifeStage: "ADULT",
-		potential: 1.1,
-		dictionary: MOCK_VARIENT[1],
-		patternScore: 100,
-		colorScore: 80,
-		bodyScore: 75,
-		skinScore: 65,
-		scaleScore: 95,
-	},
-	{
-		id: 3,
-		name: "Inazuma Kohaku 1",
-		age: 393,
-		length: 68.0,
-		weight: 3.85,
-		health: 90,
-		foodBar: 70,
-		cureBar: 90,
-		gender: "FEMALE",
-		price: 4910,
-		bornedAt: new Date(),
-		lifeStage: "JUVENILE",
-		potential: 1.1,
-		dictionary: MOCK_VARIENT[2],
-		patternScore: 100,
-		colorScore: 80,
-		bodyScore: 75,
-		skinScore: 65,
-		scaleScore: 95,
-	},
-	{
-		id: 4,
-		name: "Kohaku 2",
-		age: 520,
-		length: 88.3,
-		weight: 4.95,
-		health: 90,
-		foodBar: 70,
-		cureBar: 90,
-		gender: "FEMALE",
-		price: 5010,
-		bornedAt: new Date(),
-		lifeStage: "ADULT",
-		potential: 1.1,
-		dictionary: MOCK_VARIENT[0],
-		patternScore: 100,
-		colorScore: 80,
-		bodyScore: 75,
-		skinScore: 65,
-		scaleScore: 95,
-	},
-	{
-		id: 5,
-		name: "Menkaburi Kohaku 2",
-		age: 405,
-		length: 84.7,
-		weight: 4.55,
-		health: 90,
-		foodBar: 70,
-		cureBar: 90,
-		gender: "MALE",
-		price: 4620,
-		bornedAt: new Date(),
-		lifeStage: "ADULT",
-		potential: 1.1,
-		dictionary: MOCK_VARIENT[1],
-		patternScore: 100,
-		colorScore: 80,
-		bodyScore: 75,
-		skinScore: 65,
-		scaleScore: 95,
-	},
-	{
-		id: 6,
-		name: "Inazuma Kohaku 2",
-		age: 490,
-		length: 89.1,
-		weight: 4.85,
-		health: 90,
-		foodBar: 70,
-		cureBar: 90,
-		gender: "MALE",
-		price: 4910,
-		bornedAt: new Date(),
-		lifeStage: "ADULT",
-		potential: 1.1,
-		dictionary: MOCK_VARIENT[2],
-		patternScore: 100,
-		colorScore: 80,
-		bodyScore: 75,
-		skinScore: 65,
-		scaleScore: 95,
-	},
-	{
-		id: 7,
-		name: "Kohaku 3",
-		age: 510,
-		length: 87.3,
-		weight: 4.8,
-		health: 90,
-		foodBar: 70,
-		cureBar: 90,
-		gender: "FEMALE",
-		price: 5010,
-		bornedAt: new Date(),
-		lifeStage: "ADULT",
-		potential: 1.1,
-		dictionary: MOCK_VARIENT[0],
-		patternScore: 100,
-		colorScore: 80,
-		bodyScore: 75,
-		skinScore: 65,
-		scaleScore: 95,
-	},
-	{
-		id: 8,
-		name: "Menkaburi Kohaku 3",
-		age: 205,
-		length: 84.7,
-		weight: 4.55,
-		health: 90,
-		foodBar: 70,
-		cureBar: 90,
-		gender: "FEMALE",
-		price: 4620,
-		bornedAt: new Date(),
-		lifeStage: "JUVENILE",
-		potential: 1.05,
-		dictionary: MOCK_VARIENT[1],
-		patternScore: 100,
-		colorScore: 80,
-		bodyScore: 75,
-		skinScore: 65,
-		scaleScore: 95,
-	},
-	{
-		id: 9,
-		name: "Inazuma Kohaku 3",
-		age: 358,
-		length: 80.5,
-		weight: 3.85,
-		health: 90,
-		foodBar: 70,
-		cureBar: 90,
-		gender: "MALE",
-		price: 4910,
-		bornedAt: new Date(),
-		lifeStage: "JUVENILE",
-		potential: 1.1,
-		dictionary: MOCK_VARIENT[2],
-		patternScore: 100,
-		colorScore: 80,
-		bodyScore: 75,
-		skinScore: 65,
-		scaleScore: 95,
 	},
 ];

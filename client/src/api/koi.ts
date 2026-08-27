@@ -10,13 +10,13 @@ export interface IRequestReleaseKoiDTO {
 export const callReleaseKoiToPond = (
 	requestReleaseKoiDTO: IRequestReleaseKoiDTO,
 ) => {
-	return apiClient.post<IRestResponse<IKoi[]>>("/api/v1/kois/import", {
+	return apiClient.post<IRestResponse<IKoi[]>>("/kois/import", {
 		...requestReleaseKoiDTO,
 	});
 };
 
 export const callFetchKoisInPond = (pondId: number) => {
 	return apiClient.get<IRestResponse<IKoi[]>>(
-		`/api/v1/kois&pondId=${pondId}`,
+		`/kois?pondId=${pondId}`,
 	);
 };

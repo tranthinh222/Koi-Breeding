@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import EmptyCard from "../../components/user/dictionary/EmptyCard/EmptyCard";
 import KoiDictionaryCard from "../../components/user/dictionary/KoiDictionaryCard/KoiDictionaryCard";
 import type { IKoiVarient } from "../../types/backend";
 import styles from "./Dictionary.module.css";
 
 function Dictionary() {
+	const navigate = useNavigate();
 	const koi: IKoiVarient = {
 		id: 1,
 		name: "Kuchibeni-Kohaku",
@@ -18,16 +20,16 @@ function Dictionary() {
 		basePrice: 0,
 		alphaPrice: 0,
 	};
-	const [page, setPage] = useState<number>(0);
-	const [data, setData] = useState<(IKoiVarient | null)[]>([
+	const [, setPage] = useState<number>(0);
+	const [data] = useState<(IKoiVarient | null)[]>([
 		koi,
 		koi,
 		koi,
 		koi,
-		null,
-		null,
-		null,
-		null,
+		koi,
+		koi,
+		koi,
+		koi,
 	]);
 	const [isFlippedPrev, setIsFlippedPrev] = useState<boolean>(false);
 	const [isFlippedNext, setIsFlippedNext] = useState<boolean>(false);
@@ -82,7 +84,16 @@ function Dictionary() {
 	};
 
 	return (
-		<>
+		<main className={styles.screen}>
+			<button
+				type="button"
+				className={styles.backButton}
+				onClick={() => navigate(-1)}
+				aria-label="Go back to the previous page"
+			>
+				<span aria-hidden="true">←</span>
+				Back
+			</button>
 			<div className={styles.cover}>
 				<div className={styles.flipGroup}>
 					<button
@@ -233,7 +244,7 @@ function Dictionary() {
 					</div>
 				</div>
 			</div>
-		</>
+		</main>
 	);
 }
 

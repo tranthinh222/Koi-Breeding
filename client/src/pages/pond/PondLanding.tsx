@@ -6,6 +6,7 @@ import {
 	callUpdatePond,
 	type IRequestBuyPondDTO,
 } from "../../api/pond";
+import { CURRENT_USER_ID } from "../../api/currentUser";
 import { toast } from "../../components/share/Toast/toast";
 import Toaster from "../../components/share/Toast/Toaster";
 import BuyPondForm from "../../components/user/pond/BuyPondForm/BuyPondForm";
@@ -14,10 +15,33 @@ import type {
 	IModelPagination,
 	IOwner,
 	IPond,
-	IUser,
 } from "../../types/backend";
 import Pond from "./Pond";
 import styles from "./PondLanding.module.css";
+
+const MOCK_PONDS: IPond[] = [
+	"Kohaku Pond",
+	"Uia Pond",
+	"A Pond",
+	"Showa Pond",
+	"Ronaldo Pond",
+	"Pikachu Pond",
+].map((name, index) => ({
+	id: index + 1,
+	owner: {
+		id: CURRENT_USER_ID,
+		username: "demo_user",
+	},
+	name,
+	level: 10,
+	capacity: index === 0 ? 15 : 10,
+	waterQuality: index === 0 ? 70 : 100,
+	temperature: index === 0 ? 20 : 24,
+	pH: index === 0 ? 3.6 : 7.1,
+	oxygen: 6.2,
+	createdAt: new Date(),
+	description: "This pond is used to raise Kohaku koi fishes",
+}));
 
 function PondLanding() {
 	const navigate = useNavigate();
@@ -34,10 +58,22 @@ function PondLanding() {
 		const loadData = async () => {
 			try {
 				const response = await fetchData(page, 6);
+
+				if (response.meta.totalElements === 0) {
+					console.info("No ponds returned by the backend; using frontend sample data.");
+					setPondList(MOCK_PONDS);
+					setTotalPages(1);
+					if (page !== 1) setPage(1);
+					return;
+				}
+
 				setPondList(response.result);
 				setTotalPages(response.meta.totalPages);
 			} catch (error) {
-				console.error("Failed to fetch data:", error);
+				console.error("Failed to fetch ponds; using frontend sample data:", error);
+				setPondList(MOCK_PONDS);
+				setTotalPages(1);
+				if (page !== 1) setPage(1);
 			}
 		};
 
@@ -48,10 +84,8 @@ function PondLanding() {
 		page: number,
 		pageSize: number,
 	): Promise<IModelPagination<IPond>> => {
-		const userLogin: IUser = handleGetMockUser();
-
 		const response = await callFetchAllPonds(
-			`owner=${userLogin.id}&page=${page - 1}&size=${pageSize}`,
+			`owner=${CURRENT_USER_ID}&page=${page - 1}&size=${pageSize}`,
 		);
 
 		if (response && response.data) {
@@ -81,13 +115,11 @@ function PondLanding() {
 		formData: { name: string; description: string },
 		price: number,
 	) => {
-		const userLogin: IUser = handleGetMockUser();
-
 		const request: IRequestBuyPondDTO = {
 			name: formData.name,
 			description: formData.description,
 			price: price,
-			ownerId: userLogin.id,
+			ownerId: CURRENT_USER_ID,
 		};
 
 		const response = await callBuyPond(request);
@@ -142,20 +174,6 @@ function PondLanding() {
 		} else {
 			toast.error("Failed to update pond information!");
 		}
-	};
-
-	const handleGetMockUser = (): IUser => {
-		return {
-			id: 1,
-			username: "demo_user",
-			email: "demo_user@koi.local",
-			birthday: new Date("2000-01-01"),
-			gender: "MALE",
-			exp: 0,
-			avatarUrl: null,
-			createdAt: new Date("2026-08-17T09:48:06.840540Z"),
-			updatedAt: new Date("2026-08-17T09:48:06.840568Z"),
-		};
 	};
 
 	return (

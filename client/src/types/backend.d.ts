@@ -53,19 +53,29 @@ export interface IKoi {
 	cureBar: number;
 	gender: Gender;
 	price: number;
-	mutation?: IMutation;
+	mutation: IKoiMutation | null;
 	bornedAt: Date;
-	pond?: Pond;
+	pondId: number;
 	lifeStage: LifeStage;
-	father?: Koi;
-	mother?: Koi;
+	fatherId: number | null;
+	motherId: number | null;
 	potential: number;
-	dictionary?: IKoiVarient;
+	dictionary: IKoiVarient;
 	patternScore: number;
 	colorScore: number;
 	bodyScore: number;
 	skinScore: number;
 	scaleScore: number;
+}
+
+export interface IKoiMutation {
+	id: number;
+	name: string;
+}
+
+export interface IKoiPond {
+	id: number;
+	name: string;
 }
 
 export interface IMutation {
@@ -78,7 +88,7 @@ export interface IMutation {
 
 export interface IPond {
 	id: number;
-	owner?: IUserData;
+	owner: IOwner;
 	name: string;
 	level: number;
 	capacity: number;
@@ -90,29 +100,23 @@ export interface IPond {
 	description: string;
 }
 
+export type USER_ROLE = "ADMIN" | "USER";
+
 export interface IUser {
 	id: number;
 	username: string;
-	password: string;
 	email: string;
 	birthday: Date;
-	gender: string;
+	gender: Gender;
+	exp: number;
+	avatarUrl: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-	status: string;
-	role: string;
-	isBanned: boolean;
-	exp: number;
-	avatarUrl: string;
 }
 
-export interface IUserData {
+export interface IOwner {
 	id: number;
 	username: string;
-	email: string;
-	birthday: Date;
-	gender: string;
-	avatarUrl: string;
 }
 
 export type ItemType = "FOOD" | "KOI" | "MEDICINE" | "CURRENCY";

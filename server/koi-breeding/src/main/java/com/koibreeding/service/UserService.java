@@ -42,6 +42,7 @@ public class UserService {
                 .email(user.getEmail())
                 .birthday(user.getBirthday())
                 .gender(user.getGender())
+                .role(user.getRole())
                 .avatarUrl(user.getAvatarUrl())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())

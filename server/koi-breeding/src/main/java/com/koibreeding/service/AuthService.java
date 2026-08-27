@@ -96,6 +96,7 @@ public class AuthService {
                 newUser.getEmail(),
                 newUser.getBirthday(),
                 newUser.getGender(),
+                newUser.getRole(),
                 newUser.getExp(),
                 newUser.getAvatarUrl(),
                 newUser.getCreatedAt(),

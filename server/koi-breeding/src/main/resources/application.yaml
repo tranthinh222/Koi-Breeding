@@ -1,32 +1,32 @@
 server:
-  port: 8090
-  servlet:
-    context-path: /koi_breeding
+    port: 8090
+    servlet:
+        context-path: /koi_breeding
 spring:
-  application:
-    name: koi-breeding
-  datasource:
-    url: jdbc:postgresql://localhost:5432/koi_breeding
-    username: postgres
-    password: 123456
-  jpa:
-    hibernate:
-      ddl-auto: update
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-    properties:
-      hibernate:
-        default_schema: koi_breeding
-    show-sql: true
+    application:
+        name: koi-breeding
+    datasource:
+        url: jdbc:postgresql://localhost:5432/koi_breeding
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+    jpa:
+        hibernate:
+            ddl-auto: update
+            naming:
+                physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        properties:
+            hibernate:
+                default_schema: koi_breeding
+        show-sql: true
 cloudinary:
-  cloud-name: djmcluh5n
-  api-key: 867291126632944
-  api-secret: FyXaVv6j5PUJqL-sNtlydQVZFj0
+    cloud-name: djmcluh5n
+    api-key: 867291126632944
+    api-secret: FyXaVv6j5PUJqL-sNtlydQVZFj0
 vietqr:
-  bank-id: 970418
-  account-no: 8824121093
-  account-name: TRAN QUOC THINH
-  template: compact2
+    bank-id: 970418
+    account-no: 8824121093
+    account-name: TRAN QUOC THINH
+    template: compact2
 
 sepay:
-  api-key: ${SEPAY_API_KEY:}
+    api-key: ${SEPAY_API_KEY:}

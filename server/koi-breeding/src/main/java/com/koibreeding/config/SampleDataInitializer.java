@@ -51,7 +51,6 @@ import com.koibreeding.repository.UserRepository;
 import com.koibreeding.repository.VarietyRepository;
 import com.koibreeding.repository.WalletRepository;
 import com.koibreeding.util.formulas.KoiFormula;
-import com.koibreeding.util.formulas.PondFormula;
 
 @Configuration
 public class SampleDataInitializer {
@@ -64,7 +63,8 @@ public class SampleDataInitializer {
             ItemRepository itemRepository,
             UserRepository userRepository,
             WalletRepository walletRepository, InventoryRepository inventoryRepository,
-            TransactionRepository transactionRepository, NotificationRepository notificationRepository) {
+            TransactionRepository transactionRepository, NotificationRepository notificationRepository,
+            KoiFormula koiFormula) {
         return args -> {
 
             seedVarieties(varietyRepository);
@@ -250,7 +250,7 @@ public class SampleDataInitializer {
             seedTransactions(transactionRepository, wallet, itemsByName);
             seedNotifications(notificationRepository, demoUser);
 
-            seedKois(koiRepository, dictionaryRepository, pondRepository, demoUser);
+            seedKois(koiRepository, dictionaryRepository, pondRepository, demoUser, koiFormula);
             // seedKois(koiRepository, dictionaryRepository, pondRepository, sampleUser);
         };
     }
@@ -519,7 +519,7 @@ public class SampleDataInitializer {
     // }
 
     private void seedKois(KoiRepository koiRepository, DictionaryRepository dictionaryRepository,
-            PondRepository pondRepository, User user) {
+            PondRepository pondRepository, User user, KoiFormula koiFormula) {
         List<Pond> samplePondList = pondRepository.findByOwner_IdAndName(user.getId(), "Kohaku Garden");
         Pond pond = samplePondList.get(0);
 
@@ -533,7 +533,6 @@ public class SampleDataInitializer {
                 "Kindai Showa");
         List<Dictionary> koiVarientList = dictionaryRepository.findByNameIn(sampleKoiVarientList);
 
-        KoiFormula koiFormula = new KoiFormula(new PondFormula(new PondEnvironmentConfig()));
         if (koiVarientList.size() > 0) {
             List<Koi> sampleKoiList = koiVarientList.stream()
                     .map(koiVarient -> koiFormula.generateStarterKoi(koiVarient, pond))

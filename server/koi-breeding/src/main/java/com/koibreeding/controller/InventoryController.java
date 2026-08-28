@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.dto.response.ResItemInventory;
+import com.koibreeding.dto.response.ResItemInventoryDTO;
 import com.koibreeding.enums.ItemType;
 import com.koibreeding.service.InventoryService;
 import com.koibreeding.util.error.IdInvalidException;
@@ -70,7 +71,7 @@ public class InventoryController {
     }
 
     @GetMapping("/inventory/type")
-    public ResponseEntity<List<ResItemInventory>> getUserInventoryByItemType(@RequestParam Integer userId,
+    public ResponseEntity<List<ResItemInventoryDTO>> getUserInventoryByItemType(@RequestParam Integer userId,
             @RequestParam ItemType itemType) {
         if (userId == null) {
             throw new IdInvalidException("Inventory with userId " + userId + " not found");

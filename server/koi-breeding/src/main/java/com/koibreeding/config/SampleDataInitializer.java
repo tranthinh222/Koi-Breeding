@@ -237,13 +237,17 @@ public class SampleDataInitializer {
                     "Sample pond used to test weather updates for Hanoi.");
 
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Kohaku"), 1);
-            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Tancho"), 2);
-            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Taisho Sanke"), 1);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Tancho Sanke"), 2);
+            seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Showa Sanshoku"), 3);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi Food - Aqua Master"), 10);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi Food - Bethech"), 5);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Health Elixir - KAFKA"), 3);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Environment Elixir - KMnO4"),
                     4);
+
+            seedInventoryRow(inventoryRepository, sampleUser, itemsByName.get("Koi - Kohaku"), 1);
+            seedInventoryRow(inventoryRepository, sampleUser, itemsByName.get("Koi - Tancho Sanke"), 2);
+            seedInventoryRow(inventoryRepository, sampleUser, itemsByName.get("Koi - Showa Sanshoku"), 3);
 
             backfillTransactionsWithoutItem(transactionRepository,
                     itemsByName.get("Koi Food - Aqua Master"));
@@ -487,37 +491,6 @@ public class SampleDataInitializer {
 
         itemRepository.saveAll(sampleItemList);
     }
-
-    // private void seedPond(PondRepository pondRepository, User owner) {
-    // List<Pond> existingPonds =
-    // pondRepository.findByOwner_IdAndName(owner.getId(), "Sample Pond");
-
-    // if (existingPonds.size() > 0) {
-    // return;
-    // }
-
-    // Pond samplePond = new Pond();
-    // samplePond.setOwner(owner);
-    // samplePond.setName("Sample Pond");
-    // samplePond.setLevel(10);
-    // samplePond.setCapacity(10);
-    // BigDecimal initialTemperature = BigDecimal.valueOf(20 + Math.random() *
-    // 2).setScale(2,
-    // RoundingMode.HALF_UP);
-    // samplePond.setTemperature(initialTemperature);
-    // BigDecimal initialPH = BigDecimal.valueOf(6.8 + Math.random() *
-    // 0.2).setScale(2, RoundingMode.HALF_UP);
-    // samplePond.setPH(initialPH);
-    // BigDecimal initialOxygen = BigDecimal.valueOf(5 + Math.random()).setScale(2,
-    // RoundingMode.HALF_UP);
-    // samplePond.setOxygen(initialOxygen);
-    // Integer initialWaterQuality = (int) (Math.random() * 101);
-    // int waterQuality = PondFormula.getWaterQualityScore(initialWaterQuality);
-    // samplePond.setWaterQuality(waterQuality);
-    // samplePond.setDescription("This is a sample pond.");
-
-    // pondRepository.save(samplePond);
-    // }
 
     private void seedKois(KoiRepository koiRepository, DictionaryRepository dictionaryRepository,
             PondRepository pondRepository, String pondName, User user, KoiFormula koiFormula) {

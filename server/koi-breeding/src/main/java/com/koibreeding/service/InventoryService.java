@@ -9,6 +9,7 @@ import com.koibreeding.domain.Inventory;
 import com.koibreeding.domain.Item;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.response.ResItemInventory;
+import com.koibreeding.dto.response.ResItemInventoryDTO;
 import com.koibreeding.enums.ItemType;
 import com.koibreeding.repository.InventoryRepository;
 
@@ -120,19 +121,34 @@ public class InventoryService {
         return this.inventoryRepository.findById(inventoryId).orElse(null);
     }
 
-    public List<ResItemInventory> handleFetchUserInventoryByItemType(Integer userId, ItemType itemType) {
+    public List<ResItemInventoryDTO> handleFetchUserInventoryByItemType(Integer userId, ItemType itemType) {
         if (!userService.isUserExistById(userId)) {
             throw new RuntimeException("Failed to fetch user inventory. User does not exist.");
         }
 
-        List<ResItemInventory> inventoryList = this.inventoryRepository.findByUser_IdAndItem_ItemType(userId, itemType)
-                .stream().map(this::convertToResItemInventory).collect(Collectors.toList());
+        List<ResItemInventoryDTO> inventoryList = this.inventoryRepository
+                .findByUser_IdAndItem_ItemType(userId, itemType)
+                .stream().map(this::convertToResItemInventoryDTO).collect(Collectors.toList());
 
         return inventoryList;
     }
 
     public ResItemInventory convertToResItemInventory(Inventory inventory) {
         return new ResItemInventory(
+                inventory.getItem().getId(),
+                inventory.getItem().getName(),
+                inventory.getItem().getPrice(),
+                inventory.getItem().getItemType(),
+                inventory.getItem().getEffectValue(),
+                inventory.getItem().getEffectType(),
+                inventory.getItem().getDescription(),
+                inventory.getQuantity(),
+                inventory.getItem().getItemUrl());
+    }
+
+    public ResItemInventoryDTO convertToResItemInventoryDTO(Inventory inventory) {
+        return new ResItemInventoryDTO(
+                inventory.getId(),
                 inventory.getItem().getId(),
                 inventory.getItem().getName(),
                 inventory.getItem().getPrice(),

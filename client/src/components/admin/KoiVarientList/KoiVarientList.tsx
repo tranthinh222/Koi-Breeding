@@ -35,15 +35,13 @@ function KoiVarientList() {
 		const loadData = async () => {
 			try {
 				const response = await callFetchAllVarieties(`page=0&size=30`);
-
-				if (response && response.data) {
-					const data: IVariety[] = response.data.data?.result || [];
-					setVarietyList(
-						data.sort(
-							(a, b) => (a.id as number) - (b.id as number),
-						),
-					);
-				}
+				const varietyList: IVariety[] =
+					response.data.data?.result ?? [];
+				setVarietyList(
+					varietyList.sort(
+						(a, b) => (a.id as number) - (b.id as number),
+					),
+				);
 			} catch (error) {
 				console.error("Failed to fetch data: ", JSON.stringify(error));
 			}
@@ -56,9 +54,22 @@ function KoiVarientList() {
 	useEffect(() => {
 		const loadData = async () => {
 			try {
-				const response = await fetchData(page, pageSize);
-				setData(response.result);
-				setTotalPages(response.meta.totalPages);
+				const response = await callFetchKoiVarient(
+					`page=${page - 1}&size=${pageSize}`,
+				);
+				const varientData: IModelPagination<IKoiVarient> = response.data
+					.data ?? {
+					meta: {
+						page: page,
+						pageSize: pageSize,
+						totalPages: 0,
+						totalElements: 0,
+					},
+					result: [],
+				};
+
+				setData(varientData.result);
+				setTotalPages(varientData.meta.totalPages);
 			} catch (error) {
 				console.error("Failed to fetch data:", error);
 			}
@@ -73,29 +84,6 @@ function KoiVarientList() {
 	}, [page, pageSize]);
 
 	const listRef = useRef<HTMLDivElement>(null);
-
-	const fetchData = async (
-		page: number,
-		pageSize: number,
-	): Promise<IModelPagination<IKoiVarient>> => {
-		const response = await callFetchKoiVarient(
-			`page=${page - 1}&size=${pageSize}`,
-		);
-
-		if (response && response.data) {
-			return response.data.data as IModelPagination<IKoiVarient>;
-		}
-
-		return {
-			meta: {
-				page: page,
-				pageSize: pageSize,
-				totalPages: 0,
-				totalElements: 0,
-			},
-			result: [],
-		};
-	};
 
 	const handlePageChange = (newPage: number) => {
 		if (Number.isNaN(newPage)) {
@@ -118,15 +106,33 @@ function KoiVarientList() {
 			}
 		}
 
-		const response = await callCreateKoiVarient(requestKoi);
-		setData((prev) => [response.data.data as IKoiVarient, ...prev]);
-		toast.success("Create new koi successfully!");
+		try {
+			const response = await callCreateKoiVarient(requestKoi);
+			const koiVarient: IKoiVarient | undefined = response.data.data;
+			if (koiVarient) {
+				setData((prev) => [koiVarient, ...prev]);
+				toast.success("Create new koi successfully!");
+			} else {
+				toast.error("Failed to create new koi varient!");
+			}
+		} catch (error) {
+			toast.error("Failed to create new koi varient!");
+		}
 	};
 
 	const handleCreateVariety = async (requestVariety: IVariety) => {
-		const response = await callCreateVariety(requestVariety);
-		setVarietyList([response.data.data as IVariety, ...varietyList]);
-		toast.success("Create new variety successfully!");
+		try {
+			const response = await callCreateVariety(requestVariety);
+			const koiVariety: IVariety | undefined = response.data.data;
+			if (koiVariety) {
+				setVarietyList([koiVariety, ...varietyList]);
+				toast.success("Create new variety successfully!");
+			} else {
+				toast.error("Failed to create new koi variety!");
+			}
+		} catch (error) {
+			toast.error("Failed to create new koi variety!");
+		}
 	};
 
 	return (

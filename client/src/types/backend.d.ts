@@ -131,11 +131,17 @@ export interface IItem {
 	effectType: EffectType;
 	effectValue: number;
 	description: string;
+	image?: string;
 }
 
-export interface IInventory {
+export interface IItemInventory {
 	id: number;
-	user?: IUserData;
-	item?: IItem;
+	name: string;
+	price: number;
+	itemType: ItemType;
+	effectType: EffectType;
+	effectValue: number;
+	description: string;
 	quantity: number;
+	image?: string;
 }

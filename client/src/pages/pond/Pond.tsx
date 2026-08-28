@@ -6,7 +6,12 @@ import { toast } from "../../components/share/Toast/toast";
 import ImportKoiForm from "../../components/user/pond/ImportKoiForm/ImportKoiForm";
 import { PondCanvas } from "../../components/user/pond/PondCanvas/PondCanvas";
 import PondInformation from "../../components/user/pond/PondInformation/PondInformation";
-import type { IInventory, IKoi, IKoiVarient, IPond } from "../../types/backend";
+import type {
+	IItemInventory,
+	IKoi,
+	IKoiVarient,
+	IPond,
+} from "../../types/backend";
 import styles from "./Pond.module.css";
 
 interface PondProps {
@@ -55,10 +60,15 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 		}
 	};
 
-	const handleImportKoi = async (koiItem: IInventory, quantity: number) => {
+	const handleImportKoi = async (
+		koiItem: IItemInventory,
+		quantity: number,
+	) => {
 		const koiVarient: IKoiVarient = MOCK_VARIENT.find(
-			(varient) => varient.id === koiItem.item?.effectValue,
+			(varient) => varient.id === koiItem.effectValue,
 		) as IKoiVarient;
+
+		console.log("Is called");
 
 		const response = await callReleaseKoiToPond({
 			pondId: pond.id,
@@ -77,34 +87,6 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 		} else {
 			toast.error("Failed to release koi(s) to the current pond.");
 		}
-
-		// const newMembers: IKoi[] = Array.from({ length: quantity }, (_v, i) => {
-		// 	return {
-		// 		id: koiList.length + i,
-		// 		name: koiVarient.name,
-		// 		age: 50,
-		// 		length: 7.2 + (2 * Math.random() - 1),
-		// 		weight: 0.15 + (0.06 * Math.random() - 0.03),
-		// 		health: 90,
-		// 		foodBar: 80,
-		// 		cureBar: 100,
-		// 		gender: "MALE",
-		// 		price: koiVarient.basePrice,
-		// 		mutation: null,
-		// 		bornedAt: new Date(),
-		// 		pondId: pond.id,
-		// 		lifeStage: "FRY",
-		// 		fatherId: null,
-		// 		motherId: null,
-		// 		potential: 0.5 * Math.random() + 0.8,
-		// 		dictionary: koiVarient,
-		// 		patternScore: Math.round(20 * Math.random() + 80),
-		// 		colorScore: Math.round(10 * Math.random() + 90),
-		// 		bodyScore: Math.round(30 * Math.random() + 70),
-		// 		skinScore: Math.round(15 * Math.random() + 85),
-		// 		scaleScore: Math.round(25 * Math.random() + 75),
-		// 	};
-		// });
 	};
 
 	return (

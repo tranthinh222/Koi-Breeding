@@ -98,9 +98,13 @@
 	width: 100%;
 	height: 100%;
 	display: grid;
-	grid-template-columns: repeat(6, minmax(50px, 1fr));
-	gap: 12px;
-	padding: 10px 10px;
+
+	/* Dòng phép thuật giúp Grid tự động tính toán số cột */
+	grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+
+	align-content: start; /* Vẫn giữ nguyên để dồn hàng lên trên */
+	gap: 12px; /* Giữ nguyên theo code gốc của bạn */
+	padding: 10px; /* Giữ nguyên theo code gốc của bạn */
 	border: 5px solid #5f3d1a;
 	border-radius: 30px 10px 10px 30px;
 	background-color: #c59361;
@@ -161,7 +165,7 @@
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
-	gap: 15px;
+	gap: 10px;
 	border: 5px solid #5f3d1a;
 	border-radius: 10px;
 	background-color: white;
@@ -189,8 +193,8 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	gap: 15px;
-	padding: 0px 20px;
+	gap: 10px;
+	padding: 10px 20px;
 }
 
 .detailImage {
@@ -230,9 +234,6 @@
 	font-family: "Grandstander";
 	font-size: 30px;
 	font-weight: bold;
-}
-
-.itemDescription {
 }
 
 .itemDescription {

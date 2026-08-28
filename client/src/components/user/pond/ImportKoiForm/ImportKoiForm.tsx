@@ -1,6 +1,7 @@
 import { Import, Minus, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { IInventory } from "../../../../types/backend";
+import { callFetchInventoryByType } from "../../../../api/inventory";
+import type { IItemInventory } from "../../../../types/backend";
 import { toast } from "../../../share/Toast/toast";
 import styles from "./ImportKoiForm.module.css";
 
@@ -8,7 +9,7 @@ interface ImportKoiFormProps {
 	currentQuantity: number;
 	pondCapacity: number;
 	onClose: () => void;
-	onSubmit: (koiItem: IInventory, quantity: number) => void;
+	onSubmit: (koiItem: IItemInventory, quantity: number) => void;
 }
 
 function ImportKoiForm({
@@ -17,20 +18,40 @@ function ImportKoiForm({
 	onClose,
 	onSubmit,
 }: ImportKoiFormProps) {
-	const [koiItemList, setKoiItemList] = useState<IInventory[]>([]);
-	const [selectedItem, setSelectedItem] = useState<IInventory | null>(null);
+	const [koiItemList, setKoiItemList] = useState<IItemInventory[]>([]);
+	const [selectedItem, setSelectedItem] = useState<IItemInventory | null>(
+		null,
+	);
 	const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const data: IInventory[] = await handleFetchUserInventory();
-			setKoiItemList(data);
+			try {
+				const response = await callFetchInventoryByType(1, "KOI");
+				const itemList: IItemInventory[] = response.data.data ?? [];
+
+				if (itemList.length > 0) {
+					setKoiItemList(itemList);
+					return;
+				}
+
+				console.info(
+					"No item returned by the backend; using frontend sample items.",
+				);
+				setKoiItemList(createMockItemInventory());
+			} catch (error) {
+				console.error(
+					"Failed to fetch user inventory; using frontend sample items:",
+					error,
+				);
+				setKoiItemList(createMockItemInventory());
+			}
 		};
 
 		fetchData();
 	}, []);
 
-	const handleFetchUserInventory = async (): Promise<IInventory[]> => {
+	const createMockItemInventory = (): IItemInventory[] => {
 		return MOCK_KOI_ITEM;
 	};
 
@@ -77,7 +98,7 @@ function ImportKoiForm({
 							<div
 								key={item.id}
 								className={`${styles.itemCell} ${selectedItem != null && selectedItem.id === item.id ? styles.selectedCell : ""}`}
-								title={item.item?.name}
+								title={item.name}
 								onClick={() => {
 									if (
 										selectedItem != null &&
@@ -91,7 +112,7 @@ function ImportKoiForm({
 							>
 								<img
 									src="https://res.cloudinary.com/djmcluh5n/image/upload/v1786629266/uploads/items/cxnccf0exmmyaf0ddf5e.svg"
-									alt={item.item?.name}
+									alt={item.name}
 								/>
 								<span title={`x${item.quantity}`}>
 									x{item.quantity}
@@ -110,12 +131,12 @@ function ImportKoiForm({
 								<div className={styles.detailImage}>
 									<img
 										src="https://res.cloudinary.com/djmcluh5n/image/upload/v1786629266/uploads/items/cxnccf0exmmyaf0ddf5e.svg"
-										alt={selectedItem?.item?.name}
+										alt={selectedItem.name}
 									/>
 								</div>
-								<h2>{selectedItem?.item?.name}</h2>
+								<h2>{selectedItem.name}</h2>
 								<div className={styles.itemDescription}>
-									{selectedItem?.item?.description
+									{selectedItem.description
 										.split("\n")
 										.filter((para) => para.trim() !== "")
 										.map((para, index) => (
@@ -207,439 +228,105 @@ function ImportKoiForm({
 
 export default ImportKoiForm;
 
-const MOCK_KOI_ITEM: IInventory[] = [
+const MOCK_KOI_ITEM: IItemInventory[] = [
 	{
 		id: 1,
-		item: {
-			id: 1,
-			name: "Koi - Kohaku",
-			price: 100,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 1,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Kohaku",
+		price: 100,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 1,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 	{
 		id: 2,
-		item: {
-			id: 2,
-			name: "Koi - Menkaburi Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 2,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Menkaburi Kohaku",
+		price: 110,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 2,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 	{
 		id: 3,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Inazuma Kohaku",
+		price: 110,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 3,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 	{
 		id: 4,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Inazuma Kohaku",
+		price: 110,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 3,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 	{
 		id: 5,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Inazuma Kohaku",
+		price: 110,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 3,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 	{
 		id: 6,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Inazuma Kohaku",
+		price: 110,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 3,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 	{
 		id: 7,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Inazuma Kohaku",
+		price: 110,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 3,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 	{
 		id: 8,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Inazuma Kohaku",
+		price: 110,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 3,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 	{
 		id: 9,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Inazuma Kohaku",
+		price: 110,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 3,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 	{
 		id: 10,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 11,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 12,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 13,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 14,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 15,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 16,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 17,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 18,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 19,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 20,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 21,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 22,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 23,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 24,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 25,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 26,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 27,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 28,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 29,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 30,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
-		quantity: 3,
-	},
-	{
-		id: 31,
-		item: {
-			id: 3,
-			name: "Koi - Inazuma Kohaku",
-			price: 110,
-			usageLimit: 0,
-			itemType: "KOI",
-			effectType: "GROWTH",
-			effectValue: 3,
-			description: "Classic white Koi with vivid red Hi markings.",
-		},
+		name: "Koi - Inazuma Kohaku",
+		price: 110,
+		itemType: "KOI",
+		effectType: "GROWTH",
+		effectValue: 3,
+		description: "Classic white Koi with vivid red Hi markings.",
 		quantity: 3,
 	},
 ];

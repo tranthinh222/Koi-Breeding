@@ -1,21 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Grandstander:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
-/* .overlay {
-	position: fixed;
-	inset: 0;
-
-	display: flex;
-	justify-content: center;
-	align-items: center;
-
-	background: rgba(0, 0, 0, 0.45);
-
-	z-index: 1000;
-} */
-
 .card {
-	width: 50vw;
+	position: relative;
+	width: 55vw;
 	height: 80vh;
 	background-color: #d9d9d9;
 	border: none;
@@ -29,6 +17,29 @@
 	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
 
 	transition: all 0.2s ease;
+}
+
+.closeButton {
+	position: absolute;
+	top: 15px;
+	right: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 5px;
+	border: none;
+	background: transparent;
+	color: #6b7280;
+	cursor: pointer;
+	border-radius: 6px;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
+}
+
+.closeButton:hover {
+	background-color: #e5e7eb;
+	color: #111827;
 }
 
 .section1 {
@@ -91,10 +102,6 @@
 	padding: 10px 10px 5px 10px;
 }
 
-.titleBar > svg {
-	color: palevioletred;
-}
-
 .ratingType {
 	width: 100%;
 	display: flex;
@@ -126,10 +133,73 @@
 	height: 20px;
 }
 
+.statsContainer {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 15px;
+}
+
+.statRow {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.statLabel {
+	width: 60px;
+	font-family: "Grandstander";
+	font-weight: 700;
+	font-size: 16px;
+	color: #5c5858;
+}
+
+.progressContainer {
+	position: relative;
+	flex: 1;
+	height: 22px;
+	background-color: #e0e0e0;
+	border-radius: 15px;
+	padding: 3px;
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.progressBar {
+	height: 100%;
+	border-radius: 15px;
+	transition: width 0.4s ease-in-out;
+}
+
+.healthBar {
+	background-color: #ef4444;
+}
+
+.foodBar {
+	background-color: #f59e0b;
+}
+
+.cureBar {
+	background-color: #10b981;
+}
+
+.progressContainer span {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-family: "Grandstander";
+	font-size: 12px;
+	font-weight: bold;
+	color: #000000;
+	text-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
+}
+
 .section2 {
 	width: 100%;
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(3, 1fr);
 	gap: 10px;
 }
 
@@ -168,7 +238,7 @@
 
 .section3 {
 	width: 100%;
-	height: 45%;
+	height: 40%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -183,7 +253,7 @@
 	flex-direction: column;
 	justify-content: start;
 	align-items: start;
-	gap: 30px;
+	gap: 25px;
 	padding: 20px 20px;
 	border-radius: 5px;
 	background-color: #faf8f8;
@@ -209,9 +279,10 @@
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	justify-content: flex-start;
 	align-items: center;
-	padding: 0px 20px 20px 20px;
+	padding: 20px;
+
 	border-radius: 5px;
 	background-color: #faf8f8;
 	box-sizing: border-box;
@@ -235,6 +306,7 @@
 
 .parents {
 	width: 100%;
+	flex: 1;
 	display: flex;
 	justify-content: space-around;
 	align-items: center;
@@ -244,14 +316,14 @@
 	position: relative;
 	width: 100%;
 	max-width: 200px;
-	height: 100%;
+	height: auto;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	gap: 5px;
 	border-radius: 5px;
-	padding: 10px 20px 20px 20px;
+	padding: 10px 20px 10px 20px;
 	background-color: #d9d9d9;
 	box-sizing: border-box;
 
@@ -296,7 +368,7 @@
 
 .parentImage {
 	width: 100%;
-	height: 120px;
+	height: 100px;
 	background: radial-gradient(circle, #49a5d6, #377394);
 	border: 2px solid white;
 	border-radius: 5px;
@@ -320,5 +392,5 @@
 	font-weight: bold;
 	font-size: 18px;
 	color: black;
-	margin-top: 25px;
+	margin-top: 20px;
 }

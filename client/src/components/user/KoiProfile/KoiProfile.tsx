@@ -1,12 +1,13 @@
-import { ChevronRight, Venus } from "lucide-react";
+import { ChevronRight, Mars, Venus, X } from "lucide-react";
 import type { IKoi } from "../../../types/backend";
 import styles from "./KoiProfile.module.css";
 
 interface KoiProfileProps {
 	koi: IKoi;
+	onClose: () => void;
 }
 
-function KoiProfile({ koi }: KoiProfileProps) {
+function KoiProfile({ koi, onClose }: KoiProfileProps) {
 	const toCapitalString = (text: string) => {
 		const firstCharacter = text.at(0)?.toUpperCase();
 		return firstCharacter + text.toLowerCase().slice(1);
@@ -14,17 +15,30 @@ function KoiProfile({ koi }: KoiProfileProps) {
 
 	return (
 		<div className={styles.card}>
+			<button
+				type="button"
+				className={styles.closeButton}
+				onClick={onClose}
+				aria-label="Close"
+			>
+				<X size={30} />
+			</button>
+
 			<div className={styles.section1}>
 				<section className={styles.image}>
 					<img
-						src={`/kois/${koi.name.toLowerCase().replace(" ", "-")}.png`}
+						src={`${koi.dictionary.imageUrl ?? "/kois/koi-empty.png"}`}
 						alt="koi"
 					/>
 				</section>
 				<div className={styles.header}>
 					<div className={styles.titleBar}>
 						<span className={styles.name}>{koi.name}</span>
-						<Venus size="40" />
+						{koi.gender === "FEMALE" ? (
+							<Venus size="40" color="#d87093" />
+						) : (
+							<Mars size="40" color="#5a8bf5" />
+						)}
 					</div>
 					<div className={styles.ratingType}>
 						<div className={styles.rating}>
@@ -35,6 +49,40 @@ function KoiProfile({ koi }: KoiProfileProps) {
 							<img src="/utilities/star-off.svg" alt="star" />
 						</div>
 						<span className={styles.typeBadge}>Genuine</span>
+					</div>
+					<div className={styles.statsContainer}>
+						<div className={styles.statRow}>
+							<span className={styles.statLabel}>Health</span>
+							<div className={styles.progressContainer}>
+								<div
+									className={`${styles.progressBar} ${styles.healthBar}`}
+									style={{ width: `${koi.health}%` }}
+								/>
+								<span>{koi.health}/100</span>
+							</div>
+						</div>
+
+						<div className={styles.statRow}>
+							<span className={styles.statLabel}>Hunger</span>
+							<div className={styles.progressContainer}>
+								<div
+									className={`${styles.progressBar} ${styles.foodBar}`}
+									style={{ width: `${koi.foodBar}%` }}
+								/>
+								<span>{koi.foodBar}/100</span>
+							</div>
+						</div>
+
+						<div className={styles.statRow}>
+							<span className={styles.statLabel}>Cure</span>
+							<div className={styles.progressContainer}>
+								<div
+									className={`${styles.progressBar} ${styles.cureBar}`}
+									style={{ width: `${koi.cureBar}%` }}
+								/>
+								<span>{koi.cureBar}/100</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -54,7 +102,15 @@ function KoiProfile({ koi }: KoiProfileProps) {
 				</span>
 				<span>
 					Age: <br />
-					{koi.age} days
+					{koi.age} days ({toCapitalString(koi.lifeStage || "")})
+				</span>
+				<span>
+					Length: <br />
+					{koi.length.toFixed(1)} cm
+				</span>
+				<span>
+					Weight: <br />
+					{koi.weight.toFixed(2)} kg
 				</span>
 			</section>
 
@@ -88,35 +144,34 @@ function KoiProfile({ koi }: KoiProfileProps) {
 						</span>
 					</div>
 					<div className={styles.parents}>
-						<div className={styles.parentCard}>
+						<div className={styles.parentCard} onClick={() => {}}>
 							<ChevronRight size="25" />
 							<div className={styles.parentCardHeader}>
 								<span>Father:</span>
 							</div>
 							<section className={styles.parentImage}>
 								<img
-									src={`/kois/${koi.name.toLowerCase().replace(" ", "-")}.png`}
-									alt="koi"
+									src={`${koi.father ? (koi.father.imageUrl ?? "/kois/koi-empty.png") : "/kois/koi-empty.png"}`}
+									alt="father"
 								/>
 							</section>
 							<span className={styles.parentVarient}>
-								{koi.father?.dictionary?.name ||
-									"Kuchibeni-Kohaku"}
+								{koi.father ? koi.father.name : "Unknown"}
 							</span>
 						</div>
-						<div className={styles.parentCard}>
+						<div className={styles.parentCard} onClick={() => {}}>
 							<ChevronRight size="25" />
 							<div className={styles.parentCardHeader}>
 								<span>Mother:</span>
 							</div>
 							<section className={styles.parentImage}>
 								<img
-									src={`/kois/${koi.name.toLowerCase().replace(" ", "-")}.png`}
-									alt="koi"
+									src={`${koi.mother ? (koi.mother.imageUrl ?? "/kois/koi-empty.png") : "/kois/koi-empty.png"}`}
+									alt="mother"
 								/>
 							</section>
 							<span className={styles.parentVarient}>
-								{koi.mother?.dictionary?.name || "Taisho Sanke"}
+								{koi.mother ? koi.mother.name : "Unknown"}
 							</span>
 						</div>
 					</div>

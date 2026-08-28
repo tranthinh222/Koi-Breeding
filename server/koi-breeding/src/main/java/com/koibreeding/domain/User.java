@@ -2,7 +2,6 @@ package com.koibreeding.domain;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.koibreeding.enums.Gender;
 import com.koibreeding.enums.Role;
 import com.koibreeding.enums.UserStatus;
+import com.koibreeding.enums.Location;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -65,6 +65,12 @@ public class User {
 
     @Column(columnDefinition = "TEXT")
     private String avatarUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private Location location;
+
+    private Instant locationUpdatedAt;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     @CreationTimestamp

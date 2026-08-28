@@ -11,11 +11,18 @@ import com.koibreeding.domain.Pond;
 import com.koibreeding.enums.Gender;
 import com.koibreeding.enums.LifeStage;
 import com.koibreeding.enums.Shape;
+import org.springframework.stereotype.Component;
 
+@Component
 public class KoiFormula {
-    private static final Random random = new Random();
+    private final Random random = new Random();
+    private final PondFormula pondFormula;
 
-    private static double generateGaussianInRange(double min, double max) {
+    public KoiFormula(PondFormula pondFormula) {
+        this.pondFormula = pondFormula;
+    }
+
+    private double generateGaussianInRange(double min, double max) {
         double mean = (min + max) / 2.0;
         double stdDev = (max - min) / 6.0;
 
@@ -27,7 +34,7 @@ public class KoiFormula {
         return val;
     }
 
-    public static LifeStage defineLifeStage(int age) {
+    public LifeStage defineLifeStage(int age) {
         if (0 <= age && age <= 3) {
             return LifeStage.EGG;
         }
@@ -47,11 +54,11 @@ public class KoiFormula {
         return LifeStage.ADULT;
     }
 
-    public static BigDecimal generateRandomPotential() {
+    public BigDecimal generateRandomPotential() {
         return BigDecimal.valueOf(generateGaussianInRange(0.85, 1.3));
     }
 
-    public static BigDecimal calculateKoiLength(int age, int health, int foodBar, int cureBar, BigDecimal potential,
+    public BigDecimal calculateKoiLength(int age, int health, int foodBar, int cureBar, BigDecimal potential,
             Mutation mutation,
             Dictionary dictionary, Pond pond) {
         // Egg size vary from 1.2 - 2.0 mm
@@ -89,7 +96,8 @@ public class KoiFormula {
         double mutationModifier = mutation != null ? mutation.getValue().doubleValue() : 1.0;
         double baseGrowthRate = dictionary.getBaseGrowthRate().doubleValue();
         double environmentModifier = pond != null ? 0.8
-                + (PondFormula.getWaterQualityScore(pond.getPH(), pond.getTemperature(), pond.getOxygen()) / 100.0)
+                + (pondFormula.getEnvironmentScore(pond.getPH(), pond.getTemperature(), pond.getWaterQuality(),
+                        pond.getOxygen()) / 100.0)
                         * 0.4
                 : 1.0;
         double nutritionModifier = 0.85 + (foodBar / 100.0) * 0.3;
@@ -108,27 +116,28 @@ public class KoiFormula {
         return BigDecimal.valueOf(currentLengthAge).setScale(2, RoundingMode.HALF_UP);
     }
 
-    private static double calculateLarvaLength(int age, Dictionary dictionary) {
+    private double calculateLarvaLength(int age, Dictionary dictionary) {
         return 10 * dictionary.getBaseGrowthRate().doubleValue() * (age + 1);
     }
 
-    private static double calculateFryLength(int age, Dictionary dictionary) {
+    private double calculateFryLength(int age, Dictionary dictionary) {
         double larvaLength10 = calculateLarvaLength(10, dictionary);
         return larvaLength10 * Math.exp(4 * dictionary.getBaseGrowthRate().doubleValue() * (age - 10));
     }
 
-    private static double calculateLength(double maxLengthEffective, double kEffective, int age, int midAge) {
+    private double calculateLength(double maxLengthEffective, double kEffective, int age, int midAge) {
         return maxLengthEffective / (1 + Math.exp(-kEffective * (age - midAge)));
     }
 
-    public static BigDecimal calculateKoiWeight(double length, BigDecimal potential, int foodBar, int health, Pond pond,
+    public BigDecimal calculateKoiWeight(double length, BigDecimal potential, int foodBar, int health, Pond pond,
             Dictionary dictionary) {
         double alpha = dictionary.getAlphaWeight().doubleValue();
         double beta = generateGaussianInRange(2.95, 3.0);
         double bodyTypeModifier = dictionary.getShape().equals(Shape.STANDARD) ? 1.0 : 0.94;
         double potentialModifier = potential.doubleValue();
         double environmentModifier = (pond != null) ? 0.8
-                + (PondFormula.getWaterQualityScore(pond.getPH(), pond.getTemperature(), pond.getOxygen()) / 100.0)
+                + (pondFormula.getEnvironmentScore(pond.getPH(), pond.getTemperature(), pond.getWaterQuality(),
+                        pond.getOxygen()) / 100.0)
                         * 0.4
                 : 1.0;
         double nutritionModifier = 0.85 + (foodBar / 100.0) * 0.3;
@@ -140,7 +149,7 @@ public class KoiFormula {
                 RoundingMode.HALF_UP);
     }
 
-    public static int calculateKoiPrice(int age, double length, int patternScore, int colorScore, int bodyScore,
+    public int calculateKoiPrice(int age, double length, int patternScore, int colorScore, int bodyScore,
             int skinScore, int scaleScore, int health, Mutation mutation, Dictionary dictionary) {
         int midAge = dictionary.getMidAge();
         int basePrice = dictionary.getBasePrice();
@@ -160,7 +169,7 @@ public class KoiFormula {
 
     }
 
-    private static double calculateAgeModifier(int age, int midAge) {
+    private double calculateAgeModifier(int age, int midAge) {
         double ageModifier = 0.9 + (1.1 - 0.9) * Math.exp(-Math.pow((age - midAge) / 365.0, 2) / (2 * Math.pow(2, 2)));
 
         if (ageModifier < 0.9) {
@@ -174,7 +183,7 @@ public class KoiFormula {
         return ageModifier;
     }
 
-    public static Koi generateStarterKoi(Dictionary dictionary) {
+    public Koi generateStarterKoi(Dictionary dictionary) {
         Koi koi = new Koi();
 
         int age = 50;

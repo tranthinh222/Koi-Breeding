@@ -10,9 +10,6 @@ spring:
   profiles:
     active: local
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/koi_breeding
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,3 +21,27 @@ spring:
         default_schema: koi_breeding
 
     show-sql: true
+
+app:
+  time-zone: Asia/Ho_Chi_Minh
+  pond:
+    daily-update-cron: '0 5 0 * * *'
+    treatment-expiry-check-ms: 60000
+    environment:
+      ph-weight: 0.20
+      temperature-weight: 0.15
+      water-weight: 0.35
+      oxygen-weight: 0.30
+      coefficient-min: 0.8
+      coefficient-range: 0.4
+      temperature-response-rate: 0.2
+      water-quality-decrease-min-tenths: 30
+      water-quality-decrease-max-tenths: 50
+      oxygen-decrease-min-tenths: 2
+      oxygen-decrease-max-tenths: 4
+      ph-change-min-tenths: 1
+      ph-change-max-tenths: 3
+      ph-trend-duration-days: 30
+      treatment-temperature-change: 2.0
+      treatment-duration-hours: 24
+      location-change-cooldown-days: 60

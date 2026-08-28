@@ -5,6 +5,7 @@ import java.time.Instant;
 
 import lombok.Getter;
 import lombok.Setter;
+import com.koibreeding.enums.PhTrend;
 
 @Getter
 @Setter
@@ -14,10 +15,13 @@ public class ResPondDTO {
     private String name;
     private Integer level;
     private Integer capacity;
-    private Integer waterQuality;
+    private BigDecimal waterQuality;
     private BigDecimal temperature;
     private BigDecimal pH;
     private BigDecimal oxygen;
+    private PhTrend phTrend;
+    private Integer environmentScore;
+    private BigDecimal environmentCoefficient;
     private Instant createdAt;
     private String description;
 

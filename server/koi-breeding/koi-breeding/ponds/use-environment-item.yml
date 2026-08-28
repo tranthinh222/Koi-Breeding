@@ -1,0 +1,26 @@
+info:
+  name: Use environment item
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/ponds/:pondId/items/:itemId/usages?userId=1"
+  params:
+    - name: pondId
+      value: "1"
+      type: path
+    - name: itemId
+      value: "1"
+      type: path
+  body:
+    type: json
+    data: |-
+      {"quantity": 1}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

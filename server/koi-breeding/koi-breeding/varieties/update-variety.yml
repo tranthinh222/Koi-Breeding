@@ -1,0 +1,19 @@
+info:
+  name: Update variety
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "http://localhost:8090/koi_breeding/api/v1/varieties"
+  body:
+    type: json
+    data: |-
+      {"id":1,"name":"Updated Variety","description":"Updated from Bruno"}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

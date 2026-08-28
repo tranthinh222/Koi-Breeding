@@ -39,6 +39,7 @@ const MOCK_PONDS: IPond[] = [
 	temperature: index === 0 ? 20 : 24,
 	pH: index === 0 ? 3.6 : 7.1,
 	oxygen: 6.2,
+	environmentScore: index === 0 ? 54 : 100,
 	createdAt: new Date(),
 	description: "This pond is used to raise Kohaku koi fishes",
 }));
@@ -153,6 +154,7 @@ function PondLanding() {
 			temperature: selectedPond?.temperature as number,
 			pH: selectedPond?.pH as number,
 			oxygen: selectedPond?.oxygen as number,
+			environmentScore: selectedPond?.environmentScore as number,
 			createdAt: selectedPond?.createdAt as Date,
 			description: description,
 		};

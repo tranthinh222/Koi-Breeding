@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.domain.Pond;
 import com.koibreeding.dto.request.RequestBuyPondDTO;
+import com.koibreeding.dto.request.UsePondItemRequest;
+import jakarta.validation.Valid;
 import com.koibreeding.dto.response.ResPondDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.service.PondService;
@@ -79,5 +81,13 @@ public class PondController {
         this.pondService.handleDeletePond(id);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/ponds/{pondId}/items/{itemId}/usages")
+    public ResponseEntity<ResPondDTO> useEnvironmentItem(@PathVariable Integer pondId,
+            @PathVariable Integer itemId, @RequestParam Integer userId,
+            @Valid @RequestBody UsePondItemRequest request) {
+        int quantity = request.quantity() == null ? 1 : request.quantity();
+        return ResponseEntity.ok(pondService.useEnvironmentItem(pondId, userId, itemId, quantity));
     }
 }

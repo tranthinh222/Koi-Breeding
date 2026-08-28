@@ -2,6 +2,7 @@ package com.koibreeding.config;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,12 +12,14 @@ import java.util.stream.Collectors;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 import com.koibreeding.domain.Dictionary;
 import com.koibreeding.domain.Inventory;
 import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Notification;
+import com.koibreeding.domain.Pond;
 import com.koibreeding.domain.Transaction;
 import com.koibreeding.domain.User;
 import com.koibreeding.domain.Variety;
@@ -24,7 +27,9 @@ import com.koibreeding.domain.Wallet;
 import com.koibreeding.enums.EffectType;
 import com.koibreeding.enums.Gender;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.Location;
 import com.koibreeding.enums.NotificationType;
+import com.koibreeding.enums.PhTrend;
 import com.koibreeding.enums.Role;
 import com.koibreeding.enums.ScaleType;
 import com.koibreeding.enums.Shape;
@@ -36,6 +41,7 @@ import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.ItemRepository;
 import com.koibreeding.repository.MutationRepository;
 import com.koibreeding.repository.NotificationRepository;
+import com.koibreeding.repository.PondRepository;
 import com.koibreeding.repository.TransactionRepository;
 import com.koibreeding.repository.UserRepository;
 import com.koibreeding.repository.VarietyRepository;
@@ -45,12 +51,14 @@ import com.koibreeding.repository.WalletRepository;
 public class SampleDataInitializer {
 
     @Bean
+    @Order(100)
     CommandLineRunner seedSampleData(VarietyRepository varietyRepository, MutationRepository mutationRepository,
             DictionaryRepository dictionaryRepository,
             ItemRepository itemRepository,
             UserRepository userRepository,
             WalletRepository walletRepository, InventoryRepository inventoryRepository,
-            TransactionRepository transactionRepository, NotificationRepository notificationRepository) {
+            TransactionRepository transactionRepository, NotificationRepository notificationRepository,
+            PondRepository pondRepository) {
         return args -> {
 
             seedVarieties(varietyRepository);
@@ -103,6 +111,12 @@ public class SampleDataInitializer {
                             EffectType.WATER_QUALITY, "45.00",
                             "Premium cure for severe Koi diseases.",
                             "https://res.cloudinary.com/djmcluh5n/image/upload/v1786629140/uploads/items/qxryphcvy1acd8fijyfv.svg"),
+                    item("Cooling Treatment", "25.00", ItemType.MEDICINE,
+                            EffectType.COOLING, "2.00",
+                            "Temporarily increases pond temperature by 2°C for 24 hours.", null),
+                    item("Heating Treatment", "25.00", ItemType.MEDICINE,
+                            EffectType.HEATING, "2.00",
+                            "Temporarily decreases pond temperature by 2°C for 24 hours.", null),
                     item("Mutation Elixir - CLAK", "15.00", ItemType.MEDICINE, EffectType.MUTATION,
                             "5.00",
                             "Common elixir with a small mutation bonus.",
@@ -173,6 +187,8 @@ public class SampleDataInitializer {
             demoUser.setIsBanned(false);
             demoUser.setExp(0);
             demoUser.setAvatarUrl(null);
+            demoUser.setLocation(Location.HO_CHI_MINH_CITY);
+            demoUser.setLocationUpdatedAt(null);
             demoUser = userRepository.save(demoUser);
 
             Wallet wallet = walletRepository.findByUserId(demoUser.getId()).orElseGet(Wallet::new);
@@ -194,12 +210,24 @@ public class SampleDataInitializer {
             sampleUser.setIsBanned(false);
             sampleUser.setExp(250);
             sampleUser.setAvatarUrl(null);
+            sampleUser.setLocation(Location.HANOI);
+            sampleUser.setLocationUpdatedAt(null);
             sampleUser = userRepository.save(sampleUser);
 
             Wallet sampleWallet = walletRepository.findByUserId(sampleUser.getId()).orElseGet(Wallet::new);
             sampleWallet.setUser(sampleUser);
             sampleWallet.setBalance(new BigDecimal("5000"));
             walletRepository.save(sampleWallet);
+
+            seedPond(pondRepository, demoUser, "Kohaku Garden", 10, 15,
+                    "70.0", "24.5", "7.2", "7.50", PhTrend.ALKALINE,
+                    "Sample pond for testing environment APIs.");
+            seedPond(pondRepository, demoUser, "Sanke Lake", 5, 10,
+                    "92.0", "25.0", "7.5", "8.20", PhTrend.ACIDIC,
+                    "A healthy sample pond owned by demo_user.");
+            seedPond(pondRepository, sampleUser, "Hanoi Koi Pond", 3, 8,
+                    "84.0", "23.5", "7.0", "7.80", PhTrend.ALKALINE,
+                    "Sample pond used to test weather updates for Hanoi.");
 
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Kohaku"), 1);
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Tancho"), 2);
@@ -215,6 +243,31 @@ public class SampleDataInitializer {
             seedTransactions(transactionRepository, wallet, itemsByName);
             seedNotifications(notificationRepository, demoUser);
         };
+    }
+
+    private void seedPond(PondRepository pondRepository, User owner, String name, int level, int capacity,
+            String waterQuality, String temperature, String pH, String oxygen, PhTrend phTrend,
+            String description) {
+        boolean exists = pondRepository.findAll().stream()
+                .anyMatch(pond -> pond.getOwner().getId().equals(owner.getId()) && name.equals(pond.getName()));
+        if (exists) {
+            return;
+        }
+
+        Pond pond = new Pond();
+        pond.setOwner(owner);
+        pond.setName(name);
+        pond.setLevel(level);
+        pond.setCapacity(capacity);
+        pond.setWaterQuality(new BigDecimal(waterQuality));
+        pond.setTemperature(new BigDecimal(temperature));
+        pond.setPH(new BigDecimal(pH));
+        pond.setOxygen(new BigDecimal(oxygen));
+        pond.setPhTrend(phTrend);
+        pond.setPhTrendChangedAt(OffsetDateTime.now());
+        pond.setTemperatureAdjustment(BigDecimal.ZERO);
+        pond.setDescription(description);
+        pondRepository.save(pond);
     }
 
     private Item item(String name, String price, ItemType itemType, EffectType effectType, String effectValue,

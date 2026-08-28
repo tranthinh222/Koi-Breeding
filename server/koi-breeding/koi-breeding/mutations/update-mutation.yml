@@ -1,0 +1,19 @@
+info:
+  name: Update mutation
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "http://localhost:8090/koi_breeding/api/v1/mutations"
+  body:
+    type: json
+    data: |-
+      {"id":1,"name":"Updated Mutation","rate":0.1,"value":1.1,"description":"Updated from Bruno"}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

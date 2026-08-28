@@ -1,0 +1,19 @@
+info:
+  name: Create koi
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/kois"
+  body:
+    type: json
+    data: |-
+      {"name":"Bruno Koi","age":50,"gender":"MALE","length":15.5,"weight":0.8,"health":100,"foodBar":100,"cureBar":100,"price":100,"pond":{"id":1},"lifeStage":"JUVENILE","potential":1.0,"dictionary":{"id":1},"patternScore":80,"colorScore":80,"bodyScore":80,"skinScore":80,"scaleScore":80}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

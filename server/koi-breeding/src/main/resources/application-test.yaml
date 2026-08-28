@@ -13,3 +13,7 @@ spring:
                 physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         database-platform: org.hibernate.dialect.H2Dialect
         show-sql: true
+
+app:
+    weather:
+        forecast-url: http://localhost/weather/forecast

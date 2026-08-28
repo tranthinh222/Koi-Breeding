@@ -1,15 +1,11 @@
 info:
-  name: get products
+  name: Get inventory
   type: http
   seq: 1
 
 http:
   method: GET
-  url: http://localhost:8089/koi_breeding/shop/products?size=2
-  params:
-    - name: size
-      value: "2"
-      type: query
+  url: "http://localhost:8090/koi_breeding/api/v1/inventory?userId=1"
   auth: inherit
 
 settings:

@@ -6,6 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
+import com.koibreeding.dto.request.UpdateLocationRequest;
 
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.response.ResUserDto;
@@ -30,6 +34,12 @@ public class UserController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertToResUserDto(fetchUser));
+    }
+
+    @PatchMapping("/users/{id}/location")
+    public ResponseEntity<ResUserDto> updateLocation(@PathVariable Integer id,
+            @Valid @RequestBody UpdateLocationRequest request) {
+        return ResponseEntity.ok(userService.updateLocation(id, request.location()));
     }
 
 }

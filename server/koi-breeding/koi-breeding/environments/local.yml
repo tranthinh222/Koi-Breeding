@@ -1,0 +1,4 @@
+name: local
+variables:
+  - name: baseUrl
+    value: http://localhost:8090/koi_breeding/api/v1

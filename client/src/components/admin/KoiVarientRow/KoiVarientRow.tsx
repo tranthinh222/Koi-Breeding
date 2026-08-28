@@ -32,36 +32,41 @@ function KoiVarientRow({ koi, varietyList }: KoiDictionaryCardProps) {
 		requestKoi: IKoiVarient,
 		image: File | null,
 	) => {
-		if (image) {
-			const imageResponse = await callUploadKoiVarientImage(image);
-			if (imageResponse && imageResponse.data) {
-				requestKoi.imageUrl = imageResponse.data.data?.url as string;
-			} else {
-				toast.error("Failed to update koi varient's image!");
+		try {
+			if (image) {
+				const imageResponse = await callUploadKoiVarientImage(image);
+				if (imageResponse && imageResponse.data) {
+					requestKoi.imageUrl = imageResponse.data.data
+						?.url as string;
+				} else {
+					toast.error("Failed to update koi varient's image!");
+				}
 			}
+
+			const koiToUpdate: IKoiVarient = {
+				id: koi.id,
+				name: requestKoi.name,
+				origin: requestKoi.origin,
+				variety: requestKoi.variety,
+				scaleType: requestKoi.scaleType,
+				shape: requestKoi.shape,
+				baseMaxLength: requestKoi.baseMaxLength,
+				baseGrowthRate: requestKoi.baseGrowthRate,
+				midAge: requestKoi.midAge,
+				alphaWeight: requestKoi.alphaWeight,
+				basePrice: requestKoi.basePrice,
+				alphaPrice: requestKoi.alphaPrice,
+				imageUrl: requestKoi.imageUrl,
+			};
+
+			await callUpdateKoiVarient(koiToUpdate);
+
+			handleUpdateAttributes(koiToUpdate);
+
+			toast.success(`Update koi #${koi.id} successfully!`);
+		} catch (error) {
+			toast.error(`Failed to update koi #${koi.id}`);
 		}
-
-		const koiToUpdate: IKoiVarient = {
-			id: koi.id,
-			name: requestKoi.name,
-			origin: requestKoi.origin,
-			variety: requestKoi.variety,
-			scaleType: requestKoi.scaleType,
-			shape: requestKoi.shape,
-			baseMaxLength: requestKoi.baseMaxLength,
-			baseGrowthRate: requestKoi.baseGrowthRate,
-			midAge: requestKoi.midAge,
-			alphaWeight: requestKoi.alphaWeight,
-			basePrice: requestKoi.basePrice,
-			alphaPrice: requestKoi.alphaPrice,
-			imageUrl: requestKoi.imageUrl,
-		};
-
-		await callUpdateKoiVarient(koiToUpdate);
-
-		handleUpdateAttributes(koiToUpdate);
-
-		toast.success(`Update koi #${koi.id} successfully!`);
 	};
 
 	const handleUpdateAttributes = (requestKoi: IKoiVarient) => {

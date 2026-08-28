@@ -95,10 +95,6 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 				<section className={styles.pondShell}>
 					<PondCanvas pondKoiList={koiList} pond={pond} />
 					{/* <DebugCanvas /> */}
-					{/* <div className={styles.pondLabel}>
-						<span>Đàn koi</span>
-						<strong>{fishCount} con</strong>
-					</div> */}
 					<div className={styles.coins}>
 						<img src="/pond/coin.svg" alt="coin" />
 						<span>9.000</span>

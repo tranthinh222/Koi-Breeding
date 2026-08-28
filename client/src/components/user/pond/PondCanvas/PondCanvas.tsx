@@ -89,7 +89,7 @@ function DebugCanvas() {
 		const koiImage = new Image();
 
 		// Source image
-		koiImage.src = "/kois/koi-fish-ginrin-asagi.png";
+		koiImage.src = "/kois/koi-fish-soragoi.png";
 
 		koiImage.onload = () => {
 			// Configure canvas's size
@@ -127,7 +127,7 @@ function DebugCanvas() {
 				staticFish,
 				koiImage,
 				0,
-				KOI_PROPS_MAP.get("type28") as FishImageProperties,
+				KOI_PROPS_MAP.get("type14") as FishImageProperties,
 			);
 		};
 	}, []);

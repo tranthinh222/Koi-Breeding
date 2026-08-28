@@ -121,7 +121,7 @@ function KoiFormBody({
 				>
 					<input
 						type="file"
-						accept="image/jpeg, image/jpg, image/png"
+						accept="image/jpeg, image/jpg, image/png, image/svg+xml"
 						hidden
 						ref={fileInputRef}
 						onChange={handleFileSelect}
@@ -148,7 +148,9 @@ function KoiFormBody({
 								className={styles.imageButton}
 							/>
 							<span>Choose a file or drag & drop it here</span>
-							<span>JPEG, JPG, PNG formats, up to 10MB</span>
+							<span>
+								JPEG, JPG, PNG and SVG formats, up to 10MB
+							</span>
 							<button
 								type="button"
 								className={styles.browseButton}

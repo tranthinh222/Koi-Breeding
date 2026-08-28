@@ -213,6 +213,7 @@ function KoiVarientList() {
 									)
 								}
 							/>
+							<span>{`/ ${totalPages}`}</span>
 						</div>
 						<div className={styles.pageButtons}>
 							<button

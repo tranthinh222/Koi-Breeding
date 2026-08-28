@@ -71,11 +71,16 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 	}, [previewUrl]);
 
 	const handleFile = (file: File) => {
-		const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+		const validTypes = [
+			"image/jpeg",
+			"image/jpg",
+			"image/png",
+			"image/svg+xml",
+		];
 		const maxSize = 10 * 1024 * 1024; // 10MB
 
 		if (!validTypes.includes(file.type)) {
-			toast.error("Only JPEG, JPG, PNG formats are allowed!");
+			toast.error("Only JPEG, JPG, PNG and SVG formats are allowed!");
 			return;
 		}
 
@@ -131,7 +136,7 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 	const handleSubmit = async () => {
 		console.log(`Variety: ${JSON.stringify(form.variety)}`);
 		setIsProcessing(true);
-		await sleep(1000);
+		// await sleep(1000);
 		const fieldErrors: KoiFormErrors = {};
 		if (form.name.trim() == "") {
 			fieldErrors.name = "Name cannot be blank";
@@ -263,8 +268,8 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 		});
 	};
 
-	const sleep = (ms: number) =>
-		new Promise((resolve) => setTimeout(resolve, ms));
+	// const sleep = (ms: number) =>
+	// 	new Promise((resolve) => setTimeout(resolve, ms));
 
 	return (
 		<div className={styles.form}>

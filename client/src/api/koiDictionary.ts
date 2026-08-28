@@ -17,21 +17,19 @@ export const callCreateKoiVarient = (koiVarient: IKoiVarient) => {
 };
 
 export const callUpdateKoiVarient = (koiVarient: IKoiVarient) => {
-	return apiClient.post<IRestResponse<IKoiVarient>>("/api/v1/dictionaries", {
+	return apiClient.post<IRestResponse<IKoiVarient>>("/dictionaries", {
 		...koiVarient,
 	});
 };
 
 export const callFetchKoiVarient = (query: string) => {
 	return apiClient.get<IRestResponse<IModelPagination<IKoiVarient>>>(
-		`/api/v1/dictionaries?${query}`,
+		`/dictionaries?${query}`,
 	);
 };
 
 export const callFetchKoiVarientById = (id: number) => {
-	return apiClient.get<IRestResponse<IKoiVarient>>(
-		`/api/v1/dictionaries/${id}`,
-	);
+	return apiClient.get<IRestResponse<IKoiVarient>>(`/dictionaries/${id}`);
 };
 
 export const callUploadKoiVarientImage = (file: File) => {

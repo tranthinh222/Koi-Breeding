@@ -33,3 +33,4 @@ build/
 .vscode/
 
 ### configure file ###
+application-local.yaml

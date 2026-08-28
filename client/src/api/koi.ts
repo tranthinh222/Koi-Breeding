@@ -17,6 +17,6 @@ export const callReleaseKoiToPond = (
 
 export const callFetchKoisInPond = (pondId: number) => {
 	return apiClient.get<IRestResponse<IKoi[]>>(
-		`/api/v1/kois&pondId=${pondId}`,
+		`/api/v1/kois?pondId=${pondId}`,
 	);
 };

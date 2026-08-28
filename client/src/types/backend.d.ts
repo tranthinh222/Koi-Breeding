@@ -57,8 +57,8 @@ export interface IKoi {
 	bornedAt: Date;
 	pondId: number;
 	lifeStage: LifeStage;
-	fatherId: number | null;
-	motherId: number | null;
+	father: IKoiParent | null;
+	mother: IKoiParent | null;
 	potential: number;
 	dictionary: IKoiVarient;
 	patternScore: number;
@@ -66,6 +66,13 @@ export interface IKoi {
 	bodyScore: number;
 	skinScore: number;
 	scaleScore: number;
+}
+
+export interface IKoiParent {
+	id: number;
+	name: string;
+	imageUrl?: string;
+	isBelongToUser: boolean;
 }
 
 export interface IKoiMutation {

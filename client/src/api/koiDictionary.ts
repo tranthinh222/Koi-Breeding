@@ -11,7 +11,7 @@ import type {
 import { apiClient } from "./client";
 
 export const callCreateKoiVarient = (koiVarient: IKoiVarient) => {
-	return apiClient.post<IRestResponse<IKoiVarient>>("/api/v1/dictionaries", {
+	return apiClient.post<IRestResponse<IKoiVarient>>("/dictionaries", {
 		...koiVarient,
 	});
 };

@@ -3,28 +3,28 @@
 Module Pond
  */
 
-import type { IModelPagination, IPond, IRestResponse } from "../types/backend";
-import { apiClient } from "./client";
+import type { IModelPagination, IPond, IRestResponse } from '../types/backend'
+import { apiClient } from './client'
 
 export interface IRequestBuyPondDTO {
-	name: string;
-	description: string;
-	price: number;
-	ownerId: number;
+  name: string
+  description: string
+  price: number
+  ownerId: number
 }
 
 export const callBuyPond = (requestBuyPondDTO: IRequestBuyPondDTO) => {
-	return apiClient.post<IRestResponse<IPond>>("/api/v1/ponds", {
-		...requestBuyPondDTO,
-	});
-};
+  return apiClient.post<IRestResponse<IPond>>('/ponds', {
+    ...requestBuyPondDTO,
+  })
+}
 
 export const callFetchAllPonds = (query: string) => {
-	return apiClient.get<IRestResponse<IModelPagination<IPond>>>(
-		`/api/v1/ponds?${query}`,
-	);
-};
+  return apiClient.get<IRestResponse<IModelPagination<IPond>>>(
+    `/ponds?${query}`,
+  )
+}
 
 export const callUpdatePond = (pond: IPond) => {
-	return apiClient.put<IRestResponse<IPond>>("/api/v1/ponds", { ...pond });
-};
+  return apiClient.put<IRestResponse<IPond>>('/ponds', { ...pond })
+}

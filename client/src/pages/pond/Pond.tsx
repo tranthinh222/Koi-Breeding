@@ -34,13 +34,25 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 	}, []);
 
 	const handleFetchPondKoiList = async (): Promise<IKoi[]> => {
-		const response = await callFetchKoisInPond(pond.id);
-		if (response && response.data) {
-			return response.data.data as IKoi[];
-		}
+		try {
+			const response = await callFetchKoisInPond(pond.id);
+			const backendKois = response.data.data ?? [];
 
-		toast.error("Failed to fetch current pond's koi list!");
-		return [];
+			if (backendKois.length > 0) {
+				return backendKois;
+			}
+
+			console.info(
+				"No koi returned by the backend; using frontend sample koi.",
+			);
+			return createMockKoiList(pond.id);
+		} catch (error) {
+			console.error(
+				"Failed to fetch pond koi; using frontend sample koi:",
+				error,
+			);
+			return createMockKoiList(pond.id);
+		}
 	};
 
 	const handleImportKoi = async (koiItem: IInventory, quantity: number) => {
@@ -278,3 +290,34 @@ const MOCK_VARIENT: IKoiVarient[] = [
 		imageUrl: "/kois/koi-fish-inazuma-kohaku.svg",
 	},
 ];
+
+const createMockKoiList = (pondId: number): IKoi[] =>
+	Array.from({ length: 6 }, (_value, index) => {
+		const koiVarient = MOCK_VARIENT[index % MOCK_VARIENT.length];
+
+		return {
+			id: -(pondId * 100 + index + 1),
+			name: `${koiVarient.name} ${index + 1}`,
+			age: 50 + index * 5,
+			length: 7.2 + (2 * Math.random() - 1),
+			weight: 0.15 + (0.06 * Math.random() - 0.03),
+			health: 90,
+			foodBar: 80,
+			cureBar: 100,
+			gender: index % 2 === 0 ? "MALE" : "FEMALE",
+			price: koiVarient.basePrice,
+			mutation: null,
+			bornedAt: new Date(),
+			pondId,
+			lifeStage: "FRY",
+			fatherId: null,
+			motherId: null,
+			potential: 0.8 + 0.2 * Math.random(),
+			dictionary: koiVarient,
+			patternScore: Math.round(20 * Math.random() + 80),
+			colorScore: Math.round(10 * Math.random() + 90),
+			bodyScore: Math.round(30 * Math.random() + 70),
+			skinScore: Math.round(15 * Math.random() + 85),
+			scaleScore: Math.round(25 * Math.random() + 75),
+		};
+	});

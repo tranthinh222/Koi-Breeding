@@ -2,8 +2,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
 .card {
-	width: 200px;
-	height: 300px;
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	max-width: 200px;
+	max-height: 300px;
 	/* background: #5c5858; */
 	background-color: #11966e;
 	border-radius: 5px;
@@ -12,6 +16,8 @@
 	align-items: center;
 	transition: all 0.2s ease;
 	cursor: pointer;
+	box-sizing: border-box;
+	overflow: hidden;
 }
 
 .card:hover {
@@ -21,17 +27,23 @@
 
 .name {
 	width: 90%;
-	height: 30px;
+	min-height: 0;
+	height: 10%;
 	background-color: #faf8f8;
 	color: #5c5858;
 	font-family: "Grandstander";
 	font-weight: bold;
-	font-size: 20px;
+	font-size: clamp(8px, 1vw, 16px);
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	border-radius: 5px;
-	margin-top: 10px;
+	margin-top: 3%;
+	padding-inline: 6px;
+	box-sizing: border-box;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .image {
@@ -43,7 +55,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	margin-top: 5px;
+	margin-top: 2%;
 }
 
 .image > img {
@@ -58,46 +70,55 @@
 
 .scale {
 	width: 90%;
-	height: 30px;
+	min-height: 0;
+	height: 10%;
 	background-color: #faf8f8;
 	color: #5c5858;
 	font-family: "Grandstander";
 	font-weight: bold;
-	font-size: 18px;
+	font-size: clamp(7px, 1.15vw, 18px);
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	border-radius: 5px;
-	margin-top: 10px;
+	margin-top: 3%;
+	white-space: nowrap;
 }
 
 .origin {
 	width: 90%;
-	height: 30px;
+	min-height: 0;
+	height: 10%;
 	background-color: #faf8f8;
 	color: #5c5858;
 	font-family: "Grandstander";
 	font-weight: bold;
-	font-size: 18px;
+	font-size: clamp(7px, 1.15vw, 18px);
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	border-radius: 5px;
-	margin-top: 10px;
+	margin-top: 3%;
+	white-space: nowrap;
 }
 
 .card > button {
-	width: 40px;
-	height: 40px;
+	width: clamp(22px, 2.7vw, 40px);
+	height: clamp(22px, 2.7vw, 40px);
 	background-color: #afadad;
 	border: none;
 	border-radius: 100%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	margin-top: 12px;
+	margin-top: 4%;
 	cursor: pointer;
 	transition: all 0.2s ease;
+}
+
+.card > button > svg {
+	width: 65%;
+	height: 65%;
 }
 
 .card > button:hover {

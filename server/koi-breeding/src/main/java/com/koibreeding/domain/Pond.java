@@ -7,6 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.koibreeding.enums.PhTrend;
 
 @Entity
 @Table(name = "pond")
@@ -42,8 +45,8 @@ public class Pond {
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private Integer capacity = 1;
 
-    @Column(nullable = false, columnDefinition = "SMALLINT")
-    private Integer waterQuality;
+    @Column(nullable = false, precision = 5, scale = 1)
+    private BigDecimal waterQuality;
 
     @Column(nullable = false, precision = 4, scale = 1)
     private BigDecimal temperature;
@@ -53,6 +56,20 @@ public class Pond {
 
     @Column(nullable = false, precision = 4, scale = 2)
     private BigDecimal oxygen;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private PhTrend phTrend = PhTrend.ALKALINE;
+
+    @Column(nullable = false)
+    private OffsetDateTime phTrendChangedAt;
+
+    private OffsetDateTime lastEnvironmentUpdateAt;
+
+    @Column(precision = 4, scale = 1)
+    private BigDecimal temperatureAdjustment = BigDecimal.ZERO;
+
+    private OffsetDateTime temperatureAdjustmentExpiresAt;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

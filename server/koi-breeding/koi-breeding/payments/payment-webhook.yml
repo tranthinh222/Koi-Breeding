@@ -1,0 +1,22 @@
+info:
+  name: Payment webhook
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/payments/webhook"
+  headers:
+    - name: Authorization
+      value: Apikey YOUR_SEPAY_API_KEY
+  body:
+    type: json
+    data: |-
+      {"id":1001,"transferType":"in","content":"PAY1","code":"PAY1","transferAmount":25000,"referenceCode":"BRUNO-1001"}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -2,6 +2,7 @@ package com.koibreeding.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,23 +11,39 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.koibreeding.config.PondEnvironmentConfig;
+import com.koibreeding.domain.Inventory;
+import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Pond;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.request.RequestBuyPondDTO;
 import com.koibreeding.dto.response.ResPondDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.enums.EffectType;
+import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.PhTrend;
+import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.PondRepository;
+import com.koibreeding.util.formulas.PondFormula;
 
 @Service
 public class PondService {
     private final PondRepository pondRepository;
     private final UserService userService;
     private final WalletService walletService;
+    private final InventoryRepository inventoryRepository;
+    private final PondEnvironmentConfig environmentConfig;
+    private final PondFormula pondFormula;
 
-    public PondService(PondRepository pondRepository, UserService userService, WalletService walletService) {
+    public PondService(PondRepository pondRepository, UserService userService, WalletService walletService,
+            InventoryRepository inventoryRepository,
+            PondEnvironmentConfig environmentConfig, PondFormula pondFormula) {
         this.pondRepository = pondRepository;
         this.userService = userService;
         this.walletService = walletService;
+        this.inventoryRepository = inventoryRepository;
+        this.environmentConfig = environmentConfig;
+        this.pondFormula = pondFormula;
     }
 
     @Transactional
@@ -54,8 +71,9 @@ public class PondService {
         newPond.setPH(initialPH);
         BigDecimal initialOxygen = BigDecimal.valueOf(5 + Math.random()).setScale(2, RoundingMode.HALF_UP);
         newPond.setOxygen(initialOxygen);
-        Integer initialWaterQuality = (int) (Math.random() * 101);
-        newPond.setWaterQuality(initialWaterQuality);
+        newPond.setWaterQuality(BigDecimal.valueOf(100));
+        newPond.setPhTrend(Math.random() < 0.5 ? PhTrend.ACIDIC : PhTrend.ALKALINE);
+        newPond.setPhTrendChangedAt(OffsetDateTime.now());
         newPond.setDescription(buyPondRequestDTO.getDescription());
 
         Pond savedPond = this.pondRepository.save(newPond);
@@ -77,6 +95,7 @@ public class PondService {
         result.setTemperature(savedPond.getTemperature());
         result.setPH(savedPond.getPH());
         result.setOxygen(savedPond.getOxygen());
+        enrichEnvironment(result, savedPond);
         result.setCreatedAt(savedPond.getCreatedAt().toInstant());
         result.setDescription(savedPond.getDescription());
 
@@ -108,6 +127,58 @@ public class PondService {
         }
 
         return convertToResPondDTO(currentPond);
+    }
+
+    @Transactional
+    public ResPondDTO useEnvironmentItem(Integer pondId, Integer userId, Integer itemId, int quantity) {
+        if (quantity < 1)
+            throw new IllegalArgumentException("Quantity must be at least 1");
+        Pond pond = pondRepository.findById(pondId)
+                .orElseThrow(() -> new IllegalArgumentException("Pond not found: " + pondId));
+        if (!pond.getOwner().getId().equals(userId)) {
+            throw new IllegalArgumentException("The pond does not belong to this user");
+        }
+        Inventory inventory = inventoryRepository.findByUserIdAndItemId(userId, itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item is not in the user's inventory"));
+        Item item = inventory.getItem();
+        if (item.getItemType() != ItemType.MEDICINE || item.getEffectType() == null) {
+            throw new IllegalArgumentException("This item cannot be applied to a pond");
+        }
+        int remaining = inventory.getQuantity() - quantity;
+        if (remaining < 0)
+            throw new IllegalArgumentException("Insufficient item quantity");
+
+        applyEnvironmentEffect(pond, item, quantity);
+        if (remaining == 0)
+            inventoryRepository.delete(inventory);
+        else {
+            inventory.setQuantity(remaining);
+            inventoryRepository.save(inventory);
+        }
+        return convertToResPondDTO(pondRepository.save(pond));
+    }
+
+    private void applyEnvironmentEffect(Pond pond, Item item, int quantity) {
+        EffectType effectType = item.getEffectType();
+        if (effectType == EffectType.WATER_QUALITY) {
+            BigDecimal recovery = item.getEffectValue().multiply(BigDecimal.valueOf(quantity));
+            pond.setWaterQuality(pond.getWaterQuality().add(recovery).min(BigDecimal.valueOf(100))
+                    .setScale(1, RoundingMode.HALF_UP));
+            return;
+        }
+        if (effectType != EffectType.COOLING && effectType != EffectType.HEATING) {
+            throw new IllegalArgumentException("This medicine has no pond-environment effect");
+        }
+        BigDecimal change = environmentConfig.getTreatmentTemperatureChange().multiply(BigDecimal.valueOf(quantity));
+        if (effectType == EffectType.HEATING)
+            change = change.negate();
+        BigDecimal previousAdjustment = pond.getTemperatureAdjustment() == null
+                ? BigDecimal.ZERO
+                : pond.getTemperatureAdjustment();
+        pond.setTemperature(pond.getTemperature().add(change).setScale(1, RoundingMode.HALF_UP));
+        pond.setTemperatureAdjustment(previousAdjustment.add(change).setScale(1, RoundingMode.HALF_UP));
+        pond.setTemperatureAdjustmentExpiresAt(
+                OffsetDateTime.now().plusHours(environmentConfig.getTreatmentDurationHours()));
     }
 
     public Pond handleFetchPondById(Integer id) {
@@ -181,10 +252,19 @@ public class PondService {
         result.setTemperature(pond.getTemperature());
         result.setPH(pond.getPH());
         result.setOxygen(pond.getOxygen());
+        enrichEnvironment(result, pond);
         result.setCreatedAt(pond.getCreatedAt().toInstant());
         result.setDescription(pond.getDescription());
 
         return result;
 
+    }
+
+    private void enrichEnvironment(ResPondDTO result, Pond pond) {
+        result.setPhTrend(pond.getPhTrend());
+        int score = pondFormula.getEnvironmentScore(pond.getPH(), pond.getTemperature(),
+                pond.getWaterQuality(), pond.getOxygen());
+        result.setEnvironmentScore(score);
+        result.setEnvironmentCoefficient(pondFormula.getEnvironmentCoefficient(score));
     }
 }

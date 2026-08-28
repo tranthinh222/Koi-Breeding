@@ -1,17 +1,18 @@
 info:
-  name: post item image
+  name: Upload avatar
   type: http
   seq: 1
 
 http:
   method: POST
-  url: http://localhost:8090/koi_breeding/upload/item
+  url: "http://localhost:8090/koi_breeding/api/v1/upload/avatar"
   body:
     type: multipart-form
     data:
       - name: file
-        type: text
-        value: ""
+        type: file
+        value:
+          - ""
   auth: inherit
 
 settings:

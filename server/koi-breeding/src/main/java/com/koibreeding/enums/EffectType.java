@@ -1,5 +1,5 @@
 package com.koibreeding.enums;
 
 public enum EffectType {
-    WATER_QUALITY, GROWTH, MUTATION
+    WATER_QUALITY, COOLING, HEATING, GROWTH, MUTATION
 }

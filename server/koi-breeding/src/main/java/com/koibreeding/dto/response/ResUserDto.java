@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import com.koibreeding.enums.Gender;
+import com.koibreeding.enums.Location;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,8 @@ public class ResUserDto {
     private Gender gender;
     private Integer exp;
     private String avatarUrl;
+    private Location location;
+    private Instant locationUpdatedAt;
     private Instant createdAt;
     private Instant updatedAt;
 }

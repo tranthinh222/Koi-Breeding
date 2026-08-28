@@ -24,6 +24,7 @@ import com.koibreeding.util.formulas.KoiFormula;
 
 @Service
 public class KoiService {
+    private final KoiFormula koiFormula;
     private final KoiRepository koiRepository;
     private final MutationService mutationService;
     private final DictionaryService koiDictionaryService;
@@ -36,12 +37,13 @@ public class KoiService {
             MutationService mutationService,
             DictionaryService koiDictionaryService,
             PondService pondService,
-            InventoryService inventoryService) {
+            InventoryService inventoryService, KoiFormula koiFormula) {
         this.koiRepository = koiRepository;
         this.mutationService = mutationService;
         this.koiDictionaryService = koiDictionaryService;
         this.pondService = pondService;
         this.inventoryService = inventoryService;
+        this.koiFormula = koiFormula;
         // this.itemService = itemService;
     }
 
@@ -82,7 +84,7 @@ public class KoiService {
         List<Koi> newKoiList = new ArrayList<Koi>();
 
         for (int i = 0; i < requestReleaseKoiDTO.getQuantity(); ++i) {
-            newKoiList.add(KoiFormula.generateStarterKoi(requestDictionary, requestPond));
+            newKoiList.add(koiFormula.generateStarterKoi(requestDictionary, requestPond));
         }
 
         List<Koi> resultKoiList = this.koiRepository.saveAll(newKoiList);

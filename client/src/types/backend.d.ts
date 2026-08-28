@@ -103,6 +103,7 @@ export interface IPond {
 	temperature: number;
 	pH: number;
 	oxygen: number;
+	environmentScore: number;
 	createdAt: Date;
 	description: string;
 }

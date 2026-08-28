@@ -1,0 +1,22 @@
+info:
+  name: Upload item image
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/upload/item"
+  body:
+    type: multipart-form
+    data:
+      - name: file
+        type: file
+        value:
+          - ""
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

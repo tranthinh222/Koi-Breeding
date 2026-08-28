@@ -1,0 +1,19 @@
+info:
+  name: Get payment
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "http://localhost:8090/koi_breeding/api/v1/payments/:orderCode"
+  params:
+    - name: orderCode
+      value: "1"
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

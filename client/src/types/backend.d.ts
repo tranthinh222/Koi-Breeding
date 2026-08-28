@@ -144,6 +144,7 @@ export interface IItem {
 
 export interface IItemInventory {
 	id: number;
+	itemId: number;
 	name: string;
 	price: number;
 	itemType: ItemType;

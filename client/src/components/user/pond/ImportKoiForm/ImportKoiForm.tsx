@@ -1,8 +1,10 @@
 import { Import, Minus, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { CURRENT_USER_ID } from "../../../../api/currentUser";
 import { callFetchInventoryByType } from "../../../../api/inventory";
 import type { IItemInventory } from "../../../../types/backend";
 import { toast } from "../../../share/Toast/toast";
+import KoiItem from "../../KoiItem/KoiItem";
 import styles from "./ImportKoiForm.module.css";
 
 interface ImportKoiFormProps {
@@ -27,7 +29,10 @@ function ImportKoiForm({
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await callFetchInventoryByType(1, "KOI");
+				const response = await callFetchInventoryByType(
+					CURRENT_USER_ID,
+					"KOI",
+				);
 				const itemList: IItemInventory[] = response.data.data ?? [];
 
 				if (itemList.length > 0) {
@@ -110,8 +115,9 @@ function ImportKoiForm({
 									}
 								}}
 							>
-								<img
-									src="https://res.cloudinary.com/djmcluh5n/image/upload/v1786629266/uploads/items/cxnccf0exmmyaf0ddf5e.svg"
+								{/* <img src={`${item.image}`} alt={item.name} /> */}
+								<KoiItem
+									src={item.image ?? "/kois/koi-empty.pnd"}
 									alt={item.name}
 								/>
 								<span title={`x${item.quantity}`}>
@@ -129,8 +135,15 @@ function ImportKoiForm({
 							</div>
 							<div className={styles.detailContent}>
 								<div className={styles.detailImage}>
-									<img
-										src="https://res.cloudinary.com/djmcluh5n/image/upload/v1786629266/uploads/items/cxnccf0exmmyaf0ddf5e.svg"
+									{/* <img
+										src={`${selectedItem.image}`}
+										alt={selectedItem.name}
+									/> */}
+									<KoiItem
+										src={
+											selectedItem.image ??
+											"/kois/koi-empty.pnd"
+										}
 										alt={selectedItem.name}
 									/>
 								</div>
@@ -231,6 +244,7 @@ export default ImportKoiForm;
 const MOCK_KOI_ITEM: IItemInventory[] = [
 	{
 		id: 1,
+		itemId: 1,
 		name: "Koi - Kohaku",
 		price: 100,
 		itemType: "KOI",
@@ -241,6 +255,7 @@ const MOCK_KOI_ITEM: IItemInventory[] = [
 	},
 	{
 		id: 2,
+		itemId: 2,
 		name: "Koi - Menkaburi Kohaku",
 		price: 110,
 		itemType: "KOI",
@@ -251,6 +266,7 @@ const MOCK_KOI_ITEM: IItemInventory[] = [
 	},
 	{
 		id: 3,
+		itemId: 3,
 		name: "Koi - Inazuma Kohaku",
 		price: 110,
 		itemType: "KOI",
@@ -261,6 +277,7 @@ const MOCK_KOI_ITEM: IItemInventory[] = [
 	},
 	{
 		id: 4,
+		itemId: 4,
 		name: "Koi - Inazuma Kohaku",
 		price: 110,
 		itemType: "KOI",
@@ -271,6 +288,7 @@ const MOCK_KOI_ITEM: IItemInventory[] = [
 	},
 	{
 		id: 5,
+		itemId: 5,
 		name: "Koi - Inazuma Kohaku",
 		price: 110,
 		itemType: "KOI",
@@ -281,6 +299,7 @@ const MOCK_KOI_ITEM: IItemInventory[] = [
 	},
 	{
 		id: 6,
+		itemId: 6,
 		name: "Koi - Inazuma Kohaku",
 		price: 110,
 		itemType: "KOI",
@@ -291,6 +310,7 @@ const MOCK_KOI_ITEM: IItemInventory[] = [
 	},
 	{
 		id: 7,
+		itemId: 7,
 		name: "Koi - Inazuma Kohaku",
 		price: 110,
 		itemType: "KOI",
@@ -301,6 +321,7 @@ const MOCK_KOI_ITEM: IItemInventory[] = [
 	},
 	{
 		id: 8,
+		itemId: 8,
 		name: "Koi - Inazuma Kohaku",
 		price: 110,
 		itemType: "KOI",
@@ -311,6 +332,7 @@ const MOCK_KOI_ITEM: IItemInventory[] = [
 	},
 	{
 		id: 9,
+		itemId: 9,
 		name: "Koi - Inazuma Kohaku",
 		price: 110,
 		itemType: "KOI",
@@ -321,6 +343,7 @@ const MOCK_KOI_ITEM: IItemInventory[] = [
 	},
 	{
 		id: 10,
+		itemId: 10,
 		name: "Koi - Inazuma Kohaku",
 		price: 110,
 		itemType: "KOI",

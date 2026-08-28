@@ -64,29 +64,45 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 		koiItem: IItemInventory,
 		quantity: number,
 	) => {
-		const koiVarient: IKoiVarient = MOCK_VARIENT.find(
-			(varient) => varient.id === koiItem.effectValue,
-		) as IKoiVarient;
+		try {
+			const response = await callReleaseKoiToPond({
+				pondId: pond.id,
+				inventoryId: koiItem.id,
+				quantity: quantity,
+			});
+			const newMembers: IKoi[] = response.data.data ?? [];
 
-		console.log("Is called");
-
-		const response = await callReleaseKoiToPond({
-			pondId: pond.id,
-			inventoryId: koiItem.id,
-			quantity: quantity,
-		});
-
-		if (response && response.data) {
-			const newMembers: IKoi[] = response.data.data as IKoi[];
+			if (!newMembers.length) {
+				toast.error("Failed to release koi(s) to the current pond.");
+				return;
+			}
 			setTimeout(() => {
 				setKoiList((prev) => [...prev, ...newMembers]);
 				toast.success(
-					`Released x${quantity} ${koiVarient.name} to current pond!`,
+					`Released x${quantity} ${koiItem.name.substring(6)} to current pond!`,
 				);
 			}, 500);
-		} else {
+		} catch (error) {
 			toast.error("Failed to release koi(s) to the current pond.");
 		}
+
+		// const response = await callReleaseKoiToPond({
+		// 	pondId: pond.id,
+		// 	inventoryId: koiItem.id,
+		// 	quantity: quantity,
+		// });
+
+		// if (response && response.data) {
+		// 	const newMembers: IKoi[] = response.data.data as IKoi[];
+		// 	setTimeout(() => {
+		// 		setKoiList((prev) => [...prev, ...newMembers]);
+		// 		toast.success(
+		// 			`Released x${quantity} ${koiVarient.name} to current pond!`,
+		// 		);
+		// 	}, 500);
+		// } else {
+		// 	toast.error("Failed to release koi(s) to the current pond.");
+		// }
 	};
 
 	return (

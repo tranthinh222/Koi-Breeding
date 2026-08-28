@@ -1,21 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CURRENT_USER_ID } from "../../api/currentUser";
 import {
 	callBuyPond,
 	callFetchAllPonds,
 	callUpdatePond,
 	type IRequestBuyPondDTO,
 } from "../../api/pond";
-import { CURRENT_USER_ID } from "../../api/currentUser";
 import { toast } from "../../components/share/Toast/toast";
 import Toaster from "../../components/share/Toast/Toaster";
 import BuyPondForm from "../../components/user/pond/BuyPondForm/BuyPondForm";
 import ShopBackground from "../../components/user/ShopBackground";
-import type {
-	IModelPagination,
-	IOwner,
-	IPond,
-} from "../../types/backend";
+import type { IModelPagination, IOwner, IPond } from "../../types/backend";
 import Pond from "./Pond";
 import styles from "./PondLanding.module.css";
 
@@ -61,7 +57,9 @@ function PondLanding() {
 				const response = await fetchData(page, 6);
 
 				if (response.meta.totalElements === 0) {
-					console.info("No ponds returned by the backend; using frontend sample data.");
+					console.info(
+						"No ponds returned by the backend; using frontend sample data.",
+					);
 					setPondList(MOCK_PONDS);
 					setTotalPages(1);
 					if (page !== 1) setPage(1);
@@ -71,7 +69,10 @@ function PondLanding() {
 				setPondList(response.result);
 				setTotalPages(response.meta.totalPages);
 			} catch (error) {
-				console.error("Failed to fetch ponds; using frontend sample data:", error);
+				console.error(
+					"Failed to fetch ponds; using frontend sample data:",
+					error,
+				);
 				setPondList(MOCK_PONDS);
 				setTotalPages(1);
 				if (page !== 1) setPage(1);
@@ -301,79 +302,3 @@ function PondLanding() {
 }
 
 export default PondLanding;
-
-// const mockData: IPond[] = [
-// 	{
-// 		id: 1,
-// 		name: "Kohaku Pond",
-// 		level: 10,
-// 		capacity: 15,
-// 		waterQuality: 70,
-// 		temperature: 20,
-// 		pH: 3.6,
-// 		oxygen: 6.2,
-// 		createdAt: new Date(),
-// 		description:
-// 			"This pond is used to raise Kohaku koi fishes.\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes\nThis pond is used to raise Kohaku koi fishes",
-// 	},
-// 	{
-// 		id: 2,
-// 		name: "Uia Pond",
-// 		level: 10,
-// 		capacity: 10,
-// 		waterQuality: 100,
-// 		temperature: 24,
-// 		pH: 7.1,
-// 		oxygen: 6.2,
-// 		createdAt: new Date(),
-// 		description: "This pond is used to raise Kohaku koi fishes",
-// 	},
-// 	{
-// 		id: 3,
-// 		name: "A Pond",
-// 		level: 10,
-// 		capacity: 10,
-// 		waterQuality: 100,
-// 		temperature: 24,
-// 		pH: 7.1,
-// 		oxygen: 6.2,
-// 		createdAt: new Date(),
-// 		description: "This pond is used to raise Kohaku koi fishes",
-// 	},
-// 	{
-// 		id: 4,
-// 		name: "Showa Pond",
-// 		level: 10,
-// 		capacity: 10,
-// 		waterQuality: 100,
-// 		temperature: 24,
-// 		pH: 7.1,
-// 		oxygen: 6.2,
-// 		createdAt: new Date(),
-// 		description: "This pond is used to raise Kohaku koi fishes",
-// 	},
-// 	{
-// 		id: 5,
-// 		name: "Ronaldo Pond",
-// 		level: 10,
-// 		capacity: 10,
-// 		waterQuality: 100,
-// 		temperature: 24,
-// 		pH: 7.1,
-// 		oxygen: 6.2,
-// 		createdAt: new Date(),
-// 		description: "This pond is used to raise Kohaku koi fishes",
-// 	},
-// 	{
-// 		id: 6,
-// 		name: "Pikachu Pond",
-// 		level: 10,
-// 		capacity: 10,
-// 		waterQuality: 100,
-// 		temperature: 24,
-// 		pH: 7.1,
-// 		oxygen: 6.2,
-// 		createdAt: new Date(),
-// 		description: "This pond is used to raise Kohaku koi fishes",
-// 	},
-// ];

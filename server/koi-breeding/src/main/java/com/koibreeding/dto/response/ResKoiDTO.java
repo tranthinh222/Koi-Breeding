@@ -27,8 +27,8 @@ public class ResKoiDTO {
     private Instant bornedAt;
     private Integer pondId;
     private LifeStage lifeStage;
-    private Integer fatherId;
-    private Integer motherId;
+    private KoiParent father;
+    private KoiParent mother;
     private BigDecimal potential;
     private Dictionary dictionary;
     private Integer patternScore;
@@ -42,5 +42,14 @@ public class ResKoiDTO {
     public static class KoiMutation {
         private Integer id;
         private String name;
+    }
+
+    @Getter
+    @Setter
+    public static class KoiParent {
+        private Integer id;
+        private String name;
+        private String imageUrl;
+        private boolean isBelongToUser;
     }
 }

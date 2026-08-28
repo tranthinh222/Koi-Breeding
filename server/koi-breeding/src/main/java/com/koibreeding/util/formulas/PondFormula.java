@@ -3,10 +3,13 @@ package com.koibreeding.util.formulas;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import com.koibreeding.domain.Pond;
+
 public class PondFormula {
-    private static final BigDecimal wPH = BigDecimal.valueOf(0.3);
-    private static final BigDecimal wTemperature = BigDecimal.valueOf(0.3);
-    private static final BigDecimal wOxygen = BigDecimal.valueOf(0.4);
+    private static final BigDecimal wPH = BigDecimal.valueOf(0.2);
+    private static final BigDecimal wTemperature = BigDecimal.valueOf(0.15);
+    private static final BigDecimal wWaterQuality = BigDecimal.valueOf(0.35);
+    private static final BigDecimal wOxygen = BigDecimal.valueOf(0.3);
 
     private static final BigDecimal[] pHList = {
             BigDecimal.valueOf(6.0),
@@ -130,14 +133,41 @@ public class PondFormula {
         return 100;
     }
 
-    public static int getWaterQualityScore(BigDecimal pH, BigDecimal temperature, BigDecimal oxygen) {
+    public static int getWaterQualityScore(int waterQuality) {
+        if (0 <= waterQuality && waterQuality <= 20) {
+            return 20;
+        }
+
+        if (20 < waterQuality && waterQuality <= 40) {
+            return 40;
+        }
+
+        if (40 < waterQuality && waterQuality <= 60) {
+            return 60;
+        }
+
+        if (60 < waterQuality && waterQuality <= 80) {
+            return 80;
+        }
+
+        return 100;
+    }
+
+    public static int getEnvironmentQualityScore(BigDecimal pH, BigDecimal temperature, BigDecimal oxygen,
+            int waterQuality) {
         BigDecimal phScore = BigDecimal.valueOf(getPHScore(pH));
         BigDecimal temperatureScore = BigDecimal.valueOf(getTemperatureScore(temperature));
         BigDecimal oxygenScore = BigDecimal.valueOf(getOxygenScore(oxygen));
+        BigDecimal waterQualityScore = BigDecimal.valueOf(getWaterQualityScore(waterQuality));
         BigDecimal op1 = wPH.multiply(phScore);
         BigDecimal op2 = wTemperature.multiply(temperatureScore);
-        BigDecimal op3 = wOxygen.multiply(oxygenScore);
+        BigDecimal op3 = wWaterQuality.multiply(waterQualityScore);
+        BigDecimal op4 = wOxygen.multiply(oxygenScore);
 
-        return op1.add(op2).add(op3).setScale(0, RoundingMode.HALF_UP).intValue();
+        return op1.add(op2).add(op3).add(op4).setScale(0, RoundingMode.HALF_UP).intValue();
+    }
+
+    public static Pond generateAPond() {
+        return new Pond();
     }
 }

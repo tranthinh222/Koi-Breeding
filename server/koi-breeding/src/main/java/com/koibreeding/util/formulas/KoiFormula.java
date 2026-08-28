@@ -89,7 +89,8 @@ public class KoiFormula {
         double mutationModifier = mutation != null ? mutation.getValue().doubleValue() : 1.0;
         double baseGrowthRate = dictionary.getBaseGrowthRate().doubleValue();
         double environmentModifier = pond != null ? 0.8
-                + (PondFormula.getWaterQualityScore(pond.getPH(), pond.getTemperature(), pond.getOxygen()) / 100.0)
+                + (PondFormula.getEnvironmentQualityScore(pond.getPH(), pond.getTemperature(), pond.getOxygen(),
+                        pond.getWaterQuality()))
                         * 0.4
                 : 1.0;
         double nutritionModifier = 0.85 + (foodBar / 100.0) * 0.3;
@@ -128,7 +129,8 @@ public class KoiFormula {
         double bodyTypeModifier = dictionary.getShape().equals(Shape.STANDARD) ? 1.0 : 0.94;
         double potentialModifier = potential.doubleValue();
         double environmentModifier = (pond != null) ? 0.8
-                + (PondFormula.getWaterQualityScore(pond.getPH(), pond.getTemperature(), pond.getOxygen()) / 100.0)
+                + (PondFormula.getEnvironmentQualityScore(pond.getPH(), pond.getTemperature(), pond.getOxygen(),
+                        pond.getWaterQuality()))
                         * 0.4
                 : 1.0;
         double nutritionModifier = 0.85 + (foodBar / 100.0) * 0.3;
@@ -174,7 +176,7 @@ public class KoiFormula {
         return ageModifier;
     }
 
-    public static Koi generateStarterKoi(Dictionary dictionary) {
+    public static Koi generateStarterKoi(Dictionary dictionary, Pond pond) {
         Koi koi = new Koi();
 
         int age = 50;
@@ -187,8 +189,8 @@ public class KoiFormula {
         int bodyScore = (int) generateGaussianInRange(60.0, 100.0);
         int skinScore = (int) generateGaussianInRange(60.0, 100.0);
         int scaleScore = (int) generateGaussianInRange(60.0, 100.0);
-        BigDecimal length = calculateKoiLength(age, health, foodBar, cureBar, potential, null, dictionary, null);
-        BigDecimal weight = calculateKoiWeight(length.doubleValue(), potential, foodBar, health, null, dictionary);
+        BigDecimal length = calculateKoiLength(age, health, foodBar, cureBar, potential, null, dictionary, pond);
+        BigDecimal weight = calculateKoiWeight(length.doubleValue(), potential, foodBar, health, pond, dictionary);
         int price = calculateKoiPrice(age, length.doubleValue(), patternScore, colorScore, bodyScore, skinScore,
                 scaleScore, health, null, dictionary);
 
@@ -201,6 +203,7 @@ public class KoiFormula {
         koi.setCureBar(cureBar);
         koi.setGender(generateGaussianInRange(-1.0, 1.0) < 0 ? Gender.MALE : Gender.FEMALE);
         koi.setPrice(price);
+        koi.setPond(pond);
         koi.setLifeStage(defineLifeStage(age));
         koi.setPotential(potential);
         koi.setDictionary(dictionary);

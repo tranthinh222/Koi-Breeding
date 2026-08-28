@@ -50,7 +50,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   const [pondPage, setPondPage] = useState(0);
-  const [avatarSrc, setAvatarSrc] = useState("");
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
 
   const pageSize = 2;
 
@@ -394,7 +394,7 @@ export default function Home() {
           <section className="wood-panel profile-card">
             <div className="profile-avatar">
               <img
-                src={avatarSrc}
+                src={avatarSrc ?? fallbackAvatar}
                 alt={user.username}
                 onError={() => {
                   if (avatarSrc !== fallbackAvatar) {

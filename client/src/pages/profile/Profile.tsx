@@ -21,6 +21,7 @@ type UserProfile = {
   email: string;
   birthday: string | null;
   gender: Gender | null;
+  role?: "USER" | "ADMIN" | null;
   exp: number;
   avatarUrl: string | null;
   createdAt?: string;
@@ -547,6 +548,7 @@ export default function Profile() {
           setAuthenticatedUser({
             ...updatedProfile,
             gender: updatedProfile.gender || null,
+            role: updatedProfile.role ?? "USER",
             createdAt: updatedProfile.createdAt ?? "",
             updatedAt: updatedProfile.updatedAt ?? "",
           });

@@ -1,7 +1,8 @@
 package com.koibreeding.security;
 
+import com.koibreeding.enums.Role;
 import com.koibreeding.service.JwtService;
-import com.koibreeding.util.CookieUtil;
+import com.koibreeding.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,18 +10,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CookieUtil cookieUtil;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -38,8 +40,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (jwtService.isTokenValid(token)) {
             Integer userId = jwtService.extractUserId(token);
+            var user = userRepository.findById(userId).orElse(null);
+
+            if (user == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            Role role = user.getRole() != null ? user.getRole() : Role.USER;
             var authToken = new UsernamePasswordAuthenticationToken(
-                    userId, null, java.util.Collections.emptyList()
+                    userId,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
             );
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }

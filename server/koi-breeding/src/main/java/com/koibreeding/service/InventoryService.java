@@ -1,6 +1,7 @@
 package com.koibreeding.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -8,6 +9,7 @@ import com.koibreeding.domain.Inventory;
 import com.koibreeding.domain.Item;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.response.ResItemInventory;
+import com.koibreeding.enums.ItemType;
 import com.koibreeding.repository.InventoryRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -116,5 +118,29 @@ public class InventoryService {
 
     public Inventory handleFetchInventoryById(Integer inventoryId) {
         return this.inventoryRepository.findById(inventoryId).orElse(null);
+    }
+
+    public List<ResItemInventory> handleFetchUserInventoryByItemType(Integer userId, ItemType itemType) {
+        if (!userService.isUserExistById(userId)) {
+            throw new RuntimeException("Failed to fetch user inventory. User does not exist.");
+        }
+
+        List<ResItemInventory> inventoryList = this.inventoryRepository.findByUser_IdAndItem_ItemType(userId, itemType)
+                .stream().map(this::convertToResItemInventory).collect(Collectors.toList());
+
+        return inventoryList;
+    }
+
+    public ResItemInventory convertToResItemInventory(Inventory inventory) {
+        return new ResItemInventory(
+                inventory.getItem().getId(),
+                inventory.getItem().getName(),
+                inventory.getItem().getPrice(),
+                inventory.getItem().getItemType(),
+                inventory.getItem().getEffectValue(),
+                inventory.getItem().getEffectType(),
+                inventory.getItem().getDescription(),
+                inventory.getQuantity(),
+                inventory.getItem().getItemUrl());
     }
 }

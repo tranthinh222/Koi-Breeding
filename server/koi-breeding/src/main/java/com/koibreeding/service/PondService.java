@@ -16,7 +16,6 @@ import com.koibreeding.dto.request.RequestBuyPondDTO;
 import com.koibreeding.dto.response.ResPondDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.repository.PondRepository;
-import com.koibreeding.util.formulas.PondFormula;
 
 @Service
 public class PondService {
@@ -55,8 +54,8 @@ public class PondService {
         newPond.setPH(initialPH);
         BigDecimal initialOxygen = BigDecimal.valueOf(5 + Math.random()).setScale(2, RoundingMode.HALF_UP);
         newPond.setOxygen(initialOxygen);
-        int waterQuality = PondFormula.getWaterQualityScore(initialPH, initialTemperature, initialOxygen);
-        newPond.setWaterQuality(waterQuality);
+        Integer initialWaterQuality = (int) (Math.random() * 101);
+        newPond.setWaterQuality(initialWaterQuality);
         newPond.setDescription(buyPondRequestDTO.getDescription());
 
         Pond savedPond = this.pondRepository.save(newPond);

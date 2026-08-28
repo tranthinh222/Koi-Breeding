@@ -82,7 +82,7 @@ public class KoiService {
         List<Koi> newKoiList = new ArrayList<Koi>();
 
         for (int i = 0; i < requestReleaseKoiDTO.getQuantity(); ++i) {
-            newKoiList.add(KoiFormula.generateStarterKoi(requestDictionary));
+            newKoiList.add(KoiFormula.generateStarterKoi(requestDictionary, requestPond));
         }
 
         List<Koi> resultKoiList = this.koiRepository.saveAll(newKoiList);
@@ -202,8 +202,31 @@ public class KoiService {
         resKoiDTO.setBornedAt(koi.getBornedAt().toInstant());
         resKoiDTO.setPondId(koi.getPond().getId());
         resKoiDTO.setLifeStage(koi.getLifeStage());
-        resKoiDTO.setFatherId(koi.getFather() != null ? koi.getFather().getId() : null);
-        resKoiDTO.setMotherId(koi.getMother() != null ? koi.getMother().getId() : null);
+        Koi father = koi.getFather();
+        Koi mother = koi.getMother();
+
+        if (father != null) {
+            ResKoiDTO.KoiParent fatherData = new ResKoiDTO.KoiParent();
+            fatherData.setId(father.getId());
+            fatherData.setName(father.getName());
+            fatherData.setImageUrl(father.getDictionary().getImageUrl());
+            Integer koiUser = koi.getPond().getOwner().getId();
+            Integer fatherUser = father.getPond().getOwner().getId();
+            fatherData.setBelongToUser(koiUser.equals(fatherUser));
+            resKoiDTO.setFather(fatherData);
+        }
+
+        if (mother != null) {
+            ResKoiDTO.KoiParent motherData = new ResKoiDTO.KoiParent();
+            motherData.setId(mother.getId());
+            motherData.setName(mother.getName());
+            motherData.setImageUrl(mother.getDictionary().getImageUrl());
+            Integer koiUser = koi.getPond().getOwner().getId();
+            Integer motherUser = mother.getPond().getOwner().getId();
+            motherData.setBelongToUser(koiUser.equals(motherUser));
+            resKoiDTO.setFather(motherData);
+        }
+
         resKoiDTO.setPotential(koi.getPotential());
         resKoiDTO.setDictionary(koi.getDictionary());
         resKoiDTO.setPatternScore(koi.getPatternScore());

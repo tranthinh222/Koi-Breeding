@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { IKoi, IPond } from "../../../../types/backend";
+import KoiProfile from "../../KoiProfile/KoiProfile";
 import styles from "./PondCanvas.module.css";
 import {
 	debugDrawKoi,
@@ -141,6 +142,8 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 	const latestKoiListRef = useRef<IKoi[]>(pondKoiList);
 	const lotusRef = useRef<LotusState[]>([]);
 	const ripplesRef = useRef<RippleState[]>([]);
+
+	const [activeKoiProfile, setActiveKoiProfile] = useState<IKoi | null>(null);
 
 	// 1. STATE LƯU TRỮ CON CÁ ĐANG ĐƯỢC CHỌN
 	const [activeFishIndex, setActiveFishIndex] = useState<number | null>(null);
@@ -480,9 +483,13 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 				<div ref={popupRef} className={styles.fishMenu}>
 					<button
 						className={styles.fishInfoButton}
-						onClick={() =>
-							alert(`Xem thông tin cá số ${activeFishIndex}`)
-						}
+						onClick={() => {
+							setActiveKoiProfile(
+								latestKoiListRef.current.at(
+									activeFishIndex,
+								) as IKoi,
+							);
+						}}
 					>
 						Thông tin
 					</button>
@@ -502,6 +509,14 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 					>
 						X
 					</button>
+				</div>
+			)}
+			{activeKoiProfile !== null && (
+				<div className={styles.overlay}>
+					<KoiProfile
+						koi={activeKoiProfile}
+						onClose={() => setActiveKoiProfile(null)}
+					/>
 				</div>
 			)}
 		</>

@@ -138,10 +138,14 @@ const Listings: React.FC = () => {
     <main className="main-content">
       {/* HEADER */}
       <div className="header-section">
-        <div className="wood-board">
-          <h1>MY LISTINGS</h1>
-          <p>Manage Market Items</p>
-        </div>
+        <header className="title-section">
+          <div className="wood-sign">
+            <div className="koi-title-container"></div>
+            <h1 className="koi-title-desktop">HOME</h1>
+            <p>User Info</p>
+            <h1 className="koi-title-mobile">HOME</h1>
+          </div>
+        </header>
 
         {/* VIEW SWITCH */}
         <div className="view-switch">

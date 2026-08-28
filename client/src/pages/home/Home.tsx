@@ -1,232 +1,143 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { getUser } from '../../api/user'
-import { getBalanceWallet } from '../../api/wallet'
-import { getPonds } from '../../api/pond'
-import maleAvatar from '../../assets/avatars/male_blank_avatar.png'
-import femaleAvatar from '../../assets/avatars/female_blank_avatar.png'
-import { useAuth } from '../../context/AuthContext'
-import {logoutRequest} from '../../api/auth'
-import '../../style/home.css'
-import '../../style/global.css'
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import type { IPond } from '../../types/backend'
+import { getUser } from "../../api/user";
+import { getBalanceWallet } from "../../api/wallet";
+import { getPonds } from "../../api/pond";
 
-import StoreIcon from '../../assets/icons/storefront.svg'
-import ArrowOutward from '../../assets/icons/arrow_outward.svg'
-import ShopIcon from '../../assets/icons/shop.svg'
-import PondsIcon from '../../assets/icons/water.svg'
-// ------
-// Types
-// ------
+import maleAvatar from "../../assets/avatars/male_blank_avatar.png";
+import femaleAvatar from "../../assets/avatars/female_blank_avatar.png";
+
+import { useAuth } from "../../context/AuthContext";
+
+import PondsIcon from "../../assets/icons/water.svg";
+import StoreIcon from "../../assets/icons/storefront.svg";
+import ShopIcon from "../../assets/icons/shop.svg";
+
+import { logoutRequest } from "../../api/auth";
+
+import "../../style/global.css";
+import "../../style/home.css";
+
+import type { IPond } from "../../types/backend";
 
 type HomeUser = {
-  id: number
-  username: string
-  gender?: string | null
-  email?: string
-  birthday?: string | null
-  exp?: number
-  avatarUrl?: string | null
-}
+  id: number;
+  username: string;
+  gender?: string | null;
+  email?: string;
+  birthday?: string | null;
+  exp?: number;
+  avatarUrl?: string | null;
+};
 
 type Wallet = {
-  balance: number
-}
-
-type Breeding = {
-  parentA?: string
-  parentB?: string
-  status?: string
-}
-
-type FeaturedKoi = {
-  id?: number
-  name?: string
-  image?: string
-  rarity?: string
-}
+  balance: number;
+};
 
 type HomeResponse = {
-  user: HomeUser
-  wallet?: Wallet | null
-  ponds: IPond[]
-  breeding?: Breeding | null
-  featuredKoi: FeaturedKoi[]
-}
+  user: HomeUser;
+  wallet?: Wallet | null;
+  ponds: IPond[];
+};
 
-// ------
-// Helpers (kept from the legacy Home.tsx)
-// ------
+export default function Home() {
+  const { currentUserId } = useAuth();
+  const navigate = useNavigate();
 
-const getHomeUserId = (currentUserId: number | null) => {
-  const idFromUrl = new URLSearchParams(window.location.search).get('id')
-  return idFromUrl ? Number(idFromUrl) : currentUserId
-}
+  const [data, setData] = useState<HomeResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-function getLevel(exp = 0) {
-  return Math.max(1, Math.floor(exp / 100))
-}
+  const [pondPage, setPondPage] = useState(0);
+  const [avatarSrc, setAvatarSrc] = useState("");
 
-// ------
-// Small presentational pieces
-// ------
+  const pageSize = 2;
 
-/** Loading / error / empty banner shown in place of the main content. */
-function HomeStateMessage({
-  type,
-  message,
-}: {
-  type: 'loading' | 'error' | 'empty'
-  message: string
-}) {
-  const tone =
-    type === 'error'
-      ? 'text-error'
-      : type === 'empty'
-        ? 'text-on-surface-variant'
-        : 'text-on-surface'
+  const getHomeUserId = () => {
+    const idFromUrl = new URLSearchParams(window.location.search).get("id");
 
-  return (
-    <div className={`glass-card rounded-[32px] p-10 text-center font-body-lg text-body-lg ${tone}`}>
-      {message}
-    </div>
-  )
-}
-
-function PondMiniCard({ pond }: { pond: IPond }) {
-  return (
-    <article className="pond-mini-card">
-      <div className="pond-mini-card-header">
-        <div>
-          <span className="home-eyebrow">Pond</span>
-          <h5>{pond.name}</h5>
-        </div>
-        <strong>Lv. {pond.level}</strong>
-      </div>
-
-      <div className="pond-mini-metrics">
-        <div>
-          <span>Capacity</span>
-          <strong>{pond.capacity}</strong>
-        </div>
-        <div>
-          <span>Water</span>
-          <strong>{pond.waterQuality}%</strong>
-        </div>
-        <div>
-          <span>Temp</span>
-          <strong>{Number(pond.temperature).toFixed(1)}°C</strong>
-        </div>
-        <div>
-          <span>pH / Oxygen</span>
-          <strong>
-            {Number(pond.pH).toFixed(1)} / {Number(pond.oxygen).toFixed(2)}
-          </strong>
-        </div>
-      </div>
-    </article>
-  )
-}
-
-function PondsPreviewPanel({
-  ponds,
-  onNavigate,
-}: {
-  ponds: IPond[]
-  onNavigate: () => void
-}) {
-  const pageSize = 2
-  const [page, setPage] = useState(0)
-
-  const totalPages = Math.max(1, Math.ceil(ponds.length / pageSize))
+    return idFromUrl ? Number(idFromUrl) : currentUserId;
+  };
 
   useEffect(() => {
-    setPage(0)
-  }, [ponds])
+    let cancelled = false;
 
-  const visiblePonds = useMemo(
-    () => ponds.slice(page * pageSize, page * pageSize + pageSize),
-    [page, ponds],
-  )
+    const loadHome = async () => {
+      const userId = getHomeUserId();
 
-  if (ponds.length === 0) {
-    return (
-      <a
-        className="glass-card tab-card ponds-empty-card"
-        href="#"
-        onClick={(e) => {
-          e.preventDefault()
-          onNavigate()
-        }}
-      >
-        <div className="ponds-empty-top">
-          <div className="tab-icon-box">
-            <img className='icon-medium' src={PondsIcon} alt='ponds'/>
-          </div>
-          <img className="tab-arrow ponds-arrow" src={ArrowOutward} alt="arrow_outward" />
-        </div>
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
 
-        <div className="ponds-empty-copy">
-          <h4>Ponds</h4>
-          <p>Create your first pond and start raising koi.</p>
-        </div>
-      </a>
-    )
-  }
+      try {
+        setLoading(true);
+        setError(null);
 
-  return (
-    <section className="glass-card ponds-card">
-      <div className="ponds-card-header">
-        <div>
-          <span className="featured-badge">PONDS</span>
-          <h4 className="featured-title">Your ponds</h4>
-          <p className="featured-desc">Browse two ponds at a time.</p>
-        </div>
+        const [user, wallet, pondPageData] = await Promise.all([
+          getUser(userId),
+          getBalanceWallet(userId),
+          getPonds(0, 100),
+        ]);
 
-        <div className="ponds-pager">
-          <span className="ponds-page-meta">
-            {page + 1}/{totalPages}
-          </span>
-          <button
-            className="ponds-page-button"
-            type="button"
-            onClick={() => setPage((current) => Math.max(0, current - 1))}
-            disabled={page === 0}
-          >
-            ←
-          </button>
-          <button
-            className="ponds-page-button"
-            type="button"
-            onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
-            disabled={page >= totalPages - 1}
-          >
-            →
-          </button>
-        </div>
-      </div>
+        const ownedPonds = pondPageData.result.filter(
+          (pond: IPond) => !pond.owner || pond.owner.id === userId,
+        );
 
-      <div className="ponds-grid">
-        {visiblePonds.map((pond) => (
-          <PondMiniCard key={pond.id} pond={pond} />
-        ))}
-      </div>
-    </section>
-  )
-}
+        const homeData: HomeResponse = {
+          user,
+          wallet,
+          ponds: ownedPonds.length > 0 ? ownedPonds : pondPageData.result,
+        };
 
-// ------
-// Page
-// ------
-function ProfilePanel({ user }: { user: HomeUser }) {
-  const navigate = useNavigate()
-  const fallbackAvatar = user.gender === 'MALE' ? maleAvatar : femaleAvatar
-  const [avatarSrc, setAvatarSrc] = useState(user.avatarUrl || fallbackAvatar)
+        if (!cancelled) {
+          setData(homeData);
+          setPondPage(0);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load home data.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadHome();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUserId]);
+
+  const user = data?.user;
+
+  const fallbackAvatar = user?.gender === "MALE" ? maleAvatar : femaleAvatar;
 
   useEffect(() => {
-    setAvatarSrc(user.avatarUrl || fallbackAvatar)
-  }, [user.avatarUrl, fallbackAvatar])
+    if (user) {
+      setAvatarSrc(user.avatarUrl || fallbackAvatar);
+    }
+  }, [user?.avatarUrl, user?.gender]);
+
+  const ponds = data?.ponds ?? [];
+
+  const pondCount = ponds.length;
+
+  const totalPondPages = Math.max(1, Math.ceil(ponds.length / pageSize));
+
+  const visiblePonds = useMemo(() => {
+    return ponds.slice(pondPage * pageSize, pondPage * pageSize + pageSize);
+  }, [ponds, pondPage]);
+
+  const getLevel = (exp = 0) => {
+    return Math.max(1, Math.floor(exp / 100));
+  };
 
   const handleLogout = async () => {
     try {
@@ -240,186 +151,294 @@ function ProfilePanel({ user }: { user: HomeUser }) {
       console.error("Logout failed:", error);
     }
   };
-  const goToProfile = () => navigate('/profile')
-  return (
-    <aside className="profile-panel">
-      <div className="home-profile-avatar">
-        <img
-          src={avatarSrc}
-          alt={user.username}
-          onError={() => {
-            if (avatarSrc !== fallbackAvatar) {
-              setAvatarSrc(fallbackAvatar)
-            }
-          }}
-        />
-      </div>
 
-      <div className="profile-details">
-        <strong className="username">{user.username}</strong>
-        <span className="level">Level {getLevel(user.exp)}</span>
-      </div>
-      <div className='profile-action'>
-        <button className="view-profile-button" onClick={goToProfile}>
-          View Profile
-        </button>
-        <button className="logout-button" onClick={handleLogout}>
-            Sign out
-        </button>
-      </div>
-    </aside>
-  )
-}
-
-export default function Home() {
-  const { currentUserId } = useAuth()
-  const navigate = useNavigate()
-  const [data, setData] = useState<HomeResponse | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-
-    const loadHome = async () => {
-      const userId = getHomeUserId(currentUserId)
-      if (!userId) return
-
-      try {
-        setLoading(true)
-        setError(null)
-
-        const [user, wallet, pondPage] = await Promise.all([
-          getUser(userId),
-          getBalanceWallet(userId),
-          getPonds(0, 100),
-        ])
-        const ownedPonds = pondPage.result.filter(
-          (pond) => !pond.owner || pond.owner.id === userId,
-        )
-
-        const homeData: HomeResponse = {
-          user,
-          wallet,
-          ponds: ownedPonds.length > 0 ? ownedPonds : pondPage.result,
-          breeding: null,
-          featuredKoi: [],
-        }
-        if (!cancelled) setData(homeData)
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load home data.')
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-
-    void loadHome()
-
-    return () => {
-      cancelled = true
-    }
-  }, [currentUserId])
-
-  const user = data?.user
-  const featuredKoi = data?.featuredKoi?.[0]
-  const ponds = data?.ponds ?? []
-
-  return (
-    <div className='page-wrapper'>
-          {/* TopAppBar */}
-          <header className="title-section">
-            <div className="wood-sign">
-              <div className="koi-title-container"></div>
-              <h1 className="koi-title-desktop">HOME</h1>
-                <p>User Info</p>
-              <h1 className='koi-title-mobile'>HOME</h1>
+  if (loading) {
+    return (
+      <main className="home-body">
+        <div className="home-layout">
+          <div className="home-main">
+            <div className="home-state-message text-on-surface">
+              Loading home...
             </div>
-          </header>
-          <main className='container'>
-            
-            {loading ? (
-              <div className='full-width'>
-                <HomeStateMessage type="loading" message='Loading profile...'/>
-              </div>
-            ) : error ? (
-              <div className='full-width'>
-                <HomeStateMessage type="error" message={error}/>
-              </div>
-            ) : data && user ? (
-              <div className="dashboard-wrapper">
-                <div className="main-content">
-                  <div className="left-column">
-                    <div className="glass-card featured-card">
-                      <div>
-                        <span className="featured-badge">
-                          {featuredKoi?.rarity?.toUpperCase() ?? 'FEATURED'}
-                        </span>
-                        <h4 className="featured-title">
-                          {featuredKoi?.name ?? 'No featured Koi yet'}
-                        </h4>
-                        <p className="featured-desc">Ready for breeding</p>
-                      </div>
-                        {featuredKoi?.image ? (
-                          <img className="featured-img" src={featuredKoi.image} alt={featuredKoi.name ?? 'Koi'} />
-                        ) : (
-                          <button className="breeding-action-button" onClick={(e) => {e.preventDefault(); navigate('/breeding')}}>Start Breeding</button>
-                        )}
-                    </div>
-                    <PondsPreviewPanel ponds={ponds} onNavigate={() => navigate('/ponds')} />
-                  </div>
-                  {/* Tabs Section */}
-                  <div className="right-column">
-                    {/* Marketplace Tab */}
-                    <a className="glass-card tab-card tab-marketplace" href="#" onClick={(e) => { e.preventDefault(); navigate('/marketplace'); }}>
-                      <div className="tab-bg-gradient-market" />
-                      <div className="tab-header">
-                        <div className="tab-icon-box">
-                          <img className='icon-medium' src={StoreIcon} alt='storefront'></img>
-                        </div>
-                        <img className='tab-arrow' src={ArrowOutward} alt='arrow_outward' />
-                      </div>
-                      <div className="tab-content">
-                        <h3 className="tab-title">Marketplace</h3>
-                        <p className="tab-desc">Trade rare breeds and expand your collection with other masters.</p>
-                      </div>
-                      <div className="tab-bg-icon">
-                        <img className='icon-medium' src={StoreIcon} alt='storefront'></img>
-                      </div>
-                    </a>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
-                    {/* Shop Tab */}
-                    <a className="glass-card tab-card tab-shop" href="#" onClick={(e) => { e.preventDefault(); navigate('/shop'); }}>
-                      <div className="tab-bg-gradient-shop" />
-                      <div className="tab-header">
-                        <div className="tab-icon-box">
-                          <img className='icon-medium' src={ShopIcon} alt='shopping_bag'/>
-                        </div>
-                        <img className='tab-arrow' src={ArrowOutward} alt='arrow_outward' />
-                      </div>
-                      <div className="tab-content">
-                        <h3 className="tab-title">Shop</h3>
-                        <p className="tab-desc">Purchase premium food, pond decorations, and utility items.</p>
-                      </div>
-                      <div className="tab-bg-icon">
-                        <img src={ShopIcon} alt='shop'></img>
-                      </div>
-                    </a>
-                  </div>
+  if (error) {
+    return (
+      <main className="home-body">
+        <div className="home-layout">
+          <div className="home-main">
+            <div className="home-state-message text-error">{error}</div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+  if (!data || !user) {
+    return (
+      <main className="home-body">
+        <div className="home-layout">
+          <div className="home-main">
+            <div className="home-state-message text-on-surface-variant">
+              No data available
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+  return (
+    <main className="home-body">
+      <section className="title-section">
+        <div className="wood-sign">
+          <h1>HOME</h1>
+          <p>Koi Sanctuary</p>
+        </div>
+      </section>
+      <div className="home-layout">
+        <section className="home-main">
+          <div className="stats-row">
+            <div className="wood-panel stat-card">
+              <div className="stat-icon fish-icon">🐟</div>
+
+              <div>
+                <strong>Total Fish</strong>
+                <span className="home-stat-value">--</span>
+              </div>
+            </div>
+
+            <div className="wood-panel stat-card">
+              <div className="stat-icon">
+                <img src={PondsIcon} alt="Ponds" />
+              </div>
+
+              <div>
+                <strong>Ponds Owned</strong>
+
+                <span className="home-stat-value">{pondCount}</span>
+              </div>
+            </div>
+          </div>
+          <section className="home-box ponds-section">
+            <div className="wood-sign section-title">
+              <h2>My Ponds</h2>
+
+              {ponds.length > 0 && (
+                <div className="pond-navigation">
+                  <button
+                    type="button"
+                    disabled={pondPage === 0}
+                    onClick={() => setPondPage((page) => Math.max(0, page - 1))}
+                  >
+                    ‹
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={pondPage >= totalPondPages - 1}
+                    onClick={() =>
+                      setPondPage((page) =>
+                        Math.min(totalPondPages - 1, page + 1),
+                      )
+                    }
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {ponds.length === 0 ? (
+              <div className="ponds-empty">
+                <div className="tab-icon-box">
+                  <img className="icon-medium" src={PondsIcon} alt="Ponds" />
                 </div>
 
-                <div className="sidebar">
-                  <ProfilePanel user={data.user} />
-                </div>
-                
+                <h3>No ponds yet</h3>
+
+                <p>Create your first pond and start raising koi.</p>
+
+                <button
+                  className="pond-button"
+                  onClick={() => navigate("/ponds")}
+                >
+                  Go to Ponds
+                </button>
               </div>
             ) : (
-              <div className='full-width'>
-                <HomeStateMessage type="empty" message='No data available' />
+              <div className="pond-grid">
+                {visiblePonds.map((pond) => (
+                  <article className="pond-card" key={pond.id}>
+                    <div className="pond-image">
+                      <div className="pond-image-placeholder">
+                        <img src={PondsIcon} alt="Pond" />
+                      </div>
+
+                      <span className="capacity">
+                        Capacity: {pond.capacity}
+                      </span>
+                    </div>
+
+                    <div className="pond-content">
+                      <div>
+                        <h4>{pond.name}</h4>
+
+                        <p>Pond Level {pond.level}</p>
+                      </div>
+
+                      <div className="pond-info">
+                        <div>
+                          <span>Capacity</span>
+                          <strong>{pond.capacity}</strong>
+                        </div>
+
+                        <div>
+                          <span>Water</span>
+                          <strong>{pond.waterQuality}%</strong>
+                        </div>
+
+                        <div>
+                          <span>Temp</span>
+                          <strong>
+                            {Number(pond.temperature).toFixed(1)}
+                            °C
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>pH / O2</span>
+                          <strong>
+                            {Number(pond.pH).toFixed(1)}
+                            {" / "}
+                            {Number(pond.oxygen).toFixed(2)}
+                          </strong>
+                        </div>
+                      </div>
+
+                      <button
+                        className="pond-button"
+                        onClick={() => navigate(`/ponds/${pond.id}`)}
+                      >
+                        View Pond Details
+                      </button>
+                    </div>
+                  </article>
+                ))}
               </div>
             )}
-          </main>
-    </div>
-  )
+          </section>
+          <section className="home-box breeding-section">
+            <div className="wood-sign section-title">
+              <h2>Breeding Lab</h2>
+            </div>
+
+            <div className="breeding-area">
+              <div className="breeding-slot">
+                <div className="koi-slot">
+                  <span className="slot-plus">+</span>
+                </div>
+
+                <span>Select Parent</span>
+              </div>
+
+              <div className="breeding-icon">♥</div>
+
+              <div className="breeding-slot">
+                <div className="koi-slot">
+                  <span className="slot-plus">+</span>
+                </div>
+
+                <span>Select Parent</span>
+              </div>
+
+              <div className="breeding-arrow">→</div>
+
+              <div className="breeding-slot">
+                <span className="result-question">?</span>
+
+                <span className="potential-result">Potential Result</span>
+              </div>
+            </div>
+
+            <button
+              className="pond-button breeding-home-button"
+              onClick={() => navigate("/breeding")}
+            >
+              Open Breeding Lab
+            </button>
+          </section>
+          <div className="quick-access">
+            <button
+              className="wood-panel quick-button"
+              onClick={() => navigate("/shop")}
+            >
+              <img src={StoreIcon} alt="" />
+
+              <strong>Visit Items Shop</strong>
+            </button>
+
+            <button
+              className="wood-panel quick-button"
+              onClick={() => navigate("/marketplace")}
+            >
+              <img src={ShopIcon} alt="" />
+
+              <strong>Go to Marketplace</strong>
+            </button>
+          </div>
+        </section>
+        <aside className="home-sidebar">
+          <section className="wood-panel profile-card">
+            <div className="profile-avatar">
+              <img
+                src={avatarSrc}
+                alt={user.username}
+                onError={() => {
+                  if (avatarSrc !== fallbackAvatar) {
+                    setAvatarSrc(fallbackAvatar);
+                  }
+                }}
+              />
+            </div>
+
+            <h2>{user.username}</h2>
+
+            <p>Level {getLevel(user.exp)}</p>
+
+            <button
+              className="btn-primary"
+              onClick={() => navigate("/profile")}
+            >
+              View Profile
+            </button>
+
+            <button className="logout-button" onClick={handleLogout}>
+              Sign out
+            </button>
+          </section>
+          <section className="home-box">
+            <div className="wood-sign">
+              <h3>Top Keepers</h3>
+            </div>
+
+            <div className="home-empty-sidebar">
+              <p>Leaderboard coming soon</p>
+            </div>
+          </section>
+          <section className="home-box">
+            <div className="wood-sign">
+              <h3>Most Beautiful</h3>
+            </div>
+
+            <div className="home-empty-sidebar">
+              <p>No featured koi yet</p>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  );
 }

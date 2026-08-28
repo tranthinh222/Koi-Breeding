@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:8089/koi_breeding/shop/products?size=2
+  url: http://localhost:8090/koi_breeding/shop/items?size=2
   params:
     - name: size
       value: "2"
@@ -17,3 +17,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

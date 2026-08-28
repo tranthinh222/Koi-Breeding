@@ -359,6 +359,11 @@ public class MarketService {
                 BigDecimal.valueOf(marketplace.getPrice())
         );
 
+        walletService.credit(
+                seller.getId(),
+                BigDecimal.valueOf(marketplace.getPrice())
+        );
+
         pond.setOwner(buyer);
         pondRepository.save(pond);
 

@@ -250,8 +250,9 @@ public class SampleDataInitializer {
             seedTransactions(transactionRepository, wallet, itemsByName);
             seedNotifications(notificationRepository, demoUser);
 
-            seedKois(koiRepository, dictionaryRepository, pondRepository, demoUser, koiFormula);
-            // seedKois(koiRepository, dictionaryRepository, pondRepository, sampleUser);
+            seedKois(koiRepository, dictionaryRepository, pondRepository, "Kohaku Garden", demoUser, koiFormula);
+            seedKois(koiRepository, dictionaryRepository, pondRepository, "Sanke Lake", demoUser, koiFormula);
+            seedKois(koiRepository, dictionaryRepository, pondRepository, "Hanoi Koi Pond", sampleUser, koiFormula);
         };
     }
 
@@ -519,8 +520,8 @@ public class SampleDataInitializer {
     // }
 
     private void seedKois(KoiRepository koiRepository, DictionaryRepository dictionaryRepository,
-            PondRepository pondRepository, User user, KoiFormula koiFormula) {
-        List<Pond> samplePondList = pondRepository.findByOwner_IdAndName(user.getId(), "Kohaku Garden");
+            PondRepository pondRepository, String pondName, User user, KoiFormula koiFormula) {
+        List<Pond> samplePondList = pondRepository.findByOwner_IdAndName(user.getId(), pondName);
         Pond pond = samplePondList.get(0);
 
         List<Koi> existingKoiList = koiRepository.findAllByPond_Id(pond.getId());

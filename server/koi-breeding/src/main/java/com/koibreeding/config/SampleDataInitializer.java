@@ -12,8 +12,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.koibreeding.domain.Dictionary;
 import com.koibreeding.domain.Inventory;
 import com.koibreeding.domain.Item;
+import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Notification;
 import com.koibreeding.domain.Transaction;
 import com.koibreeding.domain.User;
@@ -24,11 +26,15 @@ import com.koibreeding.enums.Gender;
 import com.koibreeding.enums.ItemType;
 import com.koibreeding.enums.NotificationType;
 import com.koibreeding.enums.Role;
+import com.koibreeding.enums.ScaleType;
+import com.koibreeding.enums.Shape;
 import com.koibreeding.enums.TransactionStatus;
 import com.koibreeding.enums.TransactionType;
 import com.koibreeding.enums.UserStatus;
+import com.koibreeding.repository.DictionaryRepository;
 import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.ItemRepository;
+import com.koibreeding.repository.MutationRepository;
 import com.koibreeding.repository.NotificationRepository;
 import com.koibreeding.repository.TransactionRepository;
 import com.koibreeding.repository.UserRepository;
@@ -39,11 +45,17 @@ import com.koibreeding.repository.WalletRepository;
 public class SampleDataInitializer {
 
     @Bean
-    CommandLineRunner seedSampleData(VarietyRepository varietyRepository, ItemRepository itemRepository,
+    CommandLineRunner seedSampleData(VarietyRepository varietyRepository, MutationRepository mutationRepository,
+            DictionaryRepository dictionaryRepository,
+            ItemRepository itemRepository,
             UserRepository userRepository,
             WalletRepository walletRepository, InventoryRepository inventoryRepository,
             TransactionRepository transactionRepository, NotificationRepository notificationRepository) {
         return args -> {
+
+            seedVarieties(varietyRepository);
+            seedMutations(mutationRepository);
+            seedDictionaries(varietyRepository, dictionaryRepository);
 
             Map<String, Item> existingItemsByName = itemRepository.findAll().stream()
                     .collect(Collectors.toMap(Item::getName, item -> item, (left, right) -> left,
@@ -312,7 +324,75 @@ public class SampleDataInitializer {
                     return existingVariety;
                 })
                 .toList());
+    }
 
+    private void seedMutations(MutationRepository mutationRepository) {
+        Map<String, Mutation> existingMutationsByName = mutationRepository.findAll().stream()
+                .filter(Objects::nonNull)
+                .filter(v -> v.getName() != null)
+                .collect(Collectors.toMap(
+                        v -> v.getName(),
+                        item -> item,
+                        (left, right) -> left,
+                        LinkedHashMap::new));
+
+        mutationRepository.saveAll(SampleData.getSampleMutationList().stream()
+                .map(seededMutation -> {
+                    Mutation existingMutation = existingMutationsByName.get(seededMutation.getName());
+                    if (existingMutation == null) {
+                        return seededMutation;
+                    }
+
+                    existingMutation.setRate(seededMutation.getRate());
+                    existingMutation.setValue(seededMutation.getValue());
+                    existingMutation.setDescription(seededMutation.getDescription());
+                    return existingMutation;
+                })
+                .toList());
+    }
+
+    private void seedDictionaries(VarietyRepository varietyRepository, DictionaryRepository dictionaryRepository) {
+        Map<String, Dictionary> existingDictionariesByName = dictionaryRepository.findAll().stream()
+                .filter(Objects::nonNull)
+                .filter(v -> v.getName() != null)
+                .collect(Collectors.toMap(
+                        v -> v.getName(),
+                        item -> item,
+                        (left, right) -> left,
+                        LinkedHashMap::new));
+
+        Map<String, Variety> currentVariety = varietyRepository.findAll().stream()
+                .filter(Objects::nonNull)
+                .filter(v -> v.getName() != null)
+                .collect(Collectors.toMap(
+                        v -> v.getName(),
+                        item -> item,
+                        (left, right) -> left,
+                        LinkedHashMap::new));
+
+        dictionaryRepository.saveAll(SampleData.getSampleDictionaryList().stream()
+                .map(seededDictionary -> {
+                    Dictionary existingDictionary = existingDictionariesByName.get(seededDictionary.getName());
+                    if (existingDictionary == null) {
+                        seededDictionary.setVariety(currentVariety.get(seededDictionary.getVariety().getName()));
+                        return seededDictionary;
+                    }
+
+                    existingDictionary.setShape(seededDictionary.getShape());
+                    existingDictionary.setScaleType(seededDictionary.getScaleType());
+                    existingDictionary.setVariety(currentVariety.get(seededDictionary.getVariety().getName()));
+                    existingDictionary.setOrigin(seededDictionary.getOrigin());
+                    existingDictionary.setBaseMaxLength(seededDictionary.getBaseMaxLength());
+                    existingDictionary.setBaseGrowthRate(seededDictionary.getBaseGrowthRate());
+                    existingDictionary.setMidAge(seededDictionary.getMidAge());
+                    existingDictionary.setAlphaWeight(seededDictionary.getAlphaWeight());
+                    existingDictionary.setBasePrice(seededDictionary.getBasePrice());
+                    existingDictionary.setAlphaPrice(seededDictionary.getAlphaPrice());
+                    existingDictionary.setImageUrl(seededDictionary.getImageUrl());
+
+                    return existingDictionary;
+                })
+                .toList());
     }
 }
 
@@ -355,7 +435,257 @@ class SampleData {
             new Variety(null, "Kawarimono",
                     "Cá Koi Kawarimono là nhóm phân loại rất lớn dành cho tất cả các giống Koi phi kim loại không nằm trong các nhóm ánh kim (Hikari) hay hoa văn truyền thống. Đây là dòng đa dạng nhất, bao gồm nhiều biến thể đơn sắc và các kiểu hoa văn đặc biệt, mang vẻ đẹp mộc mạc nhưng mạnh mẽ.\\nMột Kawarimono đẹp thường có thân hình vạm vỡ, dài, đầu to thuôn dài, xương vây ngực dày chắc; da mờ (matte) nhưng bóng mịn tự nhiên, phản ánh màu sắc sâu và đặc; vảy đa dạng, có thể là vảy lưới thô hoặc vảy kim cương; hoa văn trải dài từ đơn sắc hoàn toàn đến các mô hình phức tạp, thậm chí có dòng tự biến đổi theo nhiệt độ môi trường.\\nCác phân loại chính gồm: Koi đơn sắc (Single Colored) như Magoi, Chagoi, Soragoi, Kigoi, Benigoi. Magoi (Hắc Long cổ đại) với thân đen xám hoặc nâu đất tối, vảy lưới thô, kích thước cực đại, mang tính hoang dã. Karasugoi với toàn thân đen tuyền, sâu hơn Magoi, thân mập mạp. Hajiro, Hageshiro, Yotsujiro là các biến thể đen với điểm trắng ở vây hoặc đầu, rất hiếm. Matsubagoi là cá đơn sắc (vàng, đỏ, trắng) nhưng mỗi vảy có tâm đen tạo hiệu ứng quả thông (Aka Matsuba, Ki Matsuba). Koi chuyển màu như Ochiba Shigure với họa tiết lá thu rơi (nâu/cam trên nền xám bạc); Midorigoi cực hiếm với màu xanh lục nhạt hoặc xanh lá cây, thường thuộc dòng da trơn Doitsu.\\nKawarimono được yêu thích bởi sự đa dạng, kích thước vượt trội và tính cách thân thiện. Trong phong thủy, nhóm này tượng trưng cho sự bền bỉ, sức mạnh và khả năng thích nghi, khiến chúng trở thành nền tảng quan trọng trong bất kỳ bộ sưu tập Koi nào."));
 
+    private static final List<Mutation> SAMPLE_MUTATIONS = List.of(
+            new Mutation(null, "Ginrin", BigDecimal.valueOf(0.05), BigDecimal.valueOf(0.98),
+                    "Phát triển vảy kim cương làm giảm nhẹ kích thước tối đa."),
+            new Mutation(null, "Doitsu", BigDecimal.valueOf(0.05), BigDecimal.valueOf(1.0),
+                    "Kích thước tối đa tương đương dòng chuẩn."),
+            new Mutation(null, "Butterfly", BigDecimal.valueOf(0.05), BigDecimal.valueOf(0.95),
+                    "Thân hình mảnh mai, chiều dài thân ngắn hơn."),
+            new Mutation(null, "Jumbo Gene", BigDecimal.valueOf(0.05), BigDecimal.valueOf(1.08),
+                    "Đột biến kích thước khổng lồ, giá trị cực cao."),
+            new Mutation(null, "Bonsai Gene", BigDecimal.valueOf(0.05), BigDecimal.valueOf(0.9),
+                    "Đột biến gen lùn, thân hình ngắn."));
+
+    private static final List<Dictionary> SAMPLE_DICTIONARIES = List.of(
+            new Dictionary(null, "Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.015), 400, BigDecimal.valueOf(0.000015), 100,
+                    BigDecimal.valueOf(1.68), null),
+            new Dictionary(null, "Menkaburi Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.015), 400, BigDecimal.valueOf(0.000015), 110,
+                    BigDecimal.valueOf(1.69), null),
+            new Dictionary(null, "Kuchibeni Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0149), 400, BigDecimal.valueOf(0.000015), 120,
+                    BigDecimal.valueOf(1.7), null),
+            new Dictionary(null, "Inazuma Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.015), 400, BigDecimal.valueOf(0.000015), 180,
+                    BigDecimal.valueOf(1.75), null),
+            new Dictionary(null, "Maruten Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0149), 400, BigDecimal.valueOf(0.000015), 160,
+                    BigDecimal.valueOf(1.74), null),
+            new Dictionary(null, "Straight Hi Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0),
+                    "Japan", BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0151), 400, BigDecimal.valueOf(0.000015),
+                    105, BigDecimal.valueOf(1.68), null),
+            new Dictionary(null, "Tancho Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0149), 400, BigDecimal.valueOf(0.000015), 220,
+                    BigDecimal.valueOf(1.9), null),
+            new Dictionary(null, "Doitsu Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0152), 400, BigDecimal.valueOf(0.000015), 150,
+                    BigDecimal.valueOf(1.72), null),
+            new Dictionary(null, "Nidan Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.015), 400, BigDecimal.valueOf(0.000015), 130,
+                    BigDecimal.valueOf(1.7), null),
+            new Dictionary(null, "Ginrin Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0148), 400, BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.75), null),
+            new Dictionary(null, "Tancho", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(1), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0148), 400, BigDecimal.valueOf(0.000015), 180,
+                    BigDecimal.valueOf(1.86), null),
+            new Dictionary(null, "Tancho Sanke", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(1), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0145), 400, BigDecimal.valueOf(0.000015), 240,
+                    BigDecimal.valueOf(1.92), null),
+            new Dictionary(null, "Tancho Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(1), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0138), 400, BigDecimal.valueOf(0.000015), 260,
+                    BigDecimal.valueOf(1.95), null),
+            new Dictionary(null, "Taisho Sanke", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(2), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0142), 410, BigDecimal.valueOf(0.000015), 120,
+                    BigDecimal.valueOf(1.72), null),
+            new Dictionary(null, "Yamato Nishiki", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(2), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.014), 410, BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.78), null),
+            new Dictionary(null, "Kuchibeni Sanke", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(2), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0142), 410, BigDecimal.valueOf(0.000015), 140,
+                    BigDecimal.valueOf(1.74), null),
+            new Dictionary(null, "Aka Sanke", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(2), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0145), 410, BigDecimal.valueOf(0.000015), 130,
+                    BigDecimal.valueOf(1.73), null),
+            new Dictionary(null, "Subo Sumi Sanke / Tsubo Sumi Sanke", Shape.STANDARD, ScaleType.WAGOI,
+                    SAMPLE_VARIETIES.get(2), "Japan", BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.014), 410,
+                    BigDecimal.valueOf(0.000015), 160, BigDecimal.valueOf(1.76), null),
+            new Dictionary(null, "Maruten Sanke", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(2), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0141), 410, BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.78), null),
+            new Dictionary(null, "Doitsu Sanke", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(2), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0144), 410, BigDecimal.valueOf(0.000015), 160,
+                    BigDecimal.valueOf(1.75), null),
+            new Dictionary(null, "Ginrin Sanke", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(2), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.014), 410, BigDecimal.valueOf(0.000015), 190,
+                    BigDecimal.valueOf(1.8), null),
+            new Dictionary(null, "Showa Sanshoku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0135), 420, BigDecimal.valueOf(0.000015), 130,
+                    BigDecimal.valueOf(1.8), null),
+            new Dictionary(null, "Hi Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0136), 420, BigDecimal.valueOf(0.000015), 140,
+                    BigDecimal.valueOf(1.81), null),
+            new Dictionary(null, "Kindai Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0134), 420, BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.84), null),
+            new Dictionary(null, "Maruten Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0135), 420, BigDecimal.valueOf(0.000015), 180,
+                    BigDecimal.valueOf(1.85), null),
+            new Dictionary(null, "Doitsu Showa", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(3), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0138), 420, BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.82), null),
+            new Dictionary(null, "Ginrin Showa", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(3), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0133), 420, BigDecimal.valueOf(0.000015), 200,
+                    BigDecimal.valueOf(1.88), null),
+            new Dictionary(null, "Goromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 450, BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.78), null),
+            new Dictionary(null, "Aigoromo (Ai Goromo)", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4),
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 450, BigDecimal.valueOf(0.000015),
+                    180, BigDecimal.valueOf(1.8), null),
+            new Dictionary(null, "Sumigoromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0138), 450, BigDecimal.valueOf(0.000015), 190,
+                    BigDecimal.valueOf(1.82), null),
+            new Dictionary(null, "Budo Koromo (Budo Goromo)", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4),
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0139), 450, BigDecimal.valueOf(0.000015),
+                    220, BigDecimal.valueOf(1.85), null),
+            new Dictionary(null, "Koromo Showa (Goromo Showa)", Shape.STANDARD, ScaleType.WAGOI,
+                    SAMPLE_VARIETIES.get(4), "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0135), 450,
+                    BigDecimal.valueOf(0.000015), 240, BigDecimal.valueOf(1.88), null),
+            new Dictionary(null, "Utsuri", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(5), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0136), 440, BigDecimal.valueOf(0.000015), 150,
+                    BigDecimal.valueOf(1.76), null),
+            new Dictionary(null, "Ginrin Shiro Utsuri", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(5),
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0136), 440, BigDecimal.valueOf(0.000015),
+                    210, BigDecimal.valueOf(1.84), null),
+            new Dictionary(null, "Ginrin Hi Utsuri", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(5), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0134), 440, BigDecimal.valueOf(0.000015), 220,
+                    BigDecimal.valueOf(1.84), null),
+            new Dictionary(null, "Ginrin Ki Utsuri", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(5), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0133), 440, BigDecimal.valueOf(0.000015), 280,
+                    BigDecimal.valueOf(1.94), null),
+            new Dictionary(null, "Shiro Utsuri Doitsu", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(5),
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0138), 440, BigDecimal.valueOf(0.000015),
+                    230, BigDecimal.valueOf(1.88), null),
+            new Dictionary(null, "Hi Utsuri Doitsu", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(5), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0138), 440, BigDecimal.valueOf(0.000015), 210,
+                    BigDecimal.valueOf(1.82), null),
+            new Dictionary(null, "Ki Utsuri Doitsu", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(5), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0137), 440, BigDecimal.valueOf(0.000015), 270,
+                    BigDecimal.valueOf(1.92), null),
+            new Dictionary(null, "Hikari Shiro Utsuri", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(6),
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0137), 430, BigDecimal.valueOf(0.000015),
+                    240, BigDecimal.valueOf(1.86), null),
+            new Dictionary(null, "Hi Utsuri", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(6), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0136), 430, BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.78), null),
+            new Dictionary(null, "Ki Utsuri", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(6), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0135), 430, BigDecimal.valueOf(0.000015), 230,
+                    BigDecimal.valueOf(1.9), null),
+            new Dictionary(null, "Shiro Bekko", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(7), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0146), 440, BigDecimal.valueOf(0.000015), 130,
+                    BigDecimal.valueOf(1.68), null),
+            new Dictionary(null, "Aka Bekko", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(7), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0145), 430, BigDecimal.valueOf(0.000015), 150,
+                    BigDecimal.valueOf(1.72), null),
+            new Dictionary(null, "Ki Bekko", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(7), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0144), 430, BigDecimal.valueOf(0.000015), 190,
+                    BigDecimal.valueOf(1.82), null),
+            new Dictionary(null, "Karashi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(8), "Japan",
+                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.0185), 320, BigDecimal.valueOf(0.000017), 180,
+                    BigDecimal.valueOf(1.56), null),
+            new Dictionary(null, "Benigoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(9), "Japan",
+                    BigDecimal.valueOf(95.0), BigDecimal.valueOf(0.0175), 330, BigDecimal.valueOf(0.000017), 130,
+                    BigDecimal.valueOf(1.58), null),
+            new Dictionary(null, "Chagoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(10), "Japan",
+                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.019), 300, BigDecimal.valueOf(0.000018), 150,
+                    BigDecimal.valueOf(1.5), null),
+            new Dictionary(null, "Midorigoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(10), "Japan",
+                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.017), 300, BigDecimal.valueOf(0.000017), 280,
+                    BigDecimal.valueOf(1.9), null),
+            new Dictionary(null, "Soragoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(10), "Japan",
+                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.0185), 300, BigDecimal.valueOf(0.000018), 160,
+                    BigDecimal.valueOf(1.55), null),
+            new Dictionary(null, "Platinum Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0162), 360, BigDecimal.valueOf(0.000016), 170,
+                    BigDecimal.valueOf(1.66), null),
+            new Dictionary(null, "Yamabuki Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0168), 360, BigDecimal.valueOf(0.000017), 180,
+                    BigDecimal.valueOf(1.64), null),
+            new Dictionary(null, "Hi Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0163), 360, BigDecimal.valueOf(0.000016), 170,
+                    BigDecimal.valueOf(1.66), null),
+            new Dictionary(null, "Orenji Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0162), 360, BigDecimal.valueOf(0.000016), 170,
+                    BigDecimal.valueOf(1.66), null),
+            new Dictionary(null, "Mukashi Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0158), 360, BigDecimal.valueOf(0.000016), 200,
+                    BigDecimal.valueOf(1.72), null),
+            new Dictionary(null, "Nezu Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0158), 360, BigDecimal.valueOf(0.000016), 170,
+                    BigDecimal.valueOf(1.65), null),
+            new Dictionary(null, "Konjo Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0148), 480, BigDecimal.valueOf(0.000015), 180,
+                    BigDecimal.valueOf(1.74), null),
+            new Dictionary(null, "Narumi Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0149), 480, BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.72), null),
+            new Dictionary(null, "Mizo Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0148), 480, BigDecimal.valueOf(0.000015), 190,
+                    BigDecimal.valueOf(1.75), null),
+            new Dictionary(null, "Ginrin Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0148), 480, BigDecimal.valueOf(0.000015), 220,
+                    BigDecimal.valueOf(1.82), null),
+            new Dictionary(null, "Shusui", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(13), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0152), 470, BigDecimal.valueOf(0.000015), 200,
+                    BigDecimal.valueOf(1.78), null),
+            new Dictionary(null, "Hi Shusui", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(13), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0151), 480, BigDecimal.valueOf(0.000015), 210,
+                    BigDecimal.valueOf(1.8), null),
+            new Dictionary(null, "Goshiki", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(14), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 460, BigDecimal.valueOf(0.000015), 220,
+                    BigDecimal.valueOf(1.88), null),
+            new Dictionary(null, "Ginrin", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(15), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.015), 410, BigDecimal.valueOf(0.000015), 180,
+                    BigDecimal.valueOf(1.72), null),
+            new Dictionary(null, "Hariwake", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0158), 420, BigDecimal.valueOf(0.000016), 210,
+                    BigDecimal.valueOf(1.8), null),
+            new Dictionary(null, "Kujaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0152), 420, BigDecimal.valueOf(0.000016), 250,
+                    BigDecimal.valueOf(1.92), null),
+            new Dictionary(null, "Kikusui", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(16), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0154), 420, BigDecimal.valueOf(0.000015), 240,
+                    BigDecimal.valueOf(1.9), null),
+            new Dictionary(null, "Magoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.02), 420, BigDecimal.valueOf(0.000018), 320,
+                    BigDecimal.valueOf(1.52), null),
+            new Dictionary(null, "Tea Chagoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.019), 420, BigDecimal.valueOf(0.000018), 150,
+                    BigDecimal.valueOf(1.5), null),
+            new Dictionary(null, "Kigoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0165), 420, BigDecimal.valueOf(0.000017), 260,
+                    BigDecimal.valueOf(1.86), null),
+            new Dictionary(null, "Karasugoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.018), 420, BigDecimal.valueOf(0.000017), 140,
+                    BigDecimal.valueOf(1.65), null),
+            new Dictionary(null, "Hagheshiro", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 420, BigDecimal.valueOf(0.000015), 300,
+                    BigDecimal.valueOf(1.94), null),
+            new Dictionary(null, "Yotsujiro", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0143), 420, BigDecimal.valueOf(0.000015), 270,
+                    BigDecimal.valueOf(1.9), null),
+            new Dictionary(null, "Aka Matsuba", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0155), 420, BigDecimal.valueOf(0.000015), 190,
+                    BigDecimal.valueOf(1.76), null),
+            new Dictionary(null, "Ki Matsuba", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0154), 420, BigDecimal.valueOf(0.000015), 210,
+                    BigDecimal.valueOf(1.78), null),
+            new Dictionary(null, "Ochiba Shigure", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0178), 420, BigDecimal.valueOf(0.000017), 180,
+                    BigDecimal.valueOf(1.6), null));
+
     public static List<Variety> getSampleVarietyList() {
         return SampleData.SAMPLE_VARIETIES;
+    }
+
+    public static List<Mutation> getSampleMutationList() {
+        return SampleData.SAMPLE_MUTATIONS;
+    }
+
+    public static List<Dictionary> getSampleDictionaryList() {
+        return SampleData.SAMPLE_DICTIONARIES;
     }
 }

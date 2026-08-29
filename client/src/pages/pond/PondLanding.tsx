@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { CURRENT_USER_ID } from "../../api/currentUser";
 import {
 	callBuyPond,
@@ -7,10 +6,12 @@ import {
 	callUpdatePond,
 	type IRequestBuyPondDTO,
 } from "../../api/pond";
+import ShopHeader from "../../components/Header";
 import { toast } from "../../components/share/Toast/toast";
 import Toaster from "../../components/share/Toast/Toaster";
 import BuyPondForm from "../../components/user/pond/BuyPondForm/BuyPondForm";
 import ShopBackground from "../../components/user/ShopBackground";
+import ShopNavigation from "../../components/user/ShopNavigation";
 import type {
 	IKoi,
 	IModelPagination,
@@ -47,11 +48,11 @@ const MOCK_PONDS: IPond[] = [
 }));
 
 function PondLanding() {
-	const navigate = useNavigate();
 	const [selectedPond, setSelectedPond] = useState<IPond | null>(null);
 	const [incomingKoi, setIncomingKoi] = useState<IKoi | null>(null);
 	const [page, setPage] = useState<number>(1);
 	const [totalPages, setTotalPages] = useState<number>(1);
+	const [totalPonds, setTotalPonds] = useState<number>(0);
 	const [pondList, setPondList] = useState<IPond[]>([]);
 	const [isBuyPondDialogOpen, setIsBuyPondDialogOpen] =
 		useState<boolean>(false);
@@ -69,12 +70,14 @@ function PondLanding() {
 					);
 					setPondList(MOCK_PONDS);
 					setTotalPages(1);
+
 					if (page !== 1) setPage(1);
 					return;
 				}
 
 				setPondList(response.result);
 				setTotalPages(response.meta.totalPages);
+				setTotalPonds(response.meta.totalElements);
 			} catch (error) {
 				console.error(
 					"Failed to fetch ponds; using frontend sample data:",
@@ -120,6 +123,27 @@ function PondLanding() {
 		setPage(Math.max(1, newPage));
 	};
 
+	const handleFetchPond = (page: "next" | "prev") => {
+		const currentIndex = pondList.findIndex(
+			(pond) => pond.id === (selectedPond as IPond).id,
+		);
+
+		if (
+			(currentIndex === 0 && page === "prev") ||
+			(currentIndex === pondList.length - 1 && page === "next")
+		) {
+			return selectedPond;
+		}
+
+		const newPond = pondList.at(
+			currentIndex + (page === "next" ? 1 : -1),
+		) as IPond;
+
+		setIncomingKoi(null);
+
+		setSelectedPond(newPond);
+	};
+
 	const handleBuyPond = async (
 		formData: { name: string; description: string },
 		price: number,
@@ -138,6 +162,8 @@ function PondLanding() {
 
 			setPondList([newPond, ...pondList]);
 			setHasNew((prev) => [newPond.id, ...prev]);
+			setTotalPonds((prev) => prev + 1);
+			setTotalPages(Math.ceil((totalPonds + 1) / 6));
 			toast.success("Buy new pond successfully!");
 		} else {
 			toast.error("Failed to buy pond!");
@@ -191,83 +217,91 @@ function PondLanding() {
 		<>
 			{selectedPond == null ? (
 				<>
-					<div className={styles.mainContent}>
-						<div className={styles.titleSection}>
-							<span>All Ponds</span>
-						</div>
+					<div className="app-layout">
+						<ShopBackground />
+						<ShopHeader />
+						<div className={styles.mainContent}>
+							<div className={styles.titleSection}>
+								<span>All Ponds</span>
+							</div>
 
-						<div className={styles.buyPond}>
-							<button
-								type="button"
-								className={styles.buyPondButton}
-								onClick={() => setIsBuyPondDialogOpen(true)}
-								title="buy pond"
-							>
-								<img
-									src="/pond/buy-pond-button.svg"
-									alt="buy pond"
-								/>
-							</button>
-						</div>
-
-						<button
-							type="button"
-							className={styles.backButton}
-							onClick={() => navigate("/")}
-						>
-							Back
-						</button>
-
-						<div className={styles.pondGrid}>
-							{pondList.slice(0, 6).map((pond, index) => (
-								<div
-									key={pond.id}
-									className={styles.pondItem}
-									onClick={() => {
-										console.log(
-											`Selected pond: id='${pond.id}' | name='${pond.name}'`,
-										);
-										setSelectedPond(pond);
-									}}
-									title={pond.name}
+							<div className={styles.buyPond}>
+								<button
+									type="button"
+									className={styles.buyPondButton}
+									onClick={() => setIsBuyPondDialogOpen(true)}
+									title="buy pond"
 								>
 									<img
-										src={`${hasNew.includes(pond.id) ? "/pond/pond-new.svg" : `/pond/pond-item-${index + 1}.svg`}`}
-										alt={pond.name}
+										src="/pond/buy-pond-button.svg"
+										alt="buy pond"
 									/>
-									<span className={styles.pondLabel}>
-										{pond.name}
-									</span>
-								</div>
-							))}
-						</div>
+								</button>
+							</div>
 
-						<div className={styles.paginationFooter}>
-							<button
-								type="button"
-								className={styles.prevButton}
-								disabled={page === 1}
-								onClick={() =>
-									handlePageChange(Math.max(1, page - 1))
-								}
-							>
-								Previous
-							</button>
-							<button
-								type="button"
-								className={styles.nextButton}
-								disabled={page === totalPages}
-								onClick={() =>
-									handlePageChange(
-										Math.min(totalPages, page + 1),
-									)
-								}
-							>
-								Next
-							</button>
+							<div className={styles.pondGridWrapper}>
+								<div className={styles.pondGrid}>
+									{pondList.slice(0, 6).map((pond, index) => (
+										<div
+											key={pond.id}
+											className={styles.pondItem}
+											onClick={() => {
+												console.log(
+													`Selected pond: id='${pond.id}' | name='${pond.name}'`,
+												);
+												setSelectedPond(pond);
+											}}
+											title={pond.name}
+										>
+											<img
+												src={`${hasNew.includes(pond.id) ? "/pond/pond-new.svg" : `/pond/pond-item-${index + 1}.svg`}`}
+												alt={pond.name}
+											/>
+											<span className={styles.pondLabel}>
+												{pond.name}
+											</span>
+										</div>
+									))}
+								</div>
+							</div>
+
+							<div className={styles.paginationFooter}>
+								<span className={styles.totalPondsLabel}>
+									Total Ponds: <strong>{totalPonds}</strong>
+								</span>
+								<button
+									type="button"
+									className={styles.prevButton}
+									disabled={page === 1}
+									onClick={() =>
+										handlePageChange(Math.max(1, page - 1))
+									}
+								>
+									Previous
+								</button>
+								<span className={styles.currentPageLabel}>
+									Page <strong>{page}</strong> of{" "}
+									{Math.max(totalPages, 1)}
+								</span>
+								<button
+									type="button"
+									className={styles.nextButton}
+									disabled={page === totalPages}
+									onClick={() =>
+										handlePageChange(
+											Math.min(totalPages, page + 1),
+										)
+									}
+								>
+									Next
+								</button>
+							</div>
 						</div>
+						<footer className="app-footer">
+							<ShopNavigation />
+						</footer>
 					</div>
-					<ShopBackground />
+
 					{isBuyPondDialogOpen && (
 						<div className={styles.overlay}>
 							<BuyPondForm
@@ -286,27 +320,7 @@ function PondLanding() {
 						setSelectedPond(null);
 						setIncomingKoi(null);
 					}}
-					onFetchPond={(page: "next" | "prev") => {
-						const currentIndex = pondList.findIndex(
-							(pond) => pond.id === selectedPond.id,
-						);
-
-						if (
-							(currentIndex === 0 && page === "prev") ||
-							(currentIndex === pondList.length - 1 &&
-								page === "next")
-						) {
-							return selectedPond;
-						}
-
-						const newPond = pondList.at(
-							currentIndex + (page === "next" ? 1 : -1),
-						) as IPond;
-
-						setIncomingKoi(null);
-
-						setSelectedPond(newPond);
-					}}
+					onFetchPond={handleFetchPond}
 					onUpdatePond={handleUpdatePondInformation}
 					onSwitchPond={(targetPond, koi) => {
 						setIncomingKoi(koi);

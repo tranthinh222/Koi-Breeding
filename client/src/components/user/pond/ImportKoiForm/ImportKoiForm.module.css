@@ -28,8 +28,8 @@
 	width: 70%;
 	min-width: 1000px;
 	height: 700px;
-	background-color: rgba(253, 229, 173, 0.95);
-	border: 4px solid #c9a26b;
+	background-color: #fffaf0;
+	border: 4px solid #b77b3e;
 	border-radius: 15px;
 	padding: 40px 20px;
 	display: flex;

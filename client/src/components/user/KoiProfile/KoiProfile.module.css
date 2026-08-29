@@ -6,7 +6,7 @@
 	width: 55vw;
 	height: 80vh;
 	background-color: #d9d9d9;
-	border: none;
+	border: 4px solid #b77b3e;
 	border-radius: 15px;
 	display: flex;
 	flex-direction: column;

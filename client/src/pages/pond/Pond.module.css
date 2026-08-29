@@ -126,7 +126,9 @@
 }
 
 .pagination svg {
-	color: #79ffff;
+	color: #fad550;
+	width: 60px;
+	height: 60px;
 }
 
 .pagination:hover {

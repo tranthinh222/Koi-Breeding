@@ -195,13 +195,6 @@ function Pond({
 								alt="pond info"
 							/>
 						</button>
-						{/* <button
-							type="button"
-							className={styles.navButton}
-							title="all ponds"
-						>
-							<img src="/pond/pond-list-1.svg" alt="pond list" />
-						</button> */}
 						<button
 							type="button"
 							className={styles.navButton}

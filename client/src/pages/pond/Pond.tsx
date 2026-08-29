@@ -336,7 +336,6 @@ const createMockKoiList = (pondId: number): IKoi[] =>
 			weight: 0.15 + (0.06 * Math.random() - 0.03),
 			health: 90,
 			foodBar: 80,
-			cureBar: 100,
 			gender: index % 2 === 0 ? "MALE" : "FEMALE",
 			price: koiVarient.basePrice,
 			mutation: null,

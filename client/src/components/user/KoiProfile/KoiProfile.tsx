@@ -72,17 +72,6 @@ function KoiProfile({ koi, onClose }: KoiProfileProps) {
 								<span>{koi.foodBar}/100</span>
 							</div>
 						</div>
-
-						<div className={styles.statRow}>
-							<span className={styles.statLabel}>Cure</span>
-							<div className={styles.progressContainer}>
-								<div
-									className={`${styles.progressBar} ${styles.cureBar}`}
-									style={{ width: `${koi.cureBar}%` }}
-								/>
-								<span>{koi.cureBar}/100</span>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>

@@ -50,7 +50,6 @@ export interface IKoi {
 	weight: number;
 	health: number;
 	foodBar: number;
-	cureBar: number;
 	gender: Gender;
 	price: number;
 	mutation: IKoiMutation | null;

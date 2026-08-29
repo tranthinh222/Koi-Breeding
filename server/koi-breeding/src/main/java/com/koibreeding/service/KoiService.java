@@ -15,6 +15,7 @@ import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Koi;
 import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Pond;
+import com.koibreeding.dto.request.RequestMoveKoiDTO;
 import com.koibreeding.dto.request.RequestReleaseKoiDTO;
 import com.koibreeding.dto.response.ResKoiDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
@@ -94,6 +95,27 @@ public class KoiService {
 
         return resultKoiList.stream().map(this::convertToResKoiDTO)
                 .collect(Collectors.toList());
+    }
+
+    public ResKoiDTO handleMoveKoi(RequestMoveKoiDTO requestMoveKoiDTO) throws Exception {
+        Koi targetKoi = this.handleFetchKoiById(requestMoveKoiDTO.getTargetKoiId());
+        if (targetKoi == null) {
+            throw new Exception("Koi with id='" + requestMoveKoiDTO.getTargetKoiId() + "' does not exist.");
+        }
+
+        Pond sourcePond = this.pondService.handleFetchPondById(requestMoveKoiDTO.getSourcePondId());
+        if (sourcePond == null) {
+            throw new Exception("Source pond with id='" + requestMoveKoiDTO.getSourcePondId() + "' does not exist.");
+        }
+
+        Pond targetPond = this.pondService.handleFetchPondById(requestMoveKoiDTO.getTargetPondId());
+        if (targetPond == null) {
+            throw new Exception("Target pond with id='" + requestMoveKoiDTO.getTargetPondId() + "' does not exist.");
+        }
+
+        targetKoi.setPond(targetPond);
+
+        return this.convertToResKoiDTO(this.koiRepository.save(targetKoi));
     }
 
     public Koi handleUpdateKoi(Koi koi) {

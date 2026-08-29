@@ -1,6 +1,5 @@
 package com.koibreeding.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.domain.Koi;
+import com.koibreeding.dto.request.RequestMoveKoiDTO;
 import com.koibreeding.dto.request.RequestReleaseKoiDTO;
 import com.koibreeding.dto.response.ResKoiDTO;
 import com.koibreeding.service.KoiService;
@@ -39,14 +39,16 @@ public class KoiController {
     @PostMapping("/kois/import")
     public ResponseEntity<List<ResKoiDTO>> releaseKoisToPond(@RequestBody RequestReleaseKoiDTO requestReleaseKoiDTO)
             throws Exception {
-        List<ResKoiDTO> newKoiList = new ArrayList<>();
-        try {
-            newKoiList = this.koiService.handleReleaseKoi(requestReleaseKoiDTO);
-        } catch (Exception ex) {
-            throw ex;
-        }
+        List<ResKoiDTO> newKoiList = this.koiService.handleReleaseKoi(requestReleaseKoiDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(newKoiList);
+    }
+
+    @PostMapping("/kois/move")
+    public ResponseEntity<ResKoiDTO> moveKoiToNewPond(@RequestBody RequestMoveKoiDTO requestMoveKoiDTO)
+            throws Exception {
+        ResKoiDTO updatedKoi = this.koiService.handleMoveKoi(requestMoveKoiDTO);
+        return ResponseEntity.ok(updatedKoi);
     }
 
     @PutMapping("/kois")

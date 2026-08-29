@@ -578,10 +578,6 @@ function PondCanvas({
 						onClose={() => setIsMoveFishDialogOpen(false)}
 						onSubmit={(targetPond: IPond, targetKoi: IKoi) => {
 							setIsMoveFishDialogOpen(false);
-							// const koiToMove =
-							// 	latestKoiListRef.current[
-							// 		activeFishIndex as number
-							// 	];
 
 							if (activeFishIndexRef.current !== null) {
 								fishRef.current[
@@ -592,7 +588,6 @@ function PondCanvas({
 							setActiveFishIndex(null);
 							activeFishIndexRef.current = null;
 
-							// Chờ 500ms cho cá bay hơi hoàn toàn rồi báo lên Pond chuyển hồ
 							setTimeout(() => {
 								onMoveKoi(targetKoi, targetPond);
 							}, 500);

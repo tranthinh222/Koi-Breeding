@@ -97,6 +97,7 @@ export interface IPond {
 	owner: IOwner;
 	name: string;
 	level: number;
+	currentQuantity: number;
 	capacity: number;
 	waterQuality: number;
 	temperature: number;

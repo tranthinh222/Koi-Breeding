@@ -86,11 +86,16 @@ function PondSelectForm({
 		setPage(Math.max(1, newPage));
 	};
 
-	const handleMoveKoi = (pond: IPond) => {
+	const handleMoveKoi = async (pond: IPond) => {
 		if (pond.id === currentPond.id) {
 			toast(`Koi ${selectedKoi.name} is still in this pond.`);
 			return;
 		}
+		if (pond.currentQuantity === pond.capacity) {
+			toast.error(`Destination pond (${pond.name}) is currently full.`);
+			return;
+		}
+
 		onSubmit(pond, selectedKoi);
 	};
 
@@ -186,6 +191,7 @@ const MOCK_PONDS: IPond[] = [
 	},
 	name,
 	level: 10,
+	currentQuantity: 0,
 	capacity: index === 0 ? 15 : 10,
 	waterQuality: index === 0 ? 70 : 100,
 	temperature: index === 0 ? 20 : 24,

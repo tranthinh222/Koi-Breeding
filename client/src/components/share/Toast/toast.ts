@@ -16,7 +16,7 @@ let listeners: Listener[] = [];
 export const toastStore = {
 	addToast: (message: ReactNode, type: ToastType) => {
 		const id = Date.now();
-		toasts = [...toasts, { id, message, type }];
+		toasts = [{ id, message, type }];
 		emitChange();
 	},
 

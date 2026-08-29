@@ -14,9 +14,9 @@ function Toaster() {
 		return () => unsubscribe();
 	}, []);
 
-	const visibleToasts = toasts.slice(-3);
-
 	if (toasts.length === 0) return null;
+
+	const currentToast = toasts[0];
 
 	return (
 		<div
@@ -24,26 +24,13 @@ function Toaster() {
 			role="region"
 			aria-label="Notifications"
 		>
-			{visibleToasts.map((toast, index) => {
-				const stackIndex = visibleToasts.length - 1 - index;
-				return (
-					<div
-						key={toast.id}
-						className={styles.toastItem}
-						style={
-							{
-								"--index": stackIndex,
-							} as React.CSSProperties
-						}
-					>
-						<Toast
-							message={toast.message}
-							type={toast.type}
-							onClose={() => toastStore.removeToast(toast.id)}
-						/>
-					</div>
-				);
-			})}
+			<div key={currentToast.id} className={styles.toastItem}>
+				<Toast
+					message={currentToast.message}
+					type={currentToast.type}
+					onClose={() => toastStore.removeToast(currentToast.id)}
+				/>
+			</div>
 		</div>
 	);
 }

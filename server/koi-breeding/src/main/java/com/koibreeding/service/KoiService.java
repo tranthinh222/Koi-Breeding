@@ -128,7 +128,6 @@ public class KoiService {
             currentKoi.setWeight(koi.getWeight() != null ? koi.getWeight() : currentKoi.getWeight());
             currentKoi.setHealth(koi.getHealth() != null ? koi.getHealth() : currentKoi.getHealth());
             currentKoi.setFoodBar(koi.getFoodBar() != null ? koi.getFoodBar() : currentKoi.getFoodBar());
-            currentKoi.setCureBar(koi.getCureBar() != null ? koi.getCureBar() : currentKoi.getCureBar());
             currentKoi.setPrice(koi.getPrice() != null ? koi.getPrice() : currentKoi.getPrice());
 
             if (koi.getMutation() != null) {
@@ -219,7 +218,6 @@ public class KoiService {
         resKoiDTO.setWeight(koi.getWeight());
         resKoiDTO.setHealth(koi.getHealth());
         resKoiDTO.setFoodBar(koi.getFoodBar());
-        resKoiDTO.setCureBar(koi.getCureBar());
         resKoiDTO.setGender(koi.getGender());
         resKoiDTO.setPrice(koi.getPrice());
         resKoiDTO.setMutation(koiMutation);

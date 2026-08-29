@@ -20,7 +20,6 @@ public class ResKoiDTO {
     private BigDecimal weight;
     private Integer health;
     private Integer foodBar;
-    private Integer cureBar;
     private Gender gender;
     private Integer price;
     private KoiMutation mutation;

@@ -3,21 +3,28 @@ import type { IKoiVarient } from "../../../../types/backend";
 import styles from "./KoiDictionaryCard.module.css";
 
 interface KoiDictionaryCardProps {
-	koi: IKoiVarient;
+	koiVarient: IKoiVarient;
 }
 
-function KoiDictionaryCard({ koi }: KoiDictionaryCardProps) {
+function KoiDictionaryCard({ koiVarient }: KoiDictionaryCardProps) {
+	const toCapitalString = (text: string) => {
+		const firstCharacter = text.at(0)?.toUpperCase();
+		return firstCharacter + text.toLowerCase().slice(1);
+	};
+
 	return (
 		<div className={styles.card}>
-			<span className={styles.name}>Kuchibeni-Kohaku</span>
+			<span className={styles.name}>{koiVarient.name}</span>
 			<section className={styles.image}>
 				<img
-					src={`/kois/${koi.name.toLowerCase().replace(" ", "-")}.png`}
-					alt="koi"
+					src={koiVarient.imageUrl ?? "/kois/koi-empty.png"}
+					alt={koiVarient.name}
 				/>
 			</section>
-			<span className={styles.scale}>Fin type: Wagoi</span>
-			<span className={styles.origin}>Origin: Japan</span>
+			<span className={styles.scale}>
+				Fin type: {toCapitalString(koiVarient.scaleType)}
+			</span>
+			<span className={styles.origin}>Origin: {koiVarient.origin}</span>
 			<button title="Details">
 				<Ellipsis />
 			</button>

@@ -1,41 +1,93 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmptyCard from "../../components/user/dictionary/EmptyCard/EmptyCard";
 import KoiDictionaryCard from "../../components/user/dictionary/KoiDictionaryCard/KoiDictionaryCard";
-import type { IKoiVarient } from "../../types/backend";
+import type { IKoiVarient, IModelPagination } from "../../types/backend";
 import styles from "./Dictionary.module.css";
+import { callFetchKoiVarient } from "../../api/koiDictionary";
 
 function Dictionary() {
 	const navigate = useNavigate();
-	const koi: IKoiVarient = {
-		id: 1,
-		name: "Kuchibeni-Kohaku",
-		origin: "Japan",
-		scaleType: "WAGOI",
-		shape: "STANDARD",
-		baseMaxLength: 0,
-		baseGrowthRate: 0,
-		midAge: 0,
-		alphaWeight: 0,
-		basePrice: 0,
-		alphaPrice: 0,
-	};
-	const [, setPage] = useState<number>(0);
-	const [data] = useState<(IKoiVarient | null)[]>([
-		koi,
-		koi,
-		koi,
-		koi,
-		koi,
-		koi,
-		koi,
-		koi,
-	]);
+
+	const [page, setPage] = useState<number>(1);
+	const [pageSize] = useState<number>(8);
+	const [totalPages, setTotalPages] = useState<number>(1);
+
+	const [data, setData] = useState<IKoiVarient[]>([]);
+	const [incomingData, setIncomingData] = useState<IKoiVarient[]>([]);
+
 	const [isFlippedPrev, setIsFlippedPrev] = useState<boolean>(false);
 	const [isFlippedNext, setIsFlippedNext] = useState<boolean>(false);
+	const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
 	const bookPrevRef = useRef<HTMLDivElement>(null);
 	const bookNextRef = useRef<HTMLDivElement>(null);
+
+	const fetchDictionaryData = async (
+		targetPage: number,
+	): Promise<IModelPagination<IKoiVarient> | null> => {
+		try {
+			const response = await callFetchKoiVarient(
+				`page=${targetPage - 1}&size=${pageSize}`,
+			);
+			const varientData: IModelPagination<IKoiVarient> = response.data
+				.data ?? {
+				meta: {
+					page: page,
+					pageSize: pageSize,
+					totalPages: 0,
+					totalElements: 0,
+				},
+				result: [],
+			};
+
+			return varientData;
+		} catch (error) {
+			console.error("Failed to fetch data:", error);
+			return null;
+		}
+	};
+
+	// Fetch the page data
+	useEffect(() => {
+		const loadInitialData = async () => {
+			setIsProcessing(true);
+			const initialData = await fetchDictionaryData(1);
+			if (initialData) {
+				setData(initialData.result);
+				setTotalPages(initialData.meta.totalPages);
+			}
+			setIsProcessing(false);
+		};
+
+		loadInitialData();
+	}, []);
+
+	const handlePrev = async () => {
+		setIsProcessing(true);
+		const prevPage = page - 1;
+		const previousData = await fetchDictionaryData(prevPage);
+
+		if (previousData) {
+			setIncomingData(previousData.result);
+			setIsFlippedPrev(true);
+		} else {
+			setIsProcessing(false);
+		}
+	};
+
+	const handleNext = async () => {
+		setIsProcessing(true);
+		const nextPage = page + 1;
+		const nextData = await fetchDictionaryData(nextPage);
+
+		if (nextData) {
+			setIncomingData(nextData.result);
+			setIsFlippedNext(true);
+		} else {
+			setIsProcessing(false);
+		}
+	};
 
 	const handlePrevTransitionEnd = () => {
 		if (!isFlippedPrev) {
@@ -47,17 +99,15 @@ function Dictionary() {
 			return;
 		}
 
-		console.log("Adu");
-
 		bookElement.style.transition = "none";
 
+		setData(incomingData);
+		setPage((prev) => prev - 1);
 		setIsFlippedPrev(false);
 
-		setPage((prev) => prev - 1);
-
 		void bookElement.offsetHeight;
-
 		bookElement.style.transition = "";
+		setIsProcessing(false);
 	};
 
 	const handleNextTransitionEnd = () => {
@@ -74,13 +124,13 @@ function Dictionary() {
 
 		bookElement.style.transition = "none";
 
+		setData(incomingData);
+		setPage((prev) => prev + 1);
 		setIsFlippedNext(false);
 
-		setPage((prev) => prev + 1);
-
 		void bookElement.offsetHeight;
-
 		bookElement.style.transition = "";
+		setIsProcessing(false);
 	};
 
 	return (
@@ -98,19 +148,15 @@ function Dictionary() {
 				<div className={styles.flipGroup}>
 					<button
 						className={styles.flipButton}
-						onClick={() => {
-							setIsFlippedPrev(!isFlippedPrev);
-						}}
-						disabled={isFlippedPrev || isFlippedNext}
+						onClick={handlePrev}
+						disabled={page === 1 || isProcessing}
 					>
 						Flip Prev
 					</button>
 					<button
 						className={styles.flipButton}
-						onClick={() => {
-							setIsFlippedNext(!isFlippedNext);
-						}}
-						disabled={isFlippedPrev || isFlippedNext}
+						onClick={handleNext}
+						disabled={page === totalPages || isProcessing}
 					>
 						Flip Next
 					</button>
@@ -126,13 +172,13 @@ function Dictionary() {
 						<section
 							className={`${styles.page} ${styles.pageLeft}`}
 						>
-							{data
+							{(isFlippedPrev ? incomingData : data)
 								.slice(0, 4)
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
 											key={256 - index}
-											koi={item}
+											koiVarient={item}
 										/>
 									) : (
 										<EmptyCard key={256 - index} />
@@ -154,7 +200,7 @@ function Dictionary() {
 									item ? (
 										<KoiDictionaryCard
 											key={index}
-											koi={item}
+											koiVarient={item}
 										/>
 									) : (
 										<EmptyCard key={index} />
@@ -164,13 +210,13 @@ function Dictionary() {
 						<section
 							className={`${styles.page} ${styles.pageLeft} ${styles.pageLeftBack}`}
 						>
-							{data
+							{incomingData
 								.slice(4, 8)
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
 											key={8 - index}
-											koi={item}
+											koiVarient={item}
 										/>
 									) : (
 										<EmptyCard key={8 - index} />
@@ -190,13 +236,13 @@ function Dictionary() {
 						<section
 							className={`${styles.page} ${styles.pageRight}`}
 						>
-							{data
+							{(isFlippedNext ? incomingData : data)
 								.slice(4, 8)
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
 											key={512 - index}
-											koi={item}
+											koiVarient={item}
 										/>
 									) : (
 										<EmptyCard key={512 - index} />
@@ -218,7 +264,7 @@ function Dictionary() {
 									item ? (
 										<KoiDictionaryCard
 											key={1024 - index}
-											koi={item}
+											koiVarient={item}
 										/>
 									) : (
 										<EmptyCard key={1024 - index} />
@@ -228,13 +274,13 @@ function Dictionary() {
 						<section
 							className={`${styles.page} ${styles.pageRight} ${styles.pageRightBack}`}
 						>
-							{data
+							{incomingData
 								.slice(0, 4)
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
 											key={192 - index}
-											koi={item}
+											koiVarient={item}
 										/>
 									) : (
 										<EmptyCard key={192 - index} />
@@ -249,3 +295,18 @@ function Dictionary() {
 }
 
 export default Dictionary;
+
+// const MOCK_VARIENT: IKoiVarient = {
+// 	id: 1,
+// 	name: "Kuchibeni-Kohaku",
+// 	origin: "Japan",
+// 	scaleType: "WAGOI",
+// 	shape: "STANDARD",
+// 	baseMaxLength: 0,
+// 	baseGrowthRate: 0,
+// 	midAge: 0,
+// 	alphaWeight: 0,
+// 	basePrice: 0,
+// 	alphaPrice: 0,
+// 	imageUrl: "/kois/koi-fish-kuchibeni-kohaku.svg",
+// };

@@ -21,6 +21,7 @@ import com.koibreeding.dto.response.ResPondDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.EffectType;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.NotificationType;
 import com.koibreeding.enums.PhTrend;
 import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.KoiRepository;
@@ -29,6 +30,7 @@ import com.koibreeding.util.formulas.PondFormula;
 
 @Service
 public class PondService {
+    private final NotificationService notificationService;
     private final KoiRepository koiRepository;
     private final PondRepository pondRepository;
     private final UserService userService;
@@ -39,7 +41,8 @@ public class PondService {
 
     public PondService(PondRepository pondRepository, UserService userService, WalletService walletService,
             InventoryRepository inventoryRepository,
-            PondEnvironmentConfig environmentConfig, PondFormula pondFormula, KoiRepository koiRepository) {
+            PondEnvironmentConfig environmentConfig, PondFormula pondFormula, KoiRepository koiRepository,
+            NotificationService notificationService) {
         this.pondRepository = pondRepository;
         this.userService = userService;
         this.walletService = walletService;
@@ -47,6 +50,7 @@ public class PondService {
         this.environmentConfig = environmentConfig;
         this.pondFormula = pondFormula;
         this.koiRepository = koiRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -101,6 +105,8 @@ public class PondService {
         enrichEnvironment(result, savedPond);
         result.setCreatedAt(savedPond.getCreatedAt().toInstant());
         result.setDescription(savedPond.getDescription());
+        notificationService.createAndSend(owner.getId(), NotificationType.PURCHASE_SUCCESS, "Purchase successful",
+                "Bought new pond with name '" + buyPondRequestDTO.getName() + "'.");
 
         return result;
     }

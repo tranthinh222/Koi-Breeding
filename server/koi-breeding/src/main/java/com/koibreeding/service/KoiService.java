@@ -113,6 +113,11 @@ public class KoiService {
             throw new Exception("Target pond with id='" + requestMoveKoiDTO.getTargetPondId() + "' does not exist.");
         }
 
+        long targetPondQuantity = this.handleGetKoisQuantityInPond(targetPond.getId());
+        if (targetPondQuantity == targetPond.getCapacity()) {
+            throw new Exception("Target pond with id='" + targetPond.getId() + "' is full.");
+        }
+
         targetKoi.setPond(targetPond);
 
         return this.convertToResKoiDTO(this.koiRepository.save(targetKoi));
@@ -191,6 +196,10 @@ public class KoiService {
     public List<ResKoiDTO> handleFetchAllKoisInPond(Integer pondId) {
         return this.koiRepository.findAllByPond_Id(pondId).stream().map(this::convertToResKoiDTO)
                 .collect(Collectors.toList());
+    }
+
+    public long handleGetKoisQuantityInPond(Integer pondId) {
+        return this.koiRepository.countByPond_Id(pondId);
     }
 
     public void handleDeleteKoi(Integer id) {

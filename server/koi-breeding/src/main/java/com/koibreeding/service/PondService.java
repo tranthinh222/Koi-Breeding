@@ -23,11 +23,13 @@ import com.koibreeding.enums.EffectType;
 import com.koibreeding.enums.ItemType;
 import com.koibreeding.enums.PhTrend;
 import com.koibreeding.repository.InventoryRepository;
+import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.repository.PondRepository;
 import com.koibreeding.util.formulas.PondFormula;
 
 @Service
 public class PondService {
+    private final KoiRepository koiRepository;
     private final PondRepository pondRepository;
     private final UserService userService;
     private final WalletService walletService;
@@ -37,13 +39,14 @@ public class PondService {
 
     public PondService(PondRepository pondRepository, UserService userService, WalletService walletService,
             InventoryRepository inventoryRepository,
-            PondEnvironmentConfig environmentConfig, PondFormula pondFormula) {
+            PondEnvironmentConfig environmentConfig, PondFormula pondFormula, KoiRepository koiRepository) {
         this.pondRepository = pondRepository;
         this.userService = userService;
         this.walletService = walletService;
         this.inventoryRepository = inventoryRepository;
         this.environmentConfig = environmentConfig;
         this.pondFormula = pondFormula;
+        this.koiRepository = koiRepository;
     }
 
     @Transactional
@@ -248,6 +251,7 @@ public class PondService {
         result.setName(pond.getName());
         result.setLevel(pond.getLevel());
         result.setCapacity(pond.getCapacity());
+        result.setCurrentQuantity((int) this.koiRepository.countByPond_Id(pond.getId()));
         result.setWaterQuality(pond.getWaterQuality());
         result.setTemperature(pond.getTemperature());
         result.setPH(pond.getPH());

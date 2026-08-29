@@ -3,9 +3,10 @@ package com.koibreeding.dto.response;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import com.koibreeding.enums.PhTrend;
+
 import lombok.Getter;
 import lombok.Setter;
-import com.koibreeding.enums.PhTrend;
 
 @Getter
 @Setter
@@ -15,6 +16,7 @@ public class ResPondDTO {
     private String name;
     private Integer level;
     private Integer capacity;
+    private Integer currentQuantity;
     private BigDecimal waterQuality;
     private BigDecimal temperature;
     private BigDecimal pH;

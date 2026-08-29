@@ -7,6 +7,12 @@ export interface IRequestReleaseKoiDTO {
 	quantity: number;
 }
 
+export interface IRequestMoveKoiDTO {
+	targetKoiId: number;
+	sourcePondId: number;
+	targetPondId: number;
+}
+
 export const callReleaseKoiToPond = (
 	requestReleaseKoiDTO: IRequestReleaseKoiDTO,
 ) => {
@@ -17,4 +23,10 @@ export const callReleaseKoiToPond = (
 
 export const callFetchKoisInPond = (pondId: number) => {
 	return apiClient.get<IRestResponse<IKoi[]>>(`/kois?pondId=${pondId}`);
+};
+
+export const callMoveKoi = (requestMoveKoiDTO: IRequestMoveKoiDTO) => {
+	return apiClient.post<IRestResponse<IKoi>>("/kois/move", {
+		...requestMoveKoiDTO,
+	});
 };

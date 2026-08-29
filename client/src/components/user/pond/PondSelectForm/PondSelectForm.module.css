@@ -1,0 +1,231 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
+
+* {
+	box-sizing: border-box;
+}
+
+.container {
+	position: relative;
+	width: 75vw;
+	height: 80vh;
+	background-color: #d9d9d9;
+	border: none;
+	border-radius: 15px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+	padding: 40px;
+	box-sizing: border-box;
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+}
+
+.closeButton {
+	position: absolute;
+	top: 15px;
+	right: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 5px;
+	border: none;
+	background: transparent;
+	color: #6b7280;
+	cursor: pointer;
+	border-radius: 6px;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
+}
+
+.closeButton:hover {
+	background-color: #e5e7eb;
+	color: #111827;
+}
+
+.formHeader {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: start;
+	gap: 10px;
+}
+
+.title {
+	font-family: "Grandstander";
+	font-weight: bold;
+	font-size: 30px;
+}
+
+.searchPanel {
+	width: 40%;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 10px;
+}
+
+.searchWrapper {
+	flex: 1;
+	position: relative;
+}
+
+.searchWrapper > svg {
+	position: absolute;
+	left: 12px;
+	top: 19px;
+	transform: translateY(-50%);
+	pointer-events: none;
+}
+
+.searchWrapper > input {
+	width: 100%;
+	font-family: "Grandstander";
+	font-size: 20px;
+	padding: 8px 12px 8px 50px;
+
+	border: 1px solid #bfc2c7;
+	border-radius: 10px;
+	background-color: white;
+	color: #111827;
+	box-sizing: border-box;
+
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+}
+
+.searchWrapper > input:focus {
+	border-color: #667eea;
+	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+	outline: none;
+}
+
+.searchButton {
+	border: none;
+	background-color: #2778d8;
+	border-radius: 10px;
+	padding: 3px 20px;
+	transition: all 0.2s ease;
+}
+
+.searchButton:hover {
+	background-color: #2d8cff;
+	transform: translateY(-2px);
+}
+
+.searchButton:active {
+	transform: translateY(1px);
+}
+
+.pondGrid {
+	width: 100%;
+	flex: 1;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-rows: repeat(2, 1fr);
+	place-items: center;
+	gap: clamp(14px, 3vh, 40px) clamp(12px, 2vw, 32px);
+	padding: clamp(12px, 2vh, 24px) clamp(20px, 3vw, 48px);
+	/* background-color: #2f8cff; */
+}
+
+.pondItem {
+	position: relative;
+	width: min(25vw, 40vh, 400px);
+	aspect-ratio: 400 / 225;
+	border: clamp(5px, 0.6vw, 10px) solid white;
+	border-radius: clamp(8px, 0.8vw, 12px);
+	box-sizing: border-box;
+	cursor: pointer;
+
+	transition: all 0.2s ease;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.pondItem:hover {
+	transform: scale(1.04) rotate(-1deg);
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+.pondLabel {
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	font-family: "Grandstander";
+	font-weight: bold;
+	font-size: clamp(15px, 1.8vw, 30px);
+	color: white;
+}
+
+.pondItem img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.pondItem svg {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	width: 40px;
+	height: 40px;
+	color: red;
+}
+
+.paginationFooter {
+	width: 100%;
+	height: clamp(64px, 9vh, 100px);
+	display: flex;
+	justify-content: end;
+	align-items: center;
+	gap: 2px;
+	padding: 0 clamp(20px, 5vw, 80px);
+	flex-shrink: 0;
+}
+
+.paginationFooter button {
+	width: clamp(105px, 10vw, 150px);
+	height: clamp(42px, 5vh, 50px);
+	font-family: "Grandstander";
+	font-size: clamp(14px, 1.3vw, 20px);
+	font-weight: bold;
+	color: white;
+	background-color: #2778d8;
+	border: 1px solid #2f8cff;
+	padding: 4px 20px;
+	transition: all 0.2s ease;
+}
+
+.prevButton {
+	border-radius: 10px 0px 0px 10px;
+}
+
+.nextButton {
+	border-radius: 0px 10px 10px 0px;
+}
+
+.paginationFooter button:hover {
+	background-color: #2d8cff;
+	transform: translateY(-2px);
+}
+
+.paginationFooter button:active {
+	transform: translateY(1px);
+}
+
+.paginationFooter button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.paginationFooter button:disabled:hover {
+	background-color: #2778d8;
+	transform: none;
+}

@@ -11,7 +11,12 @@ import { toast } from "../../components/share/Toast/toast";
 import Toaster from "../../components/share/Toast/Toaster";
 import BuyPondForm from "../../components/user/pond/BuyPondForm/BuyPondForm";
 import ShopBackground from "../../components/user/ShopBackground";
-import type { IModelPagination, IOwner, IPond } from "../../types/backend";
+import type {
+	IKoi,
+	IModelPagination,
+	IOwner,
+	IPond,
+} from "../../types/backend";
 import Pond from "./Pond";
 import styles from "./PondLanding.module.css";
 
@@ -43,6 +48,7 @@ const MOCK_PONDS: IPond[] = [
 function PondLanding() {
 	const navigate = useNavigate();
 	const [selectedPond, setSelectedPond] = useState<IPond | null>(null);
+	const [incomingKoi, setIncomingKoi] = useState<IKoi | null>(null);
 	const [page, setPage] = useState<number>(1);
 	const [totalPages, setTotalPages] = useState<number>(1);
 	const [pondList, setPondList] = useState<IPond[]>([]);
@@ -273,12 +279,16 @@ function PondLanding() {
 				<Pond
 					key={selectedPond.id}
 					pond={selectedPond}
-					onClose={() => setSelectedPond(null)}
+					incomingKoi={incomingKoi}
+					onClose={() => {
+						setSelectedPond(null);
+						setIncomingKoi(null);
+					}}
 					onFetchPond={(page: "next" | "prev") => {
 						const currentIndex = pondList.findIndex(
 							(pond) => pond.id === selectedPond.id,
 						);
-						console.log(`CurrentIndex: ${currentIndex}`);
+
 						if (
 							(currentIndex === 0 && page === "prev") ||
 							(currentIndex === pondList.length - 1 &&
@@ -291,9 +301,16 @@ function PondLanding() {
 							currentIndex + (page === "next" ? 1 : -1),
 						) as IPond;
 
+						setIncomingKoi(null);
+
 						setSelectedPond(newPond);
 					}}
 					onUpdatePond={handleUpdatePondInformation}
+					onSwitchPond={(targetPond, koi) => {
+						setIncomingKoi(koi);
+						setSelectedPond(targetPond);
+					}}
+					onClearIncomingKoi={() => setIncomingKoi(null)}
 				/>
 			)}
 			<Toaster />

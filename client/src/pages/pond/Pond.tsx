@@ -1,7 +1,11 @@
 import { CircleArrowLeft, CircleArrowRight, Undo2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { callFetchKoisInPond, callReleaseKoiToPond } from "../../api/koi";
+import {
+	callFetchKoisInPond,
+	callMoveKoi,
+	callReleaseKoiToPond,
+} from "../../api/koi";
 import { toast } from "../../components/share/Toast/toast";
 import ImportKoiForm from "../../components/user/pond/ImportKoiForm/ImportKoiForm";
 import { PondCanvas } from "../../components/user/pond/PondCanvas/PondCanvas";
@@ -16,27 +20,52 @@ import styles from "./Pond.module.css";
 
 interface PondProps {
 	pond: IPond;
+	incomingKoi?: IKoi | null;
 	onClose: () => void;
 	onFetchPond: (page: "next" | "prev") => void;
 	onUpdatePond: (name: string, description: string) => void;
+	onSwitchPond: (targetPond: IPond, koi: IKoi) => void;
+	onClearIncomingKoi: () => void;
 }
 
-function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
+function Pond({
+	pond,
+	incomingKoi,
+	onClose,
+	onFetchPond,
+	onUpdatePond,
+	onSwitchPond,
+	onClearIncomingKoi,
+}: PondProps) {
 	const navigate = useNavigate();
 	const [isInformationDialogOpen, setIsInformationDialogOpen] =
 		useState<boolean>(false);
 	const [koiList, setKoiList] = useState<IKoi[]>([]);
 	const [isAddKoiDialogOpen, setIsAddKoiDialogOpen] =
 		useState<boolean>(false);
+	const [isInitialLoaded, setIsInitialLoaded] = useState<boolean>(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			const data: IKoi[] = await handleFetchPondKoiList();
+			if (incomingKoi && !data.some((k) => k.id === incomingKoi.id)) {
+				data.push({ ...incomingKoi, pondId: pond.id });
+			}
 			setKoiList(data);
+			setIsInitialLoaded(true);
 		};
 
 		fetchData();
 	}, []);
+
+	useEffect(() => {
+		if (incomingKoi) {
+			const timer = setTimeout(() => {
+				onClearIncomingKoi();
+			}, 1000);
+			return () => clearTimeout(timer);
+		}
+	}, [incomingKoi, onClearIncomingKoi]);
 
 	const handleFetchPondKoiList = async (): Promise<IKoi[]> => {
 		try {
@@ -50,7 +79,8 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 			console.info(
 				"No koi returned by the backend; using frontend sample koi.",
 			);
-			return createMockKoiList(pond.id);
+			// return createMockKoiList(pond.id);
+			return [];
 		} catch (error) {
 			console.error(
 				"Failed to fetch pond koi; using frontend sample koi:",
@@ -85,31 +115,40 @@ function Pond({ pond, onClose, onFetchPond, onUpdatePond }: PondProps) {
 		} catch (error) {
 			toast.error("Failed to release koi(s) to the current pond.");
 		}
+	};
 
-		// const response = await callReleaseKoiToPond({
-		// 	pondId: pond.id,
-		// 	inventoryId: koiItem.id,
-		// 	quantity: quantity,
-		// });
+	const handleMoveKoi = async (koi: IKoi, targetPond: IPond) => {
+		try {
+			await callMoveKoi({
+				targetKoiId: koi.id,
+				sourcePondId: koi.pondId,
+				targetPondId: targetPond.id,
+			});
+			const movedKoi: IKoi = { ...koi, pondId: targetPond.id };
 
-		// if (response && response.data) {
-		// 	const newMembers: IKoi[] = response.data.data as IKoi[];
-		// 	setTimeout(() => {
-		// 		setKoiList((prev) => [...prev, ...newMembers]);
-		// 		toast.success(
-		// 			`Released x${quantity} ${koiVarient.name} to current pond!`,
-		// 		);
-		// 	}, 500);
-		// } else {
-		// 	toast.error("Failed to release koi(s) to the current pond.");
-		// }
+			setKoiList((prev) => prev.filter((k) => k.id !== koi.id));
+			toast.success(`Moved ${koi.name} out of the pond!`);
+
+			setTimeout(() => {
+				onSwitchPond(targetPond, movedKoi);
+			}, 400);
+		} catch (error) {
+			toast.error(`Failed to move ${koi.name} out of the pond.`);
+		}
 	};
 
 	return (
 		<>
 			<main className={styles.wrapper}>
 				<section className={styles.pondShell}>
-					<PondCanvas pondKoiList={koiList} pond={pond} />
+					{isInitialLoaded && (
+						<PondCanvas
+							pondKoiList={koiList}
+							pond={pond}
+							justMovedKoiId={incomingKoi?.id}
+							onMoveKoi={handleMoveKoi}
+						/>
+					)}
 					{/* <DebugCanvas /> */}
 					<div className={styles.coins}>
 						<img src="/pond/coin.svg" alt="coin" />

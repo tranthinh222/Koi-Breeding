@@ -1,6 +1,8 @@
+import { Info, Move } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { IKoi, IPond } from "../../../../types/backend";
 import KoiProfile from "../../KoiProfile/KoiProfile";
+import PondSelectForm from "../PondSelectForm/PondSelectForm";
 import styles from "./PondCanvas.module.css";
 import {
 	debugDrawKoi,
@@ -23,6 +25,7 @@ interface FishState {
 	phase: number;
 	image: HTMLImageElement;
 	spawnProgress: number;
+	isLeaving?: boolean;
 }
 
 interface LotusState {
@@ -79,6 +82,8 @@ interface RippleState {
 interface PondCanvasProps {
 	pondKoiList: IKoi[];
 	pond: IPond;
+	justMovedKoiId?: number | null;
+	onMoveKoi: (koi: IKoi, targetPond: IPond) => void;
 }
 
 // Use this function to debug fish in canvas
@@ -136,7 +141,12 @@ function DebugCanvas() {
 	return <canvas ref={canvasRef} aria-label="Khung debug cá tĩnh" />;
 }
 
-function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
+function PondCanvas({
+	pondKoiList,
+	pond,
+	justMovedKoiId,
+	onMoveKoi,
+}: PondCanvasProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fishRef = useRef<FishState[]>([]);
 	const latestKoiListRef = useRef<IKoi[]>(pondKoiList);
@@ -144,6 +154,8 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 	const ripplesRef = useRef<RippleState[]>([]);
 
 	const [activeKoiProfile, setActiveKoiProfile] = useState<IKoi | null>(null);
+	const [isMoveFishDialogOpen, setIsMoveFishDialogOpen] =
+		useState<boolean>(false);
 
 	// 1. STATE LƯU TRỮ CON CÁ ĐANG ĐƯỢC CHỌN
 	const [activeFishIndex, setActiveFishIndex] = useState<number | null>(null);
@@ -252,7 +264,25 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 					const koiImage = new Image();
 					koiImage.src =
 						koi.dictionary?.imageUrl || "/kois/koi-fish-null.svg";
-					return makeFish(box.width, box.height, koiImage, false);
+
+					const isJustMoved = koi.id === justMovedKoiId;
+					const newFish = makeFish(
+						box.width,
+						box.height,
+						koiImage,
+						isJustMoved,
+					);
+
+					if (isJustMoved) {
+						ripplesRef.current.push({
+							x: newFish.x,
+							y: newFish.y,
+							radius: 10,
+							alpha: 1,
+						});
+					}
+
+					return newFish;
 				});
 			}
 
@@ -353,13 +383,18 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 
 			// 3. UPDATE AND DRAW FISHES
 			fishRef.current.forEach((fish) => {
-				// Fish's spawn progress
-				if (fish.spawnProgress < 1) {
+				if (fish.isLeaving) {
+					fish.spawnProgress = Math.max(
+						0,
+						fish.spawnProgress - dt * 2,
+					);
+				} else if (fish.spawnProgress < 1) {
 					fish.spawnProgress = Math.min(
 						1,
 						fish.spawnProgress + dt * 1.5,
 					);
-				} else {
+				}
+				if (fish.spawnProgress === 1 && !fish.isLeaving) {
 					fish.turnAt -= dt;
 					if (fish.turnAt <= 0) {
 						fish.targetAngle += (Math.random() - 0.5) * 1.8;
@@ -396,7 +431,11 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 					fish.y += Math.sin(fish.angle) * fish.speed * dt;
 				}
 
-				if (fish.image && fish.image.complete) {
+				if (
+					fish.image &&
+					fish.image.complete &&
+					fish.spawnProgress > 0
+				) {
 					drawKoi(
 						ctx,
 						fish,
@@ -482,6 +521,13 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 			{activeFishIndex !== null && (
 				<div ref={popupRef} className={styles.fishMenu}>
 					<button
+						className={styles.moveFishButton}
+						onClick={() => setIsMoveFishDialogOpen(true)}
+					>
+						<Move />
+						<span>Move</span>
+					</button>
+					<button
 						className={styles.fishInfoButton}
 						onClick={() => {
 							setActiveKoiProfile(
@@ -491,7 +537,8 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 							);
 						}}
 					>
-						Thông tin
+						<Info />
+						<span>Info</span>
 					</button>
 					<button
 						className={styles.fishMenuCloseButton}
@@ -516,6 +563,40 @@ function PondCanvas({ pondKoiList, pond }: PondCanvasProps) {
 					<KoiProfile
 						koi={activeKoiProfile}
 						onClose={() => setActiveKoiProfile(null)}
+					/>
+				</div>
+			)}
+			{isMoveFishDialogOpen && (
+				<div className={styles.overlay}>
+					<PondSelectForm
+						selectedKoi={
+							latestKoiListRef.current.at(
+								activeFishIndex as number,
+							) as IKoi
+						}
+						currentPond={pond}
+						onClose={() => setIsMoveFishDialogOpen(false)}
+						onSubmit={(targetPond: IPond, targetKoi: IKoi) => {
+							setIsMoveFishDialogOpen(false);
+							// const koiToMove =
+							// 	latestKoiListRef.current[
+							// 		activeFishIndex as number
+							// 	];
+
+							if (activeFishIndexRef.current !== null) {
+								fishRef.current[
+									activeFishIndexRef.current
+								].isLeaving = true;
+							}
+
+							setActiveFishIndex(null);
+							activeFishIndexRef.current = null;
+
+							// Chờ 500ms cho cá bay hơi hoàn toàn rồi báo lên Pond chuyển hồ
+							setTimeout(() => {
+								onMoveKoi(targetKoi, targetPond);
+							}, 500);
+						}}
 					/>
 				</div>
 			)}

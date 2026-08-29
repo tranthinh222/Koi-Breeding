@@ -37,6 +37,43 @@
 	border: none;
 	background: #f2e943;
 	font-weight: bold;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+}
+
+.fishInfoButton svg {
+	width: 15px;
+	height: 15px;
+}
+
+.fishInfoButton span {
+	font-family: "Grandstander";
+	font-size: 14px;
+}
+
+.moveFishButton {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #43f2af;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+}
+
+.moveFishButton svg {
+	width: 15px;
+	height: 15px;
+}
+
+.moveFishButton span {
+	font-family: "Grandstander";
+	font-size: 14px;
 }
 
 .fishMenuCloseButton {

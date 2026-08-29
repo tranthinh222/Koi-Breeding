@@ -61,6 +61,95 @@
 	color: #f2e943;
 }
 
+.statsHud {
+	position: absolute;
+	top: 15px;
+	left: 200px;
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	background: rgba(4, 67, 85, 0.6);
+	backdrop-filter: blur(8px);
+	padding: 5px 5px;
+	border-radius: 25px;
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+	overflow: hidden;
+	max-width: 900px;
+	transition:
+		max-width 0.4s cubic-bezier(0.2, 0, 0, 1),
+		background-color 0.3s ease;
+}
+
+.statsHud.collapsed {
+	max-width: 64px;
+	background: rgba(4, 67, 85, 0.85);
+}
+
+.hudToggleButton {
+	background: transparent;
+	border: none;
+	color: white;
+	padding: 10px 14px;
+	border-radius: 25px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition:
+		background-color 0.2s ease,
+		transform 0.2s ease;
+}
+
+.hudToggleButton:hover {
+	background-color: rgba(255, 255, 255, 0.15);
+}
+
+.hudToggleButton:active {
+	transform: scale(0.85);
+}
+
+.hudContent {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	padding-right: 20px;
+	flex-shrink: 0;
+	white-space: nowrap;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.statsHud.collapsed .hudContent {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.hudItem {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: white;
+	font-family: "Grandstander", sans-serif;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.hudItem svg {
+	width: 22px;
+	height: 22px;
+	filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+.hudSeparator {
+	width: 2px;
+	height: 20px;
+	background-color: rgba(255, 255, 255, 0.3);
+	border-radius: 2px;
+}
+
 .header {
 	position: absolute;
 	top: 22px;

@@ -1,4 +1,15 @@
-import { CircleArrowLeft, CircleArrowRight, Undo2 } from "lucide-react";
+import {
+	Bubbles,
+	CheckCheck,
+	ChevronsLeft,
+	ChevronsRight,
+	CircleArrowLeft,
+	CircleArrowRight,
+	Droplets,
+	Gauge,
+	Thermometer,
+	Undo2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -44,6 +55,7 @@ function Pond({
 	const [isAddKoiDialogOpen, setIsAddKoiDialogOpen] =
 		useState<boolean>(false);
 	const [isInitialLoaded, setIsInitialLoaded] = useState<boolean>(false);
+	const [isHudExpanded, setIsHudExpanded] = useState<boolean>(true);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -154,6 +166,67 @@ function Pond({
 						<img src="/pond/coin.svg" alt="coin" />
 						<span>9.000</span>
 					</div>
+
+					<div
+						className={`${styles.statsHud} ${!isHudExpanded ? styles.collapsed : ""}`}
+					>
+						<button
+							type="button"
+							className={styles.hudToggleButton}
+							onClick={() => setIsHudExpanded(!isHudExpanded)}
+							title={
+								isHudExpanded
+									? "Collapse Stats"
+									: "Expand Stats"
+							}
+						>
+							{isHudExpanded ? (
+								<ChevronsLeft />
+							) : (
+								<ChevronsRight />
+							)}
+						</button>
+
+						<div className={styles.hudContent}>
+							<div className={styles.hudItem} title="pH Level">
+								<Droplets color="#667eea" /> {pond.pH}
+							</div>
+							<div className={styles.hudSeparator} />
+
+							<div className={styles.hudItem} title="Temperature">
+								<Thermometer color="#d97706" />{" "}
+								{pond.temperature}°C
+							</div>
+							<div className={styles.hudSeparator} />
+
+							<div
+								className={styles.hudItem}
+								title="Dissolved Oxygen"
+							>
+								<Bubbles color="#06b6d4" />{" "}
+								{`${pond.oxygen} mg/L`}
+							</div>
+							<div className={styles.hudSeparator} />
+
+							<div
+								className={styles.hudItem}
+								title="Water Quality"
+							>
+								<CheckCheck color="#16a34a" />{" "}
+								{pond.waterQuality}/100
+							</div>
+							<div className={styles.hudSeparator} />
+
+							<div
+								className={styles.hudItem}
+								title="Environment Score"
+							>
+								<Gauge color="#7c3aed" />{" "}
+								{pond.environmentScore}/100
+							</div>
+						</div>
+					</div>
+
 					<div className={styles.header}>
 						<button
 							className={styles.navButton}

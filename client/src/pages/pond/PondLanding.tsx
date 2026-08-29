@@ -1,3 +1,10 @@
+import {
+	Bubbles,
+	CheckCheck,
+	Droplets,
+	Gauge,
+	Thermometer,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { CURRENT_USER_ID } from "../../api/currentUser";
 import {
@@ -245,12 +252,9 @@ function PondLanding() {
 										<div
 											key={pond.id}
 											className={styles.pondItem}
-											onClick={() => {
-												console.log(
-													`Selected pond: id='${pond.id}' | name='${pond.name}'`,
-												);
-												setSelectedPond(pond);
-											}}
+											onClick={() =>
+												setSelectedPond(pond)
+											}
 											title={pond.name}
 										>
 											<img
@@ -260,6 +264,43 @@ function PondLanding() {
 											<span className={styles.pondLabel}>
 												{pond.name}
 											</span>
+											<div className={styles.pondStats}>
+												<div
+													className={styles.statBadge}
+													title="pH Level"
+												>
+													<Droplets color="#667eea" />{" "}
+													{pond.pH}
+												</div>
+												<div
+													className={styles.statBadge}
+													title="Temperature"
+												>
+													<Thermometer color="#d97706" />{" "}
+													{pond.temperature}°
+												</div>
+												<div
+													className={styles.statBadge}
+													title="Oxygen"
+												>
+													<Bubbles color="#06b6d4" />{" "}
+													{`${pond.oxygen} mg/L`}
+												</div>
+												<div
+													className={styles.statBadge}
+													title="Water Quality"
+												>
+													<CheckCheck color="#16a34a" />{" "}
+													{`${pond.waterQuality}/100`}
+												</div>
+												<div
+													className={styles.statBadge}
+													title="Environment Score"
+												>
+													<Gauge color="#7c3aed" />{" "}
+													{`${pond.environmentScore}/100`}
+												</div>
+											</div>
 										</div>
 									))}
 								</div>

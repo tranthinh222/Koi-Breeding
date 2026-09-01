@@ -17,6 +17,7 @@ public class ResPondDTO {
     private Integer level;
     private Integer capacity;
     private Integer currentQuantity;
+    private Integer nextLevelPrice;
     private BigDecimal waterQuality;
     private BigDecimal temperature;
     private BigDecimal pH;

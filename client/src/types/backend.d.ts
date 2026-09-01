@@ -98,6 +98,7 @@ export interface IPond {
 	name: string;
 	level: number;
 	currentQuantity: number;
+	nextLevelPrice: number;
 	capacity: number;
 	waterQuality: number;
 	temperature: number;

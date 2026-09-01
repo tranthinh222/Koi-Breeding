@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.koibreeding.domain.Pond;
 import com.koibreeding.dto.request.RequestBuyPondDTO;
 import com.koibreeding.dto.request.UsePondItemRequest;
-import jakarta.validation.Valid;
+import com.koibreeding.dto.response.ResBuyOrUpgradePondDTO;
 import com.koibreeding.dto.response.ResPondDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.service.PondService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,16 +33,18 @@ public class PondController {
     }
 
     @PostMapping("/ponds")
-    public ResponseEntity<ResPondDTO> buyNewPond(@RequestBody RequestBuyPondDTO buyPondRequestDTO)
+    public ResponseEntity<ResBuyOrUpgradePondDTO> buyNewPond(@RequestBody RequestBuyPondDTO buyPondRequestDTO)
             throws Exception {
-        ResPondDTO buyPondResponseDTO = null;
-        try {
-            buyPondResponseDTO = this.pondService.handleBuyPond(buyPondRequestDTO);
-        } catch (Exception e) {
-            throw e;
-        }
+        ResBuyOrUpgradePondDTO resBuyPondDTO = this.pondService.handleBuyPond(buyPondRequestDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(buyPondResponseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resBuyPondDTO);
+    }
+
+    @PutMapping("/ponds/upgrade")
+    public ResponseEntity<ResBuyOrUpgradePondDTO> upgradePond(@RequestParam Integer pondId) throws Exception {
+        ResBuyOrUpgradePondDTO resUpgradePondDTO = this.pondService.handleUpgradePond(pondId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(resUpgradePondDTO);
     }
 
     @PutMapping("/ponds")

@@ -17,6 +17,7 @@ import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Pond;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.request.RequestBuyPondDTO;
+import com.koibreeding.dto.response.ResBuyOrUpgradePondDTO;
 import com.koibreeding.dto.response.ResPondDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.EffectType;
@@ -26,10 +27,12 @@ import com.koibreeding.enums.PhTrend;
 import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.repository.PondRepository;
+import com.koibreeding.util.formulas.LevelingSystem;
 import com.koibreeding.util.formulas.PondFormula;
 
 @Service
 public class PondService {
+    private final LevelingSystem levelingSystem;
     private final NotificationService notificationService;
     private final KoiRepository koiRepository;
     private final PondRepository pondRepository;
@@ -42,7 +45,7 @@ public class PondService {
     public PondService(PondRepository pondRepository, UserService userService, WalletService walletService,
             InventoryRepository inventoryRepository,
             PondEnvironmentConfig environmentConfig, PondFormula pondFormula, KoiRepository koiRepository,
-            NotificationService notificationService) {
+            NotificationService notificationService, LevelingSystem levelingSystem) {
         this.pondRepository = pondRepository;
         this.userService = userService;
         this.walletService = walletService;
@@ -51,10 +54,11 @@ public class PondService {
         this.pondFormula = pondFormula;
         this.koiRepository = koiRepository;
         this.notificationService = notificationService;
+        this.levelingSystem = levelingSystem;
     }
 
     @Transactional
-    public ResPondDTO handleBuyPond(RequestBuyPondDTO buyPondRequestDTO) throws Exception {
+    public ResBuyOrUpgradePondDTO handleBuyPond(RequestBuyPondDTO buyPondRequestDTO) throws Exception {
         User owner = userService.handleFetchUserById(buyPondRequestDTO.getOwnerId());
         if (owner == null) {
             throw new Exception("Pond owner is not exist!");
@@ -88,27 +92,16 @@ public class PondService {
         // Deduct owner's wallet balance
         walletService.deduct(owner.getId(), pondPrice);
 
-        ResPondDTO result = new ResPondDTO();
-        ResPondDTO.PondOwner pondOwner = new ResPondDTO.PondOwner();
-        pondOwner.setId(owner.getId());
-        pondOwner.setUsername(owner.getUsername());
-
-        result.setId(savedPond.getId());
-        result.setOwner(pondOwner);
-        result.setName(savedPond.getName());
-        result.setLevel(savedPond.getLevel());
-        result.setCapacity(savedPond.getCapacity());
-        result.setWaterQuality(savedPond.getWaterQuality());
-        result.setTemperature(savedPond.getTemperature());
-        result.setPH(savedPond.getPH());
-        result.setOxygen(savedPond.getOxygen());
+        ResPondDTO result = this.convertToResPondDTO(savedPond);
         enrichEnvironment(result, savedPond);
-        result.setCreatedAt(savedPond.getCreatedAt().toInstant());
-        result.setDescription(savedPond.getDescription());
         notificationService.createAndSend(owner.getId(), NotificationType.PURCHASE_SUCCESS, "Purchase successful",
                 "Bought new pond with name '" + buyPondRequestDTO.getName() + "'.");
 
-        return result;
+        ResBuyOrUpgradePondDTO resBuyPondDTO = new ResBuyOrUpgradePondDTO();
+        resBuyPondDTO.setPond(result);
+        resBuyPondDTO.setBalance(walletService.getBalanceWallet(owner.getId()).getBalance());
+
+        return resBuyPondDTO;
     }
 
     public ResPondDTO handleUpdatePond(Pond pond) {
@@ -136,6 +129,43 @@ public class PondService {
         }
 
         return convertToResPondDTO(currentPond);
+    }
+
+    @Transactional
+    public ResBuyOrUpgradePondDTO handleUpgradePond(Integer pondId) throws Exception {
+        Pond pond = this.handleFetchPondById(pondId);
+        if (pond == null) {
+            throw new Exception("Pond with id='" + pondId + "' does not exist.");
+        }
+
+        if (pond.getLevel() == levelingSystem.getPondMaxLevel()) {
+            throw new Exception("Pond is currently at max level.");
+        }
+
+        User owner = pond.getOwner();
+
+        BigDecimal ownerBalance = walletService.getBalanceWallet(owner.getId()).getBalance();
+        BigDecimal upgradePrice = BigDecimal.valueOf(levelingSystem.getPondNextLevelPrice(pond.getLevel()));
+        if (ownerBalance.compareTo(upgradePrice) < 0) {
+            throw new Exception("You don't have enough koins to upgrade this pond!");
+        }
+
+        // Deduct owner's wallet balance
+        walletService.deduct(owner.getId(), upgradePrice);
+
+        pond.setLevel(pond.getLevel() + 1);
+        pond.setCapacity(pond.getCapacity() + 1);
+        Pond savedPond = this.pondRepository.save(pond);
+        ResPondDTO resPondDTO = this.convertToResPondDTO(savedPond);
+
+        notificationService.createAndSend(owner.getId(), NotificationType.PURCHASE_SUCCESS, "Purchase successful",
+                "Upgraded pond '" + pond.getName() + "' to level " + pond.getLevel());
+
+        ResBuyOrUpgradePondDTO resUpgradePondDTO = new ResBuyOrUpgradePondDTO();
+        resUpgradePondDTO.setPond(resPondDTO);
+        resUpgradePondDTO.setBalance(walletService.getBalanceWallet(owner.getId()).getBalance());
+
+        return resUpgradePondDTO;
     }
 
     @Transactional
@@ -258,6 +288,7 @@ public class PondService {
         result.setLevel(pond.getLevel());
         result.setCapacity(pond.getCapacity());
         result.setCurrentQuantity((int) this.koiRepository.countByPond_Id(pond.getId()));
+        result.setNextLevelPrice(levelingSystem.getPondNextLevelPrice(pond.getLevel()));
         result.setWaterQuality(pond.getWaterQuality());
         result.setTemperature(pond.getTemperature());
         result.setPH(pond.getPH());

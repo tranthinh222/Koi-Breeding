@@ -5,6 +5,8 @@ import java.time.OffsetDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.koibreeding.enums.PhTrend;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,11 +17,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import com.koibreeding.enums.PhTrend;
 
 @Entity
 @Table(name = "pond")
@@ -39,6 +42,8 @@ public class Pond {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    @Min(value = 1)
+    @Max(value = 20)
     @Column(nullable = false)
     private Integer level = 1;
 

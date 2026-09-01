@@ -11,8 +11,12 @@ import {
 	callBuyPond,
 	callFetchAllPonds,
 	callUpdatePond,
+	callUpgradePond,
 	type IRequestBuyPondDTO,
+	type IResponseBuyPondDTO,
+	type IResponseUpgradePondDTO,
 } from "../../api/pond";
+import { getUser, type User } from "../../api/user";
 import ShopHeader from "../../components/Header";
 import { toast } from "../../components/share/Toast/toast";
 import Toaster from "../../components/share/Toast/Toaster";
@@ -42,8 +46,9 @@ const MOCK_PONDS: IPond[] = [
 		username: "demo_user",
 	},
 	name,
-	level: 10,
+	level: index === 0 ? 15 : 10,
 	currentQuantity: 0,
+	nextLevelPrice: 900,
 	capacity: index === 0 ? 15 : 10,
 	waterQuality: index === 0 ? 70 : 100,
 	temperature: index === 0 ? 20 : 24,
@@ -55,6 +60,7 @@ const MOCK_PONDS: IPond[] = [
 }));
 
 function PondLanding() {
+	const [userLogin, setUserLogin] = useState<User | null>(null);
 	const [selectedPond, setSelectedPond] = useState<IPond | null>(null);
 	const [incomingKoi, setIncomingKoi] = useState<IKoi | null>(null);
 	const [page, setPage] = useState<number>(1);
@@ -65,10 +71,27 @@ function PondLanding() {
 		useState<boolean>(false);
 	const [hasNew, setHasNew] = useState<number[]>([]);
 
+	useEffect(() => {
+		const loadUser = async () => {
+			try {
+				const user = await getUser(CURRENT_USER_ID);
+				setUserLogin(user);
+			} catch (error) {
+				toast.error("Failed to fetch current user login.");
+			}
+		};
+
+		loadUser();
+	}, []);
+
 	// Fetch the page data
 	useEffect(() => {
 		const loadData = async () => {
 			try {
+				if (userLogin === null) {
+					return;
+				}
+
 				const response = await fetchData(page, 6);
 
 				if (response.meta.totalElements === 0) {
@@ -97,14 +120,14 @@ function PondLanding() {
 		};
 
 		loadData();
-	}, [page]);
+	}, [page, userLogin]);
 
 	const fetchData = async (
 		page: number,
 		pageSize: number,
 	): Promise<IModelPagination<IPond>> => {
 		const response = await callFetchAllPonds(
-			`owner=${CURRENT_USER_ID}&page=${page - 1}&size=${pageSize}`,
+			`owner=${userLogin?.id}&page=${page - 1}&size=${pageSize}`,
 		);
 
 		if (response && response.data) {
@@ -159,21 +182,50 @@ function PondLanding() {
 			name: formData.name,
 			description: formData.description,
 			price: price,
-			ownerId: CURRENT_USER_ID,
+			ownerId: userLogin?.id as number,
 		};
 
 		const response = await callBuyPond(request);
 
 		if (response && response.data) {
-			const newPond: IPond = response.data.data as IPond;
+			const data: IResponseBuyPondDTO = response.data
+				.data as IResponseBuyPondDTO;
 
-			setPondList([newPond, ...pondList]);
-			setHasNew((prev) => [newPond.id, ...prev]);
+			window.dispatchEvent(
+				new CustomEvent("wallet:updated", { detail: data.balance }),
+			);
+			setPondList([data.pond, ...pondList]);
+			setHasNew((prev) => [data.pond.id, ...prev]);
 			setTotalPonds((prev) => prev + 1);
 			setTotalPages(Math.ceil((totalPonds + 1) / 6));
 			toast.success("Buy new pond successfully!");
 		} else {
 			toast.error("Failed to buy pond!");
+		}
+	};
+
+	const handleUpgradePond = async (pondId: number) => {
+		try {
+			const response = await callUpgradePond(pondId);
+			const upgradeData: IResponseUpgradePondDTO = response.data
+				.data as IResponseUpgradePondDTO;
+			setPondList((prev) => {
+				const pondIndex = prev.findIndex((item) => item.id === pondId);
+
+				const newList = [...prev];
+				newList[pondIndex] = upgradeData.pond;
+
+				return newList;
+			});
+			setSelectedPond(upgradeData.pond);
+			window.dispatchEvent(
+				new CustomEvent("wallet:updated", {
+					detail: upgradeData.balance,
+				}),
+			);
+			toast.success(`Upgraded pond to level ${upgradeData.pond.level}`);
+		} catch (error) {
+			toast.error("Failed to upgrade current pond.");
 		}
 	};
 
@@ -191,6 +243,7 @@ function PondLanding() {
 			name: name,
 			level: selectedPond?.level as number,
 			currentQuantity: selectedPond?.currentQuantity as number,
+			nextLevelPrice: selectedPond?.nextLevelPrice as number,
 			capacity: selectedPond?.capacity as number,
 			waterQuality: selectedPond?.waterQuality as number,
 			temperature: selectedPond?.temperature as number,
@@ -363,6 +416,7 @@ function PondLanding() {
 					}}
 					onFetchPond={handleFetchPond}
 					onUpdatePond={handleUpdatePondInformation}
+					onUpgradePond={handleUpgradePond}
 					onSwitchPond={(targetPond, koi) => {
 						setIncomingKoi(koi);
 						setSelectedPond(targetPond);

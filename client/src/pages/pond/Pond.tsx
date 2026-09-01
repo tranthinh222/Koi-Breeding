@@ -21,6 +21,7 @@ import { toast } from "../../components/share/Toast/toast";
 import ImportKoiForm from "../../components/user/pond/ImportKoiForm/ImportKoiForm";
 import { PondCanvas } from "../../components/user/pond/PondCanvas/PondCanvas";
 import PondInformation from "../../components/user/pond/PondInformation/PondInformation";
+import PondUpgradeForm from "../../components/user/pond/PondUpgradeForm/PondUpgradeForm";
 import type {
 	IItemInventory,
 	IKoi,
@@ -35,6 +36,7 @@ interface PondProps {
 	onClose: () => void;
 	onFetchPond: (page: "next" | "prev") => void;
 	onUpdatePond: (name: string, description: string) => void;
+	onUpgradePond: (pondId: number) => Promise<void>;
 	onSwitchPond: (targetPond: IPond, koi: IKoi) => void;
 	onClearIncomingKoi: () => void;
 }
@@ -45,6 +47,7 @@ function Pond({
 	onClose,
 	onFetchPond,
 	onUpdatePond,
+	onUpgradePond,
 	onSwitchPond,
 	onClearIncomingKoi,
 }: PondProps) {
@@ -53,6 +56,8 @@ function Pond({
 		useState<boolean>(false);
 	const [koiList, setKoiList] = useState<IKoi[]>([]);
 	const [isAddKoiDialogOpen, setIsAddKoiDialogOpen] =
+		useState<boolean>(false);
+	const [isLevelingDialogOpen, setIsLevelingDialogOpen] =
 		useState<boolean>(false);
 	const [isInitialLoaded, setIsInitialLoaded] = useState<boolean>(false);
 	const [isHudExpanded, setIsHudExpanded] = useState<boolean>(true);
@@ -284,6 +289,14 @@ function Pond({
 						>
 							<img src="/pond/add-koi.svg" alt="add koi" />
 						</button>
+						<button
+							type="button"
+							className={styles.navButton}
+							title="add koi"
+							onClick={() => setIsLevelingDialogOpen(true)}
+						>
+							<img src="/pond/pond-leveling.svg" alt="add koi" />
+						</button>
 					</div>
 
 					<div className={styles.back}>
@@ -326,6 +339,7 @@ function Pond({
 						pond={pond}
 						onClose={() => setIsInformationDialogOpen(false)}
 						onEdit={onUpdatePond}
+						onUpgrade={() => onUpgradePond(pond.id)}
 					/>
 				</div>
 			)}
@@ -336,6 +350,15 @@ function Pond({
 						pondCapacity={pond.capacity}
 						onClose={() => setIsAddKoiDialogOpen(false)}
 						onSubmit={handleImportKoi}
+					/>
+				</div>
+			)}
+			{isLevelingDialogOpen && (
+				<div className={styles.overlay}>
+					<PondUpgradeForm
+						pond={pond}
+						onClose={() => setIsLevelingDialogOpen(false)}
+						onSubmit={() => onUpgradePond(pond.id)}
 					/>
 				</div>
 			)}

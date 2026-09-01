@@ -249,7 +249,7 @@
 	flex-direction: column;
 	justify-content: start;
 	align-items: start;
-	gap: 25px;
+	gap: 20px;
 	padding: 20px 20px;
 	border-radius: 5px;
 	background-color: #faf8f8;
@@ -364,7 +364,7 @@
 
 .parentImage {
 	width: 100%;
-	height: 100px;
+	height: 80px;
 	background: radial-gradient(circle, #49a5d6, #377394);
 	border: 2px solid white;
 	border-radius: 5px;
@@ -388,5 +388,5 @@
 	font-weight: bold;
 	font-size: 18px;
 	color: black;
-	margin-top: 20px;
+	margin-top: 15px;
 }

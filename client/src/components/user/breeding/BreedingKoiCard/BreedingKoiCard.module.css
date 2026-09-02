@@ -1,0 +1,89 @@
+.koiCard {
+	display: flex;
+	align-items: center;
+	background: #2d1b42;
+	border: 3px solid #1a0b2e;
+	border-radius: 12px;
+	padding: 10px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	position: relative;
+}
+
+.koiCard:hover {
+	transform: scale(1.02);
+	background: #3b2456;
+}
+
+.koiCard.selected {
+	border-color: #f5b942; /* Viền vàng rực khi chọn */
+	background: #4b2a63;
+	box-shadow: 0 0 15px rgba(245, 185, 66, 0.4);
+}
+
+.koiCard.disabled {
+	opacity: 0.4;
+	filter: grayscale(80%);
+	cursor: not-allowed;
+	pointer-events: none; /* Chặn hoàn toàn click chuột */
+}
+
+.koiLevel {
+	position: absolute;
+	top: -5px;
+	left: -5px;
+	background: #e8ad54;
+	color: #4a2500;
+	font-weight: bold;
+	font-family: "Grandstander";
+	width: 26px;
+	height: 26px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	border: 2px solid #fff;
+	font-size: 14px;
+	z-index: 2;
+}
+
+.koiImage {
+	width: 70px;
+	height: 70px;
+	object-fit: contain;
+	filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.4));
+}
+
+.koiInfo {
+	flex: 1;
+	margin-left: 10px;
+	display: flex;
+	flex-direction: column;
+}
+
+.koiName {
+	color: white;
+	font-family: "Grandstander", sans-serif;
+	font-weight: bold;
+	font-size: 18px;
+}
+
+.koiTags {
+	display: flex;
+	gap: 6px;
+	margin-top: 5px;
+}
+
+.genderTag {
+	font-size: 12px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	color: white;
+	font-weight: bold;
+}
+.genderMALE {
+	background: #2778d8;
+}
+.genderFEMALE {
+	background: #e84393;
+}

@@ -292,10 +292,18 @@ function Pond({
 						<button
 							type="button"
 							className={styles.navButton}
-							title="add koi"
+							title="upgrade"
 							onClick={() => setIsLevelingDialogOpen(true)}
 						>
-							<img src="/pond/pond-leveling.svg" alt="add koi" />
+							<img src="/pond/pond-leveling.svg" alt="upgrade" />
+						</button>
+						<button
+							type="button"
+							className={styles.navButton}
+							title="breeding"
+							onClick={() => navigate("/breeding")}
+						>
+							<img src="/pond/breeding.svg" alt="breeding" />
 						</button>
 					</div>
 

@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import KoiVarientList from "./components/admin/KoiVarientList/KoiVarientList";
 import AppLayout from "./components/AppLayout";
+import Breeding from "./pages/breeding/Breeding";
 import Dictionary from "./pages/dictionary/Dictionary";
 import Inventory from "./pages/inventory/Inventory";
 import TransactionHistory from "./pages/marketplace/TransactionHistory";
@@ -31,6 +32,8 @@ function App() {
 					<Route path="/pond" element={<PondLanding />} />
 
 					<Route path="/dictionary" element={<Dictionary />} />
+
+					<Route path="/breeding" element={<Breeding />} />
 
 					<Route path="/payment/:itemId" element={<Payment />} />
 

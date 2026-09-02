@@ -233,27 +233,3 @@ export default function Marketplace() {
     </>
   );
 }
-
-// .marketplace-filters {
-//   width: 90%;
-//   margin: 0 auto 30px;
-
-//   display: flex;
-//   flex-wrap: wrap;
-
-//   align-items: center;
-//   justify-content: center;
-
-//   gap: 12px;
-
-//   background: #f8f4ea;
-//   border: 4px solid #c9a26b;
-//   border-radius: 20px;
-
-//   padding: 18px 22px;
-
-//   position: relative;
-//   overflow: visible;
-
-//   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-// }

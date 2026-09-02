@@ -9,6 +9,7 @@ import com.koibreeding.dto.response.LoginResponse;
 import com.koibreeding.dto.response.ResAuthDto;
 import com.koibreeding.dto.response.ResUserDto;
 import com.koibreeding.enums.Gender;
+import com.koibreeding.enums.Location;
 import com.koibreeding.enums.Role;
 import com.koibreeding.enums.UserStatus;
 import com.koibreeding.repository.AuthRepository;
@@ -80,6 +81,7 @@ public class AuthService {
         user.setEmail(userRes.getEmail());
         user.setBirthday(userRes.getBirthday());
         user.setGender(userRes.getGender());
+        user.setLocation(userRes.getLocation());
         user.setExp(1);
         user.setAvatarUrl(userRes.getAvatarUrl());
         user.setStatus(UserStatus.ACTIVE);
@@ -96,6 +98,7 @@ public class AuthService {
                 newUser.getEmail(),
                 newUser.getBirthday(),
                 newUser.getGender(),
+                newUser.getLocation(),
                 newUser.getRole(),
                 newUser.getExp(),
                 newUser.getAvatarUrl(),
@@ -104,17 +107,85 @@ public class AuthService {
     }
 
     public LoginResponse Login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseGet(() -> userRepository.findByEmail(request.getEmail())
-                        .orElseThrow(() -> new RuntimeException("Incorrect username or email")));
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Incorrect password");
+
+        String loginInput = (request.getUsername() != null && !request.getUsername().isBlank())
+                ? request.getUsername()
+                : request.getEmail();
+
+        User user = userRepository.findByUsername(loginInput)
+                .orElseGet(() ->
+                        userRepository.findByEmail(loginInput)
+                                .orElseThrow(() ->
+                                        new RuntimeException("Invalid username/email or password")
+                                )
+                );
+
+        // 1. Kiểm tra tài khoản đã bị ban
+        if (Boolean.TRUE.equals(user.getIsBanned())) {
+            throw new RuntimeException("Your account has been banned");
         }
 
-        String userToken = jwtService.generateUserToken(user.getId());
-        String refreshToken = jwtService.generateRefreshToken(user.getId());
+        try {
 
-        return new LoginResponse(userToken, refreshToken);
+            // 2. Authentication
+            Authentication authentication =
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    loginInput,
+                                    request.getPassword()
+                            )
+                    );
+
+            // 3. Login thành công → reset số lần sai
+            user.setFailedLoginAttempts(0);
+            userRepository.save(user);
+
+            // 4. Tạo token
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+
+            return new LoginResponse(accessToken, refreshToken);
+
+        } catch (org.springframework.security.core.AuthenticationException e) {
+
+            // 5. Login sai
+            int failedAttempts = user.getFailedLoginAttempts() + 1;
+
+            user.setFailedLoginAttempts(failedAttempts);
+
+            // 6. Sai đủ 5 lần → ban
+            if (failedAttempts >= 5) {
+                user.setIsBanned(true);
+                userRepository.save(user);
+
+                throw new RuntimeException(
+                        "Your account has been banned after 5 failed login attempts"
+                );
+            }
+
+            userRepository.save(user);
+
+            throw new RuntimeException(
+                    "Invalid username/email or password. Attempt "
+                            + failedAttempts + "/5"
+            );
+        }
+    }
+
+    public String refresh(String refreshToken) {
+
+        if (refreshToken == null || !jwtService.isRefreshTokenValid(refreshToken)) {
+            throw new RuntimeException("Invalid or expired refresh token");
+        }
+
+        String username = jwtService.verifyToken(refreshToken);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found")
+                );
+
+        return jwtService.generateAccessToken(user);
     }
 
     public void forgotPassword(ForgotPasswordRequest request) {

@@ -9,7 +9,6 @@ import {
 } from "react";
 
 import { getCurrentUser, logoutRequest, type AuthUser } from "../api/auth";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 type AuthContextValue = {
   currentUser: AuthUser | null;
@@ -23,73 +22,100 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-function hasAuthToken() {
-  return Boolean(
-    sessionStorage.getItem("userToken") ||
-    sessionStorage.getItem("accessToken") ||
-    localStorage.getItem("accessToken"),
-  );
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // currentUser chỉ tồn tại trong React state
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
-  const [loading, setLoading] = useState(() => hasAuthToken());
+  // Ban đầu phải loading vì chưa biết user đã đăng nhập hay chưa
+  const [loading, setLoading] = useState(true);
 
   const setAuthenticatedUser = useCallback((user: AuthUser | null) => {
     setCurrentUser(user);
   }, []);
 
+  /**
+   * Lấy thông tin user hiện tại.
+   *
+   * Không cần kiểm tra accessToken vì token nằm trong HttpOnly Cookie.
+   * Browser sẽ tự động gửi cookie trong request.
+   */
   const refreshCurrentUser = useCallback(async () => {
-    if (!hasAuthToken()) {
-      setAuthenticatedUser(null);
-      return null;
-    }
-
     try {
       const user = await getCurrentUser();
 
+      // ✓ Nếu null (401), đơn giản là không có user
       setAuthenticatedUser(user);
 
       return user;
     } catch (error) {
       console.error("Failed to load current user:", error);
       setAuthenticatedUser(null);
-      throw error;
+      return null;
     }
   }, [setAuthenticatedUser]);
 
-  const clearLocalAuth = useCallback(() => {
-    sessionStorage.removeItem("userToken");
-    sessionStorage.removeItem("refreshToken");
-    sessionStorage.removeItem("accessToken");
+  // Bootstrap useEffect
+  useEffect(() => {
+    let cancelled = false;
 
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    const bootstrap = async () => {
+      try {
+        // ✓ getCurrentUser() return null nếu 401
+        const user = await getCurrentUser();
 
-    setAuthenticatedUser(null);
+        if (!cancelled) {
+          setAuthenticatedUser(user);
+        }
+      } catch (error) {
+        console.error("Failed to load authenticated user:", error);
+
+        if (!cancelled) {
+          setAuthenticatedUser(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false); // ✓ CRITICAL: luôn set loading = false
+        }
+      }
+    };
+
+    void bootstrap();
+
+    return () => {
+      cancelled = true;
+    };
   }, [setAuthenticatedUser]);
 
+  /**
+   * Logout:
+   * Backend sẽ xóa HttpOnly Cookie.
+   */
   const logout = useCallback(async () => {
     try {
       await logoutRequest();
     } catch (error) {
       console.error("Logout request failed:", error);
     } finally {
-      clearLocalAuth();
+      setAuthenticatedUser(null);
     }
-  }, [clearLocalAuth]);
+  }, [setAuthenticatedUser]);
 
+  /**
+   * Khi app được load/reload:
+   *
+   * React
+   *   ↓
+   * GET /auth/me
+   *   ↓
+   * Browser tự gửi accessToken Cookie
+   *   ↓
+   * Backend kiểm tra JWT
+   *   ↓
+   * User hoặc 401
+   */
   useEffect(() => {
     let cancelled = false;
 
     const bootstrap = async () => {
-      if (!hasAuthToken()) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const user = await getCurrentUser();
 
@@ -100,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Failed to load authenticated user:", error);
 
         if (!cancelled) {
-          await logout();
+          setAuthenticatedUser(null);
         }
       } finally {
         if (!cancelled) {
@@ -114,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [logout, setAuthenticatedUser]);
+  }, [setAuthenticatedUser]);
 
   const value = useMemo(
     () => ({

@@ -2,8 +2,8 @@ package com.koibreeding.domain;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
+import com.koibreeding.enums.Location;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -51,6 +51,10 @@ public class User {
     private Gender gender;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Location location;
+
+    @Enumerated(EnumType.STRING)
     private UserStatus status;
 
     @Enumerated(EnumType.STRING)
@@ -59,6 +63,9 @@ public class User {
 
     @Column(nullable = false)
     private Boolean isBanned = false;
+
+    @Column(nullable = false)
+    private Integer failedLoginAttempts = 0;
 
     @Column(nullable = false)
     private Integer exp = 1;

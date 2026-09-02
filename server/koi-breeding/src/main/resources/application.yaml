@@ -2,48 +2,25 @@ server:
   port: 8090
   servlet:
     context-path: /koi_breeding
+
 spring:
   application:
     name: koi-breeding
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: nguyenvanphuoc1172@gmail.com
-    password: mngg tnvb obqs aqjk
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+
+  profiles:
+    active: local
+
   datasource:
     url: jdbc:postgresql://localhost:5432/koi_breeding
-    username: postgres
-    password: khoa123
+
   jpa:
     hibernate:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+
     properties:
       hibernate:
         default_schema: koi_breeding
-    show-sql: true
-cloudinary:
-  cloud-name: djmcluh5n
-  api-key: 867291126632944
-  api-secret: FyXaVv6j5PUJqL-sNtlydQVZFj0
-vietqr:
-  bank-id: 970418
-  account-no: 8824121093
-  account-name: TRAN QUOC THINH
-  template: compact2
 
-sepay:
-  api-key: ${SEPAY_API_KEY:}
-# google:
-# client-id: ${GOOGLE_CLIENT_ID:452603430996-p2t0cklg5a3t78u6lpf4c1hgau8vbep5.apps.googleusercontent.com}
-jwt:
-  secret: qmrLNfFizjkkTyA3qMRbIRJLSc0JlF4bldJmmJ9rQfF
-  expiration: 900000
-  refresh: 86400000
+    show-sql: true

@@ -1,9 +1,9 @@
 package com.koibreeding.dto.response;
 
 import com.koibreeding.enums.Gender;
+import com.koibreeding.enums.Location;
 import lombok.*;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
 @Getter
@@ -16,6 +16,7 @@ public class ResAuthDto {
     private String email;
     private LocalDate birthday;
     private Gender gender;
+    private Location location;
     private String password;
     private String confirmPassword;
     private Integer exp;

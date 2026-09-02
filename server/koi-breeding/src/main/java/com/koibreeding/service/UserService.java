@@ -34,6 +34,9 @@ public class UserService {
     public User handleFetchUserById(Integer userId) {
         return userRepository.findById(userId).orElse(null);
     }
+    public User handleFetchUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
 
     public ResUserDto convertToResUserDto(User user) {
         return ResUserDto.builder()

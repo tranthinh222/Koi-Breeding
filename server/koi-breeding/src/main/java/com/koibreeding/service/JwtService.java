@@ -1,9 +1,10 @@
 package com.koibreeding.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
+import com.koibreeding.domain.User;
+import com.koibreeding.repository.UserRepository;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,61 +13,79 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String secret;
-
+    @Value("${jwt.signKey}")
+    private String signKey;
     @Value("${jwt.expiration}")
-    private long userExpiration;
-
+    private long accessExpiration;
     @Value("${jwt.refresh}")
-    private long refreshExpiration; // ví dụ 7 ngày
+    private long refreshExpiration;
 
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    private SecretKey getSigningKey(){
+        return Keys.hmacShaKeyFor(signKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateUserToken(Integer userId) {
-        return buildToken(userId, userExpiration, "user");
-    }
-
-    public String generateRefreshToken(Integer userId) {
-        return buildToken(userId, refreshExpiration, "refresh");
-    }
-
-    private String buildToken(Integer userId, long expiration, String type) {
+    private String generateToken(User user, long expiration, String type){
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + expiration);
+        Date expiry = new Date((now.getTime() + expiration));
 
         return Jwts.builder()
-                .subject(String.valueOf(userId))
+                .subject(user.getUsername())
                 .claim("type", type)
+                .claim("role", user.getRole())
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public Claims extractAllClaims(String token) {
-        return Jwts.parser()
+    public String generateAccessToken(User user){
+        return generateToken(user, accessExpiration, "access");
+    }
+
+    public String generateRefreshToken(User user){
+        return generateToken(user, refreshExpiration, "refresh");
+    }
+
+    //verify Token
+    public String verifyToken(String token){
+        Claims claims = Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+        return String.valueOf(claims.getSubject());
     }
 
-    public Integer extractUserId(String token) {
-        return Integer.valueOf(extractAllClaims(token).getSubject());
-    }
+    // Kiem tra token (con han va hop le)
+    public boolean isAccessTokenValid(String token){
+        try{
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
 
-    public boolean isTokenValid(String token) {
-        try {
-            Claims claims = extractAllClaims(token);
-            return claims.getExpiration().after(new Date());
-        } catch (ExpiredJwtException e) {
+            String tokenType = claims.get("type", String.class);
+            return  "access".equals(tokenType) && claims.getExpiration().after(new Date());
+        }catch (Exception e){
             return false;
-        } catch (Exception e) {
+        }
+    }
+
+    public boolean isRefreshTokenValid(String token){
+        try{
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            String tokenType = claims.get("type", String.class);
+            return "refresh".equals(tokenType) && claims.getExpiration().after(new Date());
+        }catch (Exception e){
             return false;
         }
     }

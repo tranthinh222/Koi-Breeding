@@ -5,13 +5,26 @@ export interface AuthRegisterResponse {
   username: String;
   email: String;
   birthday: String;
-  gender: "MALE" | "FEMALE" | "OTHER";
+  gender: "MALE" | "FEMALE";
+  location:
+    | "HANOI"
+    | "HO_CHI_MINH_CITY"
+    | "DA_NANG"
+    | "HAI_PHONG"
+    | "CAN_THO"
+    | "HUE"
+    | "NHA_TRANG"
+    | "DA_LAT"
+    | "VUNG_TAU"
+    | "BIEN_HOA"
+    | "QUY_NHON"
+    | "BUON_MA_THUOT";
   exp: Number;
   avatarUrl: String;
   password: String;
   confirmPassword: String;
 }
-//"multipart/form-data"
+
 export const uploadAvatar = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
@@ -49,7 +62,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  userToken: string;
+  accessToken: string;
   refreshToken: string;
 }
 
@@ -77,26 +90,42 @@ export const Login = async (data: LoginRequest): Promise<LoginResponse> => {
   }
 };
 
-export const getCurrentUser = async (): Promise<AuthUser> => {
-  const response = await apiClient.get("/auth/me");
-  return response.data.data ?? response.data;
+export const getCurrentUser = async (): Promise<AuthUser | null> => {
+  try {
+    const response = await apiClient.get("/auth/me");
+    return response.data.data ?? response.data;
+  } catch (error: any) {
+    if (error?.response?.status === 401) {
+      console.log("User not authenticated");
+      return null;
+    }
+
+    console.error("Get current user failed:", error);
+    throw error;
+  }
 };
 
 export const clearAuthStorage = (): void => {
   // Xóa sessionStorage
-  sessionStorage.removeItem("userToken");
+  sessionStorage.removeItem("accessToken");
   sessionStorage.removeItem("refreshToken");
 
   // Xóa localStorage
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("token");
-  localStorage.removeItem("user");
+  localStorage.removeItem("access");
 };
 
 export const logoutRequest = async (): Promise<void> => {
   try {
     await apiClient.post("/auth/logout");
+    console.log("Logout successful");
+  } catch (error) {
+    console.error(
+      "Logout request failed, but clearing local storage anyway:",
+      error,
+    );
   } finally {
     clearAuthStorage();
   }

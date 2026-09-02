@@ -32,6 +32,16 @@ export interface MarketplaceApiParams {
   gender?: FishGender;
 }
 
+export interface MarketplacePage {
+  content: MarketplaceItem[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+}
+
 export async function MarketplaceItems(): Promise<MarketplaceItem[]> {
   try {
     const response = await apiClient.get("/marketplace");
@@ -45,53 +55,59 @@ export async function MarketplaceItems(): Promise<MarketplaceItem[]> {
 
 export async function getMarketplaceItems(
   filters: MarketplaceApiParams,
-): Promise<MarketplaceItem[]> {
+  page: number = 0,
+  size: number = 12,
+): Promise<MarketplacePage> {
   try {
-    const params: Record<string, string | number> = {};
+    const params: Record<string, string | number> = {
+      page,
+      size,
+    };
 
-    // Keyword
     if (filters.keyword?.trim()) {
       params.keyword = filters.keyword.trim();
     }
 
-    // Category
     if (filters.category && filters.category !== "ALL") {
       params.category = filters.category;
     }
 
-    // Gender
     if (filters.gender && filters.gender !== "ALL") {
       params.gender = filters.gender;
     }
 
-    // Price range
-    if (filters.minPrice !== undefined && filters.minPrice !== null) {
+    if (filters.minPrice !== undefined) {
       params.minPrice = filters.minPrice;
     }
-    if (filters.maxPrice !== undefined && filters.maxPrice !== null) {
+
+    if (filters.maxPrice !== undefined) {
       params.maxPrice = filters.maxPrice;
     }
 
-    // Length range
-    if (filters.minLength !== undefined && filters.minLength !== null) {
+    if (filters.minLength !== undefined) {
       params.minLength = filters.minLength;
     }
-    if (filters.maxLength !== undefined && filters.maxLength !== null) {
+
+    if (filters.maxLength !== undefined) {
       params.maxLength = filters.maxLength;
     }
 
-    // Weight range
-    if (filters.minWeight !== undefined && filters.minWeight !== null) {
+    if (filters.minWeight !== undefined) {
       params.minWeight = filters.minWeight;
     }
-    if (filters.maxWeight !== undefined && filters.maxWeight !== null) {
+
+    if (filters.maxWeight !== undefined) {
       params.maxWeight = filters.maxWeight;
     }
 
-    const response = await apiClient.get("/marketplace", { params });
-    return response.data.data as MarketplaceItem[];
+    const response = await apiClient.get("/marketplace", {
+      params,
+    });
+
+    return response.data.data as MarketplacePage;
   } catch (error) {
     if (axios.isCancel(error)) throw error;
+
     console.error("Marketplace filter API failed.", error);
     throw error;
   }

@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:5432/koi_breeding/marketplace?keyword=&category=&minPrice=&maxPrice=&minLength=&maxLength=&minWeight=&maxWeight=&gender=
+  url: http://localhost:5432/koi_breeding/marketplace?keyword=&category=&minPrice=&maxPrice=&minLength=&maxLength=&minWeight=&maxWeight=&gender=&page=2
   params:
     - name: keyword
       value: ""
@@ -33,6 +33,9 @@ http:
       type: query
     - name: gender
       value: ""
+      type: query
+    - name: page
+      value: "2"
       type: query
   auth: inherit
 

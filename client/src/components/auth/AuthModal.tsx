@@ -63,6 +63,20 @@ function PasswordChecklist({ value }: { value: string }) {
     </div>
   );
 }
+const LOCATIONS = [
+  { value: "HANOI", label: "Ha Noi" },
+  { value: "HO_CHI_MINH_CITY", label: "Ho Chi Minh City" },
+  { value: "DA_NANG", label: "Da Nang" },
+  { value: "HAI_PHONG", label: "Hai Phong" },
+  { value: "CAN_THO", label: "Can Tho" },
+  { value: "HUE", label: "Hue" },
+  { value: "NHA_TRANG", label: "Nha Trang" },
+  { value: "DA_LAT", label: "Da Lat" },
+  { value: "VUNG_TAU", label: "Vung Tau" },
+  { value: "BIEN_HOA", label: "Bien Hoa" },
+  { value: "QUY_NHON", label: "Quy Nhon" },
+  { value: "BUON_MA_THUOT", label: "Buon Ma Thuot" },
+] as const;
 
 export default function AuthModal({
   isOpen,
@@ -88,6 +102,8 @@ export default function AuthModal({
   const [birthday, setBirthday] = useState("");
   const [gender, setGender] = useState("");
   const [genderOpen, setGenderOpen] = useState(false);
+  const [location, setLocation] = useState("");
+  const [locationOpen, setLocationOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
@@ -158,6 +174,7 @@ export default function AuthModal({
       }
       if (!birthday) throw new Error("Birthday is required");
       if (!gender) throw new Error("Please select gender");
+      if (!location) throw new Error("Please select location");
       if (!password) throw new Error("Password is required");
       if (!isPasswordStrong(password)) {
         throw new Error(
@@ -173,6 +190,7 @@ export default function AuthModal({
         email,
         birthday,
         gender,
+        location,
         password,
         confirmPassword,
         avatarUrl: "",
@@ -183,6 +201,8 @@ export default function AuthModal({
       setEmail("");
       setBirthday("");
       setGender("");
+      setLocation("");
+      setLocationOpen(false);
       setPassword("");
       setConfirmPassword("");
       setShowRegisterPassword(false);
@@ -212,15 +232,12 @@ export default function AuthModal({
         ? { email: loginId.trim(), password: loginPassword }
         : { username: loginId.trim(), password: loginPassword };
 
-      const result = await Login(payload);
+      // ✓ Login gọi API, server set cookies
+      await Login(payload);
 
-      // Lưu tokens vào cả sessionStorage và localStorage
-      sessionStorage.setItem("userToken", result.userToken);
-      sessionStorage.setItem("refreshToken", result.refreshToken);
-      localStorage.setItem("userToken", result.userToken);
-      localStorage.setItem("refreshToken", result.refreshToken);
-
+      // ✓ Refresh user info từ context
       await refreshCurrentUser();
+
       onClose();
       navigate("/home");
     } catch (error: any) {
@@ -463,6 +480,7 @@ export default function AuthModal({
         <div className="auth-section-title">Register</div>
 
         <div className="field-group">
+          {/* Username */}
           <label className="input-field">
             <span className="input-icon">👤</span>
             <input
@@ -474,6 +492,7 @@ export default function AuthModal({
             />
           </label>
 
+          {/* Email */}
           <label className="input-field">
             <span className="input-icon">✉️</span>
             <input
@@ -485,6 +504,7 @@ export default function AuthModal({
             />
           </label>
 
+          {/* Birthday */}
           <label className="input-field date-field">
             <span className="input-icon">🎂</span>
             <input
@@ -496,12 +516,16 @@ export default function AuthModal({
             />
           </label>
 
+          {/* Gender */}
           <div className="gender-wrapper">
             <div
-              className={`input-field gender-field ${genderOpen ? "gender-open" : ""}`}
+              className={`input-field gender-field ${
+                genderOpen ? "gender-open" : ""
+              }`}
               onClick={() => setGenderOpen(!genderOpen)}
             >
               <span className="input-icon">⚧️</span>
+
               <span className={gender ? "gender-value" : "gender-placeholder"}>
                 {gender === "MALE"
                   ? "Male"
@@ -509,6 +533,7 @@ export default function AuthModal({
                     ? "Female"
                     : "Select gender"}
               </span>
+
               <span className="gender-arrow">{genderOpen ? "⌃" : "⌄"}</span>
             </div>
 
@@ -537,6 +562,47 @@ export default function AuthModal({
                   <span>👩</span>
                   <span>Female</span>
                 </button>
+              </div>
+            )}
+          </div>
+
+          {/* Location */}
+          <div className="gender-wrapper location-wrapper">
+            <div
+              className={`input-field gender-field ${
+                locationOpen ? "gender-open" : ""
+              }`}
+              onClick={() => setLocationOpen(!locationOpen)}
+            >
+              <span className="input-icon">📍</span>
+
+              <span
+                className={location ? "gender-value" : "gender-placeholder"}
+              >
+                {location
+                  ? LOCATIONS.find((item) => item.value === location)?.label
+                  : "Select location"}
+              </span>
+
+              <span className="gender-arrow">{locationOpen ? "⌃" : "⌄"}</span>
+            </div>
+
+            {locationOpen && (
+              <div className="gender-dropdown location-dropdown">
+                {LOCATIONS.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    className="gender-option"
+                    onClick={() => {
+                      setLocation(item.value);
+                      setLocationOpen(false);
+                    }}
+                  >
+                    <span>📍</span>
+                    <span>{item.label}</span>
+                  </button>
+                ))}
               </div>
             )}
           </div>

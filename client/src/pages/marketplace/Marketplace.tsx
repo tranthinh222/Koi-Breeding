@@ -19,10 +19,6 @@ import { getBalanceWallet } from "../../api/wallet";
 import PondSelectDialog from "../../components/pond/PondSelectDialog";
 
 export default function Marketplace() {
-  // =========================
-  // Marketplace
-  // =========================
-
   const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(
     null,
   );
@@ -40,7 +36,10 @@ export default function Marketplace() {
   const [buyError, setBuyError] = useState<string | null>(null);
   const [buySuccess, setBuySuccess] = useState<string | null>(null);
 
-  // Load Marketplace
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const PAGE_SIZE = 12;
   useEffect(() => {
     const fetchMarketplace = async () => {
       try {
@@ -65,33 +64,28 @@ export default function Marketplace() {
           gender: filters.gender,
         };
 
-        const data = await getMarketplaceItems(apiParams);
+        const result = await getMarketplaceItems(
+          apiParams,
+          currentPage,
+          PAGE_SIZE,
+        );
 
-        console.log("Marketplace items loaded:", data);
+        console.log("Marketplace page:", result);
 
-        setItems(data);
-
-        // Nếu item đang chọn không còn trong kết quả
-        setSelectedItem((current) => {
-          if (!current) {
-            return null;
-          }
-
-          const stillExists = data.some((item) => item.id === current.id);
-
-          return stillExists ? current : null;
-        });
+        setItems(result.content);
+        setTotalPages(result.totalPages);
       } catch (error) {
         console.error("Failed to load marketplace:", error);
 
         setItems([]);
+        setTotalPages(0);
       } finally {
         setLoading(false);
       }
     };
 
     fetchMarketplace();
-  }, [filters]);
+  }, [filters, currentPage]);
 
   // buy koi
   const handleBuyKoi = async (pondId: number) => {
@@ -165,11 +159,41 @@ export default function Marketplace() {
           ) : items.length === 0 ? (
             <p>No items found. Try adjusting your filters.</p>
           ) : (
-            <MarketplaceGrid
-              items={items}
-              selectedItem={selectedItem}
-              onSelect={setSelectedItem}
-            />
+            <>
+              <MarketplaceGrid
+                items={items}
+                selectedItem={selectedItem}
+                onSelect={setSelectedItem}
+              />
+
+              {totalPages > 1 && (
+                <div className="pagination">
+                  <button
+                    disabled={currentPage === 0}
+                    onClick={() => setCurrentPage((page) => page - 1)}
+                  >
+                    Previous
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, index) => (
+                    <button
+                      key={index}
+                      className={currentPage === index ? "active" : ""}
+                      onClick={() => setCurrentPage(index)}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    disabled={currentPage === totalPages - 1}
+                    onClick={() => setCurrentPage((page) => page + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
 
@@ -209,3 +233,27 @@ export default function Marketplace() {
     </>
   );
 }
+
+// .marketplace-filters {
+//   width: 90%;
+//   margin: 0 auto 30px;
+
+//   display: flex;
+//   flex-wrap: wrap;
+
+//   align-items: center;
+//   justify-content: center;
+
+//   gap: 12px;
+
+//   background: #f8f4ea;
+//   border: 4px solid #c9a26b;
+//   border-radius: 20px;
+
+//   padding: 18px 22px;
+
+//   position: relative;
+//   overflow: visible;
+
+//   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+// }

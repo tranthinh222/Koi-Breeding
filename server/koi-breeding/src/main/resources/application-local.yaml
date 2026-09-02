@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    username: postgres
+    password: 123456
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nguyenvanphuoc1172@gmail.com
+    password: mngg tnvb obqs aqjk
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+cloudinary:
+  cloud-name: djmcluh5n
+  api-key: 867291126632944
+  api-secret: FyXaVv6j5PUJqL-sNtlydQVZFj0
+
+vietqr:
+  bank-id: 970418
+  account-no: 8824121093
+  account-name: TRAN QUOC THINH
+  template: compact2
+
+sepay:
+  api-key: YOUR_SEPAY_API_KEY
+
+jwt:
+  signKey: qmrLNfFizjkkTyA3qMRbIRJLSc0JlF4bldJmmJ9rQfF
+  expiration: 1800000
+  refresh: 86400000

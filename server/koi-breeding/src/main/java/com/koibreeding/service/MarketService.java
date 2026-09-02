@@ -10,6 +10,8 @@ import com.koibreeding.repository.PondRepository;
 import com.koibreeding.repository.UserRepository;
 import jakarta.persistence.criteria.Join;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +47,7 @@ public class MarketService {
                 .toList();
     }
 
-    public List<ResMarketDto> filterMarketplace(
+    public Page<ResMarketDto> filterMarketplace(
             String keyword,
             String category,
             BigDecimal minPrice,
@@ -54,7 +56,8 @@ public class MarketService {
             BigDecimal maxLength,
             BigDecimal minWeight,
             BigDecimal maxWeight,
-            String gender
+            String gender,
+            Pageable pageable
     ) {
 
         Specification<Marketplace> spec =
@@ -198,8 +201,7 @@ public class MarketService {
             });
         }
 
-        return marketRepository.findAll(spec)
-                .stream()
+        return marketRepository.findAll(spec, pageable)
                 .map(marketplace -> new ResMarketDto(
                         marketplace.getId(),
                         marketplace.getKoi().getName(),
@@ -212,8 +214,7 @@ public class MarketService {
                         marketplace.getKoi().getGender(),
                         marketplace.getKoi().getWeight(),
                         marketplace.getKoi().getLength()
-                ))
-                .toList();
+                ));
     }
 
     public List<ResMarketListKoi> getMarketListKois(Integer userId){
@@ -383,8 +384,8 @@ public class MarketService {
 
         return new ResTradeDto(
                 marketplace.getId(),
-                seller.getId(),
                 buyer.getId(),
+                seller.getId(),
                 marketplace.getPrice(),
                 trade.getTradeAt()
         );

@@ -1,0 +1,22 @@
+info:
+  name: Reset accessToken
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: localhost:8090/koi_breeding/auth/refresh
+  body:
+    type: json
+    data: |-
+      {
+        "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJraG9hMTIzIiwidHlwZSI6InJlZnJlc2giLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4ODI0NTIxMSwiZXhwIjoxNzg4MzMxNjExfQ.mJk8qGoID_1PEuyxqzaP4oLXzBCEmT_IBP1ExXGrt-g"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

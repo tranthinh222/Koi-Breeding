@@ -6,10 +6,13 @@ info:
 http:
   method: GET
   url: localhost:8090/koi_breeding/marketplace
-  auth: inherit
+  auth:
+    type: bearer
+    token: ""
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import com.koibreeding.enums.Gender;
+import com.koibreeding.enums.Location;
 import com.koibreeding.enums.Role;
 
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class ResUserDto {
     private String email;
     private LocalDate birthday;
     private Gender gender;
+    private Location location;
     private Role role;
     private Integer exp;
     private String avatarUrl;

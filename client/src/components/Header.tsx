@@ -1,85 +1,113 @@
-import { useEffect, useState } from 'react'
-import { getUserInfo } from '../api/header'
+import { useEffect, useState } from "react";
+import { getUserInfo } from "../api/header";
 import {
   getNotifications,
   markAllNotificationsRead,
   notificationStreamUrl,
   type AppNotification,
-} from '../api/notification'
-import { useAuth } from '../context/AuthContext'
+} from "../api/notification";
+import { useAuth } from "../context/AuthContext";
 
 export default function ShopHeader() {
-  const { currentUserId } = useAuth()
-  const [username, setUsername] = useState('')
-  const [exp, setExp] = useState(1)
-  const [balance, setBalance] = useState<number>(0)
-  const [notifications, setNotifications] = useState<AppNotification[]>([])
-  const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const { currentUserId } = useAuth();
+  const [username, setUsername] = useState("");
+  const [exp, setExp] = useState(1);
+  const [balance, setBalance] = useState<number>(0);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadHeaderInfo = async () => {
-      if (!currentUserId) return
+      if (!currentUserId) return;
 
       try {
-        const data = await getUserInfo(currentUserId)
+        const data = await getUserInfo(currentUserId);
 
-        setUsername(data.username)
-        setBalance(data.balance)
-        setExp(data.exp)
+        setUsername(data.username);
+        setBalance(data.balance);
+        setExp(data.exp);
       } catch (error) {
-        console.error('Failed to load header information:', error)
+        console.error("Failed to load header information:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadHeaderInfo()
-  }, [currentUserId])
-
-  useEffect(() => {
-    if (!currentUserId) return
-
-    getNotifications(currentUserId)
-      .then(setNotifications)
-      .catch((error) => console.error('Failed to load notifications:', error))
-
-    const eventSource = new EventSource(notificationStreamUrl(currentUserId))
-    eventSource.addEventListener('notification', (event) => {
-      const notification = JSON.parse(event.data) as AppNotification
-      setNotifications((current) => [notification, ...current])
-    })
-    eventSource.onerror = () => {
-      console.error('Notification stream disconnected; the browser will retry.')
-    }
-
-    return () => eventSource.close()
-  }, [currentUserId])
+    loadHeaderInfo();
+  }, [currentUserId]);
 
   useEffect(() => {
     const updateBalance = (event: Event) => {
-      setBalance((event as CustomEvent<number>).detail)
-    }
-    window.addEventListener('wallet:updated', updateBalance)
-    return () => window.removeEventListener('wallet:updated', updateBalance)
-  }, [])
+      setBalance((event as CustomEvent<number>).detail);
+    };
+    window.addEventListener("wallet:updated", updateBalance);
+    return () => window.removeEventListener("wallet:updated", updateBalance);
+  }, []);
 
   const unreadCount = notifications.filter(
     (notification) => !notification.isRead,
-  ).length
+  ).length;
 
   const markAllRead = async () => {
     try {
-      if (!currentUserId) return
+      if (!currentUserId) return;
 
-      await markAllNotificationsRead(currentUserId)
+      await markAllNotificationsRead(currentUserId);
       setNotifications((current) =>
         current.map((notification) => ({ ...notification, isRead: true })),
-      )
+      );
     } catch (error) {
-      console.error('Failed to mark notifications as read:', error)
+      console.error("Failed to mark notifications as read:", error);
     }
-  }
+  };
+
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    let cancelled = false;
+
+    const loadNotifications = async () => {
+      try {
+        const data = await getNotifications(currentUserId);
+
+        if (!cancelled) {
+          setNotifications(data);
+        }
+      } catch (error) {
+        console.error("Failed to load notifications:", error);
+      }
+    };
+
+    loadNotifications();
+
+    const eventSource = new EventSource(notificationStreamUrl(currentUserId), {
+      withCredentials: true,
+    });
+
+    eventSource.onopen = () => {
+      console.log("Notification SSE connected");
+    };
+
+    eventSource.addEventListener("notification", (event) => {
+      try {
+        const notification = JSON.parse(event.data) as AppNotification;
+
+        setNotifications((current) => [notification, ...current]);
+      } catch (error) {
+        console.error("Invalid notification data:", error);
+      }
+    });
+
+    eventSource.onerror = (error) => {
+      console.error("Notification SSE error:", error);
+    };
+
+    return () => {
+      cancelled = true;
+      eventSource.close();
+    };
+  }, [currentUserId]);
 
   return (
     <header className="hud">
@@ -87,8 +115,8 @@ export default function ShopHeader() {
         <div className="avatar">🧑</div>
 
         <div>
-          <h3>{loading ? 'Loading...' : username}</h3>
-          <p>{loading ? 'Loading...' : `Level: ${exp}`}</p>
+          <h3>{loading ? "Loading..." : username}</h3>
+          <p>{loading ? "Loading..." : `Level: ${exp}`}</p>
         </div>
       </div>
 
@@ -121,11 +149,11 @@ export default function ShopHeader() {
                 ) : (
                   notifications.map((notification) => (
                     <div
-                      className={`notification-item ${notification.isRead ? '' : 'unread'}`}
+                      className={`notification-item ${notification.isRead ? "" : "unread"}`}
                       key={notification.id}
                     >
                       <div className="notification-icon">
-                        {notification.type === 'PURCHASE_SUCCESS' ? '🛒' : '🔔'}
+                        {notification.type === "PURCHASE_SUCCESS" ? "🛒" : "🔔"}
                       </div>
                       <div>
                         <strong>{notification.title}</strong>
@@ -144,10 +172,10 @@ export default function ShopHeader() {
 
         <div className="wallet">
           <div className="gold">
-            🪙 {loading ? '...' : balance.toLocaleString()}
+            🪙 {loading ? "..." : balance.toLocaleString()}
           </div>
         </div>
       </div>
     </header>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { BookOpen, Filter, History, Undo2 } from "lucide-react";
+import { Filter, Undo2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CURRENT_USER_ID } from "../../api/currentUser";
@@ -91,6 +91,7 @@ function Breeding() {
 			toast.warning(
 				"Breeding usually requires one Male and one Female Koi!",
 			);
+			return;
 		}
 		setIsSelectingPond(true);
 	};
@@ -284,17 +285,27 @@ function Breeding() {
 				{/* FOOTER BUTTONS */}
 				<div className={styles.footerSection}>
 					<div className={styles.footerLeft}>
-						<button className={styles.actionBtn}>
-							<div className={styles.iconBox}>
-								<BookOpen size={30} />
-							</div>
-							Guide
+						<button
+							type="button"
+							className={styles.actionBtn}
+							title="Guide To Breeding"
+							// onClick={() => navigate("/breeding")}
+						>
+							<img
+								src="/breeding/guide-book.png"
+								alt="breeding guide"
+							/>
 						</button>
-						<button className={styles.actionBtn}>
-							<div className={styles.iconBox}>
-								<History size={30} />
-							</div>
-							History
+						<button
+							type="button"
+							className={styles.actionBtn}
+							title="Breeding History"
+							// onClick={() => navigate("/breeding")}
+						>
+							<img
+								src="/breeding/history.png"
+								alt="breeding history"
+							/>
 						</button>
 					</div>
 					<div className={styles.footerRight}>

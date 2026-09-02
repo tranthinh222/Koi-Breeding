@@ -9,7 +9,7 @@ interface ToastProps {
 	duration?: number;
 }
 
-function Toast({ message, type, onClose, duration = 5000 }: ToastProps) {
+function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			onClose();

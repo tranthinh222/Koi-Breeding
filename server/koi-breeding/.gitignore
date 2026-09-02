@@ -33,5 +33,4 @@ build/
 .vscode/
 
 ### configure file ###
-
-/src/main/resources/application-local.yml
+src/main/resources/application-local.yaml

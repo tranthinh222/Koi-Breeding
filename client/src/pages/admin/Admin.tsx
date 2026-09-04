@@ -12,7 +12,6 @@ import { useAuth } from "../../context/AuthContext";
 import {
   getAdminDashboard,
   getAdminUsers,
-  updateAdminUser,
   type AdminDashboardResponse,
   type AdminRankingUserDto,
   type AdminUserDto,
@@ -463,6 +462,7 @@ function Admin() {
                       isOpen: false,
                     }))
                   }
+                  onSuccess={() => refreshUsers()}
                 />
               <div className="pagination-row">
                 <span>

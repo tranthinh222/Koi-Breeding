@@ -1,0 +1,153 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
+
+.content {
+	flex: 1;
+	padding: 20px 30px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.content::-webkit-scrollbar {
+	width: 8px;
+}
+.content::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.3);
+}
+.content::-webkit-scrollbar-thumb {
+	background: #8b5a2b;
+	border-radius: 4px;
+}
+
+/* CALCULATOR STYLES */
+.calcContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 30px;
+	height: 100%;
+}
+
+.calcInputs {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 30px;
+	width: 100%;
+	margin-top: 20px;
+}
+
+.calcBox {
+	background: rgba(0, 0, 0, 0.5);
+	border: 4px dashed #b77b3e;
+	border-radius: 20px;
+	width: 250px;
+	height: 250px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 15px;
+	padding: 20px;
+}
+
+.calcBox select {
+	width: 100%;
+	background: rgba(255, 255, 255, 0.1);
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	color: white;
+	padding: 10px;
+	border-radius: 8px;
+	font-size: 16px;
+	outline: none;
+}
+
+.calcBox select option {
+	background: #1a0b2e;
+}
+
+.calcImage {
+	width: 120px;
+	height: 120px;
+	object-fit: contain;
+	filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.5));
+}
+
+.calcHeart {
+	color: #ff4757;
+	animation: heartbeat 1.5s infinite;
+}
+
+.calcResults {
+	width: 100%;
+	max-width: 800px;
+	background: rgba(26, 11, 46, 0.8);
+	border: 4px solid #5b3a1f;
+	border-radius: 20px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.calcResults h3 {
+	margin: 0;
+	color: white;
+	font-family: "Grandstander";
+	font-size: 24px;
+	text-align: center;
+	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+	padding-bottom: 10px;
+}
+
+.resultRow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: rgba(255, 255, 255, 0.05);
+	padding: 10px 20px;
+	border-radius: 12px;
+}
+
+.resultKoi {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
+
+.resultKoi img {
+	width: 50px;
+	height: 50px;
+	object-fit: contain;
+}
+
+.resultKoi span {
+	color: white;
+	font-family: "Grandstander";
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.resultBarContainer {
+	flex: 1;
+	margin: 0 20px;
+	background: rgba(0, 0, 0, 0.5);
+	height: 15px;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.resultBar {
+	height: 100%;
+	background: linear-gradient(90deg, #2778d8, #f2e943);
+	border-radius: 10px;
+}
+
+.resultProb {
+	color: #f2e943;
+	font-family: "Grandstander";
+	font-size: 22px;
+	font-weight: bold;
+	width: 80px;
+	text-align: right;
+}

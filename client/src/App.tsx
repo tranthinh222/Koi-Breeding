@@ -1,7 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
+import ProtectedRoute from "./components/auth/ProtectedRoute/ProtectedRoute"
 import Inventory from "./pages/inventory/Inventory";
 import Landing from "./pages/landing/Landing";
+import Admin from "./pages/admin/Admin";
 import TransactionHistory from "./pages/history/TransactionHistory";
 import Payment from "./pages/payment/payment";
 import Profile from "./pages/profile/Profile";
@@ -13,28 +15,37 @@ import "./style/global.css";
 import MarketAddList from "./components/marketplace/MarketAddList";
 import MarketListing from "./components/marketplace/MarketListing";
 import Home from "./pages/home/Home";
+
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route element={<AppLayout />}>
-            <Route path="/home" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/ponds" element={<Ponds />} />
-            <Route path="/breeding" element={<Breeding />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/addlist" element={<MarketAddList />} />
-            <Route path="/listings" element={<MarketListing />} />
-            <Route path="/transactions" element={<TransactionHistory />} />
-          </Route>
-
-          <Route path="/payment/:itemId" element={<Payment />} />
-
+          {/* Route công khai */}
           <Route path="/landing" element={<Landing />} />
           <Route path="/" element={<Navigate to="/landing" replace />} />
+
+          {/* Nhóm route cần login (USER + ADMIN) */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route path="/home" element={<Home />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/ponds" element={<Ponds />} />
+              <Route path="/breeding" element={<Breeding />} />
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/addlist" element={<MarketAddList />} />
+              <Route path="/listings" element={<MarketListing />} />
+              <Route path="/transactions" element={<TransactionHistory />} />
+            </Route>
+            <Route path="/payment/:itemId" element={<Payment />} />
+          </Route>
+
+          {/* Route chỉ ADMIN */}
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+            <Route path="/admin" element={<Admin />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </>

@@ -1,10 +1,6 @@
 package com.koibreeding.service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -14,12 +10,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.koibreeding.domain.User;
+import com.koibreeding.enums.Role;
 import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.admin.AdminUserDto;
 import com.koibreeding.dto.response.ResUserDto;
 import com.koibreeding.repository.UserRepository;
-
-import com.koibreeding.service.CloudinaryUploadService;
-import java.util.Map;
 
 @Service
 public class UserService {
@@ -178,29 +173,9 @@ public class UserService {
         
     }
 */
-    private void deleteOldAvatar(String oldAvatarUrl, String newAvatarUrl, Path uploadDir) throws IOException {
-        if (oldAvatarUrl == null || oldAvatarUrl.isBlank() || oldAvatarUrl.equals(newAvatarUrl)) {
-            return;
-        }
-
-        String avatarPrefix = "/uploads/avatars/";
-        if (!oldAvatarUrl.startsWith(avatarPrefix)) {
-            return;
-        }
-
-        String oldFileName = StringUtils.cleanPath(oldAvatarUrl.substring(avatarPrefix.length()));
-        if (oldFileName.isBlank() || oldFileName.contains("..")) {
-            return;
-        }
-
-        Path oldAvatarPath = uploadDir.resolve(oldFileName).normalize();
-        if (oldAvatarPath.startsWith(uploadDir)) {
-            Files.deleteIfExists(oldAvatarPath);
-        }
-    }
-
     public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {
-        Page<User> pageUser = this.userRepository.findAll(pageable);
+        Page<User> pageUser =
+            this.userRepository.findAllByRole(Role.USER, pageable);
         ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 
@@ -211,11 +186,30 @@ public class UserService {
 
         resultPaginationDTO.setMeta(meta);
 
-        List<User> userList = pageUser.getContent();
-
-        resultPaginationDTO.setResult(userList);
+        resultPaginationDTO.setResult(
+            pageUser.getContent()
+                    .stream()
+                    .map(this::convertToAdminUserDto)
+                    .toList()
+        );
 
         return resultPaginationDTO;
+    }
+    public AdminUserDto convertToAdminUserDto(User user) {
+        return AdminUserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
+                .role(user.getRole())
+                .status(user.getStatus())
+                .isBanned(user.getIsBanned())
+                .exp(user.getExp())
+                .avatarUrl(user.getAvatarUrl())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
     }
 
     public void handleDeleteUser(Integer id) {

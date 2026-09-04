@@ -13,17 +13,14 @@ const Notification: React.FC<NotificationsProps> = (
 ) => {
     return (
         <div className={`notification ${type}`}>
-            <span className="notification-icon">
+            <div className="notification-icon">
                 {type === "success" ? (
-                    <span className="checkmark">
-
-                    </span>
+                    <span className="checkmark">✓</span>
                 ) : (
-                    <span className="crossmark">
+                    <span className="crossmark">✕</span>
+                )}
+            </div>
 
-                    </span>
-                )} 
-            </span>
             <span className="notification-message">
                 {message}
             </span>

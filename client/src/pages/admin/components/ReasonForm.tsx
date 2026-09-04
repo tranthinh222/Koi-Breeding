@@ -8,6 +8,11 @@ interface ReasonFormProps {
     onCancel: () => void;
 }
 
+const DEFAULT_REASONS = {
+    ban: "Violation of community standards.",
+    unban: "Penalty period expired or pardoned."
+};
+
 const ReasonForm: React.FC<ReasonFormProps> = ({
     action,
     loading = false,
@@ -19,7 +24,8 @@ const ReasonForm: React.FC<ReasonFormProps> = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        onSubmit(reason.trim());
+        const finalReason = reason.trim() || DEFAULT_REASONS[action];
+        onSubmit(finalReason);
     };
 
     const isBan = action === "ban";

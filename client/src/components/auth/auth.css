@@ -216,6 +216,7 @@
   border-radius: 999px;
   font-size: 1.05rem;
   font-weight: 700;
+  justify-content: center;
   color: white;
   background: var(--button-bg);
   cursor: pointer;

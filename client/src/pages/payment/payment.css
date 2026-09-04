@@ -7,10 +7,10 @@
 :root {
   --sky: #87ceeb;
   --grass: #a9d18e;
-  --wood: #8b5a2b;
-  --wood-dark: #6d3f16;
-  --cream: #f8f4ea;
-  --border: #c9a26b;
+  --wood: var(--wood);
+  --wood-dark: var(--wood-dark);
+  --cream: var(--surface);
+  --border: var(--wood-border);
   --green: #5a913b;
   --green-dark: #44742b;
   --brown-text: #5b3a1f;

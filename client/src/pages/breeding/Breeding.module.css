@@ -33,9 +33,9 @@
 .titleSection {
 	width: min(40%, 450px);
 	height: 70px;
-	border: 6px solid #6d3f16;
+	border: 6px solid var(--wood-dark);
 	border-radius: 18px;
-	background-color: #8b5a2b;
+	background-color: var(--wood);
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -148,7 +148,7 @@
 	border-radius: 4px;
 }
 .parentList::-webkit-scrollbar-thumb {
-	background: #8b5a2b;
+	background: var(--wood);
 	border-radius: 4px;
 }
 
@@ -372,7 +372,7 @@
 	position: absolute;
 	bottom: -5px;
 	right: -5px;
-	background: #8b5a2b;
+	background: var(--wood);
 	color: white;
 	border-radius: 50%;
 	width: 20px;

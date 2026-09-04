@@ -6,6 +6,9 @@ export default function ShopBackground() {
       <div className="cloud cloud3"></div>
 
       <div className="background">
+        <div className="night-sky" aria-hidden="true">
+          <div className="moon" />
+        </div>
         <div className="grass"></div>
 
         <div className="trees trees-left"></div>

@@ -7,6 +7,8 @@ import {
   notificationStreamUrl,
   type AppNotification,
 } from '../api/notification'
+import ThemeControl from '../theme/ThemeControl'
+import SoundControl from '../sound/SoundControl'
 
 export default function ShopHeader() {
   const [username, setUsername] = useState('')
@@ -86,6 +88,8 @@ export default function ShopHeader() {
       </div>
 
       <div className="hud-actions">
+        <ThemeControl />
+        <SoundControl />
         <div className="notification-wrapper">
           <button
             className="notification-btn"

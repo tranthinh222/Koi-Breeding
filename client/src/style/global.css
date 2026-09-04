@@ -335,11 +335,11 @@ body {
   width: 420px;
   padding: 20px;
 
-  background: #8b5a2b;
+  background: var(--wood);
   color: white;
 
   border-radius: 18px;
-  border: 8px solid #6d3f16;
+  border: 8px solid var(--wood-dark);
 
   text-align: center;
 
@@ -381,7 +381,10 @@ body {
   border: none;
   border-radius: 12px;
 
-  background: #d7c19b;
+  background: var(--tab-background);
+  color: var(--tab-text);
+  border: 1px solid color-mix(in srgb, var(--wood-border) 72%, transparent);
+  box-shadow: 0 3px 9px var(--shadow-color);
 
   cursor: pointer;
 
@@ -390,7 +393,7 @@ body {
 }
 
 .market-tabs .tab.active {
-  background: #5a913b;
+  background: var(--tab-active);
   color: white;
 }
 
@@ -432,9 +435,9 @@ body {
 ========================= */
 
 .shop-main .fish-card {
-  background: #f8f4ea;
+  background: var(--surface);
 
-  border: 4px solid #c9a26b;
+  border: 4px solid var(--wood-border);
   border-radius: 20px;
 
   padding: 20px;
@@ -462,7 +465,7 @@ body {
   width: 100%;
   height: 14px;
 
-  background: #8b5a2b;
+  background: var(--wood);
 }
 
 .shop-main .fish-card:hover {
@@ -610,7 +613,7 @@ body {
 ========================= */
 
 .shop-main .detail-panel {
-  background: #f8f4ea;
+  background: var(--surface);
 
   border: 4px solid #c8a46b;
 
@@ -737,7 +740,7 @@ body {
 
   background: #e7e9de;
 
-  border: 3px solid #c9a26b;
+  border: 3px solid var(--wood-border);
 
   border-radius: 18px;
 
@@ -747,11 +750,11 @@ body {
 .inventory-tab {
   padding: 12px 25px;
 
-  border: 2px solid #c9a26b;
+  border: 2px solid var(--wood-border);
 
   border-radius: 12px;
 
-  background: #f8f4ea;
+  background: var(--surface);
 
   color: #5b3a1f;
 
@@ -808,7 +811,7 @@ body {
 .inventory-container {
   background: rgba(131, 84, 37, 0.7);
 
-  border: 5px solid #6d3f16;
+  border: 5px solid var(--wood-dark);
 
   border-radius: 20px;
 
@@ -866,7 +869,7 @@ body {
 .inventory-item:hover {
   transform: translateY(-4px);
 
-  background: #6d3f16;
+  background: var(--wood-dark);
 
   box-shadow:
     inset 0 4px 8px rgba(0, 0, 0, 0.5),
@@ -894,7 +897,7 @@ body {
   box-shadow:
     inset 0 4px 8px rgba(0, 0, 0, 0.5),
     0 0 0 4px #ffd54f,
-    0 0 0 6px #f8f4ea;
+    0 0 0 6px var(--surface);
 }
 
 .inventory-item.selected:hover {
@@ -986,9 +989,9 @@ body {
 ========================= */
 
 .inventory-detail {
-  background: #f8f4ea;
+  background: var(--surface);
 
-  border: 4px solid #6d3f16;
+  border: 4px solid var(--wood-dark);
 
   border-radius: 18px;
 
@@ -1010,7 +1013,7 @@ body {
 
   background: #835425;
 
-  border-bottom: 4px solid #6d3f16;
+  border-bottom: 4px solid var(--wood-dark);
 
   color: white;
 
@@ -1128,7 +1131,7 @@ body {
 
   background: #e7e9de;
 
-  border: 2px solid #c9a26b;
+  border: 2px solid var(--wood-border);
 
   border-radius: 12px;
 
@@ -1180,9 +1183,9 @@ body {
 
   border-radius: 10px;
 
-  background: #f8f4ea;
+  background: var(--surface);
 
-  border: 1px solid #c9a26b;
+  border: 1px solid var(--wood-border);
 }
 
 .stat-fill {
@@ -1224,7 +1227,7 @@ body {
 
   background: white;
 
-  border: 1px dashed #c9a26b;
+  border: 1px dashed var(--wood-border);
 
   border-radius: 10px;
 
@@ -1289,11 +1292,11 @@ body {
 }
 
 .sell-btn {
-  background: #f8f4ea;
+  background: var(--surface);
 
   color: #5b3a1f;
 
-  border: 2px solid #c9a26b !important;
+  border: 2px solid var(--wood-border) !important;
 }
 
 .sell-btn:hover {
@@ -1549,7 +1552,7 @@ body {
   height: 52px;
   border: none;
   border-radius: 50%;
-  background: #f8f4ea;
+  background: var(--surface);
   font-size: 26px;
   cursor: pointer;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.18);
@@ -1589,8 +1592,8 @@ body {
 
   width: 360px;
 
-  background: #f8f4ea;
-  border: 3px solid #c9a26b;
+  background: var(--surface);
+  border: 3px solid var(--wood-border);
   border-radius: 16px;
 
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
@@ -1708,7 +1711,7 @@ body {
   width: 90%;
   margin: 40px auto;
 
-  background: #f8f4ea;
+  background: var(--surface);
 
   border-radius: 18px;
 
@@ -1837,8 +1840,8 @@ body {
 .history-message {
   padding: 20px;
   border-radius: 14px;
-  border: 2px dashed #c9a26b;
-  background: #f8f4ea;
+  border: 2px dashed var(--wood-border);
+  background: var(--surface);
   color: #5b3a1f;
 }
 
@@ -1902,7 +1905,7 @@ body {
   padding: 9px 15px;
   border: 2px solid #a66a32;
   border-radius: 10px;
-  background: #fffaf0;
+  background: var(--surface-raised);
   color: #5b3a1f;
   font-weight: bold;
   box-shadow: 0 3px 0 #c59a65;
@@ -2089,7 +2092,7 @@ body {
 
   position: relative;
 
-  background: #fffaf0;
+  background: var(--surface-raised);
 
   border: 4px solid #b77b3e;
 

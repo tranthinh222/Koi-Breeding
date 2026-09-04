@@ -76,6 +76,44 @@
 	z-index: 0;
 }
 
+.nightSky {
+	display: none;
+	position: absolute;
+	inset: 0 0 62%;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+:global(:root[data-theme="dark"]) .nightSky {
+	display: block;
+	background-image:
+		radial-gradient(circle at 10% 20%, rgba(255, 248, 209, 0.9) 0 1.5px, transparent 2px),
+		radial-gradient(circle at 27% 67%, rgba(255, 255, 255, 0.75) 0 1px, transparent 1.7px),
+		radial-gradient(circle at 48% 25%, rgba(255, 248, 209, 0.8) 0 1px, transparent 1.8px),
+		radial-gradient(circle at 70% 62%, rgba(255, 255, 255, 0.7) 0 1.5px, transparent 2px),
+		radial-gradient(circle at 91% 27%, rgba(255, 248, 209, 0.85) 0 1px, transparent 1.8px);
+}
+
+.moon {
+	position: absolute;
+	top: clamp(34px, 5vh, 72px);
+	right: clamp(180px, 20vw, 520px);
+	width: clamp(82px, 8vw, 126px);
+	aspect-ratio: 1;
+	border-radius: 50%;
+	background:
+		radial-gradient(circle at 34% 33%, rgba(200, 184, 129, 0.28) 0 7%, transparent 8%),
+		radial-gradient(circle at 66% 68%, rgba(200, 184, 129, 0.22) 0 10%, transparent 11%),
+		#fff3bd;
+	box-shadow:
+		0 0 22px rgba(255, 239, 170, 0.7),
+		0 0 58px rgba(255, 239, 170, 0.38);
+}
+
+:global(:root[data-theme="dark"]) .cloud {
+	opacity: 0.28;
+}
+
 /* Sky */
 
 .background::before {

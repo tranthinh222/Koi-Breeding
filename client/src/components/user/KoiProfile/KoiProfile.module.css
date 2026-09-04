@@ -38,8 +38,8 @@
 }
 
 .closeButton:hover {
-	background-color: #e5e7eb;
-	color: #111827;
+	background-color: var(--border-neutral);
+	color: var(--text-primary);
 }
 
 .section1 {
@@ -97,7 +97,7 @@
 	font-family: "Grandstander";
 	font-weight: bold;
 	font-size: 30px;
-	background-color: #faf8f8;
+	background-color: var(--surface-soft);
 	border-radius: 5px;
 	padding: 10px 10px 5px 10px;
 }
@@ -123,7 +123,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background-color: #faf8f8;
+	background-color: var(--surface-soft);
 	border-radius: 5px;
 	padding: 4px 8px;
 }
@@ -153,7 +153,7 @@
 	font-family: "Grandstander";
 	font-weight: 700;
 	font-size: 16px;
-	color: #5c5858;
+	color: var(--text-secondary);
 }
 
 .progressContainer {
@@ -203,7 +203,7 @@
 	font-family: "Grandstander";
 	font-weight: bold;
 	font-size: 20px;
-	background-color: #faf8f8;
+	background-color: var(--surface-soft);
 	border-radius: 5px;
 	padding: 10px 10px 10px 10px;
 }
@@ -218,7 +218,7 @@
 
 .line {
 	flex: 1;
-	border-bottom: 3px solid #5c5858;
+	border-bottom: 3px solid var(--text-secondary);
 	border-radius: 10px;
 }
 
@@ -227,7 +227,7 @@
 	font-weight: bold;
 	font-size: 20px;
 	padding: 0 10px;
-	color: #5c5858;
+	color: var(--text-secondary);
 	font-size: 14px;
 	white-space: nowrap;
 }
@@ -252,7 +252,7 @@
 	gap: 20px;
 	padding: 20px 20px;
 	border-radius: 5px;
-	background-color: #faf8f8;
+	background-color: var(--surface-soft);
 	box-sizing: border-box;
 }
 
@@ -260,7 +260,7 @@
 	font-family: "Grandstander";
 	font-weight: bold;
 	font-size: 23px;
-	color: #5c5858;
+	color: var(--text-secondary);
 }
 
 .mutationType {
@@ -280,7 +280,7 @@
 	padding: 20px;
 
 	border-radius: 5px;
-	background-color: #faf8f8;
+	background-color: var(--surface-soft);
 	box-sizing: border-box;
 }
 
@@ -359,7 +359,7 @@
 	font-family: "Grandstander";
 	font-weight: bold;
 	font-size: 20px;
-	color: #5c5858;
+	color: var(--text-secondary);
 }
 
 .parentImage {

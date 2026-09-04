@@ -7,13 +7,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AdminUpdateUserRequest {
+public class AdminModerationUserRequest {
     @NotNull
     private Integer id;
-
-    private String password;
-
     private UserStatus status;
-
     private String reason;
 }

@@ -1,6 +1,6 @@
 package com.koibreeding.controller;
 
-import com.koibreeding.dto.request.AdminUpdateUserRequest;
+import com.koibreeding.dto.request.AdminModerationUserRequest;
 import com.koibreeding.dto.response.admin.AdminDashboardDto;
 import com.koibreeding.dto.response.admin.AdminUserDto;
 import com.koibreeding.dto.response.ResultPaginationDTO;
@@ -37,7 +37,7 @@ public class AdminController {
     @PutMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     @ApiMessage("Update user for admin")
-    public ResponseEntity<AdminUserDto> updateUser(@Valid @RequestBody AdminUpdateUserRequest request) {
+    public ResponseEntity<AdminUserDto> updateUser(@Valid @RequestBody AdminModerationUserRequest request) {
         return ResponseEntity.ok(adminService.handleUpdateUser(request));
     }
 

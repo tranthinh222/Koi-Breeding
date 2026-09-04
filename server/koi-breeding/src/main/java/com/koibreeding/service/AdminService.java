@@ -3,7 +3,7 @@ package com.koibreeding.service;
 import com.koibreeding.domain.Transaction;
 import com.koibreeding.domain.Trade;
 import com.koibreeding.domain.User;
-import com.koibreeding.dto.request.AdminUpdateUserRequest;
+import com.koibreeding.dto.request.AdminModerationUserRequest;
 import com.koibreeding.dto.response.admin.AdminDashboardDto;
 import com.koibreeding.dto.response.admin.AdminUserDto;
 import com.koibreeding.enums.PaymentStatus;
@@ -42,13 +42,9 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public AdminUserDto handleUpdateUser(AdminUpdateUserRequest request) {
-        User user = userRepository.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
+    public AdminUserDto handleUpdateUser(AdminModerationUserRequest request) {
+        User user = userRepository.findById(request.getId()).orElseThrow(() -> new RuntimeException("User not found"));
+        //Update password implement later
 
         UserStatus currentStatus = user.getStatus();
         UserStatus newStatus = request.getStatus();

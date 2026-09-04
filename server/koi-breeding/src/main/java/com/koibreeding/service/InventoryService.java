@@ -121,6 +121,10 @@ public class InventoryService {
         return this.inventoryRepository.findById(inventoryId).orElse(null);
     }
 
+    public Inventory handleFetchInventoryByUserAndItem(Integer userId, Integer itemId) {
+        return this.inventoryRepository.findByUserIdAndItemId(userId, itemId).orElse(null);
+    }
+
     public List<ResItemInventoryDTO> handleFetchUserInventoryByItemType(Integer userId, ItemType itemType) {
         if (!userService.isUserExistById(userId)) {
             throw new RuntimeException("Failed to fetch user inventory. User does not exist.");

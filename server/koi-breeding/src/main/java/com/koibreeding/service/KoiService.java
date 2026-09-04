@@ -16,12 +16,17 @@ import com.koibreeding.domain.Koi;
 import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Pond;
 import com.koibreeding.dto.request.RequestMoveKoiDTO;
+import com.koibreeding.dto.request.RequestFeedKoiDTO;
 import com.koibreeding.dto.request.RequestReleaseKoiDTO;
+import com.koibreeding.dto.response.ResFeedKoiDTO;
+import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.dto.response.ResKoiDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.ItemType;
 import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.util.formulas.KoiFormula;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class KoiService {
@@ -121,6 +126,56 @@ public class KoiService {
         targetKoi.setPond(targetPond);
 
         return this.convertToResKoiDTO(this.koiRepository.save(targetKoi));
+    }
+
+    @Transactional
+    public ResFeedKoiDTO handleFeedKoi(Integer koiId, RequestFeedKoiDTO request) {
+        Koi koi = this.handleFetchKoiById(koiId);
+        if (koi == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Koi with id '" + koiId + "' does not exist.");
+        }
+
+        if (koi.getPond() == null || koi.getPond().getOwner() == null
+                || !request.userId().equals(koi.getPond().getOwner().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot feed a koi that you do not own.");
+        }
+
+        int currentFoodBar = koi.getFoodBar() == null ? 0 : koi.getFoodBar();
+        if (currentFoodBar >= 100) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This koi is already full.");
+        }
+
+        Inventory inventory = inventoryService.handleFetchInventoryByUserAndItem(request.userId(), request.itemId());
+        if (inventory == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Food item was not found in the user's inventory.");
+        }
+
+        Item food = inventory.getItem();
+        if (food == null || food.getItemType() != ItemType.FOOD) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only FOOD items can be used to feed koi.");
+        }
+        if (food.getEffectValue() == null || food.getEffectValue().signum() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Food effect value must be greater than zero.");
+        }
+        if (inventory.getQuantity() < request.quantity()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Insufficient food quantity.");
+        }
+
+        int foodRestored = food.getEffectValue()
+                .multiply(java.math.BigDecimal.valueOf(request.quantity()))
+                .min(java.math.BigDecimal.valueOf(100L - currentFoodBar))
+                .intValue();
+
+        koi.setFoodBar(currentFoodBar + foodRestored);
+        Koi updatedKoi = koiRepository.save(koi);
+        ResItemInventory remainingInventory = inventoryService.useItemFromInventory(
+                request.userId(), request.itemId(), request.quantity());
+
+        return new ResFeedKoiDTO(
+                this.convertToResKoiDTO(updatedKoi),
+                foodRestored,
+                request.quantity(),
+                remainingInventory.getQuantity());
     }
 
     public Koi handleUpdateKoi(Koi koi) {

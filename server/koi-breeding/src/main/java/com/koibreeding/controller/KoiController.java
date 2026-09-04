@@ -16,9 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.domain.Koi;
 import com.koibreeding.dto.request.RequestMoveKoiDTO;
+import com.koibreeding.dto.request.RequestFeedKoiDTO;
 import com.koibreeding.dto.request.RequestReleaseKoiDTO;
+import com.koibreeding.dto.response.ResFeedKoiDTO;
 import com.koibreeding.dto.response.ResKoiDTO;
 import com.koibreeding.service.KoiService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -49,6 +53,13 @@ public class KoiController {
             throws Exception {
         ResKoiDTO updatedKoi = this.koiService.handleMoveKoi(requestMoveKoiDTO);
         return ResponseEntity.ok(updatedKoi);
+    }
+
+    @PostMapping("/kois/{koiId}/feed")
+    public ResponseEntity<ResFeedKoiDTO> feedKoi(
+            @PathVariable Integer koiId,
+            @Valid @RequestBody RequestFeedKoiDTO request) {
+        return ResponseEntity.ok(this.koiService.handleFeedKoi(koiId, request));
     }
 
     @PutMapping("/kois")

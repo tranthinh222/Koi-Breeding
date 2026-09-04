@@ -1139,6 +1139,7 @@ Admin Notifications
     position: fixed;
     top: 24px;
     left: 50%;
+
     transform: translateX(-50%);
 
     min-width: 260px;
@@ -1155,11 +1156,15 @@ Admin Notifications
     font-size: 14px;
     font-weight: 500;
 
-    z-index: 1100;
+    /*
+     * Phải cao hơn modal
+     */
+    z-index: 10000;
 
-    animation: notification-slide-down 0.3s ease-out;
+    animation:
+        notification-in 0.3s ease-out,
+        notification-out 0.3s ease-in 4.7s forwards;
 }
-
 .notification.success {
     background: #dcfce7;
     color: #166534;
@@ -1194,7 +1199,7 @@ Admin Notifications
     color: white;
 }
 
-@keyframes notification-slide-down {
+@keyframes notification-in {
     from {
         opacity: 0;
         transform: translate(-50%, -15px);
@@ -1202,6 +1207,18 @@ Admin Notifications
 
     to {
         opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes notification-out {
+    from {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    to {
+        opacity: 0;
         transform: translate(-50%, 0);
     }
 }

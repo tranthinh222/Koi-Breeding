@@ -155,3 +155,16 @@ export interface IItemInventory {
 	quantity: number;
 	image?: string;
 }
+
+export type BreedingRecipeType = "CROSS" | "PURE" | "OVERLAY";
+
+export interface IBreedingRecipe {
+	id: number;
+	father: IKoiVarient;
+	mother: IKoiVarient;
+	child: IKoiVarient;
+	type: BreedingRecipeType;
+	childRate: number;
+	fatherRate: number;
+	motherRate: number;
+}

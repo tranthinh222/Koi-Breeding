@@ -5,6 +5,7 @@ import { CURRENT_USER_ID } from "../../api/currentUser";
 import { getUser, type User } from "../../api/user";
 import { toast } from "../../components/share/Toast/toast";
 import Toaster from "../../components/share/Toast/Toaster";
+import BreedingGuide from "../../components/user/breeding/BreedingGuide/BreedingGuide";
 import BreedingKoiCard from "../../components/user/breeding/BreedingKoiCard/BreedingKoiCard";
 import FilterModal, {
 	type IFilterState,
@@ -40,6 +41,7 @@ function Breeding() {
 		pondId: "ALL",
 		variety: "ALL",
 	});
+	const [isGuideOpen, setIsGuideOpen] = useState(false);
 
 	useEffect(() => {
 		const loadUser = async () => {
@@ -289,7 +291,7 @@ function Breeding() {
 							type="button"
 							className={styles.actionBtn}
 							title="Guide To Breeding"
-							// onClick={() => navigate("/breeding")}
+							onClick={() => setIsGuideOpen(true)}
 						>
 							<img
 								src="/breeding/guide-book.png"
@@ -360,7 +362,11 @@ function Breeding() {
 					/>
 				</div>
 			)}
-
+			{isGuideOpen && (
+				<div className={styles.overlay}>
+					<BreedingGuide onClose={() => setIsGuideOpen(false)} />
+				</div>
+			)}
 			<Toaster />
 		</>
 	);

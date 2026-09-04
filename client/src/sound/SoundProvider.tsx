@@ -12,22 +12,14 @@ import {
 } from "./SoundContext";
 
 const ENABLED_KEY = "koi-sound-enabled";
-const VOLUME_KEY = "koi-sound-volume";
+const SOUND_VOLUME = 0.35;
 
 function loadEnabled() {
   return localStorage.getItem(ENABLED_KEY) === "true";
 }
 
-function loadVolume() {
-  const savedVolume = Number(localStorage.getItem(VOLUME_KEY));
-  return Number.isFinite(savedVolume) && savedVolume >= 0 && savedVolume <= 1
-    ? savedVolume
-    : 0.35;
-}
-
 export function SoundProvider({ children }: { children: ReactNode }) {
   const [enabled, setEnabledState] = useState(loadEnabled);
-  const [volume, setVolumeState] = useState(loadVolume);
   const audioContextRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
   const ambienceRef = useRef<HTMLAudioElement | null>(null);
@@ -37,7 +29,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     if (!audioContextRef.current) {
       const context = new AudioContext();
       const masterGain = context.createGain();
-      masterGain.gain.value = volume;
+      masterGain.gain.value = SOUND_VOLUME;
       masterGain.connect(context.destination);
       audioContextRef.current = context;
       masterGainRef.current = masterGain;
@@ -46,7 +38,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     const context = audioContextRef.current;
     if (context.state === "suspended") void context.resume();
     return context;
-  }, [volume]);
+  }, []);
 
   const stopAmbience = useCallback(() => {
     ambienceRef.current?.pause();
@@ -60,11 +52,11 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       ambienceRef.current = ambience;
     }
 
-    ambienceRef.current.volume = Math.min(1, volume * 0.65);
+    ambienceRef.current.volume = SOUND_VOLUME * 0.65;
     void ambienceRef.current.play().catch(() => {
       // The next explicit click on the sound button will retry playback.
     });
-  }, [volume]);
+  }, []);
 
   const playEffect = useCallback(
     (effect: SoundEffect) => {
@@ -93,20 +85,6 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     },
     [ensureAudio],
   );
-
-  const setVolume = useCallback((nextVolume: number) => {
-    const safeVolume = Math.min(1, Math.max(0, nextVolume));
-    setVolumeState(safeVolume);
-    localStorage.setItem(VOLUME_KEY, String(safeVolume));
-    masterGainRef.current?.gain.setTargetAtTime(
-      safeVolume,
-      audioContextRef.current?.currentTime ?? 0,
-      0.02,
-    );
-    if (ambienceRef.current) {
-      ambienceRef.current.volume = Math.min(1, safeVolume * 0.65);
-    }
-  }, []);
 
   const setEnabled = useCallback(
     (nextEnabled: boolean) => {
@@ -149,8 +127,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ enabled, volume, setEnabled, setVolume, playEffect }),
-    [enabled, volume, setEnabled, setVolume, playEffect],
+    () => ({ enabled, setEnabled, playEffect }),
+    [enabled, setEnabled, playEffect],
   );
 
   return <SoundContext.Provider value={value}>{children}</SoundContext.Provider>;

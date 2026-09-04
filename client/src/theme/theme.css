@@ -129,31 +129,26 @@ body {
 }
 
 .sound-control {
+  width: 46px;
+  height: 46px;
   display: inline-flex;
+  justify-content: center;
   align-items: center;
-  gap: 7px;
-  padding: 4px 9px 4px 4px;
+  padding: 0;
   border: 2px solid var(--wood-border);
   border-radius: 14px;
   background: var(--control-background);
-  box-shadow: 0 5px 15px var(--shadow-color);
-}
-
-.sound-control button {
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
   color: var(--control-text);
+  box-shadow: 0 5px 15px var(--shadow-color);
   cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease;
 }
 
-.sound-control button:hover,
-.sound-control button.active {
+.sound-control:hover {
+  transform: translateY(-1px);
+}
+
+.sound-control.active {
   background: var(--control-active);
   color: #fff;
 }
@@ -161,17 +156,6 @@ body {
 .sound-control svg {
   width: 18px;
   height: 18px;
-}
-
-.sound-control input {
-  width: 72px;
-  accent-color: var(--control-active);
-  cursor: pointer;
-}
-
-.sound-control input:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
 }
 
 .theme-control button {
@@ -239,6 +223,11 @@ body {
   color: #fff8e8;
 }
 
+:root[data-theme="dark"] .sound-control:not(.active):hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff8e8;
+}
+
 @media (max-width: 700px) {
   .theme-control span {
     display: none;
@@ -249,11 +238,4 @@ body {
     padding-inline: 6px;
   }
 
-  .sound-control {
-    padding-right: 4px;
-  }
-
-  .sound-control input {
-    display: none;
-  }
 }

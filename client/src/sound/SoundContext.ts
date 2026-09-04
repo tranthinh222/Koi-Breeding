@@ -4,9 +4,7 @@ export type SoundEffect = "click" | "success" | "error";
 
 export interface SoundContextValue {
   enabled: boolean;
-  volume: number;
   setEnabled: (enabled: boolean) => void;
-  setVolume: (volume: number) => void;
   playEffect: (effect: SoundEffect) => void;
 }
 

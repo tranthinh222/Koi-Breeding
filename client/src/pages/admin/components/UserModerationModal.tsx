@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+
+import { updateStatusUser } from "../../../api/admin"
+import type { AdminModerationUserRequest, AdminUserDto } from "../../../api/admin";
+
 import ReasonForm from "./ReasonForm";
 import Notification from "./AdminNotification";
 import "../../../style/admin.css";
@@ -9,6 +13,7 @@ interface UserModerationModalProps {
     action: "ban" | "unban";
     userId: number;
     onClose: () => void;
+    onSuccess: (updatedUser: AdminUserDto) => void
 }
 
 const UserModerationModal: React.FC<UserModerationModalProps> = ({
@@ -16,6 +21,7 @@ const UserModerationModal: React.FC<UserModerationModalProps> = ({
     action,
     userId,
     onClose,
+    onSuccess
 }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -35,7 +41,6 @@ const UserModerationModal: React.FC<UserModerationModalProps> = ({
             onClose();
         }, 250);
     };
-
     const handleSubmit = async (reason: string) => {
         setLoading(true);
         setNotification(null);
@@ -52,21 +57,13 @@ const UserModerationModal: React.FC<UserModerationModalProps> = ({
              *     reason
              * );
              */
-            const response = await fetch(
-                `/admin/users/${userId}/${action}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        id: userId,
-                        reason: reason || null,
-                    }),
-                }
-            );
-
-            if (!response.ok) {
+            const request: AdminModerationUserRequest = {
+                id: userId,
+                status: action === "ban" ? "BANNED" : "ACTIVE",
+                reason: reason || null
+            }
+            const updatedUser = await updateStatusUser(request);
+            if (!updatedUser) {
                 throw new Error("Request failed");
             }
 
@@ -77,7 +74,7 @@ const UserModerationModal: React.FC<UserModerationModalProps> = ({
                         ? "User has been banned successfully."
                         : "User has been unbanned successfully.",
             });
-
+            onSuccess(updatedUser);
             /*
              * Cho notification hiện một chút
              * rồi đóng popup.

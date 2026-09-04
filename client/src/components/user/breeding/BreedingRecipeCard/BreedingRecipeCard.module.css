@@ -1,0 +1,151 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
+
+.recipeCard {
+	position: relative;
+	background: rgba(0, 0, 0, 0.4);
+	border: 3px solid #5b3a1f;
+	border-radius: 15px;
+	padding: 15px;
+	padding-top: 25px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	transition: transform 0.2s;
+}
+
+.recipeCard:hover {
+	transform: translateY(-5px);
+	border-color: #f2e943;
+	box-shadow: 0 5px 15px rgba(242, 233, 67, 0.2);
+}
+
+.typeTag {
+	position: absolute;
+	top: -3px; /* Tràn lên viền thẻ */
+	left: -3px;
+	padding: 4px 12px;
+	border-radius: 12px 0 12px 0;
+	font-family: "Grandstander", sans-serif;
+	font-weight: bold;
+	font-size: 12px;
+	color: white;
+	box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.tagCross {
+	background: linear-gradient(
+		135deg,
+		#2778d8,
+		#1a5bb0
+	); /* Xanh dương - Lai chéo */
+}
+
+.tagPure {
+	background: linear-gradient(
+		135deg,
+		#1fb670,
+		#158f55
+	); /* Xanh lá - Lai thuần */
+}
+
+.tagOverlay {
+	background: linear-gradient(
+		135deg,
+		#e84393,
+		#b83070
+	); /* Hồng tím - Phủ ngoại trang */
+}
+
+.recipeParents {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: rgba(255, 255, 255, 0.05);
+	padding: 10px;
+	border-radius: 10px;
+}
+
+.parentInfo {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 5px;
+	width: 40%;
+}
+
+.parentInfo img {
+	width: 50px;
+	height: 50px;
+	object-fit: contain;
+}
+
+.parentInfo span {
+	color: white;
+	font-size: 14px;
+	font-family: "Grandstander";
+	text-align: center;
+}
+
+.plusSign {
+	color: #f2e943;
+	font-weight: bold;
+	font-size: 24px;
+}
+
+.recipeTarget {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	background: rgba(4, 67, 85, 0.6);
+	padding: 10px;
+	border-radius: 10px;
+	border: 1px solid #1a5bb0;
+}
+
+.recipeTarget img {
+	width: 70px;
+	height: 70px;
+	object-fit: contain;
+	filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+.targetDetails {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.targetName {
+	color: #f2e943;
+	font-family: "Grandstander";
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.targetTags {
+	display: flex;
+	gap: 5px;
+	margin-top: 5px;
+	flex-wrap: wrap;
+}
+
+.tag {
+	font-size: 10px;
+	padding: 2px 6px;
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
+	border-radius: 4px;
+}
+
+.probBadge {
+	background: #2778d8;
+	color: white;
+	padding: 5px 10px;
+	border-radius: 8px;
+	font-weight: bold;
+	font-size: 16px;
+	font-family: "Grandstander";
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}

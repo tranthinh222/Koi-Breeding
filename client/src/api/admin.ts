@@ -63,7 +63,7 @@ export interface AdminDashboardResponse {
   topTransactions: AdminTopTransactionDto[]
 }
 
-export interface AdminUpdateUserRequest {
+export interface AdminModerationUserRequest {
   id: number
   status?: AdminUserStatus | null
   password?: string | null
@@ -95,7 +95,7 @@ export async function getAdminDashboard(
   return response.data.data as AdminDashboardResponse
 }
 
-export async function updateAdminUser(request: AdminUpdateUserRequest): Promise<AdminUserDto> {
+export async function updateStatusUser(request: AdminModerationUserRequest): Promise<AdminUserDto> {
   const response = await apiClient.put('/admin/users', request)
   return response.data.data as AdminUserDto
 }

@@ -1,0 +1,55 @@
+.button {
+	position: fixed;
+	top: 155px;
+	left: 28px;
+	z-index: 120;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 11px 16px;
+	border: 3px solid #754217;
+	border-radius: 14px;
+	background: linear-gradient(180deg, #f8c661, #e99a2f);
+	box-shadow:
+		0 5px 0 #754217,
+		0 10px 22px rgba(63, 34, 10, 0.25);
+	color: #563114;
+	font-family: "Grandstander", sans-serif;
+	font-size: 16px;
+	font-weight: 800;
+	cursor: pointer;
+	transition: transform 160ms ease, filter 160ms ease;
+}
+
+.button:hover {
+	transform: translateY(-2px);
+	filter: brightness(1.06);
+}
+
+.button:active {
+	transform: translateY(3px);
+	box-shadow:
+		0 2px 0 #754217,
+		0 5px 12px rgba(63, 34, 10, 0.2);
+}
+
+.button svg {
+	width: 21px;
+	height: 21px;
+}
+
+.arrow {
+	margin-right: -4px;
+}
+
+@media (max-width: 700px) {
+	.button {
+		top: 125px;
+		left: 14px;
+		padding: 10px;
+	}
+
+	.button span {
+		display: none;
+	}
+}

@@ -1,5 +1,6 @@
 import { Bubbles, CheckCheck, Droplets, Gauge, Thermometer } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { CURRENT_USER_ID } from '../../api/currentUser'
 import {
   callBuyPond,
@@ -49,8 +50,12 @@ const MOCK_PONDS: IPond[] = [
 }))
 
 function PondLanding() {
+  const location = useLocation()
+  const routePond = (location.state as { openPond?: IPond } | null)?.openPond
   const [userLogin, setUserLogin] = useState<User | null>(null)
-  const [selectedPond, setSelectedPond] = useState<IPond | null>(null)
+  const [selectedPond, setSelectedPond] = useState<IPond | null>(
+    routePond ?? null,
+  )
   const [incomingKoi, setIncomingKoi] = useState<IKoi | null>(null)
   const [page, setPage] = useState<number>(1)
   const [totalPages, setTotalPages] = useState<number>(1)

@@ -8,6 +8,7 @@ import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.repository.MarketRepository;
 import com.koibreeding.repository.PondRepository;
 import com.koibreeding.repository.UserRepository;
+import com.koibreeding.repository.TradeRepository;
 import jakarta.persistence.criteria.Join;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,7 @@ public class MarketService {
     private final WalletService walletService;
     private final UserRepository userRepository;
     private final PondRepository pondRepository;
+        private final TradeRepository tradeRepository;
     public List<ResMarketDto> getMarketItems() {
         return marketRepository.findAll().stream()
                 .map(marketplace -> new ResMarketDto(
@@ -381,6 +383,7 @@ public class MarketService {
         trade.setListing(marketplace);
         trade.setPrice(request.getPrice());
         trade.setTradeAt(OffsetDateTime.now());
+        Trade savedTrade = tradeRepository.save(trade);
 
         return new ResTradeDto(
                 marketplace.getId(),

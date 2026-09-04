@@ -14,9 +14,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
 	callFetchKoisInPond,
+	callFeedKoi,
 	callMoveKoi,
 	callReleaseKoiToPond,
 } from "../../api/koi";
+import { CURRENT_USER_ID } from "../../api/currentUser";
 import { toast } from "../../components/share/Toast/toast";
 import ImportKoiForm from "../../components/user/pond/ImportKoiForm/ImportKoiForm";
 import { PondCanvas } from "../../components/user/pond/PondCanvas/PondCanvas";
@@ -154,6 +156,28 @@ function Pond({
 		}
 	};
 
+	const handleFeedKoi = async (koi: IKoi, itemId: number): Promise<IKoi | null> => {
+		try {
+			const response = await callFeedKoi(koi.id, {
+				userId: CURRENT_USER_ID,
+				itemId,
+				quantity: 1,
+			});
+			const result = response.data.data;
+			if (!result) throw new Error("The server returned no feeding result.");
+
+			setKoiList((previous) =>
+				previous.map((item) => item.id === result.koi.id ? result.koi : item),
+			);
+			toast.success(`${koi.name} recovered ${result.foodRestored} hunger points!`);
+			return result.koi;
+		} catch (error) {
+			console.error("Failed to feed koi:", error);
+			toast.error(`Failed to feed ${koi.name}.`);
+			return null;
+		}
+	};
+
 	return (
 		<>
 			<main className={styles.wrapper}>
@@ -164,6 +188,7 @@ function Pond({
 							pond={pond}
 							justMovedKoiId={incomingKoi?.id}
 							onMoveKoi={handleMoveKoi}
+							onFeedKoi={handleFeedKoi}
 						/>
 					)}
 					{/* <DebugCanvas /> */}

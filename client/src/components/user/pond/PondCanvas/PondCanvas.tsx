@@ -1,7 +1,8 @@
-import { Info, Move } from "lucide-react";
+import { Drumstick, Info, Move } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { IKoi, IPond } from "../../../../types/backend";
 import KoiProfile from "../../KoiProfile/KoiProfile";
+import FeedKoiForm from "../FeedKoiForm/FeedKoiForm";
 import PondSelectForm from "../PondSelectForm/PondSelectForm";
 import styles from "./PondCanvas.module.css";
 import {
@@ -84,6 +85,7 @@ interface PondCanvasProps {
 	pond: IPond;
 	justMovedKoiId?: number | null;
 	onMoveKoi: (koi: IKoi, targetPond: IPond) => void;
+	onFeedKoi: (koi: IKoi, itemId: number) => Promise<IKoi | null>;
 }
 
 // Use this function to debug fish in canvas
@@ -146,6 +148,7 @@ function PondCanvas({
 	pond,
 	justMovedKoiId,
 	onMoveKoi,
+	onFeedKoi,
 }: PondCanvasProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fishRef = useRef<FishState[]>([]);
@@ -156,6 +159,8 @@ function PondCanvas({
 	const [activeKoiProfile, setActiveKoiProfile] = useState<IKoi | null>(null);
 	const [isMoveFishDialogOpen, setIsMoveFishDialogOpen] =
 		useState<boolean>(false);
+	const [koiToFeed, setKoiToFeed] = useState<IKoi | null>(null);
+	const [isFeeding, setIsFeeding] = useState(false);
 
 	// 1. STATE LƯU TRỮ CON CÁ ĐANG ĐƯỢC CHỌN
 	const [activeFishIndex, setActiveFishIndex] = useState<number | null>(null);
@@ -521,6 +526,15 @@ function PondCanvas({
 			{activeFishIndex !== null && (
 				<div ref={popupRef} className={styles.fishMenu}>
 					<button
+						className={styles.feedFishButton}
+						onClick={() => {
+							setKoiToFeed(latestKoiListRef.current.at(activeFishIndex) as IKoi);
+						}}
+					>
+						<Drumstick />
+						<span>Feed</span>
+					</button>
+					<button
 						className={styles.moveFishButton}
 						onClick={() => setIsMoveFishDialogOpen(true)}
 					>
@@ -563,6 +577,24 @@ function PondCanvas({
 					<KoiProfile
 						koi={activeKoiProfile}
 						onClose={() => setActiveKoiProfile(null)}
+					/>
+				</div>
+			)}
+			{koiToFeed !== null && (
+				<div className={styles.overlay}>
+					<FeedKoiForm
+						koi={koiToFeed}
+						isProcessing={isFeeding}
+						onClose={() => setKoiToFeed(null)}
+						onSubmit={async (food) => {
+							setIsFeeding(true);
+							try {
+								const updatedKoi = await onFeedKoi(koiToFeed, food.itemId);
+								if (updatedKoi) setKoiToFeed(null);
+							} finally {
+								setIsFeeding(false);
+							}
+						}}
 					/>
 				</div>
 			)}

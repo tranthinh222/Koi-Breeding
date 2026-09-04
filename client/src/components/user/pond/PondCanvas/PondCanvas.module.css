@@ -53,6 +53,22 @@
 	font-size: 14px;
 }
 
+.feedFishButton {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #f6a623;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+}
+
+.feedFishButton svg { width: 15px; height: 15px; }
+.feedFishButton span { font-family: "Grandstander"; font-size: 14px; }
+
 .moveFishButton {
 	padding: 5px 10px;
 	cursor: pointer;

@@ -236,10 +236,11 @@ export default function AuthModal({
       await Login(payload);
 
       // ✓ Refresh user info từ context
-      await refreshCurrentUser();
 
+      const user = await refreshCurrentUser();
       onClose();
-      navigate("/home");
+      // Redirect về trang đúng
+      navigate(user?.role === "ADMIN" ? "/admin" : "/home");
     } catch (error: any) {
       console.error("Login failed:", error);
       setLoginError(
@@ -431,10 +432,7 @@ export default function AuthModal({
           </a>
         </div>
 
-        <div
-          className="link-row"
-          style={{ justifyContent: "center", marginTop: 8 }}
-        >
+        <div className="link-row">
           <span>Don't have an account?</span>
           <a
             href="#"
@@ -674,7 +672,7 @@ export default function AuthModal({
           {registering ? "Registering..." : "Register"}
         </button>
 
-        <div className="footer-note">
+        <div className="link-row">
           Already have an account?{" "}
           <a
             href="#"
@@ -687,7 +685,7 @@ export default function AuthModal({
           </a>
         </div>
 
-        <div className="footer-note">
+        <div className="link-row">
           Other options? <a href="#">Google</a>
         </div>
       </aside>
@@ -814,7 +812,7 @@ export default function AuthModal({
           </div>
         )}
 
-        <div className="footer-note">
+        <div className="link-row">
           <a
             href="#"
             onClick={(e) => {

@@ -20,6 +20,7 @@ import com.koibreeding.domain.Wallet;
 import com.koibreeding.enums.EffectType;
 import com.koibreeding.enums.Gender;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.Location;
 import com.koibreeding.enums.NotificationType;
 import com.koibreeding.enums.Role;
 import com.koibreeding.enums.TransactionStatus;
@@ -32,14 +33,22 @@ import com.koibreeding.repository.TransactionRepository;
 import com.koibreeding.repository.UserRepository;
 import com.koibreeding.repository.WalletRepository;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @Configuration
 public class SampleDataInitializer {
-
+        
     @Bean
     CommandLineRunner seedSampleData(ItemRepository itemRepository, UserRepository userRepository,
             WalletRepository walletRepository, InventoryRepository inventoryRepository,
             TransactionRepository transactionRepository, NotificationRepository notificationRepository) {
         return args -> {
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             Map<String, Item> existingItemsByName = itemRepository.findAll().stream()
                     .collect(Collectors.toMap(Item::getName, item -> item, (left, right) -> left, LinkedHashMap::new));
 
@@ -140,13 +149,29 @@ public class SampleDataInitializer {
             demoUser.setPassword("123456");
             demoUser.setBirthday(LocalDate.of(2000, 1, 1));
             demoUser.setGender(Gender.MALE);
+            demoUser.setLocation(Location.BIEN_HOA);
             demoUser.setStatus(UserStatus.ACTIVE);
             demoUser.setRole(Role.USER);
             demoUser.setIsBanned(false);
             demoUser.setExp(0);
             demoUser.setAvatarUrl(null);
             demoUser = userRepository.save(demoUser);
-
+        User admin = userRepository.findAll().stream()
+                .filter(user -> "admin".equals(user.getUsername()))
+                .findFirst()
+                .orElseGet(User::new);
+        admin.setUsername("admin");
+        admin.setEmail("admin@koi.local");
+        admin.setPassword(passwordEncoder.encode("admin"));
+        admin.setBirthday(LocalDate.of(2000, 1, 1));
+        admin.setGender(Gender.MALE);
+        admin.setLocation(Location.HO_CHI_MINH_CITY);
+        admin.setStatus(UserStatus.ACTIVE);
+        admin.setRole(Role.ADMIN);
+        admin.setIsBanned(false);
+        admin.setExp(0);
+        admin.setAvatarUrl(null);
+        admin = userRepository.save(admin);
             Wallet wallet = walletRepository.findByUserId(demoUser.getId()).orElseGet(Wallet::new);
             wallet.setUser(demoUser);
             wallet.setBalance(new BigDecimal("1000"));
@@ -161,6 +186,7 @@ public class SampleDataInitializer {
             sampleUser.setPassword("123456");
             sampleUser.setBirthday(LocalDate.of(1998, 6, 15));
             sampleUser.setGender(Gender.FEMALE);
+            sampleUser.setLocation(Location.HANOI);
             sampleUser.setStatus(UserStatus.ACTIVE);
             sampleUser.setRole(Role.USER);
             sampleUser.setIsBanned(false);
@@ -168,9 +194,26 @@ public class SampleDataInitializer {
             sampleUser.setAvatarUrl(null);
             sampleUser = userRepository.save(sampleUser);
 
+            User sampleUser1 = userRepository.findAll().stream()
+                    .filter(user -> "koi_user1".equals(user.getUsername()))
+                    .findFirst()
+                    .orElseGet(User::new);
+            sampleUser1.setUsername("koi_user1");
+            sampleUser1.setEmail("koi_user@gmail.com");
+            sampleUser1.setPassword("123456");
+            sampleUser1.setBirthday(LocalDate.of(2002, 6, 15));
+            sampleUser1.setGender(Gender.FEMALE);
+            sampleUser1.setLocation(Location.HANOI);
+            sampleUser1.setStatus(UserStatus.BANNED);
+            sampleUser1.setRole(Role.USER);
+            sampleUser1.setIsBanned(true);
+            sampleUser1.setExp(250);
+            sampleUser1.setAvatarUrl(null);
+            sampleUser1 = userRepository.save(sampleUser1);
+            
             Wallet sampleWallet = walletRepository.findByUserId(sampleUser.getId()).orElseGet(Wallet::new);
             sampleWallet.setUser(sampleUser);
-            sampleWallet.setBalance(new BigDecimal("5000"));
+            sampleWallet.setBalance(new BigDecimal("1000"));
             walletRepository.save(sampleWallet);
 
             seedInventoryRow(inventoryRepository, demoUser, itemsByName.get("Koi - Kohaku"), 1);

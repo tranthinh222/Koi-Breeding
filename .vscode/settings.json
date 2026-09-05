@@ -1,7 +1,7 @@
 {
 	"editor.formatOnSave": true,
 	"java.compile.nullAnalysis.mode": "automatic",
-	"java.configuration.updateBuildConfiguration": "automatic",
+	"java.configuration.updateBuildConfiguration": "interactive",
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit"
 	},

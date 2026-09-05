@@ -1,13 +1,18 @@
 package com.koibreeding.config;
 
+import static java.util.Map.entry;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.CommandLineRunner;
@@ -67,7 +72,7 @@ public class SampleDataInitializer {
             UserRepository userRepository,
             WalletRepository walletRepository, InventoryRepository inventoryRepository,
             TransactionRepository transactionRepository, NotificationRepository notificationRepository,
-            KoiFormula koiFormula) {
+            KoiFormula koiFormula, BreedingRateRepository breedingRateRepository) {
         return args -> {
 
             seedVarieties(varietyRepository);
@@ -123,10 +128,12 @@ public class SampleDataInitializer {
                             "https://res.cloudinary.com/djmcluh5n/image/upload/v1786629140/uploads/items/qxryphcvy1acd8fijyfv.svg"),
                     item("Cooling Treatment", "25.00", ItemType.MEDICINE,
                             EffectType.COOLING, "2.00",
-                            "Temporarily increases pond temperature by 2°C for 24 hours.", null),
+                            "Temporarily increases pond temperature by 2°C for 24 hours.",
+                            null),
                     item("Heating Treatment", "25.00", ItemType.MEDICINE,
                             EffectType.HEATING, "2.00",
-                            "Temporarily decreases pond temperature by 2°C for 24 hours.", null),
+                            "Temporarily decreases pond temperature by 2°C for 24 hours.",
+                            null),
                     item("Mutation Elixir - CLAK", "15.00", ItemType.MEDICINE, EffectType.MUTATION,
                             "5.00",
                             "Common elixir with a small mutation bonus.",
@@ -257,9 +264,14 @@ public class SampleDataInitializer {
             seedTransactions(transactionRepository, wallet, itemsByName);
             seedNotifications(notificationRepository, demoUser);
 
-            seedKois(koiRepository, dictionaryRepository, pondRepository, "Kohaku Garden", demoUser, koiFormula);
-            seedKois(koiRepository, dictionaryRepository, pondRepository, "Sanke Lake", demoUser, koiFormula);
-            seedKois(koiRepository, dictionaryRepository, pondRepository, "Hanoi Koi Pond", sampleUser, koiFormula);
+            seedKois(koiRepository, dictionaryRepository, pondRepository, "Kohaku Garden", demoUser,
+                    koiFormula);
+            seedKois(koiRepository, dictionaryRepository, pondRepository, "Sanke Lake", demoUser,
+                    koiFormula);
+            seedKois(koiRepository, dictionaryRepository, pondRepository, "Hanoi Koi Pond", sampleUser,
+                    koiFormula);
+
+            seedBreedingRate(breedingRateRepository, dictionaryRepository);
         };
     }
 
@@ -267,7 +279,8 @@ public class SampleDataInitializer {
             String waterQuality, String temperature, String pH, String oxygen, PhTrend phTrend,
             String description) {
         boolean exists = pondRepository.findAll().stream()
-                .anyMatch(pond -> pond.getOwner().getId().equals(owner.getId()) && name.equals(pond.getName()));
+                .anyMatch(pond -> pond.getOwner().getId().equals(owner.getId())
+                        && name.equals(pond.getName()));
         if (exists) {
             return;
         }
@@ -486,8 +499,10 @@ public class SampleDataInitializer {
 
         List<Item> sampleItemList = new ArrayList<>();
         existingDictionariesByName.forEach((name, dictionary) -> {
-            Item item = new Item(null, "Koi - " + name, BigDecimal.valueOf(dictionary.getBasePrice()), 1, ItemType.KOI,
-                    EffectType.GROWTH, BigDecimal.valueOf(dictionary.getId()), dictionary.getVariety().getDescription(),
+            Item item = new Item(null, "Koi - " + name, BigDecimal.valueOf(dictionary.getBasePrice()), 1,
+                    ItemType.KOI,
+                    EffectType.GROWTH, BigDecimal.valueOf(dictionary.getId()),
+                    dictionary.getVariety().getDescription(),
                     dictionary.getImageUrl());
             sampleItemList.add(item);
         });
@@ -519,13 +534,15 @@ public class SampleDataInitializer {
         }
     }
 
-    private void seedBreedingRate(VarietyRepository varietyRepository, BreedingRateRepository breedingRateRepository,
+    private void seedBreedingRate(
+            BreedingRateRepository breedingRateRepository,
             DictionaryRepository dictionaryRepository) {
         if (breedingRateRepository.count() > 0) {
             return;
         }
 
-        Map<String, Variety> existingVarietiesByName = varietyRepository.findAll().stream()
+        // Lấy danh sách tất cả các cá đang có trong hệ thống
+        Map<String, Dictionary> dictMap = dictionaryRepository.findAll().stream()
                 .filter(Objects::nonNull)
                 .filter(v -> v.getName() != null)
                 .collect(Collectors.toMap(
@@ -534,59 +551,584 @@ public class SampleDataInitializer {
                         (left, right) -> left,
                         LinkedHashMap::new));
 
-        Map<String, Dictionary> existingDictionariesByName = dictionaryRepository.findAll().stream()
-                .filter(Objects::nonNull)
-                .filter(v -> v.getName() != null)
-                .collect(Collectors.toMap(
-                        v -> v.getName(),
-                        item -> item,
-                        (left, right) -> left,
-                        LinkedHashMap::new));
+        // Phân loại cá theo Variety để dễ ép lai
+        List<Dictionary> kohakus = dictMap.values().stream()
+                .filter(d -> "Kohaku".equals(d.getVariety().getName())).toList();
+        List<Dictionary> tanchos = dictMap.values().stream()
+                .filter(d -> "Tancho".equals(d.getVariety().getName())).toList();
+        List<Dictionary> taishoSankes = dictMap.values().stream()
+                .filter(d -> "Taisho Sanke".equals(d.getVariety().getName())).toList();
+        List<Dictionary> showaSanshokus = dictMap.values().stream()
+                .filter(d -> "Showa Sanshoku".equals(d.getVariety().getName())).toList();
+        List<Dictionary> goromos = dictMap.values().stream()
+                .filter(d -> "Goromo".equals(d.getVariety().getName())).toList();
+        List<Dictionary> utsuris = dictMap.values().stream()
+                .filter(d -> "Utsuri".equals(d.getVariety().getName())).toList();
+        // List<Dictionary> hikariUtsuris = dictMap.values().stream()
+        // .filter(d -> "Hikari Utsuri".equals(d.getVariety().getName())).toList();
+        // List<Dictionary> bekkos = dictMap.values().stream()
+        // .filter(d -> "Bekko".equals(d.getVariety().getName())).toList();
+        // List<Dictionary> karashis = dictMap.values().stream()
+        // .filter(d -> "Karashi".equals(d.getVariety().getName())).toList();
+        List<Dictionary> benigois = dictMap.values().stream()
+                .filter(d -> "Benigoi".equals(d.getVariety().getName())).toList();
+        List<Dictionary> chagois = dictMap.values().stream()
+                .filter(d -> "Chagoi".equals(d.getVariety().getName())).toList();
+        List<Dictionary> hikariMujis = dictMap.values().stream()
+                .filter(d -> "Hikari Muji".equals(d.getVariety().getName())).toList();
+        List<Dictionary> asagis = dictMap.values().stream()
+                .filter(d -> "Asagi".equals(d.getVariety().getName())).toList();
+        List<Dictionary> shusuis = dictMap.values().stream()
+                .filter(d -> "Shusui".equals(d.getVariety().getName())).toList();
+        List<Dictionary> goshikis = dictMap.values().stream()
+                .filter(d -> "Goshiki".equals(d.getVariety().getName())).toList();
+        // List<Dictionary> hikarimoyos = dictMap.values().stream()
+        // .filter(d -> "Hikarimoyo".equals(d.getVariety().getName())).toList();
+        // List<Dictionary> kawarimonos = dictMap.values().stream()
+        // .filter(d -> "Kawarimono".equals(d.getVariety().getName())).toList();
+
+        List<Dictionary> doitsus = dictMap.values().stream()
+                .filter(d -> ScaleType.DOITSU.equals(d.getScaleType())).toList();
+        List<Dictionary> ginrins = dictMap.values().stream()
+                .filter(d -> ScaleType.GINRIN.equals(d.getScaleType())).toList();
 
         List<BreedingRate> sampleBreedingRates = new ArrayList<>();
 
-        // Cross-breeding recipes. A concrete dictionary variant represents broader
-        // names from the breeding table (for example Narumi Asagi represents Asagi).
-        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Shiro Utsuri Doitsu", "Tancho Showa", BreedingRecipeType.CROSS, .005, .35, .30);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Shiro Utsuri Doitsu", "Maruten Showa", BreedingRecipeType.CROSS, .0325, .35, .30);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Shiro Utsuri Doitsu", "Hi Showa", BreedingRecipeType.CROSS, .075, .35, .30);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Shiro Utsuri Doitsu", "Kindai Showa", BreedingRecipeType.CROSS, .1375, .35, .30);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Narumi Asagi", "Aigoromo", BreedingRecipeType.CROSS, .14, .35, .35);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Narumi Asagi", "Sumigoromo", BreedingRecipeType.CROSS, .04, .35, .35);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Narumi Asagi", "Budo Koromo", BreedingRecipeType.CROSS, .02, .35, .35);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Narumi Asagi", "Doitsu Kohaku", "Shusui", BreedingRecipeType.CROSS, .12, .40, .20);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Narumi Asagi", "Doitsu Kohaku", "Hi Shusui", BreedingRecipeType.CROSS, .18, .40, .20);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Narumi Asagi", "Kohaku", "Goshiki", BreedingRecipeType.CROSS, .20, .35, .35);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Chagoi", "Kigoi", "Karashi", BreedingRecipeType.CROSS, .225, .40, .25);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Chagoi", "Kigoi", "Soragoi", BreedingRecipeType.CROSS, .025, .40, .25);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Soragoi", "Chagoi", "Ochiba Shigure", BreedingRecipeType.CROSS, .30, .30, .30);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Yamabuki Ogon", "Shusui", "Midorigoi", BreedingRecipeType.CROSS, .02, .25, .45);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Goromo", "Showa Sanshoku", "Koromo Showa", BreedingRecipeType.CROSS, .05, .15, .40);
+        // THÊM DÒNG NÀY: Bộ nhớ đệm để check trùng lặp (A + B = C)
+        Set<String> generatedCombinations = new HashSet<>();
 
-        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Kohaku", "Kohaku", BreedingRecipeType.PURE, .78, 0, 0);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Kohaku", "Tancho Kohaku", BreedingRecipeType.PURE, .05, 0, 0);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Showa Sanshoku", "Showa Sanshoku", "Showa Sanshoku", BreedingRecipeType.PURE, .87, 0, 0);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Showa Sanshoku", "Showa Sanshoku", "Tancho Showa", BreedingRecipeType.PURE, .05, 0, 0);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Magoi", "Magoi", "Magoi", BreedingRecipeType.PURE, .78, 0, 0);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Magoi", "Magoi", "Chagoi", BreedingRecipeType.PURE, .04, 0, 0);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Magoi", "Magoi", "Kohaku", BreedingRecipeType.PURE, .01, 0, 0);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Karasugoi", "Karasugoi", "Karasugoi", BreedingRecipeType.PURE, .85, 0, 0);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Karasugoi", "Karasugoi", "Hajiro", BreedingRecipeType.PURE, .08, 0, 0);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Ginrin", "Ginrin", BreedingRecipeType.PURE, .92, 0, 0);
+        /*
+         * =============================================================================
+         * ============
+         * NHÓM 1: LAI CHÉO (CROSS)
+         * =============================================================================
+         * ============
+         */
 
-        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Kohaku", "Ginrin Kohaku", BreedingRecipeType.OVERLAY, .30, 0, .60);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Showa Sanshoku", "Ginrin Showa", BreedingRecipeType.OVERLAY, .25, 0, .65);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Hi Utsuri", "Ginrin Hi Utsuri", BreedingRecipeType.OVERLAY, .25, 0, .65);
-        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Ki Utsuri", "Ginrin Ki Utsuri", BreedingRecipeType.OVERLAY, .25, 0, .65);
+        // 1. Kohaku x Utsuri => Showa (Target: 0.25)
+        Map<String, Double> showaSubRates = Map.of(
+                "Tancho Showa", 0.005,
+                "Maruten Showa", 0.0325,
+                "Hi Showa", 0.075,
+                "Kindai Showa", 0.1375);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, kohakus, utsuris,
+                BreedingRecipeType.CROSS, 0.25,
+                0.35, 0.3,
+                showaSubRates);
+
+        // 2. Kohaku x Asagi => Goromo (Target: 0.20)
+        Map<String, Double> goromoSubRates = Map.of(
+                "Aigoromo", 0.14,
+                "Sumigoromo", 0.04,
+                "Budo Koromo", 0.02);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, kohakus, asagis,
+                BreedingRecipeType.CROSS, 0.20,
+                0.35, 0.35,
+                goromoSubRates);
+
+        // 3. Asagi x Doitsu
+        Map<String, Double> shusuiSubRates = Map.of(
+                "Shusui", 0.12,
+                "Hi Shusui", 0.18);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, asagis, doitsus,
+                BreedingRecipeType.CROSS, 0.30,
+                0.4, 0.2,
+                shusuiSubRates);
+
+        // 4. Asagi x Kohaku
+        Map<String, Double> goshikiSubRates1 = Map.of(
+                "Goshiki", 0.12,
+                "Modern Goshiki", 0.08);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, asagis, kohakus,
+                BreedingRecipeType.CROSS, 0.2,
+                0.35, 0.35,
+                goshikiSubRates1);
+
+        // 5. Asagi x Taisho Sanke
+        Map<String, Double> goshikiSubRates2 = Map.of(
+                "Goshiki", 0.12,
+                "Modern Goshiki", 0.03);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, asagis, taishoSankes,
+                BreedingRecipeType.CROSS,
+                0.15, 0.35,
+                0.4,
+                goshikiSubRates2);
+
+        // 6. Chagoi x Kigoi
+        Map<String, Double> karashiSoragoiSubRates = Map.of(
+                "Karashi", 0.225,
+                "Soragoi", 0.025);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, chagois,
+                List.of(dictMap.get("Kigoi")),
+                BreedingRecipeType.CROSS, 0.25, 0.4,
+                0.25,
+                karashiSoragoiSubRates);
+
+        // 7. Asagi x Magoi
+        Map<String, Double> chagoiSubRates = Map.of(
+                "Chagoi", 0.15);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, asagis,
+                List.of(dictMap.get("Magoi")),
+                BreedingRecipeType.CROSS, 0.15, 0.3,
+                0.45,
+                chagoiSubRates);
+
+        // 8. Doitsu x Magoi
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, doitsus,
+                List.of(dictMap.get("Magoi")),
+                BreedingRecipeType.CROSS, 0.15, 0.3,
+                0.45,
+                chagoiSubRates);
+
+        // 9. Chagoi x Asagi
+        Map<String, Double> soragoiSubRates = Map.of(
+                "Soragoi", 0.25);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, chagois, asagis,
+                BreedingRecipeType.CROSS, 0.25, 0.4,
+                0.25,
+                soragoiSubRates);
+
+        // 10. Asagi x Benigoi
+        Map<String, Double> matsubagoiSubRates1 = Map.of(
+                "Aka Matsuba", 0.18,
+                "Ki Matsuba", 0.02);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, asagis, benigois,
+                BreedingRecipeType.CROSS, 0.2, 0.35,
+                0.35,
+                matsubagoiSubRates1);
+
+        // 11. Asagi x Kigoi
+        Map<String, Double> matsubagoiSubRates2 = Map.of(
+                "Ki Matsuba", 0.18,
+                "Aka Matsuba", 0.02);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, asagis,
+                List.of(dictMap.get("Kigoi")),
+                BreedingRecipeType.CROSS, 0.2, 0.35,
+                0.35,
+                matsubagoiSubRates2);
+
+        // 12. Asagi x Kigoi
+        Map<String, Double> ochibashigureSubRates = Map.of(
+                "Ochiba Shigure", 0.3);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap,
+                List.of(dictMap.get("Soragoi")), chagois,
+                BreedingRecipeType.CROSS, 0.3, 0.3,
+                0.3,
+                ochibashigureSubRates);
+
+        // 13. Yamabuki Ogon x Shusui
+        Map<String, Double> midorigoiSubRates = Map.of(
+                "Midorigoi", 0.02);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap,
+                List.of(dictMap.get("Yamabuki Ogon")), shusuis,
+                BreedingRecipeType.CROSS, 0.02, 0.25,
+                0.45,
+                midorigoiSubRates);
+
+        // 13. Goromo x Showa Sanshoku
+        Map<String, Double> koromoShowaSubRates1 = Map.of(
+                "Koromo Showa", 0.05);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, goromos, showaSanshokus,
+                BreedingRecipeType.CROSS, 0.05, 0.15,
+                0.4,
+                koromoShowaSubRates1);
+
+        // 13. Goromo x Utsuri
+        Map<String, Double> koromoShowaSubRates2 = Map.of(
+                "Koromo Showa", 0.03);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, goromos, utsuris,
+                BreedingRecipeType.CROSS, 0.03, 0.1,
+                0.3,
+                koromoShowaSubRates2);
+
+        /*
+         * =============================================================================
+         * ============
+         * NHÓM 2: LAI CÙNG DÒNG VÀ ĐỘT BIẾN (PURE)
+         * =============================================================================
+         * ============
+         */
+
+        // 1. Magoi x Magoi
+        List<String> magoiPatterns = List.of("Magoi");
+        Map<String, Double> magoiMutations = Map.ofEntries(
+                entry("Konjo Asagi", 0.075),
+                entry("Narumi Asagi", 0.075),
+                entry("Mizo Asagi", 0.075),
+                entry("Ginrin Asagi", 0.075),
+                entry("Chagoi", 0.01),
+                entry("Midorigoi", 0.01),
+                entry("Soragoi", 0.01),
+                entry("Kohaku", 0.02),
+                entry("Ginrin Shiro Utsuri", 0.005),
+                entry("Ginrin Hi Utsuri", 0.005),
+                entry("Ginrin Ki Utsuri", 0.005),
+                entry("Shiro Utsuri Doitsu", 0.005),
+                entry("Hi Utsuri Doitsu", 0.005),
+                entry("Ki Utsuri Doitsu", 0.005),
+                entry("Kigoi", 0.04),
+                entry("Karasugoi", 0.03));
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Magoi")), 0.78,
+                magoiPatterns,
+                magoiMutations);
+
+        // 2. Kohaku x Kohaku => Kohaku (Base: 0.88, Đột biến: 0.09 -> Tổng 0.97)
+        List<String> kohakuPatterns = List.of(
+                "Menkaburi Kohaku", "Kuchibeni Kohaku", "Inazuma Kohaku",
+                "Maruten Kohaku", "Straight Hi Kohaku", "Nidan Kohaku");
+        Map<String, Double> kohakuMutations = Map.of(
+                "Tancho Kohaku", 0.05,
+                "Benigoi", 0.04);
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, kohakus, 0.78, kohakuPatterns,
+                kohakuMutations);
+
+        // 3. Taisho Sanke x Taisho Sanke
+        List<String> taishoSankePatterns = List.of(
+                "Kuchibeni Sanke", "Aka Sanke", "Subo Sumi Sanke",
+                "Maruten Sanke");
+        Map<String, Double> taishoSankeMutations = Map.of(
+                "Shiro Bekko", 0.02,
+                "Aka Bekko", 0.02,
+                "Ki Bekko", 0.02,
+                "Tancho Sanke", 0.03);
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, taishoSankes, 0.88,
+                taishoSankePatterns,
+                taishoSankeMutations);
+
+        // 4. Showa Sanshoku x Showa Sanshoku
+        List<String> showaSanshokuPatterns = List.of(
+                "Hi Showa", "Kindai Showa", "Maruten Showa");
+        Map<String, Double> showaSanshokuMutations = Map.of("Tancho Showa", 0.05);
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, showaSanshokus, 0.87,
+                showaSanshokuPatterns,
+                showaSanshokuMutations);
+
+        // 5. Utsuri x Utsuri
+        List<String> utsuriPatterns = List.of(
+                "Shiro Utsuri Doitsu");
+        Map<String, Double> utsuriMutations = Map.of();
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, utsuris, 0.92, utsuriPatterns,
+                utsuriMutations);
+
+        // 6. Benigoi x Benigoi
+        List<String> benigoiPatterns = List.of(
+                "Benigoi");
+        Map<String, Double> benigoiMutations = Map.of(
+                "Kigoi", 0.06);
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Benigoi")), 0.9,
+                benigoiPatterns,
+                benigoiMutations);
+
+        // 7. Karasugoi x Karasugoi
+        List<String> karasugoiPatterns = List.of(
+                "Karasugoi");
+        Map<String, Double> karasugoiMutations = Map.of(
+                "Hajiro", 0.08);
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Karasugoi")),
+                0.85, karasugoiPatterns,
+                karasugoiMutations);
+
+        // 8. Hajiro x Hajiro
+        List<String> hajiroPatterns = List.of(
+                "Hajiro");
+        Map<String, Double> hajiroMutations = Map.of(
+                "Hagheshiro", 0.05);
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Hajiro")), 0.8,
+                hajiroPatterns,
+                hajiroMutations);
+
+        // 9. Hagheshiro x Hagheshiro
+        List<String> hagheshiroPatterns = List.of(
+                "Hagheshiro");
+        Map<String, Double> hagheshiroMutations = Map.of(
+                "Yotsujiro", 0.04);
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Hagheshiro")),
+                0.8, hagheshiroPatterns,
+                hagheshiroMutations);
+
+        // 10. Hikari Muji x Hikari Muji
+        List<String> hikariMujiPatterns = List.of(
+                "Platinum Ogon", "Nezu Ogon", "Yamabuki Ogon",
+                "Hi Ogon", "Orenji Ogon", "Mukashi Ogon");
+        Map<String, Double> hikariMujiMutations = Map.of();
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, 0.9, hikariMujiPatterns,
+                hikariMujiMutations);
+
+        // 11. Ginrin x Ginrin
+        List<String> ginrinPatterns = List.of(
+                "Ginrin Kohaku", "Ginrin Sanke", "Kinrin Sanke", "Ginrin Showa", "Ginrin Shiro Utsuri",
+                "Ginrin Hi Utsuri", "Ginrin Ki Utsuri", "Ginrin Asagi");
+        Map<String, Double> ginrinMutations = Map.of();
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins, 0.92, ginrinPatterns,
+                ginrinMutations);
+
+        /*
+         * =============================================================================
+         * ============
+         * NHÓM 3: Nhóm phủ đặc tính ngoại trang
+         * =============================================================================
+         * ============
+         */
+        // 1. Ginrin x Kohaku
+        Map<String, Double> ginrinKohakuSubRates = Map.of(
+                "Ginrin Kohaku", 0.3);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins, kohakus,
+                BreedingRecipeType.OVERLAY, 0.3, 0.1,
+                0.5,
+                ginrinKohakuSubRates);
+
+        // 2. Ginrin x Taisho Sanke
+        Map<String, Double> ginrinTaishoSankeSubRates = Map.of(
+                "Ginrin Sanke", 0.25);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins, taishoSankes,
+                BreedingRecipeType.OVERLAY, 0.25, 0.1,
+                0.5,
+                ginrinTaishoSankeSubRates);
+
+        // 3. Ginrin x Showa Sanshoku
+        Map<String, Double> ginrinShowaSanshokuSubRates = Map.of(
+                "Ginrin Showa", 0.25);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins, showaSanshokus,
+                BreedingRecipeType.OVERLAY, 0.25, 0.1,
+                0.55,
+                ginrinShowaSanshokuSubRates);
+
+        // 4. Ginrin x Utsuri
+        Map<String, Double> ginrinUtsuriSubRates = Map.of(
+                "Ginrin Shiro Utsuri", 0.25);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins, utsuris,
+                BreedingRecipeType.OVERLAY, 0.25, 0.1,
+                0.45,
+                ginrinUtsuriSubRates);
+
+        // 5. Ginrin x Hi Utsuri
+        Map<String, Double> ginrinHiUtsuriSubRates = Map.of(
+                "Ginrin Hi Utsuri", 0.25);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins,
+                List.of(dictMap.get("Hi Utsuri")),
+                BreedingRecipeType.OVERLAY, 0.25, 0.1,
+                0.55,
+                ginrinHiUtsuriSubRates);
+
+        // 6. Ginrin x Ki Utsuri
+        Map<String, Double> ginrinKiUtsuriSubRates = Map.of(
+                "Ginrin Ki Utsuri", 0.25);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins,
+                List.of(dictMap.get("Ki Utsuri")),
+                BreedingRecipeType.OVERLAY, 0.25, 0.1,
+                0.5,
+                ginrinKiUtsuriSubRates);
+
+        // 7. Hikari Muji x Utsuri
+        Map<String, Double> hikariMujiUtsuriSubRates = Map.of(
+                "Hikari Shiro Utsuri", 0.07,
+                "Hi Utsuri", 0.07,
+                "Ki Utsuri", 0.07);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, utsuris,
+                BreedingRecipeType.OVERLAY, 0.21, 0.25,
+                0.39,
+                hikariMujiUtsuriSubRates);
+
+        // 8. Hikari Muji x Kohaku
+        Map<String, Double> hikariMujiKohakuSubRates = Map.of(
+                "Hariwake", 0.25);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, kohakus,
+                BreedingRecipeType.OVERLAY, 0.25, 0.2,
+                0.4,
+                hikariMujiKohakuSubRates);
+
+        // 9. Hikari Muji x Taisho Sanke
+        Map<String, Double> hikariMujiTaishoSankeSubRates = Map.of(
+                "Yamato Nishiki", 0.2);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, taishoSankes,
+                BreedingRecipeType.OVERLAY, 0.2, 0.1,
+                0.45,
+                hikariMujiTaishoSankeSubRates);
+
+        // 10. Hikari Muji x Showa Sanshoku
+        Map<String, Double> hikariMujiShowaSanshokuSubRates = Map.of(
+                "Ginrin Showa", 0.2);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, showaSanshokus,
+                BreedingRecipeType.OVERLAY, 0.2, 0.15,
+                0.5,
+                hikariMujiShowaSanshokuSubRates);
+
+        // 11. Hikari Muji x Tancho
+        Map<String, Double> hikariMujiTanchoSubRates = Map.of(
+                "Tancho Hariwake", 0.15);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, tanchos,
+                BreedingRecipeType.OVERLAY, 0.15, 0.1,
+                0.5,
+                hikariMujiTanchoSubRates);
+
+        // 12. Hikari Muji x Goromo
+        Map<String, Double> hikariMujiGoromoSubRates = Map.of(
+                "Kujaku", 0.15);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, goromos,
+                BreedingRecipeType.OVERLAY, 0.15, 0.15,
+                0.45,
+                hikariMujiGoromoSubRates);
+
+        // 13. Hikari Muji x Shiro Bekko
+        Map<String, Double> hikariMujiShiroBekkoSubRates = Map.of(
+                "Ginrin Shiro Bekko", 0.2);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                List.of(dictMap.get("Shiro Bekko")),
+                BreedingRecipeType.OVERLAY, 0.2, 0.2,
+                0.5,
+                hikariMujiShiroBekkoSubRates);
+
+        // 14. Hikari Muji x Aka Bekko
+        Map<String, Double> hikariMujiAkaBekkoSubRates = Map.of(
+                "Ginrin Aka Bekko", 0.2);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                List.of(dictMap.get("Aka Bekko")),
+                BreedingRecipeType.OVERLAY, 0.2, 0.2,
+                0.5,
+                hikariMujiAkaBekkoSubRates);
+
+        // 15. Hikari Muji x Ki Bekko
+        Map<String, Double> hikariMujiKiBekkoSubRates = Map.of(
+                "Shusui", 0.1,
+                "Hi Shusui", 0.1);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                List.of(dictMap.get("Ki Bekko")),
+                BreedingRecipeType.OVERLAY, 0.2, 0.2,
+                0.5,
+                hikariMujiKiBekkoSubRates);
+
+        // 16. Hikari Muji x Asagi
+        Map<String, Double> hikariMujiAsagiSubRates = Map.of(
+                "Kujaku", 0.15);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, asagis,
+                BreedingRecipeType.OVERLAY, 0.15, 0.2,
+                0.5,
+                hikariMujiAsagiSubRates);
+
+        // 17. Hikari Muji x Shusui
+        Map<String, Double> hikariMujiShusuiSubRates = Map.of(
+                "Shusui", 0.1,
+                "Hi Shusui", 0.1);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, shusuis,
+                BreedingRecipeType.OVERLAY, 0.2, 0.2,
+                0.5,
+                hikariMujiShusuiSubRates);
+
+        // 18. Hikari Muji x Goshiki
+        Map<String, Double> hikariMujiGoshikiSubRates = Map.of(
+                "Kujaku", 0.15);
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, goshikis,
+                BreedingRecipeType.OVERLAY, 0.15, 0.2,
+                0.4,
+                hikariMujiGoshikiSubRates);
 
         breedingRateRepository.saveAll(sampleBreedingRates);
     }
 
-    private void addRate(List<BreedingRate> target, Map<String, Dictionary> dictionaries, String father,
-            String mother, String child, BreedingRecipeType type, double targetRate, double fatherRate, double motherRate) {
-        Dictionary f = dictionaries.get(father), m = dictionaries.get(mother), c = dictionaries.get(child);
-        if (f != null && m != null && c != null) target.add(new BreedingRate(null, f, m, c, type,
-                BigDecimal.valueOf(targetRate), BigDecimal.valueOf(fatherRate), BigDecimal.valueOf(motherRate)));
+    /**
+     * Helper sinh ma trận lai chéo (CROSS / OVERLAY)
+     */
+    private void addCrossOrOverlayBreedingRates(
+            List<BreedingRate> rates,
+            Set<String> generatedCombinations,
+            Map<String, Dictionary> dictMap,
+            List<Dictionary> fathers,
+            List<Dictionary> mothers,
+            BreedingRecipeType recipeType,
+            double baseRate,
+            double fatherRate,
+            double motherRate,
+            Map<String, Double> childSubRates) {
+
+        BigDecimal normalizedFatherRate = BigDecimal.valueOf(fatherRate).setScale(4, RoundingMode.HALF_UP);
+        BigDecimal normalizedMotherRate = BigDecimal.valueOf(fatherRate).setScale(4, RoundingMode.HALF_UP);
+        BigDecimal swapFatherRate = normalizedFatherRate.multiply(BigDecimal.valueOf(0.25)).setScale(4,
+                RoundingMode.HALF_UP);
+        BigDecimal swapMotherRate = normalizedMotherRate.multiply(BigDecimal.valueOf(0.25)).setScale(4,
+                RoundingMode.HALF_UP);
+
+        for (Dictionary father : fathers) {
+            for (Dictionary mother : mothers) {
+                for (Map.Entry<String, Double> entry : childSubRates.entrySet()) {
+                    Dictionary child = dictMap.get(entry.getKey());
+                    if (child == null)
+                        continue; // Bỏ qua nếu data sample chưa có con cá này
+
+                    // Tính tỉ lệ thực tế: baseRate (VD: 0.25) * subRate (VD: 0.02) = 0.005
+                    BigDecimal targetRate = BigDecimal.valueOf(entry.getValue())
+                            .setScale(4,
+                                    RoundingMode.HALF_UP);
+
+                    // Tính tỉ lệ khi đổi bố với mẹ
+                    BigDecimal swapTargetRate = targetRate.multiply(BigDecimal.valueOf(0.25)).setScale(4,
+                            RoundingMode.HALF_UP);
+
+                    // 1. Check và thêm trường hợp Bố x Mẹ
+                    String key1 = father.getName() + "|" + mother.getName() + "|" + child.getName();
+                    if (!generatedCombinations.contains(key1)) {
+                        generatedCombinations.add(key1);
+                        rates.add(new BreedingRate(null, father, mother, child, recipeType, targetRate,
+                                normalizedFatherRate, normalizedMotherRate));
+                    }
+
+                    // 2. Check và thêm trường hợp Mẹ x Bố (Đổi chỗ)
+                    String key2 = mother.getName() + "|" + father.getName() + "|" + child.getName();
+                    if (!generatedCombinations.contains(key2)) {
+                        generatedCombinations.add(key2);
+                        rates.add(new BreedingRate(null, mother, father, child, recipeType, swapTargetRate,
+                                swapFatherRate, swapMotherRate));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper sinh ma trận lai cùng dòng (PURE)
+     */
+    private void addPureBreedingRates(
+            List<BreedingRate> rates,
+            Set<String> generatedCombinations,
+            Map<String, Dictionary> dictMap,
+            List<Dictionary> parents,
+            double baseRate,
+            List<String> normalPatterns,
+            Map<String, Double> mutations) {
+        double ratePerPattern = baseRate / normalPatterns.size();
+
+        for (Dictionary father : parents) {
+            for (Dictionary mother : parents) {
+                // 1. Phân bổ tỉ lệ cho các họa tiết cơ bản chia đều
+                for (String patternName : normalPatterns) {
+                    Dictionary child = dictMap.get(patternName);
+                    if (child == null)
+                        continue;
+
+                    String key = father.getName() + "|" + mother.getName() + "|" + child.getName();
+                    if (!generatedCombinations.contains(key)) {
+                        generatedCombinations.add(key);
+                        BigDecimal targetRate = BigDecimal.valueOf(ratePerPattern).setScale(4, RoundingMode.HALF_UP);
+                        rates.add(new BreedingRate(null, father, mother, child, BreedingRecipeType.PURE, targetRate,
+                                BigDecimal.ZERO, BigDecimal.ZERO));
+                    }
+                }
+
+                // 2. Phân bổ tỉ lệ cho các đột biến
+                for (Map.Entry<String, Double> entry : mutations.entrySet()) {
+                    Dictionary child = dictMap.get(entry.getKey());
+                    if (child == null)
+                        continue;
+
+                    String key = father.getName() + "|" + mother.getName() + "|" + child.getName();
+                    if (!generatedCombinations.contains(key)) {
+                        generatedCombinations.add(key);
+                        BigDecimal targetRate = BigDecimal.valueOf(entry.getValue()).setScale(4, RoundingMode.HALF_UP);
+                        rates.add(new BreedingRate(null, father, mother, child, BreedingRecipeType.PURE, targetRate,
+                                BigDecimal.ZERO, BigDecimal.ZERO));
+                    }
+                }
+            }
+        }
     }
 
 }
@@ -623,11 +1165,9 @@ class SampleData {
                     "Cá Koi Shusui là thế hệ lai từ Asagi, thuộc nhóm da trơn (Doitsu), nổi bật với hai hàng vảy xanh-đen đối xứng chạy thẳng dọc sống lưng đến tận đuôi. Thân cá sáng, hai bên hông bụng có mảng đỏ hoặc cam rực rỡ kéo dài đến đuôi, ranh giới rõ nét, tạo nên vẻ đẹp thanh thoát và mạnh mẽ.\\nMột Shusui đẹp phải có hàng vảy lưng đều, thẳng hàng, bóng đẹp, không bị đứt đoạn; màu đỏ/cam đồng đều, sắc nét, không loang lổ; thân hình to khỏe, dáng thuôn dài, bơi uyển chuyển. Đây là dòng Koi có thể đạt kích thước lớn (75–90cm), tuổi thọ cao, và được xem là một trong những giống Doitsu Koi đầu tiên, mang giá trị lịch sử đặc biệt.\\nCác biến thể chính gồm: Shusui thường với thân trắng chủ đạo và dải đỏ nhỏ ở hông; Hi Shusui với mảng đỏ chiếm diện tích lớn hơn, nổi bật hơn; ngoài ra còn có Ginrin Shusui (vảy lưng ánh kim lấp lánh) và Mizu Shusui (màu xanh nước biển nhạt gần như xám bạc).\\nShusui được yêu thích bởi sự kết hợp hài hòa giữa ba màu đen – đỏ – trắng (đôi khi xanh lam), tượng trưng cho sự cân bằng và may mắn, khiến giống cá này trở thành điểm nhấn độc đáo trong bộ sưu tập Koi."),
             new Variety(null, "Goshiki", // 14
                     "Cá Koi Goshiki là giống cá lai giữa Kohaku và Asagi, thuộc nhánh Goromo, nổi bật với sự kết hợp màu sắc phức tạp và độc đáo. Nền da trắng sáng phủ lớp vảy dạng lưới xanh–đen, trên đó là các mảng đỏ rực rỡ đặc trưng của Kohaku. Khi thả vào nước lạnh, màu sắc của Goshiki thường tối hơn, tạo hiệu ứng thay đổi theo môi trường.\\nMột Goshiki đẹp phải có màu đỏ (Hi) đậm, sắc nét, không bị lẫn bởi lớp lưới; nền trắng sạch sẽ, không ngả vàng; lớp vảy lưới đều, rõ ràng, không loang lổ. Thân hình to khỏe, vai rộng, dáng bơi thẳng và uyển chuyển. Đây là dòng Koi có thể đạt kích thước lớn (60–90cm) và tuổi thọ cao.\\nCác biến thể chính gồm: Goshiki truyền thống với nền trắng, lưới xanh–đen và mảng đỏ Kohaku; Doitsu Goshiki (dòng da trơn, chỉ có hàng vảy lớn chạy dọc lưng); và Goshiki hiện đại với nền sáng hơn, lưới tinh tế, mảng đỏ rõ ràng, ít bị “bẩn” bởi sashi.\\nGoshiki được yêu thích bởi sự hòa quyện của năm màu sắc: trắng, đỏ, xanh lam, xanh chàm và đen, tượng trưng cho sự cân bằng, sang trọng và may mắn. Chính sự phức tạp và độc đáo này khiến Goshiki trở thành một trong những giống Koi giá trị cao trong bộ sưu tập."),
-            new Variety(null, "Ginrin", // 15
-                    "Cá Koi Ginrin (Kin/Ginrin) là dòng Nishikigoi đặc trưng bởi lớp vảy lấp lánh như kim cương, phản chiếu ánh sáng mạnh mẽ dưới nước. Đây là một phân loại vảy đặc biệt, không phải một giống cá riêng biệt, có thể xuất hiện trên nhiều dòng Koi như Kohaku, Showa, Sanke hay Chagoi.\\nMột Ginrin đẹp phải có vảy sáng đều, đồng bộ từ đầu đến đuôi; thân hình tròn lẳn, thuôn gọn về phía đuôi, đầu hơi gù, miệng lớn, râu dài và to; màu nền của giống Koi gốc phải rõ ràng, không bị mờ bởi ánh vảy. Khác với ánh kim loại (Hikari) tạo hiệu ứng sáng liên tục, Ginrin lấp lánh từng vảy riêng biệt, tạo hiệu ứng lung linh độc đáo.\\nCác loại vảy Ginrin gồm: Diamond Ginrin (vảy phản chiếu toàn diện, sáng mạnh nhất), Pearl Ginrin (điểm sáng tập trung ở trung tâm vảy), Kado Ginrin (ánh sáng tập trung ở viền vảy), và Beta Ginrin (phản chiếu ánh sáng ở phần trên vảy).\\nGinrin được yêu thích bởi vẻ đẹp lung linh, sang trọng, thường có giá trị cao hơn cá cùng loại không có vảy kim tuyến. Trong phong thủy, ánh sáng lấp lánh của Ginrin tượng trưng cho sự thịnh vượng, may mắn và tài lộc, khiến giống cá này trở thành điểm nhấn đặc biệt trong bộ sưu tập Koi."),
-            new Variety(null, "Hikarimoyo", // 16
+            new Variety(null, "Hikarimoyo", // 15
                     "Cá Koi Hikarimoyo là dòng Koi ánh kim đa sắc, nổi bật với lớp vảy kim loại và da ánh kim óng ánh, kết hợp từ hai đến nhiều màu sắc cùng hoa văn ngẫu nhiên. Đây là nhóm Koi mang vẻ đẹp rực rỡ, sang trọng, thường được xem là điểm nhấn trong hồ Koi nhờ sự đa dạng màu sắc và ánh sáng phản chiếu mạnh mẽ.\\nMột Hikarimoyo đẹp phải có lớp vảy ánh kim đồng đều, sáng bóng, màu sắc rõ ràng, hoa văn phân bố hài hòa; thân hình cân đối, khỏe mạnh, dáng bơi uyển chuyển.\\nCác biến thể chính gồm: Hariwake với hoa văn màu cam hoặc vàng trên nền ánh kim. Yamato Nishiki với Hoa văn đỏ kết hợp đốm đen, tạo sự tương phản mạnh. Kujaku với Nền bạch kim với vảy hình chữ nhật, hoa văn màu cam hoặc đỏ. Kikusui với Hoa văn đỏ, thuộc dòng da trơn Doitsu (không vảy), mang vẻ đẹp thanh thoát.\\nHikarimoyo được yêu thích bởi sự đa dạng và rực rỡ, tượng trưng cho sự thịnh vượng, may mắn và quyền lực. Chính sự kết hợp giữa ánh kim lấp lánh và hoa văn đa sắc khiến Hikarimoyo trở thành một trong những giống Koi giá trị cao, thường được lựa chọn để làm nổi bật hồ Koi."),
-            new Variety(null, "Kawarimono", // 17
+            new Variety(null, "Kawarimono", // 16
                     "Cá Koi Kawarimono là nhóm phân loại rất lớn dành cho tất cả các giống Koi phi kim loại không nằm trong các nhóm ánh kim (Hikari) hay hoa văn truyền thống. Đây là dòng đa dạng nhất, bao gồm nhiều biến thể đơn sắc và các kiểu hoa văn đặc biệt, mang vẻ đẹp mộc mạc nhưng mạnh mẽ.\\nMột Kawarimono đẹp thường có thân hình vạm vỡ, dài, đầu to thuôn dài, xương vây ngực dày chắc; da mờ (matte) nhưng bóng mịn tự nhiên, phản ánh màu sắc sâu và đặc; vảy đa dạng, có thể là vảy lưới thô hoặc vảy kim cương; hoa văn trải dài từ đơn sắc hoàn toàn đến các mô hình phức tạp, thậm chí có dòng tự biến đổi theo nhiệt độ môi trường.\\nCác phân loại chính gồm: Koi đơn sắc (Single Colored) như Magoi, Chagoi, Soragoi, Kigoi, Benigoi. Magoi (Hắc Long cổ đại) với thân đen xám hoặc nâu đất tối, vảy lưới thô, kích thước cực đại, mang tính hoang dã. Karasugoi với toàn thân đen tuyền, sâu hơn Magoi, thân mập mạp. Hajiro, Hageshiro, Yotsujiro là các biến thể đen với điểm trắng ở vây hoặc đầu, rất hiếm. Matsubagoi là cá đơn sắc (vàng, đỏ, trắng) nhưng mỗi vảy có tâm đen tạo hiệu ứng quả thông (Aka Matsuba, Ki Matsuba). Koi chuyển màu như Ochiba Shigure với họa tiết lá thu rơi (nâu/cam trên nền xám bạc); Midorigoi cực hiếm với màu xanh lục nhạt hoặc xanh lá cây, thường thuộc dòng da trơn Doitsu.\\nKawarimono được yêu thích bởi sự đa dạng, kích thước vượt trội và tính cách thân thiện. Trong phong thủy, nhóm này tượng trưng cho sự bền bỉ, sức mạnh và khả năng thích nghi, khiến chúng trở thành nền tảng quan trọng trong bất kỳ bộ sưu tập Koi nào."));
 
     private static final List<Mutation> SAMPLE_MUTATIONS = List.of(
@@ -697,7 +1237,7 @@ class SampleData {
                     BigDecimal.valueOf(0.000015), 130,
                     BigDecimal.valueOf(1.7),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787898677/uploads/dictionaries/xjt0cj5kicxptcfpbifj.svg"),
-            new Dictionary(null, "Ginrin Kohaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(0), // 9
+            new Dictionary(null, "Ginrin Kohaku", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(0), // 9
                     "Japan",
                     BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0148), 400,
                     BigDecimal.valueOf(0.000015), 170,
@@ -756,330 +1296,361 @@ class SampleData {
                     BigDecimal.valueOf(0.000015), 190,
                     BigDecimal.valueOf(1.8),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899584/uploads/dictionaries/ba4gblcqbab3rjgus8cj.svg"),
-            new Dictionary(null, "Showa Sanshoku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), // 19
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0135), 420,
-                    BigDecimal.valueOf(0.000015), 130,
-                    BigDecimal.valueOf(1.8),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899615/uploads/dictionaries/ggykupod1phoymlyvrb8.svg"),
-            new Dictionary(null, "Hi Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), // 20
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0136), 420,
-                    BigDecimal.valueOf(0.000015), 140,
-                    BigDecimal.valueOf(1.81),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899660/uploads/dictionaries/n88suhutnaxhiprwcwcz.svg"),
-            new Dictionary(null, "Kindai Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), // 21
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0134), 420,
-                    BigDecimal.valueOf(0.000015), 170,
-                    BigDecimal.valueOf(1.84),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899705/uploads/dictionaries/e6jbgdmugxuik3rddl4f.svg"),
-            new Dictionary(null, "Maruten Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), // 22
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0135), 420,
-                    BigDecimal.valueOf(0.000015), 180,
-                    BigDecimal.valueOf(1.85),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899768/uploads/dictionaries/t1g3wcrcrd8hhy8ahp7c.svg"),
-            new Dictionary(null, "Doitsu Showa", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(3), // 23
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0138), 420,
-                    BigDecimal.valueOf(0.000015), 170,
-                    BigDecimal.valueOf(1.82),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899800/uploads/dictionaries/nqlaswekxf3x3iss93mq.svg"),
-            new Dictionary(null, "Ginrin Showa", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(3), // 24
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0133), 420,
-                    BigDecimal.valueOf(0.000015), 200,
-                    BigDecimal.valueOf(1.88),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899840/uploads/dictionaries/khyy1kqg9kns6vu4vqz3.svg"),
-            new Dictionary(null, "Goromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), // 25
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 450,
-                    BigDecimal.valueOf(0.000015), 170,
-                    BigDecimal.valueOf(1.78),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899897/uploads/dictionaries/iregklsuczak6fmdlhgd.svg"),
-            new Dictionary(null, "Aigoromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), // 26
-                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 450,
-                    BigDecimal.valueOf(0.000015),
-                    180, BigDecimal.valueOf(1.8),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899931/uploads/dictionaries/a3ximamc3alc9dph9bwx.svg"),
-            new Dictionary(null, "Sumigoromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), // 27
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0138), 450,
-                    BigDecimal.valueOf(0.000015), 190,
-                    BigDecimal.valueOf(1.82),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899961/uploads/dictionaries/yxvwzwrkizzajdhj0pa8.svg"),
-            new Dictionary(null, "Budo Koromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), // 28
-                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0139), 450,
-                    BigDecimal.valueOf(0.000015),
-                    220, BigDecimal.valueOf(1.85),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899987/uploads/dictionaries/rxdio1avdiuvhljhiubg.svg"),
-            new Dictionary(null, "Koromo Showa", Shape.STANDARD, ScaleType.WAGOI, // 29
-                    SAMPLE_VARIETIES.get(4), "Japan", BigDecimal.valueOf(85.0),
-                    BigDecimal.valueOf(0.0135), 450,
-                    BigDecimal.valueOf(0.000015), 240, BigDecimal.valueOf(1.88),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900017/uploads/dictionaries/fvdlaoowtqobgvlicpwd.svg"),
-            new Dictionary(null, "Ginrin Shiro Utsuri", Shape.STANDARD, ScaleType.GINRIN, // 30
-                    SAMPLE_VARIETIES.get(5),
-                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0136), 440,
-                    BigDecimal.valueOf(0.000015),
-                    210, BigDecimal.valueOf(1.84),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900194/uploads/dictionaries/kmd1xlsc3npapxomia1f.svg"),
-            new Dictionary(null, "Ginrin Hi Utsuri", Shape.STANDARD, ScaleType.GINRIN, // 31
-                    SAMPLE_VARIETIES.get(5), "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0134), 440,
-                    BigDecimal.valueOf(0.000015), 220,
-                    BigDecimal.valueOf(1.84),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900223/uploads/dictionaries/dgdkjlgy0k57wvzdtrdp.svg"),
-            new Dictionary(null, "Ginrin Ki Utsuri", Shape.STANDARD, ScaleType.GINRIN, // 32
-                    SAMPLE_VARIETIES.get(5), "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0133), 440,
-                    BigDecimal.valueOf(0.000015), 280,
-                    BigDecimal.valueOf(1.94),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900252/uploads/dictionaries/mxfgfxqkxmyfccxtcre0.svg"),
-            new Dictionary(null, "Shiro Utsuri Doitsu", Shape.STANDARD, ScaleType.DOITSU, // 33
-                    SAMPLE_VARIETIES.get(5),
-                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0138), 440,
-                    BigDecimal.valueOf(0.000015),
-                    230, BigDecimal.valueOf(1.88),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900283/uploads/dictionaries/vgvmcxrsjqsioavxqui3.svg"),
-            new Dictionary(null, "Hi Utsuri Doitsu", Shape.STANDARD, ScaleType.DOITSU, // 34
-                    SAMPLE_VARIETIES.get(5), "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0138), 440,
-                    BigDecimal.valueOf(0.000015), 210,
-                    BigDecimal.valueOf(1.82),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900811/uploads/dictionaries/ig1lwiygluhqr7od8zkt.svg"),
-            new Dictionary(null, "Ki Utsuri Doitsu", Shape.STANDARD, ScaleType.DOITSU, // 35
-                    SAMPLE_VARIETIES.get(5), "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0137), 440,
-                    BigDecimal.valueOf(0.000015), 270,
-                    BigDecimal.valueOf(1.92),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900917/uploads/dictionaries/fdi319hkpjygxgbzwblw.svg"),
-            new Dictionary(null, "Hikari Shiro Utsuri", Shape.STANDARD, ScaleType.WAGOI, // 36
-                    SAMPLE_VARIETIES.get(6),
-                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0137), 430,
-                    BigDecimal.valueOf(0.000015),
-                    240, BigDecimal.valueOf(1.86),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900946/uploads/dictionaries/d4x32uepcneyfxrz45ub.svg"),
-            new Dictionary(null, "Hi Utsuri", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(6), // 37
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0136), 430,
-                    BigDecimal.valueOf(0.000015), 170,
-                    BigDecimal.valueOf(1.78),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900976/uploads/dictionaries/tt95bldzfliaok38k4do.svg"),
-            new Dictionary(null, "Ki Utsuri", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(6), // 38
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0135), 430,
-                    BigDecimal.valueOf(0.000015), 230,
-                    BigDecimal.valueOf(1.9),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901003/uploads/dictionaries/l2wuodfi49q9zmousydg.svg"),
-            new Dictionary(null, "Shiro Bekko", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(7), // 39
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0146), 440,
-                    BigDecimal.valueOf(0.000015), 130,
-                    BigDecimal.valueOf(1.68),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901030/uploads/dictionaries/ci8v5vdzcalg5wbgo1hc.svg"),
-            new Dictionary(null, "Aka Bekko", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(7), // 40
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0145), 430,
-                    BigDecimal.valueOf(0.000015), 150,
-                    BigDecimal.valueOf(1.72),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901061/uploads/dictionaries/b3kyxdokrlzujfjc912j.svg"),
-            new Dictionary(null, "Ki Bekko", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(7), // 41
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0144), 430,
-                    BigDecimal.valueOf(0.000015), 190,
-                    BigDecimal.valueOf(1.82),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901090/uploads/dictionaries/gaz6h19mrcbrl8oncxyl.svg"),
-            new Dictionary(null, "Karashi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(8), // 42
-                    "Japan",
-                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.0185), 320,
-                    BigDecimal.valueOf(0.000017), 180,
-                    BigDecimal.valueOf(1.56),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901118/uploads/dictionaries/csxq3tokhy6ttjhefwuy.svg"),
-            new Dictionary(null, "Benigoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(9), // 43
-                    "Japan",
-                    BigDecimal.valueOf(95.0), BigDecimal.valueOf(0.0175), 330,
-                    BigDecimal.valueOf(0.000017), 130,
-                    BigDecimal.valueOf(1.58),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901177/uploads/dictionaries/nqe2f8a5bwecrv4s8t33.svg"),
-            new Dictionary(null, "Chagoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(10), // 44
-                    "Japan",
-                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.019), 300,
-                    BigDecimal.valueOf(0.000018), 150,
-                    BigDecimal.valueOf(1.5),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787902455/uploads/dictionaries/dulmt3mgxhmqcc1fphb6.png"),
-            new Dictionary(null, "Midorigoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(10), // 45
-                    "Japan",
-                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.017), 300,
-                    BigDecimal.valueOf(0.000017), 280,
-                    BigDecimal.valueOf(1.9),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787902487/uploads/dictionaries/flxmjflbnzk2jyxrediy.svg"),
-            new Dictionary(null, "Soragoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(10), // 46
-                    "Japan",
-                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.0185), 300,
-                    BigDecimal.valueOf(0.000018), 160,
-                    BigDecimal.valueOf(1.55),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903021/uploads/dictionaries/snvqnlhd2ihi6rqheqb4.png"),
-            new Dictionary(null, "Platinum Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 47
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0162), 360,
-                    BigDecimal.valueOf(0.000016), 170,
-                    BigDecimal.valueOf(1.66),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903110/uploads/dictionaries/u0vaxmss6nzwpps7nkwl.png"),
-            new Dictionary(null, "Yamabuki Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 48
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0168), 360,
-                    BigDecimal.valueOf(0.000017), 180,
-                    BigDecimal.valueOf(1.64),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903136/uploads/dictionaries/tw9dylh415cmyrkerbya.png"),
-            new Dictionary(null, "Hi Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 49
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0163), 360,
-                    BigDecimal.valueOf(0.000016), 170,
-                    BigDecimal.valueOf(1.66),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903166/uploads/dictionaries/ponhmaxw6wmm4dwjkejt.png"),
-            new Dictionary(null, "Orenji Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 50
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0162), 360,
-                    BigDecimal.valueOf(0.000016), 170,
-                    BigDecimal.valueOf(1.66),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903185/uploads/dictionaries/z3ppxj1mrjtueu18bxbp.png"),
-            new Dictionary(null, "Mukashi Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 51
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0158), 360,
-                    BigDecimal.valueOf(0.000016), 200,
-                    BigDecimal.valueOf(1.72),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903220/uploads/dictionaries/vhhlcrfzqj2mfgphevdy.png"),
-            new Dictionary(null, "Nezu Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 52
-                    "Japan",
-                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0158), 360,
-                    BigDecimal.valueOf(0.000016), 170,
-                    BigDecimal.valueOf(1.65),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903259/uploads/dictionaries/acnfhv3ukjnywsd8fyf0.png"),
-            new Dictionary(null, "Konjo Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), // 53
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0148), 480,
-                    BigDecimal.valueOf(0.000015), 180,
-                    BigDecimal.valueOf(1.74),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903283/uploads/dictionaries/xt8zqqxntlp1rky1vxaq.png"),
-            new Dictionary(null, "Narumi Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), // 54
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0149), 480,
-                    BigDecimal.valueOf(0.000015), 170,
-                    BigDecimal.valueOf(1.72),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903303/uploads/dictionaries/e4twvjv0cccbu8scyocp.png"),
-            new Dictionary(null, "Mizo Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), // 55
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0148), 480,
-                    BigDecimal.valueOf(0.000015), 190,
-                    BigDecimal.valueOf(1.75),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903324/uploads/dictionaries/f5axcdbeduuutpkhwkid.png"),
-            new Dictionary(null, "Ginrin Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), // 56
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0148), 480,
-                    BigDecimal.valueOf(0.000015), 220,
-                    BigDecimal.valueOf(1.82),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903345/uploads/dictionaries/zvsewloto1dv4brgghti.png"),
-            new Dictionary(null, "Shusui", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(13), // 57
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0152), 470,
-                    BigDecimal.valueOf(0.000015), 200,
-                    BigDecimal.valueOf(1.78),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903367/uploads/dictionaries/dproinwk2prnzgjorzwv.svg"),
-            new Dictionary(null, "Hi Shusui", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(13), // 58
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0151), 480,
-                    BigDecimal.valueOf(0.000015), 210,
-                    BigDecimal.valueOf(1.8),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903393/uploads/dictionaries/miluvpms5r81kpnjye31.svg"),
-            new Dictionary(null, "Goshiki", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(14), // 59
-                    "Japan",
-                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 460,
-                    BigDecimal.valueOf(0.000015), 220,
-                    BigDecimal.valueOf(1.88),
-                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903416/uploads/dictionaries/urpiuthqimzafaj6gdtn.svg"),
-            new Dictionary(null, "Ginrin", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(15), // 60
+            new Dictionary(null, "Kinrin Sanke", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(2), // 19
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.015), 410,
                     BigDecimal.valueOf(0.000015), 180,
                     BigDecimal.valueOf(1.72),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903467/uploads/dictionaries/malnjw4fiwcsxgwby4jx.svg"),
-            new Dictionary(null, "Hariwake", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 61
+            new Dictionary(null, "Showa Sanshoku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), // 20
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0135), 420,
+                    BigDecimal.valueOf(0.000015), 130,
+                    BigDecimal.valueOf(1.8),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899615/uploads/dictionaries/ggykupod1phoymlyvrb8.svg"),
+            new Dictionary(null, "Hi Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), // 21
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0136), 420,
+                    BigDecimal.valueOf(0.000015), 140,
+                    BigDecimal.valueOf(1.81),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899660/uploads/dictionaries/n88suhutnaxhiprwcwcz.svg"),
+            new Dictionary(null, "Kindai Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), // 22
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0134), 420,
+                    BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.84),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899705/uploads/dictionaries/e6jbgdmugxuik3rddl4f.svg"),
+            new Dictionary(null, "Maruten Showa", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(3), // 23
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0135), 420,
+                    BigDecimal.valueOf(0.000015), 180,
+                    BigDecimal.valueOf(1.85),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899768/uploads/dictionaries/t1g3wcrcrd8hhy8ahp7c.svg"),
+            new Dictionary(null, "Doitsu Showa", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(3), // 24
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0138), 420,
+                    BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.82),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899800/uploads/dictionaries/nqlaswekxf3x3iss93mq.svg"),
+            new Dictionary(null, "Ginrin Showa", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(3), // 25
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0133), 420,
+                    BigDecimal.valueOf(0.000015), 200,
+                    BigDecimal.valueOf(1.88),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899840/uploads/dictionaries/khyy1kqg9kns6vu4vqz3.svg"),
+            new Dictionary(null, "Goromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), // 26
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 450,
+                    BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.78),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899897/uploads/dictionaries/iregklsuczak6fmdlhgd.svg"),
+            new Dictionary(null, "Aigoromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), // 27
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 450,
+                    BigDecimal.valueOf(0.000015),
+                    180, BigDecimal.valueOf(1.8),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899931/uploads/dictionaries/a3ximamc3alc9dph9bwx.svg"),
+            new Dictionary(null, "Sumigoromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), // 28
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0138), 450,
+                    BigDecimal.valueOf(0.000015), 190,
+                    BigDecimal.valueOf(1.82),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899961/uploads/dictionaries/yxvwzwrkizzajdhj0pa8.svg"),
+            new Dictionary(null, "Budo Koromo", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(4), // 29
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0139), 450,
+                    BigDecimal.valueOf(0.000015),
+                    220, BigDecimal.valueOf(1.85),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787899987/uploads/dictionaries/rxdio1avdiuvhljhiubg.svg"),
+            new Dictionary(null, "Koromo Showa", Shape.STANDARD, ScaleType.WAGOI, // 30
+                    SAMPLE_VARIETIES.get(4), "Japan", BigDecimal.valueOf(85.0),
+                    BigDecimal.valueOf(0.0135), 450,
+                    BigDecimal.valueOf(0.000015), 240, BigDecimal.valueOf(1.88),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900017/uploads/dictionaries/fvdlaoowtqobgvlicpwd.svg"),
+            new Dictionary(null, "Ginrin Shiro Utsuri", Shape.STANDARD, ScaleType.GINRIN, // 31
+                    SAMPLE_VARIETIES.get(5),
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0136), 440,
+                    BigDecimal.valueOf(0.000015),
+                    210, BigDecimal.valueOf(1.84),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900194/uploads/dictionaries/kmd1xlsc3npapxomia1f.svg"),
+            new Dictionary(null, "Ginrin Hi Utsuri", Shape.STANDARD, ScaleType.GINRIN, // 32
+                    SAMPLE_VARIETIES.get(5), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0134), 440,
+                    BigDecimal.valueOf(0.000015), 220,
+                    BigDecimal.valueOf(1.84),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900223/uploads/dictionaries/dgdkjlgy0k57wvzdtrdp.svg"),
+            new Dictionary(null, "Ginrin Ki Utsuri", Shape.STANDARD, ScaleType.GINRIN, // 33
+                    SAMPLE_VARIETIES.get(5), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0133), 440,
+                    BigDecimal.valueOf(0.000015), 280,
+                    BigDecimal.valueOf(1.94),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900252/uploads/dictionaries/mxfgfxqkxmyfccxtcre0.svg"),
+            new Dictionary(null, "Shiro Utsuri Doitsu", Shape.STANDARD, ScaleType.DOITSU, // 34
+                    SAMPLE_VARIETIES.get(5),
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0138), 440,
+                    BigDecimal.valueOf(0.000015),
+                    230, BigDecimal.valueOf(1.88),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900283/uploads/dictionaries/vgvmcxrsjqsioavxqui3.svg"),
+            new Dictionary(null, "Hi Utsuri Doitsu", Shape.STANDARD, ScaleType.DOITSU, // 35
+                    SAMPLE_VARIETIES.get(5), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0138), 440,
+                    BigDecimal.valueOf(0.000015), 210,
+                    BigDecimal.valueOf(1.82),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900811/uploads/dictionaries/ig1lwiygluhqr7od8zkt.svg"),
+            new Dictionary(null, "Ki Utsuri Doitsu", Shape.STANDARD, ScaleType.DOITSU, // 36
+                    SAMPLE_VARIETIES.get(5), "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0137), 440,
+                    BigDecimal.valueOf(0.000015), 270,
+                    BigDecimal.valueOf(1.92),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900917/uploads/dictionaries/fdi319hkpjygxgbzwblw.svg"),
+            new Dictionary(null, "Hikari Shiro Utsuri", Shape.STANDARD, ScaleType.WAGOI, // 37
+                    SAMPLE_VARIETIES.get(6),
+                    "Japan", BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0137), 430,
+                    BigDecimal.valueOf(0.000015),
+                    240, BigDecimal.valueOf(1.86),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900946/uploads/dictionaries/d4x32uepcneyfxrz45ub.svg"),
+            new Dictionary(null, "Hi Utsuri", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(6), // 38
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0136), 430,
+                    BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.78),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787900976/uploads/dictionaries/tt95bldzfliaok38k4do.svg"),
+            new Dictionary(null, "Ki Utsuri", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(6), // 39
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0135), 430,
+                    BigDecimal.valueOf(0.000015), 230,
+                    BigDecimal.valueOf(1.9),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901003/uploads/dictionaries/l2wuodfi49q9zmousydg.svg"),
+            new Dictionary(null, "Shiro Bekko", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(7), // 40
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0146), 440,
+                    BigDecimal.valueOf(0.000015), 130,
+                    BigDecimal.valueOf(1.68),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901030/uploads/dictionaries/ci8v5vdzcalg5wbgo1hc.svg"),
+            new Dictionary(null, "Ginrin Shiro Bekko", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(7), // 41
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0147), 440,
+                    BigDecimal.valueOf(0.000015), 150,
+                    BigDecimal.valueOf(1.69),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1788633456/uploads/dictionaries/l7zy6oeujbbhsuweivor.svg"),
+            new Dictionary(null, "Aka Bekko", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(7), // 42
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0145), 430,
+                    BigDecimal.valueOf(0.000015), 150,
+                    BigDecimal.valueOf(1.72),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901061/uploads/dictionaries/b3kyxdokrlzujfjc912j.svg"),
+            new Dictionary(null, "Ginrin Aka Bekko", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(7), // 43
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0145), 430,
+                    BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.74),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1788633499/uploads/dictionaries/s7ftdr5chnrxucjo4ggg.svg"),
+            new Dictionary(null, "Ki Bekko", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(7), // 44
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0144), 430,
+                    BigDecimal.valueOf(0.000015), 190,
+                    BigDecimal.valueOf(1.82),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901090/uploads/dictionaries/gaz6h19mrcbrl8oncxyl.svg"),
+            new Dictionary(null, "Karashi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(8), // 45
+                    "Japan",
+                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.0185), 320,
+                    BigDecimal.valueOf(0.000017), 180,
+                    BigDecimal.valueOf(1.56),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901118/uploads/dictionaries/csxq3tokhy6ttjhefwuy.svg"),
+            new Dictionary(null, "Benigoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(9), // 46
+                    "Japan",
+                    BigDecimal.valueOf(95.0), BigDecimal.valueOf(0.0175), 330,
+                    BigDecimal.valueOf(0.000017), 130,
+                    BigDecimal.valueOf(1.58),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787901177/uploads/dictionaries/nqe2f8a5bwecrv4s8t33.svg"),
+            new Dictionary(null, "Chagoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(10), // 47
+                    "Japan",
+                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.019), 300,
+                    BigDecimal.valueOf(0.000018), 150,
+                    BigDecimal.valueOf(1.5),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787902455/uploads/dictionaries/dulmt3mgxhmqcc1fphb6.png"),
+            new Dictionary(null, "Midorigoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(10), // 48
+                    "Japan",
+                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.017), 300,
+                    BigDecimal.valueOf(0.000017), 280,
+                    BigDecimal.valueOf(1.9),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787902487/uploads/dictionaries/flxmjflbnzk2jyxrediy.svg"),
+            new Dictionary(null, "Soragoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(10), // 49
+                    "Japan",
+                    BigDecimal.valueOf(100.0), BigDecimal.valueOf(0.0185), 300,
+                    BigDecimal.valueOf(0.000018), 160,
+                    BigDecimal.valueOf(1.55),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903021/uploads/dictionaries/snvqnlhd2ihi6rqheqb4.png"),
+            new Dictionary(null, "Platinum Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 50
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0162), 360,
+                    BigDecimal.valueOf(0.000016), 170,
+                    BigDecimal.valueOf(1.66),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903110/uploads/dictionaries/u0vaxmss6nzwpps7nkwl.png"),
+            new Dictionary(null, "Yamabuki Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 51
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0168), 360,
+                    BigDecimal.valueOf(0.000017), 180,
+                    BigDecimal.valueOf(1.64),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903136/uploads/dictionaries/tw9dylh415cmyrkerbya.png"),
+            new Dictionary(null, "Hi Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 52
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0163), 360,
+                    BigDecimal.valueOf(0.000016), 170,
+                    BigDecimal.valueOf(1.66),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903166/uploads/dictionaries/ponhmaxw6wmm4dwjkejt.png"),
+            new Dictionary(null, "Orenji Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 53
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0162), 360,
+                    BigDecimal.valueOf(0.000016), 170,
+                    BigDecimal.valueOf(1.66),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903185/uploads/dictionaries/z3ppxj1mrjtueu18bxbp.png"),
+            new Dictionary(null, "Mukashi Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 54
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0158), 360,
+                    BigDecimal.valueOf(0.000016), 200,
+                    BigDecimal.valueOf(1.72),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903220/uploads/dictionaries/vhhlcrfzqj2mfgphevdy.png"),
+            new Dictionary(null, "Nezu Ogon", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(11), // 55
+                    "Japan",
+                    BigDecimal.valueOf(90.0), BigDecimal.valueOf(0.0158), 360,
+                    BigDecimal.valueOf(0.000016), 170,
+                    BigDecimal.valueOf(1.65),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903259/uploads/dictionaries/acnfhv3ukjnywsd8fyf0.png"),
+            new Dictionary(null, "Konjo Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), // 56
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0148), 480,
+                    BigDecimal.valueOf(0.000015), 180,
+                    BigDecimal.valueOf(1.74),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903283/uploads/dictionaries/xt8zqqxntlp1rky1vxaq.png"),
+            new Dictionary(null, "Narumi Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), // 57
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0149), 480,
+                    BigDecimal.valueOf(0.000015), 170,
+                    BigDecimal.valueOf(1.72),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903303/uploads/dictionaries/e4twvjv0cccbu8scyocp.png"),
+            new Dictionary(null, "Mizo Asagi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(12), // 58
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0148), 480,
+                    BigDecimal.valueOf(0.000015), 190,
+                    BigDecimal.valueOf(1.75),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903324/uploads/dictionaries/f5axcdbeduuutpkhwkid.png"),
+            new Dictionary(null, "Ginrin Asagi", Shape.STANDARD, ScaleType.GINRIN, SAMPLE_VARIETIES.get(12), // 59
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0148), 480,
+                    BigDecimal.valueOf(0.000015), 220,
+                    BigDecimal.valueOf(1.82),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903345/uploads/dictionaries/zvsewloto1dv4brgghti.png"),
+            new Dictionary(null, "Shusui", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(13), // 60
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0152), 470,
+                    BigDecimal.valueOf(0.000015), 200,
+                    BigDecimal.valueOf(1.78),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903367/uploads/dictionaries/dproinwk2prnzgjorzwv.svg"),
+            new Dictionary(null, "Hi Shusui", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(13), // 61
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0151), 480,
+                    BigDecimal.valueOf(0.000015), 210,
+                    BigDecimal.valueOf(1.8),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903393/uploads/dictionaries/miluvpms5r81kpnjye31.svg"),
+            new Dictionary(null, "Goshiki", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(14), // 62
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 460,
+                    BigDecimal.valueOf(0.000015), 220,
+                    BigDecimal.valueOf(1.88),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903416/uploads/dictionaries/urpiuthqimzafaj6gdtn.svg"),
+            new Dictionary(null, "Modern Goshiki", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(14), // 63
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 460,
+                    BigDecimal.valueOf(0.000015), 220,
+                    BigDecimal.valueOf(1.88),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1788615431/uploads/dictionaries/hf8g4b67b5nw4daxnk4k.svg"),
+            new Dictionary(null, "Hariwake", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(15), // 64
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0158), 420,
                     BigDecimal.valueOf(0.000016), 210,
                     BigDecimal.valueOf(1.8),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787903492/uploads/dictionaries/ul8pcjrrvpjy9e2nfucu.svg"),
-            new Dictionary(null, "Kujaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 62
+            new Dictionary(null, "Tancho Hariwake", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(15), // 65
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.016), 420,
+                    BigDecimal.valueOf(0.000016), 220,
+                    BigDecimal.valueOf(1.81),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1788631169/uploads/dictionaries/ytupmpikb8b34ropiswx.svg"),
+            new Dictionary(null, "Kujaku", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(15), // 66
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0152), 420,
                     BigDecimal.valueOf(0.000016), 250,
                     BigDecimal.valueOf(1.92),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904705/uploads/dictionaries/qogkvubzeukheb9dyimp.png"),
-            new Dictionary(null, "Kikusui", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(16), // 63
+            new Dictionary(null, "Kikusui", Shape.STANDARD, ScaleType.DOITSU, SAMPLE_VARIETIES.get(15), // 67
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0154), 420,
                     BigDecimal.valueOf(0.000015), 240,
                     BigDecimal.valueOf(1.9),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904733/uploads/dictionaries/fzqkchyzldvpypdiwrfm.svg"),
-            new Dictionary(null, "Magoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), // 64
+            new Dictionary(null, "Magoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 68
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.02), 420,
                     BigDecimal.valueOf(0.000018), 320,
                     BigDecimal.valueOf(1.52),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904821/uploads/dictionaries/rhglygdq8dywjnbibbh4.png"),
-            new Dictionary(null, "Tea Chagoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), // 65
+            new Dictionary(null, "Tea Chagoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 69
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.019), 420,
                     BigDecimal.valueOf(0.000018), 150,
                     BigDecimal.valueOf(1.5),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904846/uploads/dictionaries/ipqjgxmepfcruhxzeoti.png"),
-            new Dictionary(null, "Kigoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), // 66
+            new Dictionary(null, "Kigoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 70
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0165), 420,
                     BigDecimal.valueOf(0.000017), 260,
                     BigDecimal.valueOf(1.86),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904867/uploads/dictionaries/r7os7gocywkipuwlwcmy.png"),
-            new Dictionary(null, "Karasugoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), // 67
+            new Dictionary(null, "Karasugoi", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 71
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.018), 420,
                     BigDecimal.valueOf(0.000017), 140,
                     BigDecimal.valueOf(1.65),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904893/uploads/dictionaries/pcyurf3horhslbo3fg7y.png"),
-            new Dictionary(null, "Hagheshiro", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), // 68
+            new Dictionary(null, "Hajiro", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 72
+                    "Japan",
+                    BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.018), 420,
+                    BigDecimal.valueOf(0.000017), 150,
+                    BigDecimal.valueOf(1.66),
+                    "https://res.cloudinary.com/djmcluh5n/image/upload/v1788621548/uploads/dictionaries/urzszby60fwr65ehnd2w.png"),
+            new Dictionary(null, "Hagheshiro", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 73
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.014), 420,
                     BigDecimal.valueOf(0.000015), 300,
                     BigDecimal.valueOf(1.94),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904916/uploads/dictionaries/ccqn2o69v62kaa39hr2l.png"),
-            new Dictionary(null, "Yotsujiro", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), // 69
+            new Dictionary(null, "Yotsujiro", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 74
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0143), 420,
                     BigDecimal.valueOf(0.000015), 270,
                     BigDecimal.valueOf(1.9),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904939/uploads/dictionaries/ipheynqxkzudvq1os834.png"),
-            new Dictionary(null, "Aka Matsuba", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), // 70
+            new Dictionary(null, "Aka Matsuba", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 75
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0155), 420,
                     BigDecimal.valueOf(0.000015), 190,
                     BigDecimal.valueOf(1.76),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904961/uploads/dictionaries/vot1fzqzxq33r3xtoft1.png"),
-            new Dictionary(null, "Ki Matsuba", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(17), // 71
+            new Dictionary(null, "Ki Matsuba", Shape.STANDARD, ScaleType.WAGOI, SAMPLE_VARIETIES.get(16), // 76
                     "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0154), 420,
                     BigDecimal.valueOf(0.000015), 210,
                     BigDecimal.valueOf(1.78),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787904979/uploads/dictionaries/wpo6jrxoyukgpptiidiw.png"),
-            new Dictionary(null, "Ochiba Shigure", Shape.STANDARD, ScaleType.WAGOI, // 72
-                    SAMPLE_VARIETIES.get(17), "Japan",
+            new Dictionary(null, "Ochiba Shigure", Shape.STANDARD, ScaleType.WAGOI, // 77
+                    SAMPLE_VARIETIES.get(16), "Japan",
                     BigDecimal.valueOf(85.0), BigDecimal.valueOf(0.0178), 420,
                     BigDecimal.valueOf(0.000017), 180,
                     BigDecimal.valueOf(1.6),
                     "https://res.cloudinary.com/djmcluh5n/image/upload/v1787905000/uploads/dictionaries/wkzxkvhmh0i86segqsag.svg"));
 
     private static final List<BreedingRate> SAMPLE_BREEDING_RATES = List.of(
-            new BreedingRate(null, SAMPLE_DICTIONARIES.get(0), SAMPLE_DICTIONARIES.get(0), SAMPLE_DICTIONARIES.get(0),
+            new BreedingRate(null, SAMPLE_DICTIONARIES.get(0), SAMPLE_DICTIONARIES.get(0),
+                    SAMPLE_DICTIONARIES.get(0),
                     BreedingRecipeType.PURE, BigDecimal.valueOf(0.8), BigDecimal.valueOf(0.2),
                     BigDecimal.valueOf(0.2)));
 

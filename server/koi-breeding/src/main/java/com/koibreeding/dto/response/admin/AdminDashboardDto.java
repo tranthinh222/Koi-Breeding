@@ -22,6 +22,54 @@ public class AdminDashboardDto {
     private RankingUserDto highestLevelUser;
     private List<TopTransactionDto> topTransactions;
 
+    // Thêm 4 list này vào phần khai báo biến của AdminDashboardDto
+    private List<TimeSeriesPointDto> userGrowthChart;
+    private List<LocationPointDto> locationChart;
+    private List<LifeStagePointDto> koiLifeStageChart;
+    private List<MarketplacePointDto> marketplaceChart;
+
+    // --- CÁC CLASS DTO CON ---
+    @Getter 
+    @Setter 
+    @Builder 
+    @NoArgsConstructor 
+    @AllArgsConstructor
+    public static class TimeSeriesPointDto {
+        private String label; // Ví dụ: "Tháng 1", "Tháng 2"
+        private Long value;   // Số lượng user
+    }
+
+    @Getter 
+    @Setter 
+    @Builder 
+    @NoArgsConstructor 
+    @AllArgsConstructor
+    public static class LocationPointDto {
+        private String location; // "HANOI", "HO_CHI_MINH_CITY"
+        private Long users;      // Số user ở vị trí đó
+    }
+
+    @Getter 
+    @Setter 
+    @Builder 
+    @NoArgsConstructor 
+    @AllArgsConstructor
+    public static class LifeStagePointDto {
+        private String stage;    // "EGG", "FRY", "ADULT"
+        private Long count;      // Số cá
+    }
+
+    @Getter 
+    @Setter 
+    @Builder 
+    @NoArgsConstructor 
+    @AllArgsConstructor
+    public static class MarketplacePointDto {
+        private String date;     // "01/09", "02/09"
+        private Long active;
+        private Long sold;
+        private Long cancelled;
+    }
     @Getter
     @Setter
     @Builder

@@ -54,6 +54,7 @@ export interface AdminTopTransactionDto {
   createdAt: string
 }
 
+// Cập nhật interface chính
 export interface AdminDashboardResponse {
   users: AdminMetricDto
   shopPurchases: AdminMetricDto
@@ -61,6 +62,12 @@ export interface AdminDashboardResponse {
   topUsers: AdminRankingUserDto[]
   highestLevelUser: AdminRankingUserDto | null
   topTransactions: AdminTopTransactionDto[]
+
+  // Các field dữ liệu biểu đồ mới (Backend cần trả về các field này)
+  userGrowthChart: TimeSeriesPoint[]
+  locationChart: LocationPoint[]
+  koiLifeStageChart: LifeStagePoint[]
+  marketplaceChart: MarketplacePoint[]
 }
 
 export interface AdminModerationUserRequest {
@@ -94,8 +101,43 @@ export async function getAdminDashboard(
 
   return response.data.data as AdminDashboardResponse
 }
+// Thêm 3 interface này
+export interface TimeSeriesPoint {
+  label: string;
+  value: number;
+}
+
+export interface BreedingPoint {
+  label: string;
+  successful: number;
+  failed: number;
+}
+
+export interface TransactionSlice {
+  label: string;
+  value: number;
+}
+
 
 export async function updateStatusUser(request: AdminModerationUserRequest): Promise<AdminUserDto> {
   const response = await apiClient.put('/admin/users', request)
   return response.data.data as AdminUserDto
+}
+export interface TimeSeriesPoint {
+  label: string;
+  value: number;
+}
+export interface LocationPoint {
+  location: string;
+  users: number;
+}
+export interface LifeStagePoint { 
+  stage: string; 
+  count: number; 
+}
+export interface MarketplacePoint { 
+  date: string;
+  active: number; 
+  sold: number; 
+  cancelled: number; 
 }

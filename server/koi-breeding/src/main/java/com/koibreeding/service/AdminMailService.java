@@ -24,7 +24,10 @@ public class AdminMailService {
         }
 
         if (status == UserStatus.ACTIVE) {
-            sendMail(user, "Your account has been unbanned", "unbanned", reason);
+            sendMail(user, "Your account has been restored / unbanned", "restored / unbanned", reason);
+        }
+        if (status == UserStatus.DELETED) {
+            sendMail(user, "Your account has been deleted", "deleted", reason);
         }
     }
 

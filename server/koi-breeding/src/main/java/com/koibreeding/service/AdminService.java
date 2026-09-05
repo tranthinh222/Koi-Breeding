@@ -6,6 +6,8 @@ import com.koibreeding.domain.Trade;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.request.AdminModerationUserRequest;
 import com.koibreeding.dto.request.ReqAdminItems;
+import com.koibreeding.dto.response.ResTradeDto;
+import com.koibreeding.dto.response.ResTransactionDto;
 import com.koibreeding.dto.response.admin.AdminDashboardDto;
 import com.koibreeding.dto.response.admin.AdminUserDto;
 import com.koibreeding.enums.*;
@@ -21,6 +23,8 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import jakarta.persistence.criteria.Join;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -392,4 +396,191 @@ public class AdminService {
         );
         itemRepository.delete(item);
     }
+
+    public Page<ResTransactionDto> getAdminTransaction(
+            int page,
+            int size,
+            String search,
+            TransactionType type,
+            TransactionStatus status,
+            String sortPrice
+    ){
+        // 1. Xử lý Sắp xếp (Sort) theo giá
+        Sort sort = Sort.unsorted();
+        if ("asc".equalsIgnoreCase(sortPrice)) {
+            sort = Sort.by(Sort.Direction.ASC, "amount");
+        } else if ("desc".equalsIgnoreCase(sortPrice)) {
+            sort = Sort.by(Sort.Direction.DESC, "amount");
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // 2. Xây dựng Specification điều kiện lọc động
+        Specification<Transaction> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Tìm kiếm theo tên (không phân biệt hoa thường)
+            if (search != null && !search.trim().isEmpty()) {
+                String keyword = "%" + search.trim().toLowerCase() + "%";
+                Join<Transaction, Item> itemJoin = root.join("item");
+
+                predicates.add(
+                        cb.like(
+                                cb.lower(itemJoin.get("name")),
+                                keyword
+                        )
+                );
+            }
+
+            // Lọc theo Enum ItemType
+            if (type != null) {
+                predicates.add(cb.equal(root.get("transactionType"), type));
+            }
+
+            // Lọc theo Enum EffectType
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // 3. Truy vấn Database và Map sang DTO
+        Page<Transaction> transactionsPage = transactionRepository.findAll(spec, pageable);
+
+        return transactionsPage.map(
+                transaction -> new ResTransactionDto(
+                        transaction.getId(),
+                        transaction.getItem().getId(),
+                        transaction.getItem().getName(),
+                        transaction.getAmount(),
+                        transaction.getTransactionType(),
+                        transaction.getStatus(),
+                        transaction.getDescription(),
+                        transaction.getCreatedAt()
+                )
+        );
+    }
+
+
+    public Page<ResTradeDto> getAdminTrade(
+            int page,
+            int size,
+            String search,
+            String dateFilter,
+            String sortPrice
+    ) {
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "tradeAt");
+
+        if ("ASC".equalsIgnoreCase(sortPrice)) {
+            sort = Sort.by(Sort.Direction.ASC, "price");
+        }
+
+        if ("DESC".equalsIgnoreCase(sortPrice)) {
+            sort = Sort.by(Sort.Direction.DESC, "price");
+        }
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                sort
+        );
+
+        Specification<Trade> specification =
+                Specification.unrestricted();
+
+        // ================= SEARCH =================
+
+        if (search != null && !search.isBlank()) {
+
+            specification = specification.and(
+                    (root, query, criteriaBuilder) -> {
+
+                        String keyword = "%" + search.trim().toLowerCase() + "%";
+
+                        return criteriaBuilder.like(
+                                criteriaBuilder.lower(
+                                        root.get("buyer").get("username")
+                                ),
+                                keyword
+                        );
+                    }
+            );
+        }
+
+        // ================= DATE FILTER =================
+
+        if (dateFilter != null && !dateFilter.isBlank()) {
+
+            OffsetDateTime now = OffsetDateTime.now();
+
+            switch (dateFilter.toLowerCase()) {
+
+                case "today" -> {
+
+                    OffsetDateTime startOfToday =
+                            now.toLocalDate()
+                                    .atStartOfDay()
+                                    .atOffset(now.getOffset());
+
+                    OffsetDateTime endOfToday =
+                            now.toLocalDate()
+                                    .atTime(23, 59, 59, 999_999_999)
+                                    .atOffset(now.getOffset());
+
+                    specification = specification.and(
+                            (root, query, criteriaBuilder) ->
+                                    criteriaBuilder.between(
+                                            root.get("tradeAt"),
+                                            startOfToday,
+                                            endOfToday
+                                    )
+                    );
+                }
+
+                case "week" -> {
+
+                    specification = specification.and(
+                            (root, query, criteriaBuilder) ->
+                                    criteriaBuilder.greaterThanOrEqualTo(
+                                            root.get("tradeAt"),
+                                            now.minusDays(7)
+                                    )
+                    );
+                }
+
+                case "month" -> {
+
+                    specification = specification.and(
+                            (root, query, criteriaBuilder) ->
+                                    criteriaBuilder.greaterThanOrEqualTo(
+                                            root.get("tradeAt"),
+                                            now.minusDays(30)
+                                    )
+                    );
+                }
+            }
+        }
+
+
+        Page<Trade> trades =
+                tradeRepository.findAll(
+                        specification,
+                        pageable
+                );
+
+
+        return trades.map(trade ->
+                ResTradeDto.builder()
+                        .listing(trade.getListing().getId())
+                        .buyer(trade.getBuyer().getUsername())
+                        .seller(trade.getSeller().getUsername())
+                        .price(trade.getPrice())
+                        .tradeAt(trade.getTradeAt())
+                        .build()
+        );
+    }
+
+
 }

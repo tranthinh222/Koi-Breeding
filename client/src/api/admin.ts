@@ -182,3 +182,78 @@ export const deleteAdminItem = async (id: number) => {
 
   return response.data.data;
 };
+
+// transaction
+export interface AdminTransaction {
+  id: number;
+  itemId: number;
+  itemName: string;
+  amount: number;
+  transactionType: "DEPOSIT" | "BUY_FOOD" | "BUY_FISH" | "SELL_FISH";
+  status: "PENDING" | "CANCELLED" | "SUCCESSED" | "FAILED";
+  description: string;
+  createdAt: string;
+}
+
+export interface TransactionFilterParams {
+  page?: number;
+  size?: number;
+  search?: string;
+  transactionType?: string;
+  transactionStatus?: string;
+  sortPrice?: string;
+}
+
+export const getAdminTransactions = async ({
+  page = 0,
+  size = 8,
+  search = "",
+  transactionType = "ALL",
+  transactionStatus = "ALL",
+  sortPrice = "DEFAULT",
+}: TransactionFilterParams = {}): Promise<PageResponse<AdminTransaction>> => {
+  const params: Record<string, any> = { page, size };
+
+  if (search.trim()) params.search = search.trim();
+  if (transactionType !== "ALL") params.transactionType = transactionType;
+  if (transactionStatus !== "ALL") params.transactionStatus = transactionStatus;
+  if (sortPrice !== "DEFAULT") params.sortPrice = sortPrice.toLowerCase(); // 'asc' hoặc 'desc'
+
+  const response = await apiClient.get("/admin/transaction", { params });
+  return response.data.data as PageResponse<AdminTransaction>;
+};
+
+// trade
+
+export interface AdminTrade {
+  listing: number;
+  buyer: string;
+  seller: string;
+  price: number;
+  tradeAt: string;
+}
+
+export interface TradeFilterParams {
+  page?: number;
+  size?: number;
+  search?: string;
+  dateFilter?: string;
+  sortPrice?: string;
+}
+
+export const getAdminTrades = async ({
+  page = 0,
+  size = 8,
+  search = "",
+  dateFilter = "ALL",
+  sortPrice = "DEFAULT",
+}: TradeFilterParams = {}): Promise<PageResponse<AdminTrade>> => {
+  const params: Record<string, any> = { page, size };
+
+  if (search.trim()) params.search = search.trim();
+  if (dateFilter !== "ALL") params.dateFilter = dateFilter;
+  if (sortPrice !== "DEFAULT") params.sortPrice = sortPrice.toLowerCase();
+
+  const response = await apiClient.get("/admin/trade", { params });
+  return response.data.data as PageResponse<AdminTrade>;
+};

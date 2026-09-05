@@ -24,10 +24,18 @@ import maleDefaultAvatar from "../../assets/avatars/male_blank_avatar.png";
 import femaleDefaultAvatar from "../../assets/avatars/female_blank_avatar.png";
 
 import UserModerationModal from "./components/UserModerationModal";
+import AdminTransactions from "./components/AdminTransactions";
 
 import AdminItems from "./components/AdminItems";
+import AdminTrades from "./components/AdminTrades";
 
-export type MenuTab = "dashboard" | "users" | "breeding" | "items";
+export type MenuTab =
+  | "dashboard"
+  | "users"
+  | "breeding"
+  | "items"
+  | "transactions"
+  | "trade";
 export type OtherTab = "settings" | "account";
 type AdminView = MenuTab | OtherTab;
 type PanelAction = "View" | "Edit" | "Refresh";
@@ -604,7 +612,8 @@ function Admin() {
           )}
 
           {activeView === "items" && <AdminItems />}
-
+          {activeView === "transactions" && <AdminTransactions />}
+          {activeView === "trade" && <AdminTrades />}
           {activeView === "settings" && (
             <div className="settings-page">
               <div className="page-heading">

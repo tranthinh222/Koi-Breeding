@@ -2,11 +2,15 @@ package com.koibreeding.controller;
 
 import com.koibreeding.dto.request.AdminModerationUserRequest;
 import com.koibreeding.dto.request.ReqAdminItems;
+import com.koibreeding.dto.response.ResTradeDto;
+import com.koibreeding.dto.response.ResTransactionDto;
 import com.koibreeding.dto.response.admin.AdminDashboardDto;
 import com.koibreeding.dto.response.admin.AdminUserDto;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.EffectType;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.TransactionStatus;
+import com.koibreeding.enums.TransactionType;
 import com.koibreeding.service.AdminService;
 import com.koibreeding.service.UserService;
 import com.koibreeding.util.annotation.ApiMessage;
@@ -105,5 +109,47 @@ public class AdminController {
     ) {
         adminService.deleteItem(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/transaction")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<ResTransactionDto>> getTransaction(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) TransactionType transactionType,
+            @RequestParam(required = false) TransactionStatus transactionStatus,
+            @RequestParam(required = false) String sortPrice
+    ) {
+        return ResponseEntity.ok(
+                adminService.getAdminTransaction(
+                        page,
+                        size,
+                        search,
+                        transactionType,
+                        transactionStatus,
+                        sortPrice
+                )
+        );
+    }
+
+    @GetMapping("/trade")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<ResTradeDto>> getTrade(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String dateFilter,
+            @RequestParam(required = false) String priceFilter
+    ) {
+        return ResponseEntity.ok(
+                adminService.getAdminTrade(
+                        page,
+                        size,
+                        search,
+                        dateFilter,
+                        priceFilter
+                )
+        );
     }
 }

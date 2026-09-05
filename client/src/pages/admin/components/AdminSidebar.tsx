@@ -19,6 +19,8 @@ const menuItems: Array<{ id: MenuTab; label: string; icon: LucideIcon }> = [
   { id: "users", label: "Users", icon: Users },
   { id: "breeding", label: "Breeding", icon: Fish },
   { id: "items", label: "Items", icon: Package },
+  { id: "transactions", label: "Transactions", icon: Package },
+  { id: "trade", label: "Trades", icon: Package },
 ];
 
 const otherItems: Array<{ id: OtherTab; label: string; icon: LucideIcon }> = [

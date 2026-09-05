@@ -7,7 +7,7 @@ import {
   type AdminItem,
 } from "../../../api/admin";
 
-import "./additem.css";
+import "./itemdialog.css";
 
 interface ItemDialogProps {
   mode: "add" | "edit";

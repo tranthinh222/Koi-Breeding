@@ -13,8 +13,8 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 public class ResTradeDto {
      Integer listing;
-     Integer buyer;
-     Integer seller;
+     String buyer;
+     String seller;
      Long price;
      OffsetDateTime tradeAt;
 }

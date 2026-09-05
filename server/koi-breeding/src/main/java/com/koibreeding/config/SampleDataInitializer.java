@@ -16,7 +16,14 @@ import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Notification;
 import com.koibreeding.domain.Transaction;
 import com.koibreeding.domain.User;
+import com.koibreeding.domain.Variety;
 import com.koibreeding.domain.Wallet;
+import com.koibreeding.domain.Pond;
+import com.koibreeding.domain.Koi;
+import com.koibreeding.domain.Dictionary;
+
+import com.koibreeding.enums.ListingStatus;
+import com.koibreeding.enums.LifeStage;
 import com.koibreeding.enums.EffectType;
 import com.koibreeding.enums.Gender;
 import com.koibreeding.enums.ItemType;
@@ -28,14 +35,15 @@ import com.koibreeding.enums.TransactionType;
 import com.koibreeding.enums.UserStatus;
 import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.ItemRepository;
+import com.koibreeding.repository.KoiDictionaryRepository;
+import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.repository.NotificationRepository;
+import com.koibreeding.repository.PondRepository;
 import com.koibreeding.repository.TransactionRepository;
 import com.koibreeding.repository.UserRepository;
+import com.koibreeding.repository.VarietyRepository;
 import com.koibreeding.repository.WalletRepository;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import com.koibreeding.repository.MarketRepository;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +54,9 @@ public class SampleDataInitializer {
     @Bean
     CommandLineRunner seedSampleData(ItemRepository itemRepository, UserRepository userRepository,
             WalletRepository walletRepository, InventoryRepository inventoryRepository,
-            TransactionRepository transactionRepository, NotificationRepository notificationRepository) {
+            TransactionRepository transactionRepository, NotificationRepository notificationRepository,
+        PondRepository pondRepository, KoiRepository koiRepository, MarketRepository marketRepository, 
+        VarietyRepository varietyRepository, KoiDictionaryRepository koiDictionaryRepository) {
         return args -> {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             Map<String, Item> existingItemsByName = itemRepository.findAll().stream()
@@ -172,7 +182,43 @@ public class SampleDataInitializer {
         admin.setExp(0);
         admin.setAvatarUrl(null);
         admin = userRepository.save(admin);
-            Wallet wallet = walletRepository.findByUserId(demoUser.getId()).orElseGet(Wallet::new);
+
+
+        User demoUser2 = userRepository.findAll().stream()
+                .filter(user -> "demo_user2".equals(user.getUsername()))
+                .findFirst()
+                .orElseGet(User::new);
+        demoUser2.setUsername("demo_user2");
+                demoUser2.setEmail("user2@koi.local");
+        demoUser2.setPassword(passwordEncoder.encode("Password@2"));
+        demoUser2.setBirthday(LocalDate.of(2010, 1, 1));
+        demoUser2.setGender(Gender.MALE);
+        demoUser2.setLocation(Location.BUON_MA_THUOT);
+        demoUser2.setStatus(UserStatus.ACTIVE);
+        demoUser2.setRole(Role.USER);
+        demoUser2.setIsBanned(false);
+        demoUser2.setExp(1238);
+        demoUser2.setAvatarUrl(null);
+        demoUser2 = userRepository.save(demoUser2);
+
+        User demoUser3 = userRepository.findAll().stream()
+                .filter(user -> "demo_user3".equals(user.getUsername()))
+                .findFirst()
+                .orElseGet(User::new);
+        demoUser3.setUsername("demo_user3");
+        demoUser3.setEmail("user3@koi.local");
+        demoUser3.setPassword(passwordEncoder.encode("Password@3"));
+        demoUser3.setBirthday(LocalDate.of(2000, 1, 1));
+        demoUser3.setGender(Gender.MALE);
+        demoUser3.setLocation(Location.DA_LAT);
+        demoUser3.setStatus(UserStatus.ACTIVE);
+        demoUser3.setRole(Role.USER);
+        demoUser3.setIsBanned(false);
+        demoUser3.setExp(934);
+        demoUser3.setAvatarUrl(null);
+        demoUser3 = userRepository.save(demoUser3);
+
+        Wallet wallet = walletRepository.findByUserId(demoUser.getId()).orElseGet(Wallet::new);
             wallet.setUser(demoUser);
             wallet.setBalance(new BigDecimal("1000"));
             walletRepository.save(wallet);
@@ -227,6 +273,15 @@ public class SampleDataInitializer {
             backfillTransactionsWithoutItem(transactionRepository, itemsByName.get("Koi Food - Aqua Master"));
             seedTransactions(transactionRepository, wallet, itemsByName);
             seedNotifications(notificationRepository, demoUser);
+
+            // Thêm vào 
+            seedExtraUser(userRepository, "user_danang", "dn@koi.local", Location.DA_NANG);
+            seedExtraUser(userRepository, "user_cantho", "ct@koi.local", Location.CAN_THO);
+            seedExtraUser(userRepository, "user_haiphong", "hp@koi.local", Location.HAI_PHONG);
+            seedExtraUser(userRepository, "user_hanoi2", "hn2@koi.local", Location.HANOI);
+
+            // 3. Thêm tin đăng lên Chợ (Biểu đồ Marketplace Liquidity)
+            seedMarketplaceListings(marketRepository, koiRepository, demoUser);
         };
     }
 
@@ -312,5 +367,48 @@ public class SampleDataInitializer {
         notification.setTitle(title);
         notification.setMessage(message);
         notificationRepository.save(notification);
+    }
+    // ====================================================================
+    // CÁC HÀM HELPER SEED DỮ LIỆU DASHBOARD
+    // ====================================================================
+
+    private void seedExtraUser(UserRepository userRepository, String username, String email, Location location) {
+        if (userRepository.findAll().stream().anyMatch(u -> username.equals(u.getUsername()))) {
+            return; // Đã tồn tại thì bỏ qua
+        }
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("123456"));
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+        user.setGender(Gender.MALE);
+        user.setLocation(location);
+        user.setStatus(UserStatus.ACTIVE);
+        user.setRole(Role.USER);
+        user.setIsBanned(false);
+        user.setExp(50);
+        userRepository.save(user);
+    }
+
+    private void seedMarketplaceListings(MarketRepository marketplaceRepository, KoiRepository koiRepository, User seller) {
+        if (!marketplaceRepository.findAll().isEmpty()) return;
+
+        List<com.koibreeding.domain.Koi> kois = koiRepository.findAll();
+        if (kois.size() >= 3) {
+            // Đăng 3 tin với 3 trạng thái khác nhau
+            createListing(marketplaceRepository, kois.get(0), seller, 5000, ListingStatus.ACTIVE);
+            createListing(marketplaceRepository, kois.get(1), seller, 8000, ListingStatus.SOLD);
+            createListing(marketplaceRepository, kois.get(2), seller, 4500, ListingStatus.CANCELLED);
+        }
+    }
+
+    private void createListing(MarketRepository marketplaceRepository, Koi koi, User seller, long price, ListingStatus status) {
+        com.koibreeding.domain.Marketplace listing = new com.koibreeding.domain.Marketplace();
+        listing.setKoi(koi);
+        listing.setSeller(seller);
+        listing.setPrice(price);
+        listing.setStatus(status);
+        listing.setDescription("Đăng bán cá đẹp!");
+        marketplaceRepository.save(listing);
     }
 }

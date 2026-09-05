@@ -41,8 +41,8 @@
 }
 
 .closeButton:hover {
-	background-color: #e5e7eb;
-	color: #111827;
+	background-color: var(--border-neutral);
+	color: var(--text-primary);
 }
 
 .formHeader {
@@ -128,7 +128,7 @@
 	background-color: #fffdf5;
 	box-shadow: 0 8px 20px rgba(245, 185, 66, 0.25);
 	transform: scale(1.05);
-	color: #111827;
+	color: var(--text-primary);
 }
 
 .levelLabel {
@@ -158,9 +158,9 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	border: 5px solid #6d3f16;
+	border: 5px solid var(--wood-dark);
 	border-radius: 15px;
-	background-color: #8b5a2b;
+	background-color: var(--wood);
 	padding: 0px 55px 0px 35px;
 }
 

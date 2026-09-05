@@ -1,432 +1,399 @@
+import { Bubbles, CheckCheck, Droplets, Gauge, Thermometer } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { CURRENT_USER_ID } from '../../api/currentUser'
 import {
-	Bubbles,
-	CheckCheck,
-	Droplets,
-	Gauge,
-	Thermometer,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { CURRENT_USER_ID } from "../../api/currentUser";
-import {
-	callBuyPond,
-	callFetchAllPonds,
-	callUpdatePond,
-	callUpgradePond,
-	type IRequestBuyPondDTO,
-	type IResponseBuyPondDTO,
-	type IResponseUpgradePondDTO,
-} from "../../api/pond";
-import { getUser, type User } from "../../api/user";
-import ShopHeader from "../../components/Header";
-import { toast } from "../../components/share/Toast/toast";
-import Toaster from "../../components/share/Toast/Toaster";
-import BuyPondForm from "../../components/user/pond/BuyPondForm/BuyPondForm";
-import ShopBackground from "../../components/user/ShopBackground";
-import ShopNavigation from "../../components/user/ShopNavigation";
-import type {
-	IKoi,
-	IModelPagination,
-	IOwner,
-	IPond,
-} from "../../types/backend";
-import Pond from "./Pond";
-import styles from "./PondLanding.module.css";
+  callBuyPond,
+  callFetchAllPonds,
+  callUpdatePond,
+  callUpgradePond,
+  type IRequestBuyPondDTO,
+  type IResponseBuyPondDTO,
+  type IResponseUpgradePondDTO,
+} from '../../api/pond'
+import { getUser, type User } from '../../api/user'
+import ShopHeader from '../../components/Header'
+import { toast } from '../../components/share/Toast/toast'
+import Toaster from '../../components/share/Toast/Toaster'
+import BuyPondForm from '../../components/user/pond/BuyPondForm/BuyPondForm'
+import ShopBackground from '../../components/user/ShopBackground'
+import ShopNavigation from '../../components/user/ShopNavigation'
+import type { IKoi, IModelPagination, IOwner, IPond } from '../../types/backend'
+import Pond from './Pond'
+import styles from './PondLanding.module.css'
 
 const MOCK_PONDS: IPond[] = [
-	"Kohaku Pond",
-	"Uia Pond",
-	"A Pond",
-	"Showa Pond",
-	"Ronaldo Pond",
-	"Pikachu Pond",
+  'Kohaku Pond',
+  'Uia Pond',
+  'A Pond',
+  'Showa Pond',
+  'Ronaldo Pond',
+  'Pikachu Pond',
 ].map((name, index) => ({
-	id: index + 1,
-	owner: {
-		id: CURRENT_USER_ID,
-		username: "demo_user",
-	},
-	name,
-	level: index === 0 ? 15 : 10,
-	currentQuantity: 0,
-	nextLevelPrice: 900,
-	capacity: index === 0 ? 15 : 10,
-	waterQuality: index === 0 ? 70 : 100,
-	temperature: index === 0 ? 20 : 24,
-	pH: index === 0 ? 3.6 : 7.1,
-	oxygen: 6.2,
-	environmentScore: index === 0 ? 54 : 100,
-	createdAt: new Date(),
-	description: "This pond is used to raise Kohaku koi fishes",
-}));
+  id: index + 1,
+  owner: {
+    id: CURRENT_USER_ID,
+    username: 'demo_user',
+  },
+  name,
+  level: index === 0 ? 15 : 10,
+  currentQuantity: 0,
+  nextLevelPrice: 900,
+  capacity: index === 0 ? 15 : 10,
+  waterQuality: index === 0 ? 70 : 100,
+  temperature: index === 0 ? 20 : 24,
+  pH: index === 0 ? 3.6 : 7.1,
+  oxygen: 6.2,
+  environmentScore: index === 0 ? 54 : 100,
+  createdAt: new Date(),
+  description: 'This pond is used to raise Kohaku koi fishes',
+}))
 
 function PondLanding() {
-	const [userLogin, setUserLogin] = useState<User | null>(null);
-	const [selectedPond, setSelectedPond] = useState<IPond | null>(null);
-	const [incomingKoi, setIncomingKoi] = useState<IKoi | null>(null);
-	const [page, setPage] = useState<number>(1);
-	const [totalPages, setTotalPages] = useState<number>(1);
-	const [totalPonds, setTotalPonds] = useState<number>(0);
-	const [pondList, setPondList] = useState<IPond[]>([]);
-	const [isBuyPondDialogOpen, setIsBuyPondDialogOpen] =
-		useState<boolean>(false);
-	const [hasNew, setHasNew] = useState<number[]>([]);
+  const location = useLocation()
+  const routePond = (location.state as { openPond?: IPond } | null)?.openPond
+  const [userLogin, setUserLogin] = useState<User | null>(null)
+  const [selectedPond, setSelectedPond] = useState<IPond | null>(
+    routePond ?? null,
+  )
+  const [incomingKoi, setIncomingKoi] = useState<IKoi | null>(null)
+  const [page, setPage] = useState<number>(1)
+  const [totalPages, setTotalPages] = useState<number>(1)
+  const [totalPonds, setTotalPonds] = useState<number>(0)
+  const [pondList, setPondList] = useState<IPond[]>([])
+  const [isBuyPondDialogOpen, setIsBuyPondDialogOpen] = useState<boolean>(false)
+  const [hasNew, setHasNew] = useState<number[]>([])
 
-	useEffect(() => {
-		const loadUser = async () => {
-			try {
-				const user = await getUser(CURRENT_USER_ID);
-				setUserLogin(user);
-			} catch (error) {
-				toast.error("Failed to fetch current user login.");
-			}
-		};
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const user = await getUser(CURRENT_USER_ID)
+        setUserLogin(user)
+      } catch (error) {
+        toast.error('Failed to fetch current user login.')
+      }
+    }
 
-		loadUser();
-	}, []);
+    loadUser()
+  }, [])
 
-	// Fetch the page data
-	useEffect(() => {
-		const loadData = async () => {
-			try {
-				if (userLogin === null) {
-					return;
-				}
+  // Fetch the page data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        if (userLogin === null) {
+          return
+        }
 
-				const response = await fetchData(page, 6);
+        const response = await fetchData(page, 6)
 
-				if (response.meta.totalElements === 0) {
-					console.info(
-						"No ponds returned by the backend; using frontend sample data.",
-					);
-					setPondList(MOCK_PONDS);
-					setTotalPages(1);
+        if (response.meta.totalElements === 0) {
+          console.info(
+            'No ponds returned by the backend; using frontend sample data.',
+          )
+          setPondList(MOCK_PONDS)
+          setTotalPages(1)
 
-					if (page !== 1) setPage(1);
-					return;
-				}
+          if (page !== 1) setPage(1)
+          return
+        }
 
-				setPondList(response.result);
-				setTotalPages(response.meta.totalPages);
-				setTotalPonds(response.meta.totalElements);
-			} catch (error) {
-				console.error(
-					"Failed to fetch ponds; using frontend sample data:",
-					error,
-				);
-				setPondList(MOCK_PONDS);
-				setTotalPages(1);
-				if (page !== 1) setPage(1);
-			}
-		};
+        setPondList(response.result)
+        setTotalPages(response.meta.totalPages)
+        setTotalPonds(response.meta.totalElements)
+      } catch (error) {
+        console.error(
+          'Failed to fetch ponds; using frontend sample data:',
+          error,
+        )
+        setPondList(MOCK_PONDS)
+        setTotalPages(1)
+        if (page !== 1) setPage(1)
+      }
+    }
 
-		loadData();
-	}, [page, userLogin]);
+    loadData()
+  }, [page, userLogin])
 
-	const fetchData = async (
-		page: number,
-		pageSize: number,
-	): Promise<IModelPagination<IPond>> => {
-		const response = await callFetchAllPonds(
-			`owner=${userLogin?.id}&page=${page - 1}&size=${pageSize}`,
-		);
+  const fetchData = async (
+    page: number,
+    pageSize: number,
+  ): Promise<IModelPagination<IPond>> => {
+    const response = await callFetchAllPonds(
+      `owner=${userLogin?.id}&page=${page - 1}&size=${pageSize}`,
+    )
 
-		if (response && response.data) {
-			return response.data.data as IModelPagination<IPond>;
-		}
+    if (response && response.data) {
+      return response.data.data as IModelPagination<IPond>
+    }
 
-		return {
-			meta: {
-				page: page,
-				pageSize: pageSize,
-				totalPages: 0,
-				totalElements: 0,
-			},
-			result: [],
-		};
-	};
+    return {
+      meta: {
+        page: page,
+        pageSize: pageSize,
+        totalPages: 0,
+        totalElements: 0,
+      },
+      result: [],
+    }
+  }
 
-	const handlePageChange = (newPage: number) => {
-		if (Number.isNaN(newPage)) {
-			return;
-		}
+  const handlePageChange = (newPage: number) => {
+    if (Number.isNaN(newPage)) {
+      return
+    }
 
-		setPage(Math.max(1, newPage));
-	};
+    setPage(Math.max(1, newPage))
+  }
 
-	const handleFetchPond = (page: "next" | "prev") => {
-		const currentIndex = pondList.findIndex(
-			(pond) => pond.id === (selectedPond as IPond).id,
-		);
+  const handleFetchPond = (page: 'next' | 'prev') => {
+    const currentIndex = pondList.findIndex(
+      (pond) => pond.id === (selectedPond as IPond).id,
+    )
 
-		if (
-			(currentIndex === 0 && page === "prev") ||
-			(currentIndex === pondList.length - 1 && page === "next")
-		) {
-			return selectedPond;
-		}
+    if (
+      (currentIndex === 0 && page === 'prev') ||
+      (currentIndex === pondList.length - 1 && page === 'next')
+    ) {
+      return selectedPond
+    }
 
-		const newPond = pondList.at(
-			currentIndex + (page === "next" ? 1 : -1),
-		) as IPond;
+    const newPond = pondList.at(
+      currentIndex + (page === 'next' ? 1 : -1),
+    ) as IPond
 
-		setIncomingKoi(null);
+    setIncomingKoi(null)
 
-		setSelectedPond(newPond);
-	};
+    setSelectedPond(newPond)
+  }
 
-	const handleBuyPond = async (
-		formData: { name: string; description: string },
-		price: number,
-	) => {
-		const request: IRequestBuyPondDTO = {
-			name: formData.name,
-			description: formData.description,
-			price: price,
-			ownerId: userLogin?.id as number,
-		};
+  const handleBuyPond = async (
+    formData: { name: string; description: string },
+    price: number,
+  ) => {
+    const request: IRequestBuyPondDTO = {
+      name: formData.name,
+      description: formData.description,
+      price: price,
+      ownerId: userLogin?.id as number,
+    }
 
-		const response = await callBuyPond(request);
+    const response = await callBuyPond(request)
 
-		if (response && response.data) {
-			const data: IResponseBuyPondDTO = response.data
-				.data as IResponseBuyPondDTO;
+    if (response && response.data) {
+      const data: IResponseBuyPondDTO = response.data
+        .data as IResponseBuyPondDTO
 
-			window.dispatchEvent(
-				new CustomEvent("wallet:updated", { detail: data.balance }),
-			);
-			setPondList([data.pond, ...pondList]);
-			setHasNew((prev) => [data.pond.id, ...prev]);
-			setTotalPonds((prev) => prev + 1);
-			setTotalPages(Math.ceil((totalPonds + 1) / 6));
-			toast.success("Buy new pond successfully!");
-		} else {
-			toast.error("Failed to buy pond!");
-		}
-	};
+      window.dispatchEvent(
+        new CustomEvent('wallet:updated', { detail: data.balance }),
+      )
+      setPondList([data.pond, ...pondList])
+      setHasNew((prev) => [data.pond.id, ...prev])
+      setTotalPonds((prev) => prev + 1)
+      setTotalPages(Math.ceil((totalPonds + 1) / 6))
+      toast.success('Buy new pond successfully!')
+    } else {
+      toast.error('Failed to buy pond!')
+    }
+  }
 
-	const handleUpgradePond = async (pondId: number) => {
-		try {
-			const response = await callUpgradePond(pondId);
-			const upgradeData: IResponseUpgradePondDTO = response.data
-				.data as IResponseUpgradePondDTO;
-			setPondList((prev) => {
-				const pondIndex = prev.findIndex((item) => item.id === pondId);
+  const handleUpgradePond = async (pondId: number) => {
+    try {
+      const response = await callUpgradePond(pondId)
+      const upgradeData: IResponseUpgradePondDTO = response.data
+        .data as IResponseUpgradePondDTO
+      setPondList((prev) => {
+        const pondIndex = prev.findIndex((item) => item.id === pondId)
 
-				const newList = [...prev];
-				newList[pondIndex] = upgradeData.pond;
+        const newList = [...prev]
+        newList[pondIndex] = upgradeData.pond
 
-				return newList;
-			});
-			setSelectedPond(upgradeData.pond);
-			window.dispatchEvent(
-				new CustomEvent("wallet:updated", {
-					detail: upgradeData.balance,
-				}),
-			);
-			toast.success(`Upgraded pond to level ${upgradeData.pond.level}`);
-		} catch (error) {
-			toast.error("Failed to upgrade current pond.");
-		}
-	};
+        return newList
+      })
+      setSelectedPond(upgradeData.pond)
+      window.dispatchEvent(
+        new CustomEvent('wallet:updated', {
+          detail: upgradeData.balance,
+        }),
+      )
+      toast.success(`Upgraded pond to level ${upgradeData.pond.level}`)
+    } catch (error) {
+      toast.error('Failed to upgrade current pond.')
+    }
+  }
 
-	const handleUpdatePondInformation = async (
-		name: string,
-		description: string,
-	) => {
-		const pondIndex = pondList.findIndex(
-			(item) => item.id === selectedPond?.id,
-		);
+  const handleUpdatePondInformation = async (
+    name: string,
+    description: string,
+  ) => {
+    const pondIndex = pondList.findIndex((item) => item.id === selectedPond?.id)
 
-		const newPond: IPond = {
-			id: selectedPond?.id as number,
-			owner: selectedPond?.owner as IOwner,
-			name: name,
-			level: selectedPond?.level as number,
-			currentQuantity: selectedPond?.currentQuantity as number,
-			nextLevelPrice: selectedPond?.nextLevelPrice as number,
-			capacity: selectedPond?.capacity as number,
-			waterQuality: selectedPond?.waterQuality as number,
-			temperature: selectedPond?.temperature as number,
-			pH: selectedPond?.pH as number,
-			oxygen: selectedPond?.oxygen as number,
-			environmentScore: selectedPond?.environmentScore as number,
-			createdAt: selectedPond?.createdAt as Date,
-			description: description,
-		};
+    const newPond: IPond = {
+      id: selectedPond?.id as number,
+      owner: selectedPond?.owner as IOwner,
+      name: name,
+      level: selectedPond?.level as number,
+      currentQuantity: selectedPond?.currentQuantity as number,
+      nextLevelPrice: selectedPond?.nextLevelPrice as number,
+      capacity: selectedPond?.capacity as number,
+      waterQuality: selectedPond?.waterQuality as number,
+      temperature: selectedPond?.temperature as number,
+      pH: selectedPond?.pH as number,
+      oxygen: selectedPond?.oxygen as number,
+      environmentScore: selectedPond?.environmentScore as number,
+      createdAt: selectedPond?.createdAt as Date,
+      description: description,
+    }
 
-		const response = await callUpdatePond(newPond);
+    const response = await callUpdatePond(newPond)
 
-		if (response && response.data) {
-			const updatedPond: IPond = response.data.data as IPond;
+    if (response && response.data) {
+      const updatedPond: IPond = response.data.data as IPond
 
-			setPondList((prev) => {
-				const newList = [...prev];
-				newList[pondIndex] = updatedPond;
-				return newList;
-			});
+      setPondList((prev) => {
+        const newList = [...prev]
+        newList[pondIndex] = updatedPond
+        return newList
+      })
 
-			setSelectedPond(updatedPond);
+      setSelectedPond(updatedPond)
 
-			toast.success("Update pond successfully!");
-		} else {
-			toast.error("Failed to update pond information!");
-		}
-	};
+      toast.success('Update pond successfully!')
+    } else {
+      toast.error('Failed to update pond information!')
+    }
+  }
 
-	return (
-		<>
-			{selectedPond == null ? (
-				<>
-					<div className="app-layout">
-						<ShopBackground />
-						<ShopHeader />
-						<div className={styles.mainContent}>
-							<div className={styles.titleSection}>
-								<span>All Ponds</span>
-							</div>
+  return (
+    <>
+      {selectedPond == null ? (
+        <>
+          <div className="app-layout">
+            <ShopBackground />
+            <ShopHeader />
+            <div className={styles.mainContent}>
+              <section className={styles.titleSection}>
+                <div className={styles.woodSign}>
+                  <h1>ALL PONDS</h1>
+                  <p>Choose a pond to continue</p>
+                </div>
+              </section>
 
-							<div className={styles.buyPond}>
-								<button
-									type="button"
-									className={styles.buyPondButton}
-									onClick={() => setIsBuyPondDialogOpen(true)}
-									title="buy pond"
-								>
-									<img
-										src="/pond/buy-pond-button.svg"
-										alt="buy pond"
-									/>
-								</button>
-							</div>
+              <div className={styles.buyPond}>
+                <button
+                  type="button"
+                  className={styles.buyPondButton}
+                  onClick={() => setIsBuyPondDialogOpen(true)}
+                  title="buy pond"
+                >
+                  <img src="/pond/buy-pond-button.svg" alt="buy pond" />
+                </button>
+              </div>
 
-							<div className={styles.pondGridWrapper}>
-								<div className={styles.pondGrid}>
-									{pondList.slice(0, 6).map((pond, index) => (
-										<div
-											key={pond.id}
-											className={styles.pondItem}
-											onClick={() =>
-												setSelectedPond(pond)
-											}
-											title={pond.name}
-										>
-											<img
-												src={`${hasNew.includes(pond.id) ? "/pond/pond-new.svg" : `/pond/pond-item-${index + 1}.svg`}`}
-												alt={pond.name}
-											/>
-											<span className={styles.pondLabel}>
-												{pond.name}
-											</span>
-											<div className={styles.pondStats}>
-												<div
-													className={styles.statBadge}
-													title="pH Level"
-												>
-													<Droplets color="#667eea" />{" "}
-													{pond.pH}
-												</div>
-												<div
-													className={styles.statBadge}
-													title="Temperature"
-												>
-													<Thermometer color="#d97706" />{" "}
-													{pond.temperature}°
-												</div>
-												<div
-													className={styles.statBadge}
-													title="Oxygen"
-												>
-													<Bubbles color="#06b6d4" />{" "}
-													{`${pond.oxygen} mg/L`}
-												</div>
-												<div
-													className={styles.statBadge}
-													title="Water Quality"
-												>
-													<CheckCheck color="#16a34a" />{" "}
-													{`${pond.waterQuality}/100`}
-												</div>
-												<div
-													className={styles.statBadge}
-													title="Environment Score"
-												>
-													<Gauge color="#7c3aed" />{" "}
-													{`${pond.environmentScore}/100`}
-												</div>
-											</div>
-										</div>
-									))}
-								</div>
-							</div>
+              <div className={styles.pondGridWrapper}>
+                <div className={styles.pondGrid}>
+                  {pondList.slice(0, 6).map((pond, index) => (
+                    <div
+                      key={pond.id}
+                      className={styles.pondItem}
+                      onClick={() => setSelectedPond(pond)}
+                      title={pond.name}
+                    >
+                      <img
+                        src={`${hasNew.includes(pond.id) ? '/pond/pond-new.svg' : `/pond/pond-item-${index + 1}.svg`}`}
+                        alt={pond.name}
+                      />
+                      <span className={styles.pondLabel}>{pond.name}</span>
+                      <div className={styles.pondStats}>
+                        <div className={styles.statBadge} title="pH Level">
+                          <Droplets color="#667eea" /> {pond.pH}
+                        </div>
+                        <div className={styles.statBadge} title="Temperature">
+                          <Thermometer color="#d97706" /> {pond.temperature}°
+                        </div>
+                        <div className={styles.statBadge} title="Oxygen">
+                          <Bubbles color="#06b6d4" /> {`${pond.oxygen} mg/L`}
+                        </div>
+                        <div className={styles.statBadge} title="Water Quality">
+                          <CheckCheck color="#16a34a" />{' '}
+                          {`${pond.waterQuality}/100`}
+                        </div>
+                        <div
+                          className={styles.statBadge}
+                          title="Environment Score"
+                        >
+                          <Gauge color="#7c3aed" />{' '}
+                          {`${pond.environmentScore}/100`}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-							<div className={styles.paginationFooter}>
-								<span className={styles.totalPondsLabel}>
-									Total Ponds: <strong>{totalPonds}</strong>
-								</span>
-								<button
-									type="button"
-									className={styles.prevButton}
-									disabled={page === 1}
-									onClick={() =>
-										handlePageChange(Math.max(1, page - 1))
-									}
-								>
-									Previous
-								</button>
-								<span className={styles.currentPageLabel}>
-									Page <strong>{page}</strong> of{" "}
-									{Math.max(totalPages, 1)}
-								</span>
-								<button
-									type="button"
-									className={styles.nextButton}
-									disabled={page === totalPages}
-									onClick={() =>
-										handlePageChange(
-											Math.min(totalPages, page + 1),
-										)
-									}
-								>
-									Next
-								</button>
-							</div>
-						</div>
-						<footer className="app-footer">
-							<ShopNavigation />
-						</footer>
-					</div>
+              <div className={styles.paginationFooter}>
+                <span className={styles.totalPondsLabel}>
+                  Total Ponds: <strong>{totalPonds}</strong>
+                </span>
+                <button
+                  type="button"
+                  className={styles.prevButton}
+                  disabled={page === 1}
+                  onClick={() => handlePageChange(Math.max(1, page - 1))}
+                >
+                  Previous
+                </button>
+                <span className={styles.currentPageLabel}>
+                  Page <strong>{page}</strong> of {Math.max(totalPages, 1)}
+                </span>
+                <button
+                  type="button"
+                  className={styles.nextButton}
+                  disabled={page === totalPages}
+                  onClick={() =>
+                    handlePageChange(Math.min(totalPages, page + 1))
+                  }
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+            <footer className="app-footer">
+              <ShopNavigation />
+            </footer>
+          </div>
 
-					{isBuyPondDialogOpen && (
-						<div className={styles.overlay}>
-							<BuyPondForm
-								onClose={() => setIsBuyPondDialogOpen(false)}
-								onSubmit={handleBuyPond}
-							/>
-						</div>
-					)}
-				</>
-			) : (
-				<Pond
-					key={selectedPond.id}
-					pond={selectedPond}
-					incomingKoi={incomingKoi}
-					onClose={() => {
-						setSelectedPond(null);
-						setIncomingKoi(null);
-					}}
-					onFetchPond={handleFetchPond}
-					onUpdatePond={handleUpdatePondInformation}
-					onUpgradePond={handleUpgradePond}
-					onSwitchPond={(targetPond, koi) => {
-						setIncomingKoi(koi);
-						setSelectedPond(targetPond);
-					}}
-					onClearIncomingKoi={() => setIncomingKoi(null)}
-				/>
-			)}
-			<Toaster />
-		</>
-	);
+          {isBuyPondDialogOpen && (
+            <div className={styles.overlay}>
+              <BuyPondForm
+                onClose={() => setIsBuyPondDialogOpen(false)}
+                onSubmit={handleBuyPond}
+              />
+            </div>
+          )}
+        </>
+      ) : (
+        <Pond
+          key={selectedPond.id}
+          pond={selectedPond}
+          incomingKoi={incomingKoi}
+          onClose={() => {
+            setSelectedPond(null)
+            setIncomingKoi(null)
+          }}
+          onFetchPond={handleFetchPond}
+          onUpdatePond={handleUpdatePondInformation}
+          onUpgradePond={handleUpgradePond}
+          onSwitchPond={(targetPond, koi) => {
+            setIncomingKoi(koi)
+            setSelectedPond(targetPond)
+          }}
+          onClearIncomingKoi={() => setIncomingKoi(null)}
+        />
+      )}
+      <Toaster />
+    </>
+  )
 }
 
-export default PondLanding;
+export default PondLanding

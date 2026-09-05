@@ -1,5 +1,6 @@
 import { CircleCheckBig, CircleX, Info, TriangleAlert } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
+import { useSound } from "../../../sound/SoundContext";
 import "./Toast.css";
 
 interface ToastProps {
@@ -10,6 +11,12 @@ interface ToastProps {
 }
 
 function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
+	const { playEffect } = useSound();
+
+	useEffect(() => {
+		if (type === "success" || type === "error") playEffect(type);
+	}, [type, playEffect]);
+
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			onClose();

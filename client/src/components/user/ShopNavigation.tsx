@@ -2,8 +2,8 @@ import {
   Backpack,
   House,
   ReceiptText,
-  Settings,
   ShoppingCart,
+  UserRound,
   Waves,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -50,8 +50,8 @@ export default function ShopNavigation() {
       </button>
 
       <button>
-        <Settings />
-        <span>Settings</span>
+        <UserRound />
+        <span>Profile</span>
       </button>
     </nav>
   );

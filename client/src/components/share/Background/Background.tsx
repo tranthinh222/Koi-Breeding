@@ -8,6 +8,9 @@ function Background() {
 			<div className={`${styles.cloud} ${styles.cloud3}`}></div>
 
 			<div className={styles.background}>
+				<div className={styles.nightSky} aria-hidden="true">
+					<div className={styles.moon}></div>
+				</div>
 				<div className={styles.grass}></div>
 
 				<div className={`${styles.pond} ${styles.pond1}`}></div>

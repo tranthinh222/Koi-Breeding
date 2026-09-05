@@ -8,7 +8,7 @@
 	height: 100%;
 	max-width: 200px;
 	max-height: 300px;
-	/* background: #5c5858; */
+	/* background: var(--text-secondary); */
 	background-color: #11966e;
 	border-radius: 5px;
 	display: flex;
@@ -29,8 +29,8 @@
 	width: 90%;
 	min-height: 0;
 	height: 10%;
-	background-color: #faf8f8;
-	color: #5c5858;
+	background-color: var(--surface-soft);
+	color: var(--text-secondary);
 	font-family: "Grandstander";
 	font-weight: bold;
 	font-size: clamp(8px, 1vw, 16px);
@@ -72,8 +72,8 @@
 	width: 90%;
 	min-height: 0;
 	height: 10%;
-	background-color: #faf8f8;
-	color: #5c5858;
+	background-color: var(--surface-soft);
+	color: var(--text-secondary);
 	font-family: "Grandstander";
 	font-weight: bold;
 	font-size: clamp(7px, 1.15vw, 18px);
@@ -89,8 +89,8 @@
 	width: 90%;
 	min-height: 0;
 	height: 10%;
-	background-color: #faf8f8;
-	color: #5c5858;
+	background-color: var(--surface-soft);
+	color: var(--text-secondary);
 	font-family: "Grandstander";
 	font-weight: bold;
 	font-size: clamp(7px, 1.15vw, 18px);

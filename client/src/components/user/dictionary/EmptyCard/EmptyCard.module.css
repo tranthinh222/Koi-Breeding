@@ -8,7 +8,7 @@
 	height: 100%;
 	max-width: 200px;
 	max-height: 300px;
-	/* background: #5c5858; */
+	/* background: var(--text-secondary); */
 	background-color: #b4b0b0bd;
 	border-radius: 5px;
 	display: flex;

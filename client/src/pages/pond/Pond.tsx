@@ -262,7 +262,11 @@ function Pond({
 							className={styles.navButton}
 							type="button"
 							title="marketplace"
-							onClick={() => navigate("/transactions")}
+							onClick={() =>
+								navigate("/transactions", {
+									state: { returnToPond: pond },
+								})
+							}
 						>
 							<img src="/pond/store.png" alt="store" />
 						</button>
@@ -278,7 +282,11 @@ function Pond({
 							className={styles.navButton}
 							type="button"
 							title="shop"
-							onClick={() => navigate("/shop")}
+							onClick={() =>
+								navigate("/shop", {
+									state: { returnToPond: pond },
+								})
+							}
 						>
 							<img
 								src="/pond/shopping-cart.png"
@@ -302,7 +310,11 @@ function Pond({
 							type="button"
 							className={styles.navButton}
 							title="inventory"
-							onClick={() => navigate("/inventory")}
+							onClick={() =>
+								navigate("/inventory", {
+									state: { returnToPond: pond },
+								})
+							}
 						>
 							<img src="/pond/backpack.png" alt="inventory" />
 						</button>

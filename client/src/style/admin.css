@@ -961,7 +961,8 @@
   font-weight: 700;
 }
 
-.action-button.danger {
+.action-button.danger, 
+.action-button.delete {
   background: rgba(239, 68, 68, 0.12);
   color: #b91c1c;
 }
@@ -971,6 +972,10 @@
   color: #15803d;
 }
 
+.action-button.restore {
+  background: rgba(198, 100, 100, 0.12);
+  color: #148ba0;
+}
 .action-button.neutral,
 .icon-button {
   background: var(--surface-tertiary);
@@ -1382,7 +1387,21 @@ Reason Form
 .submit-button.unban:hover {
     background: #16a34a;
 }
+/* Màu cho nút Delete (Đỏ đậm hơn Ban một chút) */
+.submit-button.delete {
+    background: #b91c1c; 
+}
+.submit-button.delete:hover {
+    background: #991b1b;
+}
 
+/* Màu cho nút Restore (Xanh dương) */
+.submit-button.restore {
+    background: #0ea5e9; 
+}
+.submit-button.restore:hover {
+    background: #0284c7;
+}
 .reason-form-actions button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -1424,4 +1443,226 @@ Reason Form
 
 .modal-container.closing {
     animation: modal-slide-down 0.25s ease-in forwards;
+}
+
+/*
+Dashboard
+*/
+/* =========================================================
+   DASHBOARD GRID & PANELS (Được gộp từ dashboard.css)
+========================================================= */
+
+.dashboard-grid {
+  position: relative;
+}
+
+.panel {
+  position: relative; 
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.react-grid-item.react-draggable-dragging .panel,
+.react-grid-item.resizing .panel {
+  border-color: #0ea5e9;
+  box-shadow: 0 8px 32px rgba(14, 165, 233, 0.2);
+}
+
+.panel .panel-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 12px;
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.panel .panel-heading {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel .panel-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel .panel-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.panel .panel-body {
+  flex: 1;
+  min-height: 0;
+  padding: 16px 20px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Nút Drag được đưa xuống góc dưới phải */
+/* =========================================
+   STYLE CHO NÚT DRAG PANEL (KÉO THẢ)
+========================================= */
+.panel .panel-grip {
+  position: absolute;
+  right: 14px;
+  bottom: 18px;
+  width: 36px;        /* Kích thước giống hệt nút Menu */
+  height: 36px;       /* Kích thước giống hệt nút Menu */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px; /* Bo góc y hệt nút Menu */
+  background: var(--surface-tertiary); /* Màu nền giống nút Menu */
+  color: var(--text-muted);
+  cursor: grab;
+  touch-action: none;
+  transition: all 0.2s ease;
+  z-index: 10;
+  border: none;
+  box-shadow: none;   /* Bỏ shadow để phẳng và chìm vào nền */
+}
+
+.panel .panel-grip svg circle {
+  fill: currentColor;
+}
+
+.panel .panel-grip:hover {
+  color: var(--text-primary);
+  background: var(--border-color); /* Hiện rõ hơn một chút khi hover */
+}
+
+.panel .panel-grip:active {
+  cursor: grabbing;
+  transform: scale(0.92); /* Hiệu ứng lún xuống khi bấm giữ */
+}
+/* ---- react-grid-layout overrides ---- */
+.react-grid-item.react-grid-placeholder {
+  background: rgba(14, 165, 233, 0.1);
+  border: 1.5px dashed #0ea5e9;
+  border-radius: 24px;
+  opacity: 1;
+}
+
+.react-resizable-handle {
+  opacity: 0.4; 
+  transition: opacity 0.2s ease;
+  z-index: 20;
+}
+
+.react-grid-item:hover .react-resizable-handle {
+  opacity: 1;
+}
+
+.react-resizable-handle::after {
+  border-right: 2.5px solid var(--text-muted) !important; 
+  border-bottom: 2.5px solid var(--text-muted) !important;
+  right: 8px; 
+  bottom: 8px;
+  width: 8px; 
+  height: 8px;
+  transition: border-color 0.2s ease;
+}
+
+.react-resizable-handle:hover::after {
+  border-color: var(--text-primary) !important; 
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .react-resizable-handle {
+    transition: none;
+  }
+}
+
+/* =========================================
+   FULLSCREEN CHART MODAL (POPUP BIỂU ĐỒ)
+========================================= */
+.chart-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 4vw, 40px);
+  animation: overlay-fade-in 0.2s ease-out;
+}
+
+.chart-modal-content {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 1200px;
+  height: 80vh; 
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+  animation: modal-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.chart-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.chart-modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chart-modal-header .close-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--surface-tertiary);
+  color: var(--text-primary);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
+}
+
+.chart-modal-header .close-button:hover {
+  background: var(--surface-secondary);
+}
+
+.chart-modal-body {
+  flex: 1;
+  padding: 32px;
+  min-height: 0; 
+  background: var(--surface-primary);
 }

@@ -7,7 +7,7 @@ import { useAuth } from "../../context/AuthContext";
 import maleAvatar from "../../assets/avatars/male_blank_avatar.png";
 import femaleAvatar from "../../assets/avatars/female_blank_avatar.png";
 
-import ImageEditor from "./ImageEditor";
+import ImageEditor from "../../components/image-preview/ImageEditor";
 
 import { useNavigate } from "react-router-dom";
 

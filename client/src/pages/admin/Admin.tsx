@@ -20,12 +20,14 @@ import {
 import { AdminNavbar } from "./components/AdminNavbar";
 import { AdminSidebar } from "./components/AdminSidebar";
 import "../../style/admin.css";
-import maleDefaultAvatar from '../../assets/avatars/male_blank_avatar.png'
-import femaleDefaultAvatar from '../../assets/avatars/female_blank_avatar.png'
+import maleDefaultAvatar from "../../assets/avatars/male_blank_avatar.png";
+import femaleDefaultAvatar from "../../assets/avatars/female_blank_avatar.png";
 
 import UserModerationModal from "./components/UserModerationModal";
 
-export type MenuTab = "dashboard" | "users" | "breeding" | "origin";
+import AdminItems from "./components/AdminItems";
+
+export type MenuTab = "dashboard" | "users" | "breeding" | "items";
 export type OtherTab = "settings" | "account";
 type AdminView = MenuTab | OtherTab;
 type PanelAction = "View" | "Edit" | "Refresh";
@@ -72,7 +74,9 @@ function formatRelativeTime(dateValue: string | null | undefined) {
   return `${diffDays} days ago`;
 }
 
-function buildDashboardPanels(dashboard: AdminDashboardResponse | null): PanelDescriptor[] {
+function buildDashboardPanels(
+  dashboard: AdminDashboardResponse | null,
+): PanelDescriptor[] {
   const usersGrowth = dashboard?.users.growthPercent;
   const shopGrowth = dashboard?.shopPurchases.growthPercent;
   const marketGrowth = dashboard?.marketplaceTrades.growthPercent;
@@ -85,9 +89,14 @@ function buildDashboardPanels(dashboard: AdminDashboardResponse | null): PanelDe
       value: formatNumber(dashboard?.users.total),
       change:
         usersGrowth == null
-          ? `${dashboard?.users.delta ?? 0 >= 0 ? "+" : ""}${formatNumber(dashboard?.users.delta)}`
+          ? `${(dashboard?.users.delta ?? 0 >= 0) ? "+" : ""}${formatNumber(dashboard?.users.delta)}`
           : `${usersGrowth >= 0 ? "+" : ""}${usersGrowth.toFixed(1)}%`,
-      trend: (dashboard?.users.delta ?? 0) > 0 ? "up" : (dashboard?.users.delta ?? 0) < 0 ? "down" : "flat",
+      trend:
+        (dashboard?.users.delta ?? 0) > 0
+          ? "up"
+          : (dashboard?.users.delta ?? 0) < 0
+            ? "down"
+            : "flat",
       accent: "blue",
     },
     {
@@ -97,7 +106,7 @@ function buildDashboardPanels(dashboard: AdminDashboardResponse | null): PanelDe
       value: formatNumber(dashboard?.shopPurchases.total),
       change:
         shopGrowth == null
-          ? `${dashboard?.shopPurchases.delta ?? 0 >= 0 ? "+" : ""}${formatNumber(dashboard?.shopPurchases.delta)}`
+          ? `${(dashboard?.shopPurchases.delta ?? 0 >= 0) ? "+" : ""}${formatNumber(dashboard?.shopPurchases.delta)}`
           : `${shopGrowth >= 0 ? "+" : ""}${shopGrowth.toFixed(1)}%`,
       trend:
         (dashboard?.shopPurchases.delta ?? 0) > 0
@@ -114,7 +123,7 @@ function buildDashboardPanels(dashboard: AdminDashboardResponse | null): PanelDe
       value: formatNumber(dashboard?.marketplaceTrades.total),
       change:
         marketGrowth == null
-          ? `${dashboard?.marketplaceTrades.delta ?? 0 >= 0 ? "+" : ""}${formatNumber(dashboard?.marketplaceTrades.delta)}`
+          ? `${(dashboard?.marketplaceTrades.delta ?? 0 >= 0) ? "+" : ""}${formatNumber(dashboard?.marketplaceTrades.delta)}`
           : `${marketGrowth >= 0 ? "+" : ""}${marketGrowth.toFixed(1)}%`,
       trend:
         (dashboard?.marketplaceTrades.delta ?? 0) > 0
@@ -128,7 +137,9 @@ function buildDashboardPanels(dashboard: AdminDashboardResponse | null): PanelDe
       id: "koi",
       title: "Highest Level User",
       subtitle: "Top level account in the system",
-      value: dashboard?.highestLevelUser ? `Lv. ${dashboard.highestLevelUser.level}` : "Lv. 1",
+      value: dashboard?.highestLevelUser
+        ? `Lv. ${dashboard.highestLevelUser.level}`
+        : "Lv. 1",
       change: dashboard?.highestLevelUser?.username ?? "No data",
       trend: "flat",
       accent: "violet",
@@ -140,7 +151,7 @@ function Admin() {
   const { currentUser } = useAuth();
   const [activeView, setActiveView] = useState<AdminView>("dashboard");
   const [theme, setTheme] = useState<"light" | "dark">(() => {
-  const saved = localStorage.getItem("theme") as "light" | "dark" | null;
+    const saved = localStorage.getItem("theme") as "light" | "dark" | null;
     if (saved === "light" || saved === "dark") return saved;
     return window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
@@ -149,7 +160,9 @@ function Admin() {
 
   const [panelMenuOpenId, setPanelMenuOpenId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [dashboard, setDashboard] = useState<AdminDashboardResponse | null>(null);
+  const [dashboard, setDashboard] = useState<AdminDashboardResponse | null>(
+    null,
+  );
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
   const [users, setUsers] = useState<AdminUserDto[]>([]);
@@ -171,11 +184,14 @@ function Admin() {
   const openStatusModal = (user: AdminUserDto) => {
     setStatusModal({
       isOpen: true,
-      action: user.status === 'ACTIVE' ? 'ban' : 'unban',
+      action: user.status === "ACTIVE" ? "ban" : "unban",
       userId: user.id,
     });
   };
-  const panelDescriptors = useMemo(() => buildDashboardPanels(dashboard), [dashboard]);
+  const panelDescriptors = useMemo(
+    () => buildDashboardPanels(dashboard),
+    [dashboard],
+  );
 
   const filteredUsers = useMemo(() => {
     const normalizedTerm = searchTerm.trim().toLowerCase();
@@ -193,7 +209,7 @@ function Admin() {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
-  
+
   useEffect(() => {
     let cancelled = false;
 
@@ -204,7 +220,8 @@ function Admin() {
         const response = await getAdminDashboard(3, 3);
         if (!cancelled) setDashboard(response);
       } catch {
-        if (!cancelled) setDashboardError("Unable to load dashboard data from the database.");
+        if (!cancelled)
+          setDashboardError("Unable to load dashboard data from the database.");
       } finally {
         if (!cancelled) setDashboardLoading(false);
       }
@@ -220,7 +237,8 @@ function Admin() {
           setTotalPages(response.meta?.totalPages ?? 1);
         }
       } catch {
-        if (!cancelled) setUsersError("Unable to load users from the database.");
+        if (!cancelled)
+          setUsersError("Unable to load users from the database.");
       } finally {
         if (!cancelled) setUsersLoading(false);
       }
@@ -265,10 +283,14 @@ function Admin() {
   const adminProfileName = currentUser?.username ?? "Admin";
   const adminProfileEmail = currentUser?.email ?? "admin@koi-breeding.local";
   const adminProfileRole = currentUser?.role ?? "ADMIN";
-  const adminProfileAvatar = currentUser?.avatarUrl ?? (currentUser?.gender === "MALE" ? maleDefaultAvatar : femaleDefaultAvatar);
+  const adminProfileAvatar =
+    currentUser?.avatarUrl ??
+    (currentUser?.gender === "MALE" ? maleDefaultAvatar : femaleDefaultAvatar);
 
   return (
-    <div className={`admin-shell ${theme === "dark" ? "theme-dark" : "theme-light"}`}>
+    <div
+      className={`admin-shell ${theme === "dark" ? "theme-dark" : "theme-light"}`}
+    >
       <AdminSidebar activeView={activeView} onSelectView={setActiveView} />
 
       <main className="admin-main">
@@ -287,19 +309,30 @@ function Admin() {
               <div className="page-heading">
                 <div>
                   <p className="eyebrow">Dashboard</p>
-                  <h1>Control the game, economy, and community in one place.</h1>
+                  <h1>
+                    Control the game, economy, and community in one place.
+                  </h1>
                 </div>
-                <button type="button" className="primary-button" onClick={refreshDashboard}>
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={refreshDashboard}
+                >
                   Refresh data
                   <ArrowUpRight size={16} />
                 </button>
               </div>
 
-              {dashboardError ? <div className="inline-alert error">{dashboardError}</div> : null}
+              {dashboardError ? (
+                <div className="inline-alert error">{dashboardError}</div>
+              ) : null}
 
               <div className="panel-grid panel-grid-metrics">
                 {panelDescriptors.map((panel) => (
-                  <article key={panel.id} className={`dashboard-panel accent-${panel.accent}`}>
+                  <article
+                    key={panel.id}
+                    className={`dashboard-panel accent-${panel.accent}`}
+                  >
                     <PanelHeader
                       title={panel.title}
                       subtitle={panel.subtitle}
@@ -310,9 +343,15 @@ function Admin() {
                     <div className="panel-body">
                       <div className="panel-value-row">
                         <strong>{panel.value}</strong>
-                        <span className={`panel-trend trend-${panel.trend}`}>{panel.change}</span>
+                        <span className={`panel-trend trend-${panel.trend}`}>
+                          {panel.change}
+                        </span>
                       </div>
-                      <p>{dashboardLoading ? "Loading database snapshot..." : "Updated from the live dashboard endpoint."}</p>
+                      <p>
+                        {dashboardLoading
+                          ? "Loading database snapshot..."
+                          : "Updated from the live dashboard endpoint."}
+                      </p>
                     </div>
                   </article>
                 ))}
@@ -330,13 +369,23 @@ function Admin() {
                   {dashboard?.topUsers?.length ? (
                     <div className="ranking-list">
                       {dashboard.topUsers.map((user, index) => (
-                        <RankingRow key={user.id} rank={index + 1} user={user} />
+                        <RankingRow
+                          key={user.id}
+                          rank={index + 1}
+                          user={user}
+                        />
                       ))}
                     </div>
                   ) : (
-                    <div className="empty-state">No top users available yet.</div>
+                    <div className="empty-state">
+                      No top users available yet.
+                    </div>
                   )}
-                  <button type="button" className="view-more-button" onClick={() => setActiveView("users")}>
+                  <button
+                    type="button"
+                    className="view-more-button"
+                    onClick={() => setActiveView("users")}
+                  >
                     View more
                     <ChevronRight size={16} />
                   </button>
@@ -353,20 +402,36 @@ function Admin() {
                   {dashboard?.topTransactions?.length ? (
                     <div className="transaction-list">
                       {dashboard.topTransactions.map((transaction) => (
-                        <div key={`${transaction.source}-${transaction.id}`} className="transaction-item">
+                        <div
+                          key={`${transaction.source}-${transaction.id}`}
+                          className="transaction-item"
+                        >
                           <div>
-                            <span className="transaction-source">{transaction.source}</span>
+                            <span className="transaction-source">
+                              {transaction.source}
+                            </span>
                             <strong>{transaction.title}</strong>
-                            <span className="transaction-note">{transaction.description ?? "Live transaction record"}</span>
+                            <span className="transaction-note">
+                              {transaction.description ??
+                                "Live transaction record"}
+                            </span>
                           </div>
-                          <span className="transaction-amount">{formatMoney(transaction.amount)} VND</span>
+                          <span className="transaction-amount">
+                            {formatMoney(transaction.amount)} VND
+                          </span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="empty-state">No top transactions available yet.</div>
+                    <div className="empty-state">
+                      No top transactions available yet.
+                    </div>
                   )}
-                  <button type="button" className="view-more-button" onClick={() => setActiveView("users")}>
+                  <button
+                    type="button"
+                    className="view-more-button"
+                    onClick={() => setActiveView("users")}
+                  >
                     View more
                     <ChevronRight size={16} />
                   </button>
@@ -381,9 +446,21 @@ function Admin() {
                     setOpenPanelMenu={setPanelMenuOpenId}
                   />
                   <div className="metric-summary-list">
-                    <MetricSummary label="Users this month" value={dashboard?.users.currentMonth} previous={dashboard?.users.previousMonth} />
-                    <MetricSummary label="Shop purchases" value={dashboard?.shopPurchases.currentMonth} previous={dashboard?.shopPurchases.previousMonth} />
-                    <MetricSummary label="Marketplace trades" value={dashboard?.marketplaceTrades.currentMonth} previous={dashboard?.marketplaceTrades.previousMonth} />
+                    <MetricSummary
+                      label="Users this month"
+                      value={dashboard?.users.currentMonth}
+                      previous={dashboard?.users.previousMonth}
+                    />
+                    <MetricSummary
+                      label="Shop purchases"
+                      value={dashboard?.shopPurchases.currentMonth}
+                      previous={dashboard?.shopPurchases.previousMonth}
+                    />
+                    <MetricSummary
+                      label="Marketplace trades"
+                      value={dashboard?.marketplaceTrades.currentMonth}
+                      previous={dashboard?.marketplaceTrades.previousMonth}
+                    />
                   </div>
                 </article>
               </div>
@@ -397,35 +474,53 @@ function Admin() {
                   <p className="eyebrow">Users</p>
                   <h1>Manage active and banned users from the database.</h1>
                 </div>
-                <button type="button" className="primary-button" onClick={() => refreshUsers(page)}>
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() => refreshUsers(page)}
+                >
                   Refresh users
                   <ArrowUpRight size={16} />
                 </button>
               </div>
 
-              {usersError ? <div className="inline-alert error">{usersError}</div> : null}
+              {usersError ? (
+                <div className="inline-alert error">{usersError}</div>
+              ) : null}
 
               <div className="user-section-list">
                 {usersLoading ? (
-                  <div className="empty-state">Loading users from the database...</div>
+                  <div className="empty-state">
+                    Loading users from the database...
+                  </div>
                 ) : filteredUsers.length ? (
                   filteredUsers.map((user) => (
                     <article key={user.id} className="user-section-card">
                       <div className="user-section-main">
                         <div className="user-section-avatar">
-                          {user.avatarUrl ? <img src={user.avatarUrl} alt={user.username} /> : user.username.slice(0, 1)}
+                          {user.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.username} />
+                          ) : (
+                            user.username.slice(0, 1)
+                          )}
                         </div>
                         <div className="user-section-copy">
                           <div className="user-section-title-row">
                             <strong>{user.username}</strong>
-                            <span className={`user-status ${getStatusTone(user.status)}`}>{user.status ?? "ACTIVE"}</span>
+                            <span
+                              className={`user-status ${getStatusTone(user.status)}`}
+                            >
+                              {user.status ?? "ACTIVE"}
+                            </span>
                           </div>
                           <p>{user.email}</p>
                           <div className="user-meta-row">
                             <span>Role: {user.role}</span>
                             <span>Level: {getLevel(user.exp)}</span>
                             <span>{formatNumber(user.exp)} EXP</span>
-                            <span>Updated {formatRelativeTime(user.updatedAt)}</span>
+                            <span>
+                              Updated {formatRelativeTime(user.updatedAt)}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -448,22 +543,24 @@ function Admin() {
                     </article>
                   ))
                 ) : (
-                  <div className="empty-state">No user matches the current search.</div>
+                  <div className="empty-state">
+                    No user matches the current search.
+                  </div>
                 )}
               </div>
-                {/* Ban / Unban Modal */}
-                <UserModerationModal
-                  isOpen={statusModal.isOpen}
-                  action={statusModal.action}
-                  userId={statusModal.userId}
-                  onClose={() =>
-                    setStatusModal((prev) => ({
-                      ...prev,
-                      isOpen: false,
-                    }))
-                  }
-                  onSuccess={() => refreshUsers()}
-                />
+              {/* Ban / Unban Modal */}
+              <UserModerationModal
+                isOpen={statusModal.isOpen}
+                action={statusModal.action}
+                userId={statusModal.userId}
+                onClose={() =>
+                  setStatusModal((prev) => ({
+                    ...prev,
+                    isOpen: false,
+                  }))
+                }
+                onSuccess={() => refreshUsers()}
+              />
               <div className="pagination-row">
                 <span>
                   Showing page {page} of {Math.max(totalPages, 1)}
@@ -483,7 +580,9 @@ function Admin() {
                   <button
                     type="button"
                     className="page-button"
-                    onClick={() => void refreshUsers(Math.min(page + 1, totalPages))}
+                    onClick={() =>
+                      void refreshUsers(Math.min(page + 1, totalPages))
+                    }
                     disabled={page >= totalPages}
                   >
                     Next
@@ -497,17 +596,14 @@ function Admin() {
             <div className="feature-placeholder">
               <p className="eyebrow">Breeding</p>
               <h1>Breeding management area</h1>
-              <p>Use this space for breeding rules, approvals, and lineage moderation.</p>
+              <p>
+                Use this space for breeding rules, approvals, and lineage
+                moderation.
+              </p>
             </div>
           )}
 
-          {activeView === "origin" && (
-            <div className="feature-placeholder">
-              <p className="eyebrow">Origin</p>
-              <h1>Koi origin management area</h1>
-              <p>Use this space for variety origins, taxonomy, and origin content control.</p>
-            </div>
-          )}
+          {activeView === "items" && <AdminItems />}
 
           {activeView === "settings" && (
             <div className="settings-page">
@@ -621,14 +717,23 @@ function PanelHeader({
       </div>
 
       <div className="panel-options-wrap">
-        <button type="button" className="panel-options-trigger" onClick={() => setOpenPanelMenu(isOpen ? null : panelId)}>
+        <button
+          type="button"
+          className="panel-options-trigger"
+          onClick={() => setOpenPanelMenu(isOpen ? null : panelId)}
+        >
           <MoreHorizontal size={16} />
         </button>
 
         {isOpen && (
           <div className="panel-options-menu">
             {actions.map((action) => (
-              <button key={action} type="button" className="panel-option-item" onClick={() => setOpenPanelMenu(null)}>
+              <button
+                key={action}
+                type="button"
+                className="panel-option-item"
+                onClick={() => setOpenPanelMenu(null)}
+              >
                 {action}
               </button>
             ))}
@@ -639,46 +744,49 @@ function PanelHeader({
   );
 }
 
-function RankingRow({ rank, user }: { rank: number; user: AdminRankingUserDto }) {
-return (
-  <div className="ranking-item">
-    <div
-      className={`ranking-order ${
-        rank === 1
-          ? "gold"
-          : rank === 2
-          ? "silver"
-          : rank === 3
-          ? "bronze"
-          : "normal"
-      }`}
-    >
-      #{rank}
-    </div>
-
-    <div className="ranking-user">
-      <div className="ranking-avatar">
-        {user.avatarUrl ? (
-          <img
-            src={user.avatarUrl}
-            alt={user.username}
-          />
-        ) : (
-          user.username.slice(0, 1)
-        )}
+function RankingRow({
+  rank,
+  user,
+}: {
+  rank: number;
+  user: AdminRankingUserDto;
+}) {
+  return (
+    <div className="ranking-item">
+      <div
+        className={`ranking-order ${
+          rank === 1
+            ? "gold"
+            : rank === 2
+              ? "silver"
+              : rank === 3
+                ? "bronze"
+                : "normal"
+        }`}
+      >
+        #{rank}
       </div>
 
-      <div>
-        <strong>{user.username}</strong>
-        <span>Lv. {user.level}</span>
+      <div className="ranking-user">
+        <div className="ranking-avatar">
+          {user.avatarUrl ? (
+            <img src={user.avatarUrl} alt={user.username} />
+          ) : (
+            user.username.slice(0, 1)
+          )}
+        </div>
+
+        <div>
+          <strong>{user.username}</strong>
+          <span>Lv. {user.level}</span>
+        </div>
+      </div>
+
+      <div className="ranking-stat">
+        <span>{formatNumber(user.exp)} EXP</span>
       </div>
     </div>
-
-    <div className="ranking-stat">
-      <span>{formatNumber(user.exp)} EXP</span>
-    </div>
-  </div>
-);
+  );
 }
 
 function MetricSummary({

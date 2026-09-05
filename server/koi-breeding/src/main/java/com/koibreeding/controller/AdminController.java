@@ -1,24 +1,25 @@
 package com.koibreeding.controller;
 
 import com.koibreeding.dto.request.AdminModerationUserRequest;
+import com.koibreeding.dto.request.ReqAdminItems;
 import com.koibreeding.dto.response.admin.AdminDashboardDto;
 import com.koibreeding.dto.response.admin.AdminUserDto;
 import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.enums.EffectType;
+import com.koibreeding.enums.ItemType;
 import com.koibreeding.service.AdminService;
 import com.koibreeding.service.UserService;
 import com.koibreeding.util.annotation.ApiMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -56,5 +57,53 @@ public class AdminController {
             @RequestParam(defaultValue = "3") int userLimit,
             @RequestParam(defaultValue = "3") int transactionLimit) {
         return ResponseEntity.ok(adminService.handleFetchDashboard(userLimit, transactionLimit));
+    }
+
+    @GetMapping("/items")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<ReqAdminItems>> getItems(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) ItemType itemType,
+            @RequestParam(required = false) EffectType effectType,
+            @RequestParam(required = false) String sortPrice
+    ) {
+        return ResponseEntity.ok(
+                adminService.getAdminItems(
+                        page,
+                        size,
+                        search,
+                        itemType,
+                        effectType,
+                        sortPrice
+                )
+        );
+    }
+
+    @PostMapping("/items/addition")
+    public ResponseEntity<ReqAdminItems> addItem(
+            @RequestBody ReqAdminItems items
+    ){
+        return ResponseEntity.ok(adminService.addItem(items));
+    }
+
+    @PatchMapping("/items/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ReqAdminItems> updateItem(
+            @PathVariable Integer id,
+            @RequestBody ReqAdminItems request
+    ) {
+        return ResponseEntity.ok(
+                adminService.updateItem(id, request)
+        );
+    }
+    @DeleteMapping("/items/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteItem(
+            @PathVariable Integer id
+    ) {
+        adminService.deleteItem(id);
+        return ResponseEntity.ok().build();
     }
 }

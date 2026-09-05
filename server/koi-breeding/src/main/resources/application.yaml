@@ -12,7 +12,6 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/koi_breeding
-
   jpa:
     hibernate:
       ddl-auto: update

@@ -1,18 +1,16 @@
 package com.koibreeding.service;
 
+import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Transaction;
 import com.koibreeding.domain.Trade;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.request.AdminModerationUserRequest;
+import com.koibreeding.dto.request.ReqAdminItems;
 import com.koibreeding.dto.response.admin.AdminDashboardDto;
 import com.koibreeding.dto.response.admin.AdminUserDto;
-import com.koibreeding.enums.PaymentStatus;
-import com.koibreeding.enums.TransactionStatus;
-import com.koibreeding.enums.UserStatus;
-import com.koibreeding.repository.PaymentRepository;
-import com.koibreeding.repository.TransactionRepository;
-import com.koibreeding.repository.TradeRepository;
-import com.koibreeding.repository.UserRepository;
+import com.koibreeding.enums.*;
+import com.koibreeding.repository.*;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -24,11 +22,17 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
+
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +44,9 @@ public class AdminService {
     private final AdminMailService adminMailService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+
+    private final ItemRepository itemRepository;
+
 
     @Transactional
     public AdminUserDto handleUpdateUser(AdminModerationUserRequest request) {
@@ -254,5 +261,135 @@ public class AdminService {
                     previousStartOffsetDateTime,
                     previousEndOffsetDateTime);
         }
+    }
+
+    public Page<ReqAdminItems> getAdminItems(
+            int page,
+            int size,
+            String search,
+            ItemType itemType,
+            EffectType effectType,
+            String sortPrice
+    ) {
+        // 1. Xử lý Sắp xếp (Sort) theo giá
+        Sort sort = Sort.unsorted();
+        if ("asc".equalsIgnoreCase(sortPrice)) {
+            sort = Sort.by(Sort.Direction.ASC, "price");
+        } else if ("desc".equalsIgnoreCase(sortPrice)) {
+            sort = Sort.by(Sort.Direction.DESC, "price");
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // 2. Xây dựng Specification điều kiện lọc động
+        Specification<Item> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Tìm kiếm theo tên (không phân biệt hoa thường)
+            if (search != null && !search.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + search.trim().toLowerCase() + "%"));
+            }
+
+            // Lọc theo Enum ItemType
+            if (itemType != null) {
+                predicates.add(cb.equal(root.get("itemType"), itemType));
+            }
+
+            // Lọc theo Enum EffectType
+            if (effectType != null) {
+                predicates.add(cb.equal(root.get("effectType"), effectType));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // 3. Truy vấn Database và Map sang DTO
+        Page<Item> itemPage = itemRepository.findAll(spec, pageable);
+
+        return itemPage.map(item -> ReqAdminItems.builder()
+                .id(item.getId())
+                .imageUrl(item.getItemUrl())
+                .nameItem(item.getName())
+                .description(item.getDescription())
+                .itemType(item.getItemType())
+                .price(item.getPrice())
+                .effectType(item.getEffectType())
+                .build()
+        );
+    }
+
+    public ReqAdminItems addItem(ReqAdminItems item){
+        Item newItem = new Item();
+        newItem.setItemUrl(item.getImageUrl());
+        newItem.setName(item.getNameItem());
+        newItem.setDescription(item.getDescription());
+        newItem.setItemType(item.getItemType());
+        newItem.setPrice(item.getPrice());
+        newItem.setEffectType(item.getEffectType());
+        newItem.setEffectValue(BigDecimal.valueOf(10));
+        itemRepository.save(newItem);
+        return new ReqAdminItems(
+                newItem.getId(),
+                newItem.getItemUrl(),
+                newItem.getName(),
+                newItem.getDescription(),
+                newItem.getItemType(),
+                newItem.getPrice(),
+                newItem.getEffectType()
+        );
+    }
+
+    @Transactional
+    public ReqAdminItems updateItem(
+            Integer id,
+            ReqAdminItems request
+    ) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Item not found with id: " + id)
+                );
+
+        if (request.getImageUrl() != null) {
+            item.setItemUrl(request.getImageUrl());
+        }
+
+        if (request.getNameItem() != null) {
+            item.setName(request.getNameItem());
+        }
+
+        if (request.getDescription() != null) {
+            item.setDescription(request.getDescription());
+        }
+
+        if (request.getItemType() != null) {
+            item.setItemType(request.getItemType());
+        }
+
+        if (request.getPrice() != null) {
+            item.setPrice(request.getPrice());
+        }
+
+        if (request.getEffectType() != null) {
+            item.setEffectType(request.getEffectType());
+        }
+
+        Item updatedItem = itemRepository.save(item);
+
+        return new ReqAdminItems(
+                updatedItem.getId(),
+                updatedItem.getItemUrl(),
+                updatedItem.getName(),
+                updatedItem.getDescription(),
+                updatedItem.getItemType(),
+                updatedItem.getPrice(),
+                updatedItem.getEffectType()
+        );
+    }
+
+    public void deleteItem(Integer id){
+        Item item = itemRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("No found item")
+        );
+        itemRepository.delete(item);
     }
 }

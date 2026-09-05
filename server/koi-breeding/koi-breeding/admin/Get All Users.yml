@@ -1,15 +1,11 @@
 info:
-  name: Delete User
+  name: Get All Users
   type: http
-  seq: 3
+  seq: 2
 
 http:
-  method: DELETE
-  url: localhost:8090/koi_breeding/admin/users?id=1
-  params:
-    - name: id
-      value: "1"
-      type: query
+  method: GET
+  url: localhost:8090/koi_breeding/admin/users
   body:
     type: json
     data: ""

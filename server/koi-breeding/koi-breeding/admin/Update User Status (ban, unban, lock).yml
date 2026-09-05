@@ -5,14 +5,15 @@ info:
 
 http:
   method: PUT
-  url: localhost:8090/koi_breeding/admin/users?id=1
-  params:
-    - name: id
-      value: "1"
-      type: query
+  url: localhost:8090/koi_breeding/admin/users
   body:
     type: json
-    data: ""
+    data: |-
+      {
+          "id": 1,
+          "status": "ACTIVE", 
+          "reason" : "No reason"
+      }
   auth: inherit
 
 settings:

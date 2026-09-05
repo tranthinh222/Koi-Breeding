@@ -26,4 +26,12 @@ public interface KoiRepository extends JpaRepository<Koi, Integer> {
     )
     """)
     List<Koi> findAvailableKoisByUserId(@Param("userId") Integer userId);
+
+        interface LifeStageCount {
+        String getLifeStage();
+        Long getCount();
+    }
+
+    @Query("SELECT k.lifeStage AS lifeStage, COUNT(k.id) AS count FROM Koi k GROUP BY k.lifeStage")
+    List<LifeStageCount> countKoiByLifeStage();
 }

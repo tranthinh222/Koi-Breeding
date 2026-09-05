@@ -14,6 +14,7 @@ interface FilterModalProps {
 	filter: IFilterState;
 	setFilter: React.Dispatch<React.SetStateAction<IFilterState>>;
 	onClose: () => void;
+	lockedGender?: "MALE" | "FEMALE";
 }
 
 function FilterModal({
@@ -23,6 +24,7 @@ function FilterModal({
 	filter,
 	setFilter,
 	onClose,
+	lockedGender,
 }: FilterModalProps) {
 	return (
 		<div className={styles.overlay} onClick={onClose}>
@@ -36,19 +38,28 @@ function FilterModal({
 						<X size={24} />
 					</button>
 				</div>
-				<div className={styles.filterGroup}>
-					<label>Gender</label>
-					<select
-						value={filter.gender}
-						onChange={(e) =>
-							setFilter({ ...filter, gender: e.target.value })
-						}
-					>
-						<option value="ALL">All Genders</option>
-						<option value="MALE">Male</option>
-						<option value="FEMALE">Female</option>
-					</select>
-				</div>
+				{lockedGender ? (
+					<div className={styles.filterGroup}>
+						<label>Breeding role</label>
+						<div className={styles.lockedGender}>
+							{lockedGender === "MALE" ? "♂ Male · Father" : "♀ Female · Mother"}
+						</div>
+					</div>
+				) : (
+					<div className={styles.filterGroup}>
+						<label>Gender</label>
+						<select
+							value={filter.gender}
+							onChange={(e) =>
+								setFilter({ ...filter, gender: e.target.value })
+							}
+						>
+							<option value="ALL">All Genders</option>
+							<option value="MALE">Male</option>
+							<option value="FEMALE">Female</option>
+						</select>
+					</div>
+				)}
 				<div className={styles.filterGroup}>
 					<label>Pond</label>
 					<select
@@ -86,7 +97,7 @@ function FilterModal({
 						className={styles.btnReset}
 						onClick={() => {
 							setFilter({
-								gender: "ALL",
+								gender: lockedGender ?? "ALL",
 								pondId: "ALL",
 								variety: "ALL",
 							});

@@ -191,6 +191,7 @@ const MOCK_PONDS: IPond[] = [
 	},
 	name,
 	level: 10,
+	nextLevelPrice: 900,
 	currentQuantity: 0,
 	capacity: index === 0 ? 15 : 10,
 	waterQuality: index === 0 ? 70 : 100,

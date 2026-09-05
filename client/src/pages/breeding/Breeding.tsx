@@ -1,8 +1,6 @@
-import { Filter, Undo2 } from "lucide-react";
+import { Filter, Mars, Undo2, Venus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CURRENT_USER_ID } from "../../api/currentUser";
-import { getUser, type User } from "../../api/user";
 import { toast } from "../../components/share/Toast/toast";
 import Toaster from "../../components/share/Toast/Toaster";
 import BreedingGuide from "../../components/user/breeding/BreedingGuide/BreedingGuide";
@@ -18,7 +16,6 @@ import styles from "./Breeding.module.css";
 
 function Breeding() {
 	const navigate = useNavigate();
-	const [userLogin, setUserLogin] = useState<User | null>(null);
 	const [koiList, setKoiList] = useState<IKoi[]>([]);
 
 	// Trạng thái hai con cá được chọn
@@ -33,29 +30,17 @@ function Breeding() {
 	const [isFilter1Open, setIsFilter1Open] = useState(false);
 	const [isFilter2Open, setIsFilter2Open] = useState(false);
 	const [filter1, setFilter1] = useState<IFilterState>({
-		gender: "ALL",
+		gender: "MALE",
 		pondId: "ALL",
 		variety: "ALL",
 	});
 	const [filter2, setFilter2] = useState<IFilterState>({
-		gender: "ALL",
+		gender: "FEMALE",
 		pondId: "ALL",
 		variety: "ALL",
 	});
 	const [isGuideOpen, setIsGuideOpen] = useState(false);
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-
-	useEffect(() => {
-		const loadUser = async () => {
-			try {
-				const user = await getUser(CURRENT_USER_ID);
-				setUserLogin(user);
-			} catch (error) {
-				toast.error("Failed to fetch current user login.");
-			}
-		};
-		loadUser();
-	}, []);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -141,9 +126,17 @@ function Breeding() {
 
 				{/* BODY */}
 				<div className={styles.contentSection}>
-					{/* PANEL 1: PARENT 1 */}
-					<div className={styles.parentsSection}>
-						<h2>Parent 1</h2>
+					{/* MALE PARENT */}
+					<div
+						className={`${styles.parentsSection} ${styles.maleSection}`}
+					>
+						<div className={styles.parentHeading}>
+							<Mars />
+							<div>
+								<h2>Father</h2>
+								<span>Male Koi</span>
+							</div>
+						</div>
 						<div className={styles.parentFilter}>
 							<button
 								className={styles.filterButton}
@@ -153,6 +146,11 @@ function Breeding() {
 							</button>
 						</div>
 						<div className={styles.parentList}>
+							{filteredList1.length === 0 && (
+								<p className={styles.emptyParentList}>
+									No male koi found
+								</p>
+							)}
 							{filteredList1.map((koi) => (
 								<BreedingKoiCard
 									key={koi.id}
@@ -174,22 +172,29 @@ function Breeding() {
 						/>
 
 						<div className={styles.mainBreedingArea}>
-							<div
-								className={styles.breedingSlot}
-								style={{
-									borderColor: slot1 ? "transparent" : "",
-								}}
-							>
-								{slot1 && (
-									<img
+							<div className={styles.breedingSlotGroup}>
+								<span
+									className={`${styles.slotRole} ${styles.maleRole}`}
+								>
+									<Mars /> Father
+								</span>
+								<div
+									className={`${styles.breedingSlot} ${styles.maleSlot}`}
+									style={{
+										borderColor: slot1 ? "transparent" : "",
+									}}
+								>
+									{slot1 && (
+										<img
 										src={
 											slot1.dictionary.imageUrl ??
 											"/kois/koi-fish-null.svg"
 										}
-										alt="Parent 1"
+										alt="Father"
 										style={{ transform: "scaleX(-1)" }}
-									/>
-								)}
+										/>
+									)}
+								</div>
 							</div>
 
 							<button
@@ -205,21 +210,28 @@ function Breeding() {
 								</span>
 							</button>
 
-							<div
-								className={styles.breedingSlot}
-								style={{
-									borderColor: slot2 ? "transparent" : "",
-								}}
-							>
-								{slot2 && (
-									<img
+							<div className={styles.breedingSlotGroup}>
+								<span
+									className={`${styles.slotRole} ${styles.femaleRole}`}
+								>
+									<Venus /> Mother
+								</span>
+								<div
+									className={`${styles.breedingSlot} ${styles.femaleSlot}`}
+									style={{
+										borderColor: slot2 ? "transparent" : "",
+									}}
+								>
+									{slot2 && (
+										<img
 										src={
 											slot2.dictionary.imageUrl ??
 											"/kois/koi-fish-null.svg"
 										}
-										alt="Parent 2"
-									/>
-								)}
+										alt="Mother"
+										/>
+									)}
+								</div>
 							</div>
 						</div>
 
@@ -261,9 +273,17 @@ function Breeding() {
 						)}
 					</div>
 
-					{/* PANEL 2: PARENT 2 */}
-					<div className={styles.parentsSection}>
-						<h2>Parent 2</h2>
+					{/* FEMALE PARENT */}
+					<div
+						className={`${styles.parentsSection} ${styles.femaleSection}`}
+					>
+						<div className={styles.parentHeading}>
+							<Venus />
+							<div>
+								<h2>Mother</h2>
+								<span>Female Koi</span>
+							</div>
+						</div>
 						<div className={styles.parentFilter}>
 							<button
 								className={styles.filterButton}
@@ -273,6 +293,11 @@ function Breeding() {
 							</button>
 						</div>
 						<div className={styles.parentList}>
+							{filteredList2.length === 0 && (
+								<p className={styles.emptyParentList}>
+									No female koi found
+								</p>
+							)}
 							{filteredList2.map((koi) => (
 								<BreedingKoiCard
 									key={koi.id}
@@ -331,7 +356,8 @@ function Breeding() {
 				<FilterModal
 					uniquePonds={uniquePonds}
 					uniqueVarieties={uniqueVarieties}
-					title="Filter Parent 1"
+					title="Filter Father"
+					lockedGender="MALE"
 					filter={filter1}
 					setFilter={setFilter1}
 					onClose={() => setIsFilter1Open(false)}
@@ -341,7 +367,8 @@ function Breeding() {
 				<FilterModal
 					uniquePonds={uniquePonds}
 					uniqueVarieties={uniqueVarieties}
-					title="Filter Parent 2"
+					title="Filter Mother"
+					lockedGender="FEMALE"
 					filter={filter2}
 					setFilter={setFilter2}
 					onClose={() => setIsFilter2Open(false)}

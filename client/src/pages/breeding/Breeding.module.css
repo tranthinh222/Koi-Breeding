@@ -99,6 +99,43 @@
 	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
+.parentHeading {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.parentHeading > svg {
+	width: 36px;
+	height: 36px;
+}
+
+.parentHeading h2 { margin: 0; }
+.parentHeading span {
+	display: block;
+	margin-top: 2px;
+	color: rgba(255, 255, 255, 0.72);
+	font-family: "Grandstander", sans-serif;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.maleSection { border-color: #4389e8; }
+.maleSection .parentHeading > svg { color: #67a8ff; }
+.femaleSection { border-color: #df5d9d; }
+.femaleSection .parentHeading > svg { color: #ff83be; }
+
+.emptyParentList {
+	margin: auto;
+	color: rgba(255, 255, 255, 0.65);
+	font-family: "Grandstander", sans-serif;
+	font-weight: 700;
+	text-align: center;
+}
+
 .parentFilter {
 	width: 100%;
 	display: flex;
@@ -181,6 +218,31 @@
 	align-items: center;
 	transition: all 0.3s ease;
 }
+
+.breedingSlotGroup {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+
+.slotRole {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 5px 11px;
+	border-radius: 999px;
+	color: white;
+	font-family: "Grandstander", sans-serif;
+	font-size: 13px;
+	font-weight: 800;
+}
+
+.slotRole svg { width: 16px; height: 16px; }
+.maleRole { background: #2778d8; }
+.femaleRole { background: #d83f89; }
+.maleSlot { box-shadow: 0 0 24px rgba(39, 120, 216, 0.22); }
+.femaleSlot { box-shadow: 0 0 24px rgba(216, 63, 137, 0.22); }
 
 .breedingSlot img {
 	width: 120%;

@@ -17,15 +17,26 @@ import {
   type AdminUserDto,
   type AdminUserStatus,
 } from "../../api/admin";
+
 import { AdminNavbar } from "./components/AdminNavbar";
 import { AdminSidebar } from "./components/AdminSidebar";
+import UserModerationModal from "./components/UserModerationModal";
 import "../../style/admin.css";
 import maleDefaultAvatar from '../../assets/avatars/male_blank_avatar.png'
 import femaleDefaultAvatar from '../../assets/avatars/female_blank_avatar.png'
 
-import UserModerationModal from "./components/UserModerationModal";
+// --- IMPORT CÁC COMPONENT TỪ DASHBOARD MỚI ---
+import { DashboardGrid, loadDashboardLayouts, type Layouts } from "./components/dashboard/DashboardGrid";
+import { Panel } from "./components/dashboard/Panel";
+import { UserGrowthChart, type TimeSeriesPoint } from "./components/charts/UserGrowthChart";
+import { BreedingSuccessChart, type BreedingPoint } from "./components/charts/BreedingSuccessChart";
+import { TransactionMixChart, type TransactionSlice } from "./components/charts/TransactionMixChart";
+import { RevenueAreaChart, type RevenuePoint } from "./components/charts/RevenueAreaChart";
+import { KoiLifeStageChart } from "./components/charts/KoiLifeStageChart";
+import { MarketplaceStatusChart } from "./components/charts/MarketplaceStatusChart";
+import { UserLocationChart } from "./components/charts/UserLocationChart";
 
-export type MenuTab = "dashboard" | "users" | "breeding" | "origin";
+export type MenuTab = "dashboard" | "users" | "breeding" | "items";
 export type OtherTab = "settings" | "account";
 type AdminView = MenuTab | OtherTab;
 type PanelAction = "View" | "Edit" | "Refresh";
@@ -39,6 +50,32 @@ interface PanelDescriptor {
   trend: "up" | "down" | "flat";
   accent: string;
 }
+
+// --- CONFIG CHO LƯỚI KÉO THẢ MỚI ---
+// Đổi key để trình duyệt tạo lại lưới layout mới
+const STORAGE_KEY = "koi-admin-dashboard-layout-v2";
+
+const DEFAULT_LAYOUTS: Layouts = {
+  lg: [
+    { i: "users", x: 0, y: 0, w: 6, h: 4, minW: 3, minH: 3 },
+    { i: "lifestage", x: 6, y: 0, w: 6, h: 4, minW: 3, minH: 3 },
+    { i: "location", x: 0, y: 4, w: 6, h: 4, minW: 3, minH: 3 },
+    { i: "marketplace", x: 6, y: 4, w: 6, h: 4, minW: 3, minH: 3 },
+  ],
+  md: [
+    { i: "users", x: 0, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
+    { i: "lifestage", x: 4, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
+    { i: "location", x: 0, y: 4, w: 4, h: 4, minW: 3, minH: 3 },
+    { i: "marketplace", x: 4, y: 4, w: 4, h: 4, minW: 3, minH: 3 },
+  ],
+  sm: [
+    { i: "users", x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 3 },
+    { i: "lifestage", x: 0, y: 4, w: 4, h: 4, minW: 2, minH: 3 },
+    { i: "location", x: 0, y: 8, w: 4, h: 4, minW: 2, minH: 3 },
+    { i: "marketplace", x: 0, y: 12, w: 4, h: 4, minW: 2, minH: 3 },
+  ],
+
+};
 
 function formatNumber(value: number | null | undefined) {
   return new Intl.NumberFormat("en-US").format(value ?? 0);
@@ -147,20 +184,36 @@ function Admin() {
       : "light";
   });
 
+  // State Layout cho Grid Dashboard Mới
+  const [layouts, setLayouts] = useState<Layouts>(() =>
+    loadDashboardLayouts(STORAGE_KEY, DEFAULT_LAYOUTS),
+  );
+
+  // States dữ liệu thực tế cho Biểu đồ
+  const [userGrowthData, setUserGrowthData] = useState<TimeSeriesPoint[]>([]);
+  const [breedingData, setBreedingData] = useState<BreedingPoint[]>([]);
+  const [transactionData, setTransactionData] = useState<TransactionSlice[]>([]);
+  const [revenueData, setRevenueData] = useState<RevenuePoint[]>([]);
+
+  // State quản lý xem biểu đồ nào đang mở full-screen
+  const [fullScreenChart, setFullScreenChart] = useState<string | null>(null);
+
   const [panelMenuOpenId, setPanelMenuOpenId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [dashboard, setDashboard] = useState<AdminDashboardResponse | null>(null);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
+
   const [users, setUsers] = useState<AdminUserDto[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const [usersError, setUsersError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
+
   const [statusModal, setStatusModal] = useState<{
     isOpen: boolean;
-    action: "ban" | "unban";
+    action: "ban" | "unban" | "delete" | "restore";
     userId: number;
   }>({
     isOpen: false,
@@ -168,10 +221,11 @@ function Admin() {
     userId: 1,
   });
 
-  const openStatusModal = (user: AdminUserDto) => {
+  // Bắt buộc truyền targetAction vào để không bao giờ bị nhầm
+  const openStatusModal = (user: AdminUserDto, targetAction: "ban" | "unban" | "delete" | "restore") => {
     setStatusModal({
       isOpen: true,
-      action: user.status === 'ACTIVE' ? 'ban' : 'unban',
+      action: targetAction,
       userId: user.id,
     });
   };
@@ -210,6 +264,40 @@ function Admin() {
       }
     };
 
+    const loadChartData = async () => {
+      try {
+        /*
+         * Lấy dữ liệu dạng <TimeSeriesPoint[]> cho UserGrowthChart
+         * VD: 
+         * const res = await apiClient.get('/admin/charts/user-growth');
+         * if (!cancelled) setUserGrowthData(res.data.data);
+         */
+
+        /*
+         * Lấy dữ liệu dạng <BreedingPoint[]> cho BreedingSuccessChart
+         * VD: 
+         * const res = await apiClient.get('/admin/charts/breeding-success');
+         * if (!cancelled) setBreedingData(res.data.data);
+         */
+
+        /*
+         * Lấy dữ liệu dạng <TransactionSlice[]> cho TransactionMixChart
+         * VD: 
+         * const res = await apiClient.get('/admin/charts/transaction-mix');
+         * if (!cancelled) setTransactionData(res.data.data);
+         */
+
+        /*
+         * Lấy dữ liệu dạng <RevenuePoint[]> cho RevenueAreaChart
+         * VD: 
+         * const res = await apiClient.get('/admin/charts/revenue');
+         * if (!cancelled) setRevenueData(res.data.data);
+         */
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu biểu đồ:", error);
+      }
+    };
+
     const loadUsers = async () => {
       setUsersLoading(true);
       setUsersError(null);
@@ -227,6 +315,7 @@ function Admin() {
     };
 
     void loadDashboard();
+    void loadChartData();
     void loadUsers();
 
     return () => {
@@ -288,6 +377,10 @@ function Admin() {
                 <div>
                   <p className="eyebrow">Dashboard</p>
                   <h1>Control the game, economy, and community in one place.</h1>
+                  {/* Text hướng dẫn nhỏ cho lưới kéo thả */}
+                  <p style={{ marginTop: '8px', color: 'var(--text-muted)', fontSize: '14px' }}>
+                    Drag the ⠿ icon in the corner of the chart panel to move, drag the bottom-right corner to resize.
+                  </p>
                 </div>
                 <button type="button" className="primary-button" onClick={refreshDashboard}>
                   Refresh data
@@ -296,7 +389,6 @@ function Admin() {
               </div>
 
               {dashboardError ? <div className="inline-alert error">{dashboardError}</div> : null}
-
               <div className="panel-grid panel-grid-metrics">
                 {panelDescriptors.map((panel) => (
                   <article key={panel.id} className={`dashboard-panel accent-${panel.accent}`}>
@@ -317,8 +409,67 @@ function Admin() {
                   </article>
                 ))}
               </div>
+              <div className="dashboard-grid-wrapper" style={{ marginTop: '16px' }}>
+                <DashboardGrid
+                  layouts={layouts}
+                  onLayoutChange={(_current, all) => setLayouts(all)}
+                  storageKey={STORAGE_KEY}
+                >
+                  <Panel 
+                    key="users" panelId="chart-users"
+                    title="New Users" subtitle="Last 6 months."
+                    openPanelMenu={panelMenuOpenId} setOpenPanelMenu={setPanelMenuOpenId}
+                    onView={() => setFullScreenChart("users")}
+                  >
+                    {!dashboard?.userGrowthChart?.length ? (
+                      <div className="empty-state" style={{height: '100%'}}>No data claimed. </div>
+                    ) : (
+                      <UserGrowthChart data={dashboard.userGrowthChart} />
+                    )}
+                  </Panel>
 
-              <div className="panel-grid panel-grid-secondary">
+                  <Panel 
+                    key="lifestage" panelId="chart-lifestage"
+                    title="Koi Lifestage" subtitle="Number of fish by lifestage"
+                    openPanelMenu={panelMenuOpenId} setOpenPanelMenu={setPanelMenuOpenId}
+                    onView={() => setFullScreenChart("lifestage")}
+                  >
+                    {!dashboard?.koiLifeStageChart?.length ? (
+                      <div className="empty-state" style={{height: '100%'}}>No data claimed. </div>
+                    ) : (
+                      <KoiLifeStageChart data={dashboard.koiLifeStageChart} />
+                    )}
+                  </Panel>
+
+                  <Panel 
+                    key="location" panelId="chart-location"
+                    title="Users' Location" subtitle="Province/city"
+                    openPanelMenu={panelMenuOpenId} setOpenPanelMenu={setPanelMenuOpenId}
+                    onView={() => setFullScreenChart("location")}
+                  >
+                    {!dashboard?.locationChart?.length ? (
+                      <div className="empty-state" style={{height: '100%'}}>No data claimed. </div>
+                    ) : (
+                      <UserLocationChart data={dashboard.locationChart} />
+                    )}
+                  </Panel>
+
+                  <Panel 
+                    key="marketplace" panelId="chart-marketplace"
+                    title="Market liquidity" subtitle="Listing status by date"
+                    openPanelMenu={panelMenuOpenId} setOpenPanelMenu={setPanelMenuOpenId}
+                    onView={() => setFullScreenChart("marketplace")}
+                  >
+                    {!dashboard?.marketplaceChart?.length ? (
+                      <div className="empty-state" style={{height: '100%'}}>No data claimed. </div>
+                    ) : (
+                      <MarketplaceStatusChart data={dashboard.marketplaceChart} />
+                    )}
+                  </Panel>
+                </DashboardGrid>
+              </div>
+
+              <div className="panel-grid panel-grid-secondary" style={{ marginTop: '16px' }}>
                 <article className="dashboard-panel ranking-panel">
                   <PanelHeader
                     title="Top users"
@@ -429,22 +580,53 @@ function Admin() {
                           </div>
                         </div>
                       </div>
-
                       <div className="user-actions">
-                        <button
-                          type="button"
-                          className={`action-button ${user.status === "ACTIVE" ? "danger" : "success"}`}
-                          onClick={() => openStatusModal(user)}
-                        >
-                          {user.status === "ACTIVE" ? "Ban" : "Unban"}
-                        </button>
-                        <button type="button" className="action-button neutral">
-                          Edit
-                        </button>
-                        <button type="button" className="icon-button">
-                          <MoreHorizontal size={18} />
-                        </button>
+                        {user.status === "ACTIVE" ? (
+                          <>
+                            <button
+                              type="button"
+                              className="action-button danger"
+                              onClick={() => openStatusModal(user, "ban")}
+                            >
+                              Ban
+                            </button>
+                            <button
+                              type="button"
+                              className="action-button danger"
+                              onClick={() => openStatusModal(user, "delete")}
+                            >
+                              Delete
+                            </button>
+                          </>
+                        ) : user.status === "BANNED" ? (
+                          <>
+                            <button
+                              type="button"
+                              className="action-button success"
+                              onClick={() => openStatusModal(user, "unban")}
+                            >
+                              Unban
+                            </button>
+                            <button
+                              type="button"
+                              className="action-button danger"
+                              onClick={() => openStatusModal(user, "delete")}
+                            >
+                              Delete
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            className="action-button success"
+                            onClick={() => openStatusModal(user, "restore")}
+                          >
+                            Restore
+                          </button>
+                        )}
+
                       </div>
+
                     </article>
                   ))
                 ) : (
@@ -501,11 +683,11 @@ function Admin() {
             </div>
           )}
 
-          {activeView === "origin" && (
+          {activeView === "items" && (
             <div className="feature-placeholder">
-              <p className="eyebrow">Origin</p>
-              <h1>Koi origin management area</h1>
-              <p>Use this space for variety origins, taxonomy, and origin content control.</p>
+              <p className="eyebrow">Items</p>
+              <h1>Koi items management area</h1>
+              <p>Use this space for Items management: Add, Edit item's price and effects, Delete Items </p>
             </div>
           )}
 
@@ -591,11 +773,36 @@ function Admin() {
               </aside>
             </div>
           )}
+          {/* --- FULLSCREEN CHART MODAL --- */}
+          {fullScreenChart && (
+            <div className="chart-modal-overlay" onClick={() => setFullScreenChart(null)}>
+              <div className="chart-modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="chart-modal-header">
+                  <h2>
+                    {fullScreenChart === "users" && "New Users"}
+                    {fullScreenChart === "lifestage" && "Koi Lifestage"}
+                    {fullScreenChart === "location" && "Users' Location"}
+                    {fullScreenChart === "marketplace" && "Market liquidity"}
+                  </h2>
+                  <button type="button" className="close-button" onClick={() => setFullScreenChart(null)}>
+                    ✕
+                  </button>
+                </div>
+                <div className="chart-modal-body">
+                  {fullScreenChart === "users" && <UserGrowthChart data={dashboard?.userGrowthChart || []} />}
+                  {fullScreenChart === "lifestage" && <KoiLifeStageChart data={dashboard?.koiLifeStageChart || []} />}
+                  {fullScreenChart === "location" && <UserLocationChart data={dashboard?.locationChart || []} />}
+                  {fullScreenChart === "marketplace" && <MarketplaceStatusChart data={dashboard?.marketplaceChart || []} />}
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       </main>
     </div>
   );
 }
+
 
 function PanelHeader({
   title,
@@ -618,22 +825,6 @@ function PanelHeader({
       <div>
         <h3>{title}</h3>
         <p>{subtitle}</p>
-      </div>
-
-      <div className="panel-options-wrap">
-        <button type="button" className="panel-options-trigger" onClick={() => setOpenPanelMenu(isOpen ? null : panelId)}>
-          <MoreHorizontal size={16} />
-        </button>
-
-        {isOpen && (
-          <div className="panel-options-menu">
-            {actions.map((action) => (
-              <button key={action} type="button" className="panel-option-item" onClick={() => setOpenPanelMenu(null)}>
-                {action}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

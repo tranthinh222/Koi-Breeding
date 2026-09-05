@@ -60,6 +60,14 @@ public class BreedingEvent {
 
     private OffsetDateTime endedAt;
 
+    @Column(nullable = false)
+    private Integer expectedEggCount = 0;
+
+    @Column(nullable = false)
+    private Boolean offspringGenerated = false;
+
+    private OffsetDateTime lastReminderAt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BreedingStatus status = BreedingStatus.STARTED;

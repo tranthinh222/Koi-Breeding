@@ -405,7 +405,7 @@ function BreedingGuide({ onClose }: BreedingGuideProps) {
 			);
 			if (sameRecipe) {
 				const results = [
-					{ name: sameRecipe.child.name, prob: sameRecipe.childRate },
+					{ name: sameRecipe.child.name, prob: sameRecipe.childRate ?? sameRecipe.targetRate ?? 0 },
 				];
 				// sameRecipe.mutations?.forEach((m) =>
 				// 	results.push({ name: m.name, prob: m.prob }),

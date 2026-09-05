@@ -39,6 +39,37 @@
 	background: #087d9d;
 }
 
+.pondWarningBanner {
+	position: absolute;
+	top: 92px;
+	left: 50%;
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	max-width: min(620px, calc(100% - 40px));
+	padding: 10px 16px;
+	border: 2px solid rgba(255, 255, 255, 0.9);
+	border-radius: 14px;
+	color: white;
+	font-family: "Grandstander", sans-serif;
+	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.32);
+	transform: translateX(-50%);
+	backdrop-filter: blur(8px);
+}
+
+.pondWarningBanner.warning { background: rgba(180, 83, 9, 0.94); }
+.pondWarningBanner.critical { background: rgba(185, 28, 28, 0.95); animation: warningPulse 1.8s ease-in-out infinite; }
+.pondWarningBanner svg { width: 28px; height: 28px; flex: 0 0 auto; }
+.pondWarningBanner div { display: grid; gap: 2px; }
+.pondWarningBanner strong { font-size: 16px; }
+.pondWarningBanner span { font-size: 13px; }
+
+@keyframes warningPulse {
+	0%, 100% { box-shadow: 0 6px 22px rgba(0, 0, 0, 0.32); }
+	50% { box-shadow: 0 6px 28px rgba(239, 68, 68, 0.75); }
+}
+
 .coins {
 	position: absolute;
 	top: 15px;

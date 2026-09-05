@@ -545,7 +545,48 @@ public class SampleDataInitializer {
 
         List<BreedingRate> sampleBreedingRates = new ArrayList<>();
 
+        // Cross-breeding recipes. A concrete dictionary variant represents broader
+        // names from the breeding table (for example Narumi Asagi represents Asagi).
+        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Shiro Utsuri Doitsu", "Tancho Showa", BreedingRecipeType.CROSS, .005, .35, .30);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Shiro Utsuri Doitsu", "Maruten Showa", BreedingRecipeType.CROSS, .0325, .35, .30);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Shiro Utsuri Doitsu", "Hi Showa", BreedingRecipeType.CROSS, .075, .35, .30);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Shiro Utsuri Doitsu", "Kindai Showa", BreedingRecipeType.CROSS, .1375, .35, .30);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Narumi Asagi", "Aigoromo", BreedingRecipeType.CROSS, .14, .35, .35);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Narumi Asagi", "Sumigoromo", BreedingRecipeType.CROSS, .04, .35, .35);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Narumi Asagi", "Budo Koromo", BreedingRecipeType.CROSS, .02, .35, .35);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Narumi Asagi", "Doitsu Kohaku", "Shusui", BreedingRecipeType.CROSS, .12, .40, .20);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Narumi Asagi", "Doitsu Kohaku", "Hi Shusui", BreedingRecipeType.CROSS, .18, .40, .20);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Narumi Asagi", "Kohaku", "Goshiki", BreedingRecipeType.CROSS, .20, .35, .35);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Chagoi", "Kigoi", "Karashi", BreedingRecipeType.CROSS, .225, .40, .25);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Chagoi", "Kigoi", "Soragoi", BreedingRecipeType.CROSS, .025, .40, .25);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Soragoi", "Chagoi", "Ochiba Shigure", BreedingRecipeType.CROSS, .30, .30, .30);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Yamabuki Ogon", "Shusui", "Midorigoi", BreedingRecipeType.CROSS, .02, .25, .45);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Goromo", "Showa Sanshoku", "Koromo Showa", BreedingRecipeType.CROSS, .05, .15, .40);
+
+        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Kohaku", "Kohaku", BreedingRecipeType.PURE, .78, 0, 0);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Kohaku", "Kohaku", "Tancho Kohaku", BreedingRecipeType.PURE, .05, 0, 0);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Showa Sanshoku", "Showa Sanshoku", "Showa Sanshoku", BreedingRecipeType.PURE, .87, 0, 0);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Showa Sanshoku", "Showa Sanshoku", "Tancho Showa", BreedingRecipeType.PURE, .05, 0, 0);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Magoi", "Magoi", "Magoi", BreedingRecipeType.PURE, .78, 0, 0);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Magoi", "Magoi", "Chagoi", BreedingRecipeType.PURE, .04, 0, 0);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Magoi", "Magoi", "Kohaku", BreedingRecipeType.PURE, .01, 0, 0);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Karasugoi", "Karasugoi", "Karasugoi", BreedingRecipeType.PURE, .85, 0, 0);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Karasugoi", "Karasugoi", "Hajiro", BreedingRecipeType.PURE, .08, 0, 0);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Ginrin", "Ginrin", BreedingRecipeType.PURE, .92, 0, 0);
+
+        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Kohaku", "Ginrin Kohaku", BreedingRecipeType.OVERLAY, .30, 0, .60);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Showa Sanshoku", "Ginrin Showa", BreedingRecipeType.OVERLAY, .25, 0, .65);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Hi Utsuri", "Ginrin Hi Utsuri", BreedingRecipeType.OVERLAY, .25, 0, .65);
+        addRate(sampleBreedingRates, existingDictionariesByName, "Ginrin", "Ki Utsuri", "Ginrin Ki Utsuri", BreedingRecipeType.OVERLAY, .25, 0, .65);
+
         breedingRateRepository.saveAll(sampleBreedingRates);
+    }
+
+    private void addRate(List<BreedingRate> target, Map<String, Dictionary> dictionaries, String father,
+            String mother, String child, BreedingRecipeType type, double targetRate, double fatherRate, double motherRate) {
+        Dictionary f = dictionaries.get(father), m = dictionaries.get(mother), c = dictionaries.get(child);
+        if (f != null && m != null && c != null) target.add(new BreedingRate(null, f, m, c, type,
+                BigDecimal.valueOf(targetRate), BigDecimal.valueOf(fatherRate), BigDecimal.valueOf(motherRate)));
     }
 
 }

@@ -14,4 +14,6 @@ public interface KoiRepository extends JpaRepository<Koi, Integer> {
     List<Koi> findAllByPond_Id(Integer pondId);
 
     long countByPond_Id(Integer pondId);
+
+    List<Koi> findAllByPond_Owner_Id(Integer ownerId);
 }

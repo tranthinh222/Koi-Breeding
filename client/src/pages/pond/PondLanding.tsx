@@ -1,4 +1,4 @@
-import { Bubbles, CheckCheck, Droplets, Gauge, Thermometer } from 'lucide-react'
+import { AlertTriangle, Bubbles, CheckCheck, Droplets, Gauge, Thermometer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { CURRENT_USER_ID } from '../../api/currentUser'
@@ -19,6 +19,7 @@ import BuyPondForm from '../../components/user/pond/BuyPondForm/BuyPondForm'
 import ShopBackground from '../../components/user/ShopBackground'
 import ShopNavigation from '../../components/user/ShopNavigation'
 import type { IKoi, IModelPagination, IOwner, IPond } from '../../types/backend'
+import { getPondAlert } from '../../utils/pondHealth'
 import Pond from './Pond'
 import styles from './PondLanding.module.css'
 
@@ -99,6 +100,11 @@ function PondLanding() {
         }
 
         setPondList(response.result)
+        setSelectedPond((current) =>
+          current
+            ? response.result.find((pond) => pond.id === current.id) ?? current
+            : current,
+        )
         setTotalPages(response.meta.totalPages)
         setTotalPonds(response.meta.totalElements)
       } catch (error) {
@@ -113,6 +119,8 @@ function PondLanding() {
     }
 
     loadData()
+    const refreshTimer = window.setInterval(loadData, 60_000)
+    return () => window.clearInterval(refreshTimer)
   }, [page, userLogin])
 
   const fetchData = async (
@@ -304,6 +312,17 @@ function PondLanding() {
                         alt={pond.name}
                       />
                       <span className={styles.pondLabel}>{pond.name}</span>
+                      {getPondAlert(pond) && (
+                        <div
+                          className={`${styles.pondAlert} ${getPondAlert(pond)?.severity === 'critical' ? styles.pondAlertCritical : styles.pondAlertWarning}`}
+                          title={getPondAlert(pond)?.message}
+                          role="status"
+                          aria-label={getPondAlert(pond)?.message}
+                        >
+                          <AlertTriangle />
+                          <span>{getPondAlert(pond)?.severity === 'critical' ? 'Danger' : 'Warning'}</span>
+                        </div>
+                      )}
                       <div className={styles.pondStats}>
                         <div className={styles.statBadge} title="pH Level">
                           <Droplets color="#667eea" /> {pond.pH}

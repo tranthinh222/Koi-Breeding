@@ -1,5 +1,6 @@
 import {
 	Bubbles,
+	AlertTriangle,
 	CheckCheck,
 	ChevronsLeft,
 	ChevronsRight,
@@ -31,6 +32,7 @@ import type {
 	IPond,
 } from "../../types/backend";
 import styles from "./Pond.module.css";
+import { getPondAlert } from "../../utils/pondHealth";
 
 interface PondProps {
 	pond: IPond;
@@ -54,6 +56,7 @@ function Pond({
 	onClearIncomingKoi,
 }: PondProps) {
 	const navigate = useNavigate();
+	const pondAlert = getPondAlert(pond);
 	const [isInformationDialogOpen, setIsInformationDialogOpen] =
 		useState<boolean>(false);
 	const [koiList, setKoiList] = useState<IKoi[]>([]);
@@ -182,6 +185,12 @@ function Pond({
 		<>
 			<main className={styles.wrapper}>
 				<section className={styles.pondShell}>
+					{pondAlert && (
+						<div className={`${styles.pondWarningBanner} ${pondAlert.severity === "critical" ? styles.critical : styles.warning}`} title={pondAlert.message} role="alert">
+							<AlertTriangle />
+							<div><strong>{pondAlert.severity === "critical" ? "Dangerous pond conditions" : "Pond needs attention"}</strong><span>{pondAlert.issues.join(" • ")}</span></div>
+						</div>
+					)}
 					{isInitialLoaded && (
 						<PondCanvas
 							pondKoiList={koiList}

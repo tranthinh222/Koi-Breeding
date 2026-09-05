@@ -46,12 +46,12 @@ public class BreedingRate {
     @Column(nullable = false)
     private BreedingRecipeType type;
 
-    @Column(nullable = false, precision = 4, scale = 2)
+    @Column(nullable = false, precision = 6, scale = 4)
     private BigDecimal targetRate;
 
-    @Column(nullable = false, precision = 4, scale = 2)
+    @Column(nullable = false, precision = 6, scale = 4)
     private BigDecimal fatherRate;
 
-    @Column(nullable = false, precision = 4, scale = 2)
+    @Column(nullable = false, precision = 6, scale = 4)
     private BigDecimal motherRate;
 }

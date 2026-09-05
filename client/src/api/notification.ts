@@ -19,6 +19,8 @@ export async function markAllNotificationsRead(userId: number): Promise<void> {
 }
 
 export function notificationStreamUrl(userId: number): string {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8090/koi_breeding'
+  const baseUrl =
+    import.meta.env.VITE_API_BASE_URL ??
+    'http://localhost:8090/koi_breeding/api/v1'
   return `${baseUrl}/users/${userId}/notifications/stream`
 }

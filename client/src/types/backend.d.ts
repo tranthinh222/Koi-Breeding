@@ -164,7 +164,9 @@ export interface IBreedingRecipe {
 	mother: IKoiVarient;
 	child: IKoiVarient;
 	type: BreedingRecipeType;
-	childRate: number;
+	targetRate?: number;
+	/** @deprecated Backend uses targetRate. */
+	childRate?: number;
 	fatherRate: number;
 	motherRate: number;
 }
@@ -185,8 +187,9 @@ export interface IBreedingEvent {
 	female: IKoi;
 	pond: IKoiPond;
 	breedingType: BreedingType;
-	startedAt: Date;
-	expectedHatchDate: Date;
-	endedAt: Date;
+	startedAt: string | Date;
+	expectedHatchDate: string | Date;
+	endedAt: string | Date | null;
 	status: BreedingStatus;
+	expectedEggCount: number;
 }

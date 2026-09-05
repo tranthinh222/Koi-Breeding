@@ -2,6 +2,10 @@ import { Filter, Mars, Undo2, Venus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "../../components/share/Toast/toast";
+import { callCreateBreedingEvent } from "../../api/breeding";
+import { CURRENT_USER_ID } from "../../api/currentUser";
+import { callFetchKoisInPond } from "../../api/koi";
+import { callFetchAllPonds } from "../../api/pond";
 import Toaster from "../../components/share/Toast/Toaster";
 import BreedingGuide from "../../components/user/breeding/BreedingGuide/BreedingGuide";
 import BreedingHistory from "../../components/user/breeding/BreedingHistory/BreedingHistory";
@@ -11,7 +15,7 @@ import FilterModal, {
 } from "../../components/user/breeding/FilterModal/FilterModal";
 import ModeSwitcher from "../../components/user/breeding/ModeSwitcher/ModeSwitcher";
 import PondSelectForm from "../../components/user/pond/PondSelectForm/PondSelectForm";
-import type { IKoi, IKoiVarient, IPond } from "../../types/backend";
+import type { IKoi, IPond } from "../../types/backend";
 import styles from "./Breeding.module.css";
 
 function Breeding() {
@@ -41,6 +45,7 @@ function Breeding() {
 	});
 	const [isGuideOpen, setIsGuideOpen] = useState(false);
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -51,10 +56,33 @@ function Breeding() {
 	}, []);
 
 	const handleFetchUserKoiList = async (): Promise<IKoi[]> => {
-		console.info(
-			"No koi returned by the backend; using frontend sample koi.",
-		);
-		return createMockKoiList(1);
+		try {
+			const ponds = await callFetchAllPonds(`owner=${CURRENT_USER_ID}&page=0&size=100`);
+			const pondList = ponds.data.data?.result ?? [];
+			const responses = await Promise.all(pondList.map((pond) => callFetchKoisInPond(pond.id)));
+			return responses.flatMap((response) => response.data.data ?? []);
+		} catch (error) {
+			toast.error("Failed to load your koi.");
+			return [];
+		}
+	};
+
+	const handleStartBreeding = async (targetPond: IPond) => {
+		if (!slot1 || !slot2 || isSubmitting) return;
+		setIsSubmitting(true);
+		try {
+			const response = await callCreateBreedingEvent({
+				fatherId: slot1.id, motherId: slot2.id, pondId: targetPond.id,
+				breedingType: isAutoMode ? "AUTOMATIC" : "MANUAL", userId: CURRENT_USER_ID,
+			});
+			const event = response.data.data;
+			setIsSelectingPond(false); setSlot1(null); setSlot2(null);
+			toast.success(`Breeding started in ${targetPond.name}${event ? ` with ${event.expectedEggCount} estimated eggs` : ""}.`);
+			setKoiList((list) => list.map((koi) => koi.id === slot1.id || koi.id === slot2.id ? { ...koi, pondId: targetPond.id } : koi));
+		} catch (error) {
+			const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message;
+			toast.error(message ?? "Could not start breeding. Please check the selected pond.");
+		} finally { setIsSubmitting(false); }
 	};
 
 	// Logic Click chọn cá
@@ -382,12 +410,7 @@ function Breeding() {
 						selectedKoi={slot1}
 						currentPond={{ id: -1 } as IPond}
 						onClose={() => setIsSelectingPond(false)}
-						onSubmit={(targetPond: IPond) => {
-							setIsSelectingPond(false);
-							toast.success(
-								`Parents moved to ${targetPond.name} for isolation! Breeding process started.`,
-							);
-						}}
+						onSubmit={(targetPond: IPond) => void handleStartBreeding(targetPond)}
 					/>
 				</div>
 			)}
@@ -403,78 +426,3 @@ function Breeding() {
 }
 
 export default Breeding;
-
-// Dữ liệu Mock --------------------------
-const MOCK_VARIENT: IKoiVarient[] = [
-	{
-		id: 1,
-		name: "Kohaku",
-		origin: "Japan",
-		scaleType: "WAGOI",
-		shape: "STANDARD",
-		baseMaxLength: 90.0,
-		baseGrowthRate: 0.015,
-		midAge: 400,
-		alphaWeight: 0.000015,
-		basePrice: 100,
-		alphaPrice: 1.68,
-		imageUrl: "/kois/koi-fish-kohaku.svg",
-	},
-	{
-		id: 2,
-		name: "Menkaburi Kohaku",
-		origin: "Japan",
-		scaleType: "WAGOI",
-		shape: "STANDARD",
-		baseMaxLength: 90.0,
-		baseGrowthRate: 0.015,
-		midAge: 400,
-		alphaWeight: 0.000015,
-		basePrice: 110,
-		alphaPrice: 1.69,
-		imageUrl: "/kois/koi-fish-menkaburi-kohaku.svg",
-	},
-	{
-		id: 3,
-		name: "Inazuma Kohaku",
-		origin: "Japan",
-		scaleType: "WAGOI",
-		shape: "STANDARD",
-		baseMaxLength: 90.0,
-		baseGrowthRate: 0.015,
-		midAge: 400,
-		alphaWeight: 0.000015,
-		basePrice: 180,
-		alphaPrice: 1.75,
-		imageUrl: "/kois/koi-fish-inazuma-kohaku.svg",
-	},
-];
-
-const createMockKoiList = (pondId: number): IKoi[] =>
-	Array.from({ length: 15 }, (_value, index) => {
-		const koiVarient = MOCK_VARIENT[index % MOCK_VARIENT.length];
-		return {
-			id: -(pondId * 100 + index + 1),
-			name: `${koiVarient.name} ${index + 1}`,
-			age: 50 + index * 5,
-			length: 7.2 + (2 * Math.random() - 1),
-			weight: 0.15 + (0.06 * Math.random() - 0.03),
-			health: 90,
-			foodBar: 80,
-			gender: index % 2 === 0 ? "MALE" : "FEMALE",
-			price: koiVarient.basePrice,
-			mutation: null,
-			bornedAt: new Date(),
-			pondId: (index % 3) + 1,
-			lifeStage: "FRY",
-			father: null,
-			mother: null,
-			potential: 0.8 + 0.2 * Math.random(),
-			dictionary: koiVarient,
-			patternScore: Math.round(20 * Math.random() + 80),
-			colorScore: Math.round(10 * Math.random() + 90),
-			bodyScore: Math.round(30 * Math.random() + 70),
-			skinScore: Math.round(15 * Math.random() + 85),
-			scaleScore: Math.round(25 * Math.random() + 75),
-		};
-	});

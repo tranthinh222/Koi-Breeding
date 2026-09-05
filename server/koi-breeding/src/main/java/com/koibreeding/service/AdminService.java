@@ -13,12 +13,15 @@ import com.koibreeding.repository.PaymentRepository;
 import com.koibreeding.repository.TransactionRepository;
 import com.koibreeding.repository.TradeRepository;
 import com.koibreeding.repository.UserRepository;
+import com.koibreeding.repository.KoiRepository;
+import com.koibreeding.repository.MarketRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,6 +40,8 @@ public class AdminService {
     private final PaymentRepository paymentRepository;
     private final TransactionRepository transactionRepository;
     private final TradeRepository tradeRepository;
+    private final KoiRepository koiRepository;
+    private final MarketRepository marketRepository;
     private final AdminMailService adminMailService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -95,6 +100,37 @@ public class AdminService {
         long currentMarketplaceTrades = tradeRepository.countByTradeAtBetween(window.currentStartOffsetDateTime(), window.currentEndOffsetDateTime());
         long previousMarketplaceTrades = tradeRepository.countByTradeAtBetween(window.previousStartOffsetDateTime(), window.previousEndOffsetDateTime());
 
+        // 1. Tính toán mốc thời gian từ Java
+        Instant sixMonthsAgo = Instant.now().minus(180, ChronoUnit.DAYS);
+        OffsetDateTime sevenDaysAgo = OffsetDateTime.now().minus(7, ChronoUnit.DAYS);
+
+        // 2. Data Biểu đồ Vị trí (Location) - Đã dùng JPQL sẵn nên giữ nguyên
+        List<AdminDashboardDto.LocationPointDto> locationChart = userRepository.countUsersByLocation()
+            .stream()
+            .map(res -> new AdminDashboardDto.LocationPointDto(res.getLocation(), res.getCount()))
+            .toList();
+
+        // 3. Data Biểu đồ Giai đoạn Koi (LifeStage) - Đã dùng JPQL sẵn nên giữ nguyên
+        List<AdminDashboardDto.LifeStagePointDto> lifeStageChart = koiRepository.countKoiByLifeStage()
+            .stream()
+            .map(res -> new AdminDashboardDto.LifeStagePointDto(res.getLifeStage(), res.getCount()))
+            .toList();
+
+        // 4. Data Biểu đồ Tăng trưởng User (Truyền sixMonthsAgo vào)
+        List<AdminDashboardDto.TimeSeriesPointDto> userGrowthChart = userRepository.countUserGrowthByMonth(sixMonthsAgo)
+            .stream()
+            .map(res -> new AdminDashboardDto.TimeSeriesPointDto(res.getLabel(), res.getValue()))
+            .toList();
+
+        // 5. Data Biểu đồ Chợ giao dịch (Truyền sevenDaysAgo vào)
+        List<AdminDashboardDto.MarketplacePointDto> marketplaceChart = marketRepository.getMarketplaceStatusByDay(sevenDaysAgo)
+            .stream()
+            .map(res -> new AdminDashboardDto.MarketplacePointDto(
+                res.getDate(),
+                res.getActive() != null ? res.getActive() : 0L,
+                res.getSold() != null ? res.getSold() : 0L,
+                res.getCancelled() != null ? res.getCancelled() : 0L
+            )).toList();
         List<AdminDashboardDto.RankingUserDto> topUsers = userRepository.findAll(PageRequest.of(
                         0,
                         Math.max(userLimit, 1),
@@ -121,6 +157,11 @@ public class AdminService {
                 .topUsers(topUsers)
                 .highestLevelUser(highestLevelUser)
                 .topTransactions(topTransactions)
+                // 4 dữ liệu biểu đồ
+                .locationChart(locationChart)
+                .koiLifeStageChart(lifeStageChart)
+                .userGrowthChart(userGrowthChart)
+                .marketplaceChart(marketplaceChart)
                 .build();
     }
 

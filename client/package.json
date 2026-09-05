@@ -15,6 +15,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-easy-crop": "^6.2.3",
+    "react-grid-layout": "^2.2.4",
     "react-router-dom": "^7.18.2",
     "recharts": "^3.10.1"
   },

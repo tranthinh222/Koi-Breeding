@@ -1,4 +1,4 @@
-import { Fish, LayoutDashboard, ShieldAlert, Settings, UserCircle2, Users, LogOut } from "lucide-react";
+import { Fish, LayoutDashboard, FlaskConical, Settings, UserCircle2, Users, LogOut } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { MenuTab, OtherTab } from "../Admin";
 import { logoutRequest } from "../../../api/auth";
@@ -10,7 +10,7 @@ const menuItems: Array<{ id: MenuTab; label: string; icon: LucideIcon }> = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "users", label: "Users", icon: Users },
   { id: "breeding", label: "Breeding", icon: Fish },
-  { id: "origin", label: "Origin", icon: ShieldAlert },
+  { id: "items", label: "Items", icon: FlaskConical },
 ];
 
 const otherItems: Array<{ id: OtherTab; label: string; icon: LucideIcon }> = [

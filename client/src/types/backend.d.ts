@@ -168,3 +168,25 @@ export interface IBreedingRecipe {
 	fatherRate: number;
 	motherRate: number;
 }
+
+export type BreedingType = "MANUAL" | "AUTOMATIC";
+export type BreedingStatus =
+	| "STARTED"
+	| "EGG_LAID"
+	| "ISOLATED"
+	| "HATCHED"
+	| "COMPLETED"
+	| "CANCELLED";
+
+export interface IBreedingEvent {
+	id: number;
+	user: IOwner;
+	male: IKoi;
+	female: IKoi;
+	pond: IKoiPond;
+	breedingType: BreedingType;
+	startedAt: Date;
+	expectedHatchDate: Date;
+	endedAt: Date;
+	status: BreedingStatus;
+}

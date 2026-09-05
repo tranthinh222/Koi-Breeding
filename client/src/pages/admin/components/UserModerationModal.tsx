@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { updateStatusUser } from "../../../api/admin"
-import type { AdminModerationUserRequest, AdminUserDto } from "../../../api/admin";
+import type { AdminModerationUserRequest, AdminUserDto, AdminUserStatus } from "../../../api/admin";
 
 import ReasonForm from "./ReasonForm";
 import Notification from "./AdminNotification";
@@ -10,7 +10,7 @@ import "../../../style/admin.css";
 
 interface UserModerationModalProps {
     isOpen: boolean;
-    action: "ban" | "unban";
+    action: "ban" | "unban" | "delete" | "restore"; // Bổ sung 2 trạng thái mới
     userId: number;
     onClose: () => void;
     onSuccess: (updatedUser: AdminUserDto) => void
@@ -33,55 +33,50 @@ const UserModerationModal: React.FC<UserModerationModalProps> = ({
 
     const handleClose = () => {
         if (loading) return;
-
         setIsClosing(true);
-
         setTimeout(() => {
             setIsClosing(false);
             onClose();
         }, 250);
     };
+
     const handleSubmit = async (reason: string) => {
         setLoading(true);
         setNotification(null);
 
         try {
-            /*
-             * Thay phần này bằng API thực tế của bạn.
-             *
-             * Ví dụ:
-             *
-             * await userService.updateBanStatus(
-             *     userId,
-             *     action,
-             *     reason
-             * );
-             */
+            // 1. CHUYỂN ĐỔI ACTION TỪ GIAO DIỆN SANG STATUS CỦA API
+            let newStatus: AdminUserStatus = "ACTIVE";
+            if (action === "ban") newStatus = "BANNED";
+            if (action === "delete") newStatus = "DELETED";
+            if (action === "restore" || action === "unban") newStatus = "ACTIVE";
+
             const request: AdminModerationUserRequest = {
                 id: userId,
-                status: action === "ban" ? "BANNED" : "ACTIVE",
+                status: newStatus,
                 reason: reason || null
             }
+            
             const updatedUser = await updateStatusUser(request);
             if (!updatedUser) {
                 throw new Error("Request failed");
             }
 
+            // 2. TẠO CÂU THÔNG BÁO TƯƠNG ỨNG
+            let successMsg = "Action completed successfully.";
+            if (action === "ban") successMsg = "User has been banned successfully.";
+            if (action === "unban") successMsg = "User has been unbanned successfully.";
+            if (action === "delete") successMsg = "User has been deleted successfully.";
+            if (action === "restore") successMsg = "User has been restored successfully.";
+
             setNotification({
                 type: "success",
-                message:
-                    action === "ban"
-                        ? "User has been banned successfully."
-                        : "User has been unbanned successfully.",
+                message: successMsg,
             });
             onSuccess(updatedUser);
-            /*
-             * Cho notification hiện một chút
-             * rồi đóng popup.
-             */
+
             setTimeout(() => {
                 setIsClosing(true);
-
                 setTimeout(() => {
                     setIsClosing(false);
                     setNotification(null);
@@ -90,21 +85,20 @@ const UserModerationModal: React.FC<UserModerationModalProps> = ({
             }, 1200);
 
         } catch (error) {
+            let errorMsg = "Action failed.";
+            if (action === "ban") errorMsg = "Failed to ban user.";
+            if (action === "unban") errorMsg = "Failed to unban user.";
+            if (action === "delete") errorMsg = "Failed to delete user.";
+            if (action === "restore") errorMsg = "Failed to restore user.";
+
             setNotification({
                 type: "error",
-                message:
-                    action === "ban"
-                        ? "Failed to ban user."
-                        : "Failed to unban user.",
+                message: errorMsg,
             });
-
             setLoading(false);
         }
     };
 
-    /*
-     * Xóa notification khi modal được mở lại.
-     */
     useEffect(() => {
         if (isOpen) {
             setNotification(null);

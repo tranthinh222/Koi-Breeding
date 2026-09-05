@@ -123,7 +123,7 @@ public class AuthService {
 
         // 1. Kiểm tra tài khoản đã bị ban hoặc bị xóa
         if (user.getStatus() == UserStatus.DELETED) {
-            throw new DisabledException("Your account has been deleted. Contact the administrators.");
+            throw new DisabledException("Your account has been marked as deleted. Contact the administrators.");
         }
         if (user.getStatus() == UserStatus.BANNED || Boolean.TRUE.equals(user.getIsBanned())) {
             throw new RuntimeException("Your account has been banned");

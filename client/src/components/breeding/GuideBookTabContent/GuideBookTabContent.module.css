@@ -34,7 +34,7 @@
 	background: rgba(255, 255, 255, 0.1);
 	border: 2px solid rgba(255, 255, 255, 0.2);
 	border-radius: 12px;
-	padding: 0 15px;
+	padding: 8px 15px;
 	color: white;
 }
 
@@ -43,14 +43,39 @@
 	background: none;
 	border: none;
 	color: white;
-	padding: 12px;
-	font-family: "DM Sans", sans-serif;
+	padding-left: 10px;
+	font-family: "Grandstander", sans-serif;
 	font-size: 16px;
 	outline: none;
 }
 
 .searchBar input::placeholder {
 	color: #a39c98;
+}
+
+.searchBtn {
+	background: #2778d8;
+	border: none;
+	color: white;
+	width: 44px;
+	height: 44px;
+	border: 2px solid #1a5bb0;
+	border-radius: 12px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	transition: all 0.2s;
+	flex-shrink: 0;
+}
+
+.searchBtn:hover {
+	background: #2d8cff;
+	transform: translateY(-2px);
+}
+
+.searchBtn:active {
+	transform: translateY(1px);
 }
 
 /* --- THÊM NÚT BẬT FILTER MODAL --- */

@@ -1,34 +1,33 @@
 import { Dna } from "lucide-react";
-import type { IKoiVarient } from "../../../types/backend";
+import { useEffect, useState } from "react";
+import type { IBreedingRecipe, IKoiVarient } from "../../../types/backend";
 import styles from "./BreedingCalculator.module.css";
 
 interface BreedingCalculatorProps {
-	calcP1: string;
-	setCalcP1: React.Dispatch<React.SetStateAction<string>>;
-	calcP2: string;
-	setCalcP2: React.Dispatch<React.SetStateAction<string>>;
 	koiVarients: IKoiVarient[];
 	onCalculate: (
-		p1: string,
-		p2: string,
-	) => {
-		name: string;
-		prob: number;
-	}[];
+		p1: IKoiVarient,
+		p2: IKoiVarient,
+	) => Promise<IBreedingRecipe[]>;
 }
 
 function BreedingCalculator({
-	calcP1,
-	setCalcP1,
-	calcP2,
-	setCalcP2,
 	koiVarients,
 	onCalculate,
 }: BreedingCalculatorProps) {
-	const getKoiInfo = (name: string) =>
-		koiVarients.find((k) => k.name === name) || {
+	// State cho Calculator
+	const [calcP1, setCalcP1] = useState<IKoiVarient>(
+		koiVarients.at(0) as IKoiVarient,
+	);
+	const [calcP2, setCalcP2] = useState<IKoiVarient>(
+		koiVarients.at(0) as IKoiVarient,
+	);
+	const [breedingResult, setBreedingResult] = useState<IBreedingRecipe[]>([]);
+
+	const getKoiInfo = (id: number) =>
+		koiVarients.find((k) => k.id === id) || {
 			id: 1,
-			name: name,
+			name: "Trash/Random",
 			shape: "STANDARD",
 			scaleType: "WAGOI",
 			variety: {
@@ -46,22 +45,34 @@ function BreedingCalculator({
 			imageUrl: "/kois/koi-fish-null.svg",
 		};
 
+	useEffect(() => {
+		const handleBreeding = async () => {
+			const response = await onCalculate(calcP1, calcP2);
+			setBreedingResult(response);
+		};
+
+		handleBreeding();
+	}, [calcP1, calcP2]);
+
 	return (
 		<div className={styles.content}>
 			<div className={styles.calcContainer}>
 				<div className={styles.calcInputs}>
 					<div className={styles.calcBox}>
 						<img
-							src={getKoiInfo(calcP1).imageUrl}
+							src={calcP1.imageUrl}
 							className={styles.calcImage}
+							style={{ transform: "scaleX(-1)" }}
 							alt="P1"
 						/>
 						<select
-							value={getKoiInfo(calcP1).name}
-							onChange={(e) => setCalcP1(e.target.value)}
+							value={calcP1.id}
+							onChange={(e) =>
+								setCalcP1(getKoiInfo(Number(e.target.value)))
+							}
 						>
 							{koiVarients.map((k) => (
-								<option key={`p1-${k.name}`} value={k.name}>
+								<option key={`p1-${k.name}`} value={k.id}>
 									{k.name} (Male)
 								</option>
 							))}
@@ -72,17 +83,18 @@ function BreedingCalculator({
 
 					<div className={styles.calcBox}>
 						<img
-							src={getKoiInfo(calcP2).imageUrl}
+							src={calcP2.imageUrl}
 							className={styles.calcImage}
-							style={{ transform: "scaleX(-1)" }}
 							alt="P2"
 						/>
 						<select
-							value={calcP2}
-							onChange={(e) => setCalcP2(e.target.value)}
+							value={calcP2.id}
+							onChange={(e) =>
+								setCalcP2(getKoiInfo(Number(e.target.value)))
+							}
 						>
 							{koiVarients.map((k) => (
-								<option key={`p2-${k.name}`} value={k.name}>
+								<option key={`p2-${k.name}`} value={k.id}>
 									{k.name} (Female)
 								</option>
 							))}
@@ -92,25 +104,25 @@ function BreedingCalculator({
 
 				<div className={styles.calcResults}>
 					<h3>Predicted Outcomes</h3>
-					{onCalculate(calcP1, calcP2).map((res, idx) => (
+					{breedingResult.map((res, idx) => (
 						<div key={idx} className={styles.resultRow}>
 							<div className={styles.resultKoi}>
 								<img
-									src={getKoiInfo(res.name).imageUrl}
-									alt={res.name}
+									src={res.child.imageUrl}
+									alt={res.child.name}
 								/>
-								<span>{res.name}</span>
+								<span>{res.child.name}</span>
 							</div>
 							<div className={styles.resultBarContainer}>
 								<div
 									className={styles.resultBar}
 									style={{
-										width: `${res.prob * 100}%`,
+										width: `${(res.targetRate ?? 0) * 100}%`,
 									}}
 								></div>
 							</div>
 							<div className={styles.resultProb}>
-								{(res.prob * 100).toFixed(1)}%
+								{((res.targetRate ?? 0) * 100).toFixed(1)}%
 							</div>
 						</div>
 					))}

@@ -2,6 +2,7 @@ import { MapPin, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CURRENT_USER_ID } from "../../../api/currentUser";
 import { callFetchAllPonds } from "../../../api/pond";
+import { useAuth } from "../../../context/AuthContext";
 import type { IKoi, IModelPagination, IPond } from "../../../types/backend";
 import { toast } from "../../shared/Toast/toast";
 import styles from "./PondSelectForm.module.css";
@@ -19,6 +20,7 @@ function PondSelectForm({
 	onClose,
 	onSubmit,
 }: PondSelectFormProps) {
+	const { currentUserId } = useAuth();
 	const [pondList, setPondList] = useState<IPond[]>([]);
 	const [page, setPage] = useState<number>(1);
 	const [totalPages, setTotalPages] = useState<number>(1);
@@ -60,7 +62,7 @@ function PondSelectForm({
 		pageSize: number,
 	): Promise<IModelPagination<IPond>> => {
 		const response = await callFetchAllPonds(
-			`owner=${CURRENT_USER_ID}&page=${page - 1}&size=${pageSize}`,
+			`owner=${currentUserId}&page=${page - 1}&size=${pageSize}`,
 		);
 
 		if (response && response.data) {

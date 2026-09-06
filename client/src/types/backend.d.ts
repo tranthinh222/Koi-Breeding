@@ -165,8 +165,6 @@ export interface IBreedingRecipe {
 	child: IKoiVarient;
 	type: BreedingRecipeType;
 	targetRate?: number;
-	/** @deprecated Backend uses targetRate. */
-	childRate?: number;
 	fatherRate: number;
 	motherRate: number;
 }

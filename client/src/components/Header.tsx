@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CURRENT_USER_ID } from '../api/currentUser'
-import { getUserInfo } from '../api/header'
+import { getBalanceWallet } from '../api/wallet'
 import {
   getNotifications,
   markAllNotificationsRead,
@@ -9,10 +8,10 @@ import {
 } from '../api/notification'
 import ThemeControl from '../theme/ThemeControl'
 import SoundControl from '../sound/SoundControl'
+import { useAuth } from '../context/AuthContext'
 
 export default function ShopHeader() {
-  const [username, setUsername] = useState('')
-  const [exp, setExp] = useState(1)
+  const { currentUser, currentUserId } = useAuth()
   const [balance, setBalance] = useState<number>(0)
   const [notifications, setNotifications] = useState<AppNotification[]>([])
   const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false)
@@ -21,11 +20,9 @@ export default function ShopHeader() {
   useEffect(() => {
     const loadHeaderInfo = async () => {
       try {
-        const data = await getUserInfo(CURRENT_USER_ID)
-
-        setUsername(data.username)
-        setBalance(data.balance)
-        setExp(data.exp)
+        if (!currentUserId) return
+        const wallet = await getBalanceWallet(currentUserId)
+        setBalance(wallet.balance)
       } catch (error) {
         console.error('Failed to load header information:', error)
       } finally {
@@ -34,14 +31,18 @@ export default function ShopHeader() {
     }
 
     loadHeaderInfo()
-  }, [])
+  }, [currentUserId])
 
   useEffect(() => {
-    getNotifications(CURRENT_USER_ID)
+    if (!currentUserId) return
+
+    getNotifications(currentUserId)
       .then(setNotifications)
       .catch((error) => console.error('Failed to load notifications:', error))
 
-    const eventSource = new EventSource(notificationStreamUrl(CURRENT_USER_ID))
+    const eventSource = new EventSource(notificationStreamUrl(currentUserId), {
+      withCredentials: true,
+    })
     eventSource.addEventListener('notification', (event) => {
       const notification = JSON.parse(event.data) as AppNotification
       setNotifications((current) => [notification, ...current])
@@ -51,7 +52,7 @@ export default function ShopHeader() {
     }
 
     return () => eventSource.close()
-  }, [])
+  }, [currentUserId])
 
   useEffect(() => {
     const updateBalance = (event: Event) => {
@@ -67,7 +68,8 @@ export default function ShopHeader() {
 
   const markAllRead = async () => {
     try {
-      await markAllNotificationsRead(CURRENT_USER_ID)
+      if (!currentUserId) return
+      await markAllNotificationsRead(currentUserId)
       setNotifications((current) =>
         current.map((notification) => ({ ...notification, isRead: true })),
       )
@@ -82,8 +84,8 @@ export default function ShopHeader() {
         <div className="avatar">🧑</div>
 
         <div>
-          <h3>{loading ? 'Loading...' : username}</h3>
-          <p>{loading ? 'Loading...' : `Level: ${exp}`}</p>
+          <h3>{currentUser?.username ?? ''}</h3>
+          <p>{loading ? 'Loading...' : `Level: ${currentUser?.exp ?? 1}`}</p>
         </div>
       </div>
 

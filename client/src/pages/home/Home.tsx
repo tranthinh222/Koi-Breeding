@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getUser } from "../../api/user";
 import { getBalanceWallet } from "../../api/wallet";
 import { getPonds } from "../../api/pond";
 
@@ -42,7 +41,7 @@ type HomeResponse = {
 };
 
 export default function Home() {
-  const { currentUserId } = useAuth();
+  const { currentUser, currentUserId } = useAuth();
   const navigate = useNavigate();
 
   const [data, setData] = useState<HomeResponse | null>(null);
@@ -75,10 +74,9 @@ export default function Home() {
         setLoading(true);
         setError(null);
 
-        const [user, wallet, pondPageData] = await Promise.all([
-          getUser(userId),
+        const [wallet, pondPageData] = await Promise.all([
           getBalanceWallet(userId),
-          getPonds(0, 100),
+          getPonds(0, 100, userId),
         ]);
 
         const ownedPonds = pondPageData.result.filter(
@@ -86,7 +84,7 @@ export default function Home() {
         );
 
         const homeData: HomeResponse = {
-          user,
+          user: currentUser as HomeUser,
           wallet,
           ponds: ownedPonds.length > 0 ? ownedPonds : pondPageData.result,
         };
@@ -113,7 +111,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [currentUserId]);
+  }, [currentUser, currentUserId]);
 
   const user = data?.user;
 

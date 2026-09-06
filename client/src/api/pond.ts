@@ -62,10 +62,11 @@ export async function getPondsByOwner(userId: number): Promise<Pond[]> {
 export async function getPonds(
 	page = 0,
 	size = 20,
+	owner: number,
 ): Promise<IModelPagination<IPond>> {
 	const response = await apiClient.get<IRestResponse<IModelPagination<IPond>>>(
 		"/ponds",
-		{ params: { page, size } },
+		{ params: { owner, page, size } },
 	);
 
 	return response.data.data ?? {

@@ -34,3 +34,7 @@ build/
 
 ### configure file ###
 /src/main/resources/application-local.yaml
+
+
+### 
+/src/main/java/com/koibreeding/seeder/DictionarySeeder.java

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import EmptyCard from "../../components/user/dictionary/EmptyCard/EmptyCard";
-import KoiDictionaryCard from "../../components/user/dictionary/KoiDictionaryCard/KoiDictionaryCard";
+import EmptyCard from "../../components/dictionary/EmptyCard/EmptyCard";
+import KoiDictionaryCard from "../../components/dictionary/KoiDictionaryCard/KoiDictionaryCard";
 import type { IKoiVarient, IModelPagination } from "../../types/backend";
 import styles from "./Dictionary.module.css";
 import { callFetchKoiVarient } from "../../api/koiDictionary";

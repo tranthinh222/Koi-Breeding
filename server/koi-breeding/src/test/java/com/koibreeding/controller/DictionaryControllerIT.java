@@ -25,14 +25,18 @@ import com.koibreeding.domain.Variety;
 import com.koibreeding.dto.RestResponse;
 import com.koibreeding.enums.ScaleType;
 import com.koibreeding.enums.Shape;
+import com.koibreeding.repository.VarietyRepository;
 
 @Transactional
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @IntergrationTest
 public class DictionaryControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private VarietyRepository varietyRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -40,7 +44,7 @@ public class DictionaryControllerIT {
 
     @BeforeEach
     void init() {
-        variety = new Variety(1, "Kohaku", "");
+        variety = varietyRepository.save(new Variety(null, "Kohaku", ""));
     }
 
     @Test

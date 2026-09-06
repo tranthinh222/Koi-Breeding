@@ -15,10 +15,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Pageable;
 
 import com.koibreeding.domain.BreedingRate;
@@ -61,6 +63,8 @@ import com.koibreeding.repository.WalletRepository;
 import com.koibreeding.util.formulas.KoiFormula;
 
 @Configuration
+@Profile("seed")
+@ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
 public class SampleDataInitializer {
 
     @Bean

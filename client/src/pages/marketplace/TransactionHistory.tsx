@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { CURRENT_USER_ID } from '../../api/currentUser'
 import { getTransactions, type Transaction } from '../../api/transaction'
+import TransactionNavigation from '../../components/marketplace/TransactionNavigation'
+import MarketplaceState from '../../components/marketplace/MarketplaceState'
+import { useAuth } from '../../context/AuthContext'
 
 type TransactionFilter = 'ALL' | 'BOUGHT' | 'SOLD'
 type TransactionSort = 'NEWEST' | 'OLDEST'
@@ -16,6 +18,7 @@ const SORT_OPTIONS: { value: TransactionSort; label: string }[] = [
 ]
 
 export default function TransactionHistory() {
+  const { currentUserId } = useAuth()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [filter, setFilter] = useState<TransactionFilter>('ALL')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -61,10 +64,11 @@ export default function TransactionHistory() {
   }, [])
 
   useEffect(() => {
+    if (!currentUserId) return
     setLoading(true)
     setError(null)
     getTransactions(
-      CURRENT_USER_ID,
+      currentUserId,
       page,
       pageSize,
       sort === 'NEWEST' ? 'desc' : 'asc',
@@ -80,7 +84,7 @@ export default function TransactionHistory() {
         setError('Unable to load transaction history.')
       })
       .finally(() => setLoading(false))
-  }, [filter, page, pageSize, sort])
+  }, [currentUserId, filter, page, pageSize, sort])
 
   return (
     <div className="transaction-history-page">
@@ -90,12 +94,7 @@ export default function TransactionHistory() {
         </div>
       </section>
 
-      <section className="market-tabs history-tabs">
-        <button className="tab">🛒 Buy</button>
-        <button className="tab">💰 Sell</button>
-        <button className="tab">📋 My Listings</button>
-        <button className="tab active">📜 History</button>
-      </section>
+      <TransactionNavigation />
 
       <section className="search-panel">
         <div className="history-filter-dropdown" ref={filterDropdownRef}>
@@ -184,7 +183,7 @@ export default function TransactionHistory() {
         {loading && <p className="history-message">Loading transactions...</p>}
         {error && <p className="history-message">{error}</p>}
         {!loading && !error && transactions.length === 0 && (
-          <p className="history-message">No transactions yet.</p>
+          <MarketplaceState compact icon="📜" title="No transactions yet" description="Your koi purchases, sales, and wallet activity will appear here." />
         )}
         {transactions.map((transaction) => {
           const isDeposit = transaction.transactionType === 'DEPOSIT'

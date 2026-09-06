@@ -1,20 +1,20 @@
 import { Filter, Mars, Undo2, Venus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "../../components/share/Toast/toast";
+import { toast } from "../../components/shared/Toast/toast";
 import { callCreateBreedingEvent } from "../../api/breeding";
 import { CURRENT_USER_ID } from "../../api/currentUser";
 import { callFetchKoisInPond } from "../../api/koi";
 import { callFetchAllPonds } from "../../api/pond";
-import Toaster from "../../components/share/Toast/Toaster";
-import BreedingGuide from "../../components/user/breeding/BreedingGuide/BreedingGuide";
-import BreedingHistory from "../../components/user/breeding/BreedingHistory/BreedingHistory";
-import BreedingKoiCard from "../../components/user/breeding/BreedingKoiCard/BreedingKoiCard";
+import Toaster from "../../components/shared/Toast/Toaster";
+import BreedingGuide from "../../components/breeding/BreedingGuide/BreedingGuide";
+import BreedingHistory from "../../components/breeding/BreedingHistory/BreedingHistory";
+import BreedingKoiCard from "../../components/breeding/BreedingKoiCard/BreedingKoiCard";
 import FilterModal, {
 	type IFilterState,
-} from "../../components/user/breeding/FilterModal/FilterModal";
-import ModeSwitcher from "../../components/user/breeding/ModeSwitcher/ModeSwitcher";
-import PondSelectForm from "../../components/user/pond/PondSelectForm/PondSelectForm";
+} from "../../components/breeding/FilterModal/FilterModal";
+import ModeSwitcher from "../../components/breeding/ModeSwitcher/ModeSwitcher";
+import PondSelectForm from "../../components/pond/PondSelectForm/PondSelectForm";
 import type { IKoi, IPond } from "../../types/backend";
 import styles from "./Breeding.module.css";
 

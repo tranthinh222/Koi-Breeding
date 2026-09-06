@@ -1,0 +1,64 @@
+import {
+  Backpack,
+  House,
+  ReceiptText,
+  ShoppingCart,
+  UserRound,
+  Waves,
+} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+export default function ShopNavigation() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  return (
+    <nav className="navigation-menu">
+      <button
+        className={location.pathname === "/home" ? "active" : ""}
+        onClick={() => navigate("/home")}
+      >
+        <House />
+        <span>Home</span>
+      </button>
+
+      <button
+        className={location.pathname.startsWith("/pond") ? "active" : ""}
+        onClick={() => navigate("/pond")}
+      >
+        <Waves />
+        <span>My Ponds</span>
+      </button>
+
+      <button
+        className={location.pathname === "/inventory" ? "active" : ""}
+        onClick={() => navigate("/inventory")}
+      >
+        <Backpack />
+        <span>Inventory</span>
+      </button>
+
+      <button
+        className={location.pathname === "/shop" ? "active" : ""}
+        onClick={() => navigate("/shop")}
+      >
+        <ShoppingCart />
+        <span>Shop</span>
+      </button>
+
+      <button
+        className={location.pathname === "/marketplace" ? "active" : ""}
+        onClick={() => navigate("/marketplace")}
+      >
+        <ReceiptText />
+        <span>Marketplace</span>
+      </button>
+
+      <button
+        className={location.pathname.startsWith("/profile") ? "active" : ""}
+        onClick={() => navigate("/profile")}
+      >
+        <UserRound />
+        <span>Profile</span>
+      </button>
+    </nav>
+  );
+}

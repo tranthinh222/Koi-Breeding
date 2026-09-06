@@ -2,7 +2,7 @@ spring:
     application:
         name: koi-breeding-test
     datasource:
-        url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;INIT=CREATE SCHEMA IF NOT EXISTS koi_breeding;
+        url: jdbc:h2:mem:koi_${random.uuid};MODE=PostgreSQL;NON_KEYWORDS=VALUE;INIT=CREATE SCHEMA IF NOT EXISTS koi_breeding;
         driverClassName: org.h2.Driver
         username: sa
         password:
@@ -13,7 +13,44 @@ spring:
                 physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         database-platform: org.hibernate.dialect.H2Dialect
         show-sql: true
+    mail:
+        host: localhost
+        port: 1025
 
 app:
     weather:
         forecast-url: http://localhost/weather/forecast
+    pond:
+        environment:
+            ph-weight: 0.20
+            temperature-weight: 0.15
+            water-weight: 0.35
+            oxygen-weight: 0.30
+            coefficient-min: 0.8
+            coefficient-range: 0.4
+            temperature-response-rate: 0.2
+            water-quality-decrease-min-tenths: 30
+            water-quality-decrease-max-tenths: 50
+            oxygen-decrease-min-tenths: 2
+            oxygen-decrease-max-tenths: 4
+            ph-change-min-tenths: 1
+            ph-change-max-tenths: 3
+            ph-trend-duration-days: 30
+            treatment-temperature-change: 2.0
+            treatment-duration-hours: 24
+            location-change-cooldown-days: 60
+
+cloudinary:
+    cloud-name: test-cloud
+    api-key: test-key
+    api-secret: test-secret
+
+jwt:
+    signKey: koi-breeding-test-signing-key-that-is-at-least-32-bytes
+    expiration: 3600000
+    refresh: 604800000
+
+vietqr:
+    bank-id: test-bank
+    account-no: "0000000000"
+    account-name: TEST ACCOUNT

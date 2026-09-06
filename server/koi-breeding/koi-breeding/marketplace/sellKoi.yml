@@ -1,0 +1,27 @@
+info:
+  name: sellKoi
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: localhost:8090/koi_breeding/marketplace/saleKoi?userId=1
+  params:
+    - name: userId
+      value: "1"
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+        "koiId": 1,
+        "price": 1000
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

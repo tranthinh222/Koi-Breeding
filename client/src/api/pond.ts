@@ -6,6 +6,13 @@ Module Pond
 import type { IModelPagination, IPond, IRestResponse } from "../types/backend";
 import { apiClient } from "./client";
 
+export interface Pond {
+	id: number;
+	name: string;
+	capacity: number;
+	currentKoi: number;
+}
+
 export interface IRequestBuyPondDTO {
 	name: string;
 	description: string;
@@ -44,3 +51,31 @@ export const callUpgradePond = (pondId: number) => {
 		`/ponds/upgrade?pondId=${pondId}`,
 	);
 };
+
+export async function getPondsByOwner(userId: number): Promise<Pond[]> {
+	const response = await apiClient.get<IRestResponse<Pond[]>>("/ponds/owner", {
+		params: { userId },
+	});
+	return response.data.data ?? [];
+}
+
+export async function getPonds(
+	page = 0,
+	size = 20,
+	owner: number,
+): Promise<IModelPagination<IPond>> {
+	const response = await apiClient.get<IRestResponse<IModelPagination<IPond>>>(
+		"/ponds",
+		{ params: { owner, page, size } },
+	);
+
+	return response.data.data ?? {
+		meta: {
+			page: page + 1,
+			pageSize: size,
+			totalPages: 0,
+			totalElements: 0,
+		},
+		result: [],
+	};
+}

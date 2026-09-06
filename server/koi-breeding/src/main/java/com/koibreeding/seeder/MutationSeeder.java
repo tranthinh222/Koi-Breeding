@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,8 @@ import com.koibreeding.domain.Mutation;
 import com.koibreeding.repository.MutationRepository;
 
 @Component
+@Profile("seed")
+@ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
 @Order(2)
 public class MutationSeeder implements CommandLineRunner {
     private MutationRepository mutationRepository;

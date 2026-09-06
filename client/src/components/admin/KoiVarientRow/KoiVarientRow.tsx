@@ -14,8 +14,8 @@ import {
 	callUploadKoiVarientImage,
 } from "../../../api/koiDictionary";
 import type { IKoiVarient, IVariety } from "../../../types/backend";
-import { toast } from "../../share/Toast/toast";
-import Toaster from "../../share/Toast/Toaster";
+import { toast } from "../../shared/Toast/toast";
+import Toaster from "../../shared/Toast/Toaster";
 import KoiForm from "../KoiForm/KoiForm";
 import styles from "./KoiVarientRow.module.css";
 

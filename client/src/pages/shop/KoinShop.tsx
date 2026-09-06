@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import type { ShopItem } from "../../api/shop";
 import { getShopItem } from "../../api/shop";
 
-import DetailPanel from "../../components/DetailPanel";
-import ShopGrid from "../../components/user/ShopGrid";
+import DetailPanel from "../../components/shop/DetailPanel";
+import ShopGrid from "../../components/shop/ShopGrid";
 
 interface Props {
 	selectedItem: ShopItem | null;

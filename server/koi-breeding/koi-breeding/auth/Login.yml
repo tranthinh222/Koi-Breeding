@@ -1,0 +1,23 @@
+info:
+  name: Login
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: localhost:8090/koi_breeding/auth/login
+  body:
+    type: json
+    data: |-
+      {
+        "username": "admin",
+        "password": "admin"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

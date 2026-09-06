@@ -1,0 +1,23 @@
+info:
+  name: Verify Code
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: localhost:8090/koi_breeding/auth/verify-reset-code
+  body:
+    type: json
+    data: |-
+      {
+        "email": "safepoison33891@gmail.com",
+        "code": "283866"
+      }
+      // Data = null, check mail
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

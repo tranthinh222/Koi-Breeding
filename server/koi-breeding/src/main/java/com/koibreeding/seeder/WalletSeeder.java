@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Profile;
 
 import com.koibreeding.domain.User;
 import com.koibreeding.domain.Wallet;
@@ -15,6 +16,7 @@ import com.koibreeding.repository.UserRepository;
 import com.koibreeding.repository.WalletRepository;
 
 @Component
+@Profile("!test")
 @Order(6)
 public class WalletSeeder implements CommandLineRunner {
     private WalletRepository walletRepository;

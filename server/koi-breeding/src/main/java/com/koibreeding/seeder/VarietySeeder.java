@@ -3,10 +3,12 @@ package com.koibreeding.seeder;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Profile;
 
 import com.koibreeding.repository.VarietyRepository;
 
 @Component
+@Profile("!test")
 @Order(1)
 public class VarietySeeder implements CommandLineRunner {
     private final VarietyRepository varietyRepository;

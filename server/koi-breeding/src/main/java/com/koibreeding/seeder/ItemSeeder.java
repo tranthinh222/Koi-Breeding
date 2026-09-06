@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Profile;
 
 import com.koibreeding.domain.Dictionary;
 import com.koibreeding.domain.Item;
@@ -20,6 +21,7 @@ import com.koibreeding.repository.DictionaryRepository;
 import com.koibreeding.repository.ItemRepository;
 
 @Component
+@Profile("!test")
 @Order(4)
 public class ItemSeeder implements CommandLineRunner {
     private ItemRepository itemRepository;

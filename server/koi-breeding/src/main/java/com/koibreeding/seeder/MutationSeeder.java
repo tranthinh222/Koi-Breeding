@@ -3,10 +3,12 @@ package com.koibreeding.seeder;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Profile;
 
 import com.koibreeding.repository.MutationRepository;
 
 @Component
+@Profile("!test")
 @Order(2)
 public class MutationSeeder implements CommandLineRunner {
     private MutationRepository mutationRepository;

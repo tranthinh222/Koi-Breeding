@@ -28,6 +28,7 @@ import AdminTransactions from "./components/AdminTransactions";
 
 import AdminItems from "./components/AdminItems";
 import AdminTrades from "./components/AdminTrades";
+import AdminBreeding from "./components/AdminBreeding";
 
 export type MenuTab =
   | "dashboard"
@@ -600,16 +601,7 @@ function Admin() {
             </div>
           )}
 
-          {activeView === "breeding" && (
-            <div className="feature-placeholder">
-              <p className="eyebrow">Breeding</p>
-              <h1>Breeding management area</h1>
-              <p>
-                Use this space for breeding rules, approvals, and lineage
-                moderation.
-              </p>
-            </div>
-          )}
+          {activeView === "breeding" && <AdminBreeding />}
 
           {activeView === "items" && <AdminItems />}
           {activeView === "transactions" && <AdminTransactions />}

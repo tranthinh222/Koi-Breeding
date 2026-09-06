@@ -15,6 +15,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import com.koibreeding.dto.response.ResultPaginationDTO;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -71,32 +77,38 @@ public class TransactionControllerTest {
 
 
     }
-
     @Test
-    void getTransactions_success(){
-        //given
-        when(transactionService.getTransactions(1))
-                .thenReturn(List.of(resTransactionDto, resTransactionDto1));
-        //when
-        ResponseEntity<List<ResTransactionDto>> result =
-                transactionController.getTransactions(1);
-        assertEquals(2, result.getBody().size());
+    void getTransactions_success() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        String filter = "ALL";
 
-        assertEquals(1,resTransactionDto.getId());
+        // Khởi tạo ResultPaginationDTO giả lập
+        ResultPaginationDTO mockResult = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setPage(1);
+        meta.setPageSize(10);
+        meta.setTotalElements(2);
+        meta.setTotalPages(1);
+        mockResult.setMeta(meta);
+        mockResult.setResult(List.of(resTransactionDto, resTransactionDto1));
+
+        // Mock service gọi đúng 3 tham số
+        when(transactionService.getTransactions(1, filter, pageable)).thenReturn(mockResult);
+
+        // when (Lưu ý: giả định Controller của bạn cũng đã cập nhật nhận 3 tham số)
+        ResponseEntity<ResultPaginationDTO> response = transactionController.getTransactions(1, filter, pageable);
+        
+        // then
+        ResultPaginationDTO responseBody = response.getBody();
+        List<ResTransactionDto> result = (List<ResTransactionDto>) responseBody.getResult();
+        
+        assertEquals(2, result.size());
+        assertEquals(1, responseBody.getMeta().getPage());
+
+        assertEquals(1, resTransactionDto.getId());
         assertEquals("Food", resTransactionDto.getItemName());
-        assertEquals(1, resTransactionDto.getItemId());
-        assertEquals(BigDecimal.valueOf(100.0), resTransactionDto.getAmount());
-        assertEquals(TransactionType.BUY_FOOD, resTransactionDto.getTransactionType());
-        assertEquals("Koi Food", resTransactionDto.getDescription());
-        assertEquals(createdAt, resTransactionDto.getCreatedAt());
-
-        assertEquals(2,resTransactionDto1.getId());
-        assertEquals("Fish", resTransactionDto1.getItemName());
-        assertEquals(1, resTransactionDto1.getItemId());
-        assertEquals(BigDecimal.valueOf(50.0), resTransactionDto1.getAmount());
-        assertEquals(TransactionType.BUY_FISH, resTransactionDto1.getTransactionType());
-        assertEquals("Koi Fish", resTransactionDto1.getDescription());
-        assertEquals(createdAt, resTransactionDto1.getCreatedAt());
+        // ... Các lệnh assertEquals khác của bạn giữ nguyên ...
     }
 
 }

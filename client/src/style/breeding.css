@@ -1,0 +1,278 @@
+
+.koi-page-content {
+  width: 90%;
+  margin: 0 auto 60px;
+}
+
+.breeding-hero,
+.breeding-incubator,
+.discovery-card {
+  background: #f8f4ea;
+  border: 4px solid #c9a26b;
+  border-radius: 18px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.15);
+}
+
+.breeding-hero {
+  padding: 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 30px;
+  align-items: center;
+}
+
+.breeding-hero h2,
+.ponds-toolbar h2,
+.zen-profile-card h2 {
+  color: #5b3a1f;
+}
+
+.breeding-hero h2 {
+  margin: 6px 0 12px;
+  font-size: 34px;
+}
+
+.breeding-hero p,
+.ponds-toolbar p,
+.zen-link-card p {
+  color: #666;
+  line-height: 1.6;
+}
+
+.breeding-hero-copy {
+  max-width: 650px;
+}
+
+.breeding-slots {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.breeding-slot {
+  width: 125px;
+  height: 160px;
+  border: 2px dashed #8ed6f7;
+  border-radius: 16px;
+  background: #fff8e8;
+  color: #5b3a1f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.breeding-slot:hover {
+  transform: translateY(-3px);
+  border-color: #5a913b;
+}
+
+.breeding-slot.selected {
+  border-style: solid;
+  border-color: #5a913b;
+}
+
+.breeding-slot img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #8ed6f7;
+}
+
+.breeding-add {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #8ed6f7;
+  font-size: 28px;
+}
+
+.breeding-x {
+  color: #174562;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.breeding-layout {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+.home-card {
+  padding: 22px;
+}
+
+.home-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.home-card-header h3 {
+  margin-top: 6px;
+  color: #5b3a1f;
+  font-size: 24px;
+}
+
+.home-card-header > strong {
+  color: #d97706;
+}
+
+.incubator-card {
+  padding: 18px;
+  background: #fff8e8;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.incubator-koi {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #8ed6f7;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+}
+
+.incubator-info {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+}
+
+.incubator-info strong {
+  color: #5b3a1f;
+}
+
+.incubator-info span,
+.incubator-info small {
+  color: #666;
+}
+
+.progress-track {
+  height: 10px;
+  background: #e6e1d6;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.progress-value {
+  height: 100%;
+  background: #5a913b;
+  border-radius: inherit;
+}
+
+.unlock-slot,
+.history-button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  border: 2px dashed #c9a26b;
+  border-radius: 12px;
+  background: transparent;
+  color: #5b3a1f;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.unlock-slot {
+  display: flex;
+  justify-content: space-between;
+}
+
+.discovery-list {
+  display: grid;
+  gap: 12px;
+}
+
+.discovery-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 12px;
+  background: #fff8e8;
+}
+
+.discovery-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #8ed6f7;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+}
+
+.discovery-item strong {
+  color: #5b3a1f;
+}
+
+.discovery-item p {
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+  color: #777;
+  font-size: 13px;
+}
+
+.rarity {
+  font-weight: 800;
+}
+
+.rarity.rare { color: #8b5cf6; }
+.rarity.uncommon { color: #d97706; }
+.rarity.common { color: #666; }
+
+.ponds-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .breeding-hero,
+  .breeding-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .breeding-slots {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .koi-page-content {
+    width: 94%;
+  }
+
+  .breeding-hero {
+    padding: 20px;
+  }
+
+  .breeding-slots {
+    gap: 6px;
+  }
+
+  .breeding-slot {
+    width: 110px;
+    height: 145px;
+  }
+}

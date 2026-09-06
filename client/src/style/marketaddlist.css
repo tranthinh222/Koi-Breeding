@@ -1,0 +1,1360 @@
+/* =========================================================
+   MARKET ADD LIST
+========================================================= */
+
+.main-content {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header-section {
+  width: 90%;
+  margin: 0 auto 25px;
+}
+
+/* Wooden title board */
+
+.wood-board {
+  position: relative;
+  width: fit-content;
+  min-width: 280px;
+  margin: 0 auto 20px;
+  padding: 18px 35px;
+
+  background: linear-gradient(135deg, #8b5a2b, #a8753e, #8b5a2b);
+
+  border: 4px solid #c9a26b;
+  border-radius: 16px;
+
+  text-align: center;
+
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.15);
+}
+
+.wood-board h1 {
+  margin: 0;
+
+  color: #fff8e8;
+
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+}
+
+.wood-board p {
+  margin: 4px 0 0;
+
+  color: #f3dfbd;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   VIEW SWITCH
+========================================================= */
+
+.view-switch {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+
+  margin: 0 auto 20px;
+}
+
+.view-btn {
+  padding: 10px 20px;
+
+  border: 3px solid #c9a26b;
+  border-radius: 12px;
+
+  background: #fffdf8;
+  color: #5b3a1f;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.view-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+}
+
+.view-btn.active {
+  background: linear-gradient(135deg, #5a913b, #44742b);
+
+  border-color: #44742b;
+
+  color: white;
+
+  box-shadow: 0 5px 12px rgba(74, 126, 48, 0.25);
+}
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+.filters-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+
+  width: 70%;
+  margin: 0 auto;
+
+  padding: 15px 18px;
+  box-sizing: border-box;
+
+  background: #f8f4ea;
+  border: 4px solid #c9a26b;
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.filter-select {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+
+  padding: 10px 14px;
+  box-sizing: border-box;
+
+  background: #fffdf8;
+  color: #5b3a1f;
+  border: 3px solid #c9a26b;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+}
+
+.filter-select:hover,
+.filter-select:focus {
+  border-color: #8b5a2b;
+
+  box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.12);
+}
+
+/* =========================================================
+   KOI GRID
+========================================================= */
+
+.koi-grid {
+  width: 90%;
+  margin: 0 auto;
+
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(210px, 240px));
+
+  justify-content: center;
+
+  gap: 20px;
+
+  align-items: stretch;
+}
+
+/* =========================================================
+   KOI CARD
+========================================================= */
+
+.koi-card {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  max-width: 240px;
+  min-width: 0;
+
+  padding: 14px;
+
+  box-sizing: border-box;
+
+  background: linear-gradient(180deg, #fffdf8 0%, #f8f4ea 100%);
+
+  border: 4px solid #c9a26b;
+  border-radius: 20px;
+
+  text-align: center;
+
+  cursor: pointer;
+  overflow: hidden;
+
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* Wooden top */
+
+.koi-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 14px;
+
+  background: #8b5a2b;
+}
+
+.koi-card:hover {
+  transform: translateY(-8px);
+
+  border-color: #b98b4d;
+
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.22);
+}
+
+/* =========================================================
+   CARD CONTENT
+========================================================= */
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+
+  flex: 1;
+}
+
+/* =========================================================
+   RARITY BADGE
+========================================================= */
+
+.rarity-badge {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+
+  margin: 3px auto 8px;
+  padding: 4px 12px;
+
+  border-radius: 999px;
+
+  color: white;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.6px;
+
+  text-transform: uppercase;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================================================
+   KOI IMAGE
+========================================================= */
+
+.koi-image-container {
+  position: relative;
+
+  width: 145px;
+  height: 145px;
+
+  margin: 5px auto 12px;
+  padding: 22px;
+
+  box-sizing: border-box;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle at 35% 30%,
+    #d9f5ff 0%,
+    #a9e2f8 45%,
+    #83cce9 100%
+  );
+
+  border: 5px solid rgba(255, 255, 255, 0.75);
+
+  box-shadow:
+    inset 0 0 25px rgba(255, 255, 255, 0.55),
+    0 8px 20px rgba(62, 133, 163, 0.18);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* Water reflection */
+
+.koi-image-container::after {
+  content: "";
+
+  position: absolute;
+
+  top: 18px;
+  left: 25px;
+
+  width: 35px;
+  height: 18px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  transform: rotate(-25deg);
+
+  filter: blur(1px);
+}
+
+.koi-image {
+  position: relative;
+
+  z-index: 1;
+
+  width: 125%;
+  height: 125%;
+
+  object-fit: contain;
+
+  transition: transform 0.3s ease;
+}
+
+.koi-card:hover .koi-image-container {
+  transform: scale(1.04);
+
+  box-shadow:
+    inset 0 0 30px rgba(255, 255, 255, 0.6),
+    0 12px 28px rgba(62, 133, 163, 0.25);
+}
+
+.koi-card:hover .koi-image {
+  transform: scale(1.08) rotate(-3deg);
+}
+
+/* =========================================================
+   KOI NAME
+========================================================= */
+
+.koi-name {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  width: 100%;
+}
+
+.koi-name h2 {
+  margin: 2px 0 3px;
+
+  color: #5b3a1f;
+
+  font-size: 18px;
+  font-weight: 800;
+
+  line-height: 1.25;
+}
+
+/* =========================================================
+   GENDER
+========================================================= */
+
+.gender-icon {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 22px;
+  height: 22px;
+
+  border-radius: 50%;
+
+  font-size: 13px;
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================================================
+   POND
+========================================================= */
+
+.koi-pond {
+  margin: 4px 0 8px;
+
+  color: #7a5c3e;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   KOI STATS
+========================================================= */
+
+.koi-stats {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 6px;
+
+  width: 100%;
+
+  margin: 5px 0 8px;
+  padding: 7px 0;
+
+  border-top: 1px dashed #d8c5a5;
+  border-bottom: 1px dashed #d8c5a5;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  min-width: 82px;
+
+  padding: 5px 7px;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  border-radius: 7px;
+}
+
+.stat-label {
+  color: #8a7256;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.stat-value {
+  margin-top: 2px;
+
+  color: #51351f;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   CARD FOOTER
+========================================================= */
+
+.card-footer {
+  width: 100%;
+
+  margin-top: auto;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: stretch;
+}
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+.price-section {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  margin: 8px 0 10px;
+  padding: 7px;
+
+  background: rgba(255, 237, 204, 0.55);
+
+  border: 1px solid #f0d29f;
+  border-radius: 10px;
+}
+
+.gold-icon {
+  font-size: 15px;
+}
+
+.price {
+  color: #d97706;
+
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* =========================================================
+   CARD ACTIONS
+========================================================= */
+
+.card-actions {
+  display: flex;
+
+  gap: 7px;
+
+  width: 100%;
+}
+
+.card-actions button {
+  flex: 1;
+
+  padding: 9px 8px;
+
+  border: none;
+  border-radius: 10px;
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.card-actions button:active {
+  transform: translateY(1px);
+}
+
+/* Sell */
+
+.btn-sell {
+  background: linear-gradient(135deg, #b3462c, #8f3620);
+
+  box-shadow: 0 5px 12px rgba(179, 70, 44, 0.2);
+}
+
+.btn-sell:hover {
+  background: linear-gradient(135deg, #c75539, #a43e27);
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 16px rgba(179, 70, 44, 0.3);
+}
+
+/* Detail */
+
+.btn-detail {
+  background: linear-gradient(135deg, #5a913b, #44742b);
+
+  box-shadow: 0 5px 12px rgba(74, 126, 48, 0.25);
+}
+
+.btn-detail:hover {
+  background: linear-gradient(135deg, #6aa647, #4f8835);
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 16px rgba(74, 126, 48, 0.3);
+}
+
+/* =========================================================
+   MY LISTINGS
+========================================================= */
+
+.listings-container {
+  width: 90%;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+.listing-summary {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  width: 100%;
+
+  box-sizing: border-box;
+
+  margin-bottom: 24px;
+  padding: 16px 20px;
+
+  background: #f8f4ea;
+
+  border: 3px solid #c9a26b;
+  border-radius: 16px;
+
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.summary-item {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+}
+
+.summary-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: rgba(90, 145, 59, 0.15);
+
+  font-size: 20px;
+}
+
+.summary-icon.gold {
+  background: rgba(255, 213, 79, 0.25);
+}
+
+.summary-label {
+  margin: 0 0 3px;
+
+  color: #7a5c3e;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.7px;
+}
+
+.summary-value {
+  margin: 0;
+
+  color: #5b3a1f;
+
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.summary-divider {
+  width: 2px;
+  height: 42px;
+
+  background: #c9a26b;
+}
+
+.new-listing-btn {
+  padding: 10px 16px;
+
+  border: none;
+  border-bottom: 4px solid #346816;
+  border-radius: 10px;
+
+  background: #4c822e;
+  color: white;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.new-listing-btn:hover {
+  background: #5a913b;
+
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   LISTING GRID
+========================================================= */
+
+.listing-grid {
+  width: 100%;
+
+  margin: 0 auto;
+
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(210px, 240px));
+
+  justify-content: center;
+
+  gap: 20px;
+
+  align-items: stretch;
+}
+
+.listing-grid .koi-card {
+  max-width: 240px;
+}
+
+.listing-grid .listing-price {
+  margin-top: 0;
+}
+
+/* =========================================================
+   LISTING CARD
+========================================================= */
+
+.listing-card {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  max-width: 240px;
+  min-width: 0;
+
+  padding: 14px;
+
+  box-sizing: border-box;
+
+  background: linear-gradient(180deg, #fffdf8 0%, #f8f4ea 100%);
+
+  border: 4px solid #c9a26b;
+  border-radius: 20px;
+
+  text-align: center;
+
+  overflow: hidden;
+
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.listing-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 14px;
+
+  background: #8b5a2b;
+}
+
+.listing-card:hover {
+  transform: translateY(-8px);
+
+  border-color: #b98b4d;
+
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.22);
+}
+
+/* =========================================================
+   LISTING BODY
+========================================================= */
+
+.listing-card-body {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  width: 100%;
+
+  flex: 1;
+
+  padding: 0;
+}
+
+/* =========================================================
+   LISTING IMAGE
+========================================================= */
+
+.listing-image-container {
+  position: relative;
+
+  width: 96px;
+  height: 96px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin: 5px auto 12px;
+
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle at 35% 30%,
+    #d9f5ff 0%,
+    #a9e2f8 45%,
+    #83cce9 100%
+  );
+
+  border: 3px solid rgba(255, 255, 255, 0.8);
+
+  overflow: hidden;
+
+  box-shadow:
+    inset 0 0 15px rgba(255, 255, 255, 0.55),
+    0 5px 12px rgba(62, 133, 163, 0.18);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.listing-image-container::after {
+  content: "";
+
+  position: absolute;
+
+  top: 12px;
+  left: 17px;
+
+  width: 25px;
+  height: 13px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  transform: rotate(-25deg);
+
+  filter: blur(1px);
+}
+
+.listing-image {
+  position: relative;
+
+  z-index: 1;
+
+  width: 70%;
+  height: 70%;
+
+  object-fit: contain;
+
+  transition: transform 0.25s ease;
+}
+
+.listing-card:hover .listing-image-container {
+  transform: scale(1.04);
+
+  box-shadow:
+    inset 0 0 20px rgba(255, 255, 255, 0.6),
+    0 8px 18px rgba(62, 133, 163, 0.25);
+}
+
+.listing-card:hover .listing-image {
+  transform: scale(1.1) rotate(-3deg);
+}
+
+/* =========================================================
+   LISTING RARITY
+========================================================= */
+
+.listing-rarity {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+
+  margin: 3px auto 8px;
+
+  padding: 4px 11px;
+
+  border-radius: 999px;
+
+  color: white;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: 0.6px;
+
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   LISTING NAME
+========================================================= */
+
+.listing-name {
+  margin: 0 0 12px;
+
+  color: #5b3a1f;
+
+  font-size: 17px;
+  font-weight: 900;
+
+  text-align: center;
+}
+
+/* =========================================================
+   LISTING PRICE
+========================================================= */
+
+.listing-price {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  margin-top: auto;
+  margin-bottom: 12px;
+
+  padding: 8px;
+
+  background: #e7e9de;
+
+  border-radius: 9px;
+
+  text-align: center;
+}
+
+.listed-price-label {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #7a5c3e;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.listed-price {
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 4px;
+
+  color: #5b3a1f;
+
+  font-size: 16px;
+  font-weight: 900;
+}
+
+/* =========================================================
+   LISTING ACTIONS
+========================================================= */
+
+.listing-actions {
+  display: flex;
+
+  width: 100%;
+
+  gap: 7px;
+}
+
+.listing-actions button {
+  flex: 1;
+
+  padding: 8px 5px;
+
+  border: none;
+  border-radius: 9px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+/* Edit */
+
+.listing-edit-btn {
+  background: #e1e4d9;
+
+  color: #5b3a1f;
+
+  border-bottom: 2px solid #72796a !important;
+}
+
+.listing-edit-btn:hover {
+  background: #d5d9cc;
+
+  transform: translateY(-2px);
+}
+
+/* Remove */
+
+.listing-remove-btn {
+  background: rgba(186, 26, 26, 0.08);
+
+  color: #ba1a1a;
+
+  border-bottom: 2px solid rgba(186, 26, 26, 0.3) !important;
+}
+
+.listing-remove-btn:hover {
+  background: rgba(186, 26, 26, 0.15);
+
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   RESPONSIVE - 900px
+========================================================= */
+
+@media (max-width: 900px) {
+  .header-section,
+  .koi-grid,
+  .listings-container {
+    width: 94%;
+  }
+
+  .koi-grid,
+  .listing-grid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 240px));
+  }
+
+  .listing-summary {
+    flex-wrap: wrap;
+  }
+
+  .summary-divider {
+    display: none;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE - 700px
+========================================================= */
+
+@media (max-width: 700px) {
+  .main-content {
+    padding: 15px;
+  }
+
+  .filters-section {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .view-switch {
+    flex-direction: column;
+
+    width: 94%;
+  }
+
+  .view-btn {
+    width: 100%;
+  }
+
+  .koi-grid,
+  .listing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 15px;
+  }
+
+  .koi-card,
+  .listing-card {
+    max-width: none;
+  }
+
+  .listing-summary {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .summary-item {
+    justify-content: center;
+  }
+
+  .new-listing-btn {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE - 500px
+========================================================= */
+
+@media (max-width: 500px) {
+  .koi-grid,
+  .listing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .koi-card,
+  .listing-card {
+    max-width: 260px;
+
+    width: 100%;
+
+    margin: 0 auto;
+  }
+
+  .koi-image-container {
+    width: 160px;
+    height: 160px;
+  }
+
+  .wood-board {
+    min-width: 0;
+
+    width: 80%;
+
+    padding: 15px 20px;
+  }
+
+  .wood-board h1 {
+    font-size: 21px;
+  }
+}
+/* =========================================================
+   PRICE FILTER - KÉO GIÁ
+========================================================= */
+
+.price-filter {
+  width: 100%;
+  margin: 4px 0 10px;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  background: rgba(255, 237, 204, 0.45);
+  border-radius: 10px;
+}
+
+.price-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.price-filter-header span {
+  color: #7a5c3e;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.price-filter-header strong {
+  color: #d97706;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+/* Thanh kéo */
+.price-range {
+  width: 100%;
+  height: 5px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #d8c5a5;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Nút kéo - Chrome / Edge */
+.price-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #d97706;
+  border: 3px solid #fff8e8;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.price-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(217, 119, 6, 0.35);
+}
+
+.price-range::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+}
+
+/* Firefox */
+.price-range::-moz-range-thumb {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #d97706;
+  border: 3px solid #fff8e8;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+}
+
+.price-range::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* Firefox track */
+.price-range::-moz-range-track {
+  height: 5px;
+  background: #d8c5a5;
+  border-radius: 999px;
+}
+
+.price-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.price-range {
+  flex: 1;
+  min-width: 0;
+  height: 5px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #d8c5a5;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Nút - / + */
+.price-adjust-btn {
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: 2px solid #c8944d;
+  border-radius: 50%;
+
+  background: #fff8e8;
+  color: #8b5a2b;
+
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.price-adjust-btn:hover {
+  background: #c8944d;
+  color: white;
+  box-shadow: 0 2px 6px rgba(139, 90, 43, 0.25);
+}
+
+.price-adjust-btn:active {
+  transform: scale(0.9);
+}
+
+/* Chrome / Edge */
+.price-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 17px;
+  height: 17px;
+
+  border-radius: 50%;
+  border: 3px solid #fff8e8;
+
+  background: #d97706;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  cursor: grab;
+}
+
+.price-range::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.15);
+}
+
+/* Firefox */
+.price-range::-moz-range-thumb {
+  width: 17px;
+  height: 17px;
+
+  border-radius: 50%;
+  border: 3px solid #fff8e8;
+
+  background: #d97706;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  cursor: grab;
+}
+
+.price-range::-moz-range-track {
+  height: 5px;
+  background: #d8c5a5;
+  border-radius: 999px;
+}

@@ -1,0 +1,29 @@
+info:
+  name: BuyKoiFromMarket
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: http://localhost:8090/koi_breeding/marketplace/purchase?userId=1
+  params:
+    - name: userId
+      value: "1"
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+        "sellerId": 2,
+        "koiId":6,
+        "price": 3500,
+        "pondId": 1
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

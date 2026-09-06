@@ -1,0 +1,29 @@
+info:
+  name: add item admin
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: localhost:8090/koi_breeding/admin/items/addition
+  body:
+    type: json
+    data: |-
+      {
+          "imageUrl":"",
+          "nameItem": "Koi Food Free",
+          "description": "free",
+          "itemType":"FOOD",
+          "price": 1,
+          "effectType": "GROWTH"
+      }
+  auth:
+    type: bearer
+    token: ""
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

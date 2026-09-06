@@ -51,6 +51,10 @@ public class User {
     private Gender gender;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Location location;
+
+    @Enumerated(EnumType.STRING)
     private UserStatus status;
 
     @Enumerated(EnumType.STRING)
@@ -61,14 +65,13 @@ public class User {
     private Boolean isBanned = false;
 
     @Column(nullable = false)
+    private Integer failedLoginAttempts = 0;
+
+    @Column(nullable = false)
     private Integer exp = 1;
 
     @Column(columnDefinition = "TEXT")
     private String avatarUrl;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 30)
-    private Location location;
 
     private Instant locationUpdatedAt;
 

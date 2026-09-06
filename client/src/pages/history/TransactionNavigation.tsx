@@ -28,8 +28,8 @@ export default function TransactionNavigation() {
       </button>
 
       <button
-        className={location.pathname === "/history" ? "tab active" : "tab"}
-        onClick={() => navigate("/history")}
+        className={location.pathname === "/transactions" ? "tab active" : "tab"}
+        onClick={() => navigate("/transactions")}
       >
         📜 History
       </button>

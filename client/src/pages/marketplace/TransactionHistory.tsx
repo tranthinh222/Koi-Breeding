@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CURRENT_USER_ID } from '../../api/currentUser'
 import { getTransactions, type Transaction } from '../../api/transaction'
+import TransactionNavigation from '../history/TransactionNavigation'
 
 type TransactionFilter = 'ALL' | 'BOUGHT' | 'SOLD'
 type TransactionSort = 'NEWEST' | 'OLDEST'
@@ -90,12 +91,7 @@ export default function TransactionHistory() {
         </div>
       </section>
 
-      <section className="market-tabs history-tabs">
-        <button className="tab">🛒 Buy</button>
-        <button className="tab">💰 Sell</button>
-        <button className="tab">📋 My Listings</button>
-        <button className="tab active">📜 History</button>
-      </section>
+      <TransactionNavigation />
 
       <section className="search-panel">
         <div className="history-filter-dropdown" ref={filterDropdownRef}>

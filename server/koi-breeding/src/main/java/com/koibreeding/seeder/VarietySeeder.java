@@ -3,7 +3,6 @@ package com.koibreeding.seeder;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +10,6 @@ import com.koibreeding.domain.Variety;
 import com.koibreeding.repository.VarietyRepository;
 
 @Component
-@ConditionalOnProperty(prefix = "app.seed.catalog", name = "enabled", havingValue = "true")
 @Order(1)
 public class VarietySeeder implements CommandLineRunner {
     private final VarietyRepository varietyRepository;

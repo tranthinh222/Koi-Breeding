@@ -1,4 +1,12 @@
-import { Fish, LayoutDashboard, FlaskConical, Settings, UserCircle2, Users, LogOut } from "lucide-react";
+import {
+  Fish,
+  LayoutDashboard,
+  Users,
+  Package,
+  Settings,
+  UserCircle2,
+  LogOut,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { MenuTab, OtherTab } from "../Admin";
 import { logoutRequest } from "../../../api/auth";
@@ -10,14 +18,15 @@ const menuItems: Array<{ id: MenuTab; label: string; icon: LucideIcon }> = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "users", label: "Users", icon: Users },
   { id: "breeding", label: "Breeding", icon: Fish },
-  { id: "items", label: "Items", icon: FlaskConical },
+  { id: "items", label: "Items", icon: Package },
+  { id: "transactions", label: "Transactions", icon: Package },
+  { id: "trade", label: "Trades", icon: Package },
 ];
 
 const otherItems: Array<{ id: OtherTab; label: string; icon: LucideIcon }> = [
   { id: "settings", label: "Settings", icon: Settings },
   { id: "account", label: "Account", icon: UserCircle2 },
 ];
-
 
 interface AdminSidebarProps {
   activeView: AdminView;
@@ -27,16 +36,16 @@ interface AdminSidebarProps {
 export function AdminSidebar({ activeView, onSelectView }: AdminSidebarProps) {
   const navigate = useNavigate();
   const handleLogout = async () => {
-  try {
-    await logoutRequest();
+    try {
+      await logoutRequest();
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
 
-    navigate("/");
-  } catch (error) {
-    console.error("Logout failed:", error);
-  }
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
   return (
     <aside className="admin-sidebar">
@@ -93,7 +102,7 @@ export function AdminSidebar({ activeView, onSelectView }: AdminSidebarProps) {
       </div>
 
       <div className="sidebar-footer">
-        <button type="button" className="sidebar-logout" onClick={handleLogout}> 
+        <button type="button" className="sidebar-logout" onClick={handleLogout}>
           <LogOut size={16} />
           <span>Logout</span>
         </button>

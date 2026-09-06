@@ -387,8 +387,8 @@ public class MarketService {
 
         return new ResTradeDto(
                 marketplace.getId(),
-                buyer.getId(),
-                seller.getId(),
+                buyer.getUsername(),
+                seller.getUsername(),
                 marketplace.getPrice(),
                 trade.getTradeAt()
         );

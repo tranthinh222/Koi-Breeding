@@ -1,87 +1,86 @@
-import { useEffect, useRef, useState } from "react";
-import { getTransactions, type Transaction } from "../../api/transaction";
-import "./transaction.css";
-import TransactionNavigation from "./TransactionNavigation";
+import { useEffect, useRef, useState } from 'react'
+import { CURRENT_USER_ID } from '../../api/currentUser'
+import { getTransactions, type Transaction } from '../../api/transaction'
 
-type TransactionFilter = "ALL" | "BOUGHT" | "SOLD";
-type TransactionSort = "NEWEST" | "OLDEST";
-const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+type TransactionFilter = 'ALL' | 'BOUGHT' | 'SOLD'
+type TransactionSort = 'NEWEST' | 'OLDEST'
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50]
 const FILTER_OPTIONS: { value: TransactionFilter; label: string }[] = [
-  { value: "ALL", label: "All Transactions" },
-  { value: "BOUGHT", label: "Bought" },
-  { value: "SOLD", label: "Sold" },
-];
+  { value: 'ALL', label: 'All Transactions' },
+  { value: 'BOUGHT', label: 'Bought' },
+  { value: 'SOLD', label: 'Sold' },
+]
 const SORT_OPTIONS: { value: TransactionSort; label: string }[] = [
-  { value: "NEWEST", label: "Newest" },
-  { value: "OLDEST", label: "Oldest" },
-];
+  { value: 'NEWEST', label: 'Newest' },
+  { value: 'OLDEST', label: 'Oldest' },
+]
 
 export default function TransactionHistory() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [filter, setFilter] = useState<TransactionFilter>("ALL");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [sort, setSort] = useState<TransactionSort>("NEWEST");
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
-  const [isPageSizeOpen, setIsPageSizeOpen] = useState(false);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const pageSizeDropdownRef = useRef<HTMLDivElement>(null);
-  const filterDropdownRef = useRef<HTMLDivElement>(null);
-  const sortDropdownRef = useRef<HTMLDivElement>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [filter, setFilter] = useState<TransactionFilter>('ALL')
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [sort, setSort] = useState<TransactionSort>('NEWEST')
+  const [isSortOpen, setIsSortOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(5)
+  const [isPageSizeOpen, setIsPageSizeOpen] = useState(false)
+  const [totalPages, setTotalPages] = useState(0)
+  const [totalElements, setTotalElements] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const pageSizeDropdownRef = useRef<HTMLDivElement>(null)
+  const filterDropdownRef = useRef<HTMLDivElement>(null)
+  const sortDropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const closeDropdown = (event: MouseEvent) => {
       if (!pageSizeDropdownRef.current?.contains(event.target as Node)) {
-        setIsPageSizeOpen(false);
+        setIsPageSizeOpen(false)
       }
       if (!filterDropdownRef.current?.contains(event.target as Node)) {
-        setIsFilterOpen(false);
+        setIsFilterOpen(false)
       }
       if (!sortDropdownRef.current?.contains(event.target as Node)) {
-        setIsSortOpen(false);
+        setIsSortOpen(false)
       }
-    };
+    }
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsPageSizeOpen(false);
-        setIsFilterOpen(false);
-        setIsSortOpen(false);
+      if (event.key === 'Escape') {
+        setIsPageSizeOpen(false)
+        setIsFilterOpen(false)
+        setIsSortOpen(false)
       }
-    };
+    }
 
-    document.addEventListener("mousedown", closeDropdown);
-    document.addEventListener("keydown", closeOnEscape);
+    document.addEventListener('mousedown', closeDropdown)
+    document.addEventListener('keydown', closeOnEscape)
     return () => {
-      document.removeEventListener("mousedown", closeDropdown);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, []);
+      document.removeEventListener('mousedown', closeDropdown)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [])
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     getTransactions(
-      1,
+      CURRENT_USER_ID,
       page,
       pageSize,
-      sort === "NEWEST" ? "desc" : "asc",
+      sort === 'NEWEST' ? 'desc' : 'asc',
       filter,
     )
       .then((response) => {
-        setTransactions(response.result);
-        setTotalPages(response.meta.totalPages);
-        setTotalElements(response.meta.totalElements);
+        setTransactions(response.result)
+        setTotalPages(response.meta.totalPages)
+        setTotalElements(response.meta.totalElements)
       })
       .catch((requestError) => {
-        console.error("Failed to load transactions:", requestError);
-        setError("Unable to load transaction history.");
+        console.error('Failed to load transactions:', requestError)
+        setError('Unable to load transaction history.')
       })
-      .finally(() => setLoading(false));
-  }, [filter, page, pageSize, sort]);
+      .finally(() => setLoading(false))
+  }, [filter, page, pageSize, sort])
 
   return (
     <div className="transaction-history-page">
@@ -91,7 +90,12 @@ export default function TransactionHistory() {
         </div>
       </section>
 
-      <TransactionNavigation />
+      <section className="market-tabs history-tabs">
+        <button className="tab">🛒 Buy</button>
+        <button className="tab">💰 Sell</button>
+        <button className="tab">📋 My Listings</button>
+        <button className="tab active">📜 History</button>
+      </section>
 
       <section className="search-panel">
         <div className="history-filter-dropdown" ref={filterDropdownRef}>
@@ -118,12 +122,12 @@ export default function TransactionHistory() {
                   type="button"
                   role="option"
                   aria-selected={filter === option.value}
-                  className={filter === option.value ? "selected" : ""}
+                  className={filter === option.value ? 'selected' : ''}
                   key={option.value}
                   onClick={() => {
-                    setFilter(option.value);
-                    setPage(1);
-                    setIsFilterOpen(false);
+                    setFilter(option.value)
+                    setPage(1)
+                    setIsFilterOpen(false)
                   }}
                 >
                   <span>{option.label}</span>
@@ -160,12 +164,12 @@ export default function TransactionHistory() {
                   type="button"
                   role="option"
                   aria-selected={sort === option.value}
-                  className={sort === option.value ? "selected" : ""}
+                  className={sort === option.value ? 'selected' : ''}
                   key={option.value}
                   onClick={() => {
-                    setSort(option.value);
-                    setPage(1);
-                    setIsSortOpen(false);
+                    setSort(option.value)
+                    setPage(1)
+                    setIsSortOpen(false)
                   }}
                 >
                   <span>{option.label}</span>
@@ -183,23 +187,23 @@ export default function TransactionHistory() {
           <p className="history-message">No transactions yet.</p>
         )}
         {transactions.map((transaction) => {
-          const isDeposit = transaction.transactionType === "DEPOSIT";
+          const isDeposit = transaction.transactionType === 'DEPOSIT'
           return (
             <article className="history-card" key={transaction.id}>
-              <div className={`history-icon ${isDeposit ? "sell" : "buy"}`}>
-                {isDeposit ? "💰" : "🛒"}
+              <div className={`history-icon ${isDeposit ? 'sell' : 'buy'}`}>
+                {isDeposit ? '💰' : '🛒'}
               </div>
               <div className="history-info">
                 <h3>{transaction.itemName}</h3>
                 <p>{transaction.description}</p>
                 <p>{new Date(transaction.createdAt).toLocaleString()}</p>
               </div>
-              <div className={`history-price ${isDeposit ? "income" : ""}`}>
-                {isDeposit ? "+" : "-"}
-                {transaction.amount.toLocaleString("vi-VN")} Koins
+              <div className={`history-price ${isDeposit ? 'income' : ''}`}>
+                {isDeposit ? '+' : '-'}
+                {transaction.amount.toLocaleString('vi-VN')} Koins
               </div>
             </article>
-          );
+          )
         })}
         {!loading && !error && totalElements > 0 && (
           <div className="history-pagination">
@@ -233,12 +237,12 @@ export default function TransactionHistory() {
                         type="button"
                         role="option"
                         aria-selected={pageSize === option}
-                        className={pageSize === option ? "selected" : ""}
+                        className={pageSize === option ? 'selected' : ''}
                         key={option}
                         onClick={() => {
-                          setPageSize(option);
-                          setPage(1);
-                          setIsPageSizeOpen(false);
+                          setPageSize(option)
+                          setPage(1)
+                          setIsPageSizeOpen(false)
                         }}
                       >
                         <span>{option}</span>
@@ -275,5 +279,5 @@ export default function TransactionHistory() {
         )}
       </section>
     </div>
-  );
+  )
 }

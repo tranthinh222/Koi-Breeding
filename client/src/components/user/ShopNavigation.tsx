@@ -12,17 +12,14 @@ export default function ShopNavigation() {
   const location = useLocation();
   return (
     <nav className="navigation-menu">
-      <button
-        className={location.pathname === "/home" ? "active" : ""}
-        onClick={() => navigate("/home")}
-      >
+      <button onClick={() => navigate("/")}>
         <House />
         <span>Home</span>
       </button>
 
       <button
         className={location.pathname.startsWith("/pond") ? "active" : ""}
-        onClick={() => navigate("/ponds")}
+        onClick={() => navigate("/pond")}
       >
         <Waves />
         <span>My Ponds</span>
@@ -45,17 +42,14 @@ export default function ShopNavigation() {
       </button>
 
       <button
-        className={location.pathname === "/marketplace" ? "active" : ""}
-        onClick={() => navigate("/marketplace")}
+        className={location.pathname === "/transactions" ? "active" : ""}
+        onClick={() => navigate("/transactions")}
       >
         <ReceiptText />
         <span>Marketplace</span>
       </button>
 
-      <button
-        className={location.pathname === "/profile" ? "active" : ""}
-        onClick={() => navigate("/profile")}
-      >
+      <button>
         <UserRound />
         <span>Profile</span>
       </button>

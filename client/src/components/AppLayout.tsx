@@ -8,13 +8,8 @@ import { useAuth } from '../context/AuthContext'
 export default function AppLayout() {
   const { currentUser, loading } = useAuth()
 
-  if (loading) {
-    return null
-  }
-
-  if (!currentUser) {
-    return <Navigate to="/landing" replace />
-  }
+  if (loading) return null
+  if (!currentUser) return <Navigate to="/landing" replace />
 
   return (
     <div className="app-layout">

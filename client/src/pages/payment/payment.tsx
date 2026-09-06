@@ -2,13 +2,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { createPayment } from '../../api/payment'
 import type { CreatedPayment } from '../../api/payment'
-import { useAuth } from '../../context/AuthContext'
+import { CURRENT_USER_ID } from '../../api/currentUser'
 import './payment.css'
 
 const Payment = () => {
   const { itemId } = useParams<{ itemId: string }>()
   const navigate = useNavigate()
-  const { currentUserId, loading: authLoading } = useAuth()
 
   const [payment, setPayment] = useState<CreatedPayment | null>(null)
   const [loading, setLoading] = useState(true)
@@ -16,17 +15,12 @@ const Payment = () => {
 
   useEffect(() => {
     const loadPayment = async () => {
-      if (authLoading) return
-
       try {
         if (!itemId) {
           throw new Error('Item ID is missing')
         }
-        if (!currentUserId) {
-          throw new Error('Please login before creating a payment')
-        }
 
-        const data = await createPayment(currentUserId, Number(itemId))
+        const data = await createPayment(CURRENT_USER_ID, Number(itemId))
 
         setPayment(data)
       } catch (err) {
@@ -38,9 +32,9 @@ const Payment = () => {
     }
 
     loadPayment()
-  }, [authLoading, currentUserId, itemId])
+  }, [itemId])
 
-  if (loading || authLoading) {
+  if (loading) {
     return (
       <main className="payment-page">
         <div className="payment-card">

@@ -52,16 +52,6 @@ export const callUpgradePond = (pondId: number) => {
 	);
 };
 
-export async function getPonds(page = 0, size = 20): Promise<IModelPagination<IPond>> {
-	const response = await apiClient.get<IRestResponse<IModelPagination<IPond>>>("/ponds", {
-		params: { page, size },
-	});
-	return response.data.data ?? {
-		meta: { page: page + 1, pageSize: size, totalPages: 0, totalElements: 0 },
-		result: [],
-	};
-}
-
 export async function getPondsByOwner(userId: number): Promise<Pond[]> {
 	const response = await apiClient.get<IRestResponse<Pond[]>>("/ponds/owner", {
 		params: { userId },

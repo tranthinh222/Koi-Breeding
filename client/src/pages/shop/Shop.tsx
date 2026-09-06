@@ -1,20 +1,19 @@
-import { useState } from "react";
+import { useState } from 'react'
 
-import type { ShopCategory, ShopItem } from "../../api/shop";
+import type { ShopCategory, ShopItem } from '../../api/shop'
 
-import ShopTitle from "../../components/user/ShopTitle";
-import ShopTabs from "../../components/user/ShopTabs";
+import ShopTitle from '../../components/user/ShopTitle'
+import ShopTabs from '../../components/user/ShopTabs'
 
-import FoodShop from "./FoodShop";
-import MedicineShop from "./MedicineShop";
-import KoiShop from "./KoiShop";
-import KoinShop from "./KoinShop";
-import "../../style/shop.css";
+import FoodShop from './FoodShop'
+import MedicineShop from './MedicineShop'
+import KoiShop from './KoiShop'
+import KoinShop from './KoinShop'
 
 export default function Shop() {
-  const [category, setCategory] = useState<ShopCategory>("FOOD");
+  const [category, setCategory] = useState<ShopCategory>('FOOD')
 
-  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null)
 
   return (
     <>
@@ -23,26 +22,26 @@ export default function Shop() {
       <ShopTabs
         activeCategory={category}
         onChange={(newCategory) => {
-          setCategory(newCategory);
-          setSelectedItem(null);
+          setCategory(newCategory)
+          setSelectedItem(null)
         }}
       />
 
-      {category === "FOOD" && (
+      {category === 'FOOD' && (
         <FoodShop selectedItem={selectedItem} onSelect={setSelectedItem} />
       )}
 
-      {category === "MEDICINE" && (
+      {category === 'MEDICINE' && (
         <MedicineShop selectedItem={selectedItem} onSelect={setSelectedItem} />
       )}
 
-      {category === "KOI" && (
+      {category === 'KOI' && (
         <KoiShop selectedItem={selectedItem} onSelect={setSelectedItem} />
       )}
 
-      {category === "CURRENCY" && (
+      {category === 'CURRENCY' && (
         <KoinShop selectedItem={selectedItem} onSelect={setSelectedItem} />
       )}
     </>
-  );
+  )
 }

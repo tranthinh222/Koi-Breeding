@@ -11,9 +11,9 @@ import type {
 	IModelPagination,
 	IVariety,
 } from "../../../types/backend";
-import Background from "../../share/Background/Background";
-import { toast } from "../../share/Toast/toast";
-import Toaster from "../../share/Toast/Toaster";
+import Background from "../../shared/Background/Background";
+import { toast } from "../../shared/Toast/toast";
+import Toaster from "../../shared/Toast/Toaster";
 import KoiForm from "../KoiForm/KoiForm";
 import KoiVarientRow from "../KoiVarientRow/KoiVarientRow";
 import VarietyForm from "../VarietyForm/VarietyForm";

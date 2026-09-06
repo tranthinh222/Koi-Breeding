@@ -34,7 +34,6 @@ apiClient.interceptors.response.use(
 
     // ✓ SKIP retry cho auth endpoints
     const shouldNotRefresh =
-      requestUrl.includes("/auth/me") ||
       requestUrl.includes("/auth/refresh") ||
       requestUrl.includes("/auth/login") ||
       requestUrl.includes("/auth/register") ||

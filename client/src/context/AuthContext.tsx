@@ -53,38 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [setAuthenticatedUser]);
 
-  // Bootstrap useEffect
-  useEffect(() => {
-    let cancelled = false;
-
-    const bootstrap = async () => {
-      try {
-        // ✓ getCurrentUser() return null nếu 401
-        const user = await getCurrentUser();
-
-        if (!cancelled) {
-          setAuthenticatedUser(user);
-        }
-      } catch (error) {
-        console.error("Failed to load authenticated user:", error);
-
-        if (!cancelled) {
-          setAuthenticatedUser(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false); // ✓ CRITICAL: luôn set loading = false
-        }
-      }
-    };
-
-    void bootstrap();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [setAuthenticatedUser]);
-
   /**
    * Logout:
    * Backend sẽ xóa HttpOnly Cookie.

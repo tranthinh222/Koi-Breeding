@@ -77,16 +77,16 @@ export default function PondSelectDialog({
         <div className="pond-dialog-title">
           <span className="pond-title-pin left" />
 
-          <h2>Chọn hồ</h2>
+          <h2>Select a Pond</h2>
 
           <span className="pond-title-pin right" />
         </div>
 
         <div className="pond-dialog-list">
           {loading ? (
-            <div className="pond-dialog-message">Đang tải danh sách hồ...</div>
+            <div className="pond-dialog-message">Loading your ponds...</div>
           ) : ponds.length === 0 ? (
-            <div className="pond-dialog-message">Bạn chưa có hồ cá.</div>
+            <div className="pond-dialog-message">You do not have a pond available for this koi.</div>
           ) : (
             ponds.map((pond) => {
               const isFull = pond.currentKoi >= pond.capacity;
@@ -116,7 +116,7 @@ export default function PondSelectDialog({
 
                       <span className={`pond-capacity ${isFull ? "full" : ""}`}>
                         {pond.currentKoi} / {pond.capacity}
-                        {isFull && " [Đầy]"}
+                        {isFull && " [Full]"}
                       </span>
                     </div>
 
@@ -141,7 +141,7 @@ export default function PondSelectDialog({
                       handleSelect(pond);
                     }}
                   >
-                    {isFull ? "Đầy" : isSelected ? "Đã chọn" : "Chọn"}
+                    {isFull ? "Full" : isSelected ? "Selected" : "Select"}
                   </button>
                 </div>
               );
@@ -155,7 +155,7 @@ export default function PondSelectDialog({
             className="pond-dialog-cancel"
             onClick={onClose}
           >
-            Hủy
+            Cancel
           </button>
 
           <button
@@ -164,7 +164,7 @@ export default function PondSelectDialog({
             disabled={selectedPondId === null || loading}
             onClick={handleConfirm}
           >
-            Xác nhận
+            Confirm
           </button>
         </div>
       </div>

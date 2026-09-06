@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.context.annotation.Profile;
 
 import com.koibreeding.domain.Dictionary;
 import com.koibreeding.domain.Item;
@@ -22,8 +21,7 @@ import com.koibreeding.repository.DictionaryRepository;
 import com.koibreeding.repository.ItemRepository;
 
 @Component
-@Profile("seed")
-@ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "app.seed.catalog", name = "enabled", havingValue = "true")
 @Order(4)
 public class ItemSeeder implements CommandLineRunner {
     private ItemRepository itemRepository;

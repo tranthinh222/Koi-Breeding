@@ -3,8 +3,8 @@ import type { ShopItem } from '../../api/shop'
 import { getShopItem } from '../../api/shop'
 import { usePurchase } from '../../hooks/usePurchase'
 
-import ShopGrid from '../../components/user/ShopGrid'
-import DetailPanel from '../../components/DetailPanel'
+import ShopGrid from '../../components/shop/ShopGrid'
+import DetailPanel from '../../components/shop/DetailPanel'
 
 interface Props {
   selectedItem: ShopItem | null

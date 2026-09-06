@@ -6,13 +6,16 @@ import { useAuth } from "../../context/AuthContext";
 
 import maleAvatar from "../../assets/avatars/male_blank_avatar.png";
 import femaleAvatar from "../../assets/avatars/female_blank_avatar.png";
+import kohakuImage from "../../assets/koi/kohaku.svg";
+import showaImage from "../../assets/koi/showa_sanshoku.svg";
+import sankeImage from "../../assets/koi/taisho_sanke.svg";
 
 import ImageEditor from "./ImageEditor";
 
 import { useNavigate } from "react-router-dom";
 
 import { logoutRequest } from "../../api/auth";
-import "../../style/home.css";
+import "./Profile.css";
 
 type Gender = "MALE" | "FEMALE" | "";
 
@@ -119,7 +122,7 @@ function ProfileHero({
   useEffect(() => {
     setAvatarSrc(avatarUrl ?? profile.avatarUrl ?? fallbackAvatar);
   }, [avatarUrl, profile.avatarUrl, fallbackAvatar]);
-  const avatarText = profile.username.charAt(0).toUpperCase();
+  const levelProgress = Math.max(0, Math.min(100, profile.exp % 100));
 
   const handleLogout = async () => {
     try {
@@ -140,19 +143,15 @@ function ProfileHero({
         aria-label="Upload avatar"
         title="Upload avatar"
       >
-        {avatarUrl ? (
-          <img
-            src={avatarSrc}
-            alt={profile.username}
-            onError={() => {
-              if (avatarSrc !== fallbackAvatar) {
-                setAvatarSrc(fallbackAvatar);
-              }
-            }}
-          />
-        ) : (
-          <span>{avatarText}</span>
-        )}
+        <img
+          src={avatarSrc}
+          alt={profile.username}
+          onError={() => {
+            if (avatarSrc !== fallbackAvatar) {
+              setAvatarSrc(fallbackAvatar);
+            }
+          }}
+        />
         <span className="profile-avatar-overlay">
           <span>Upload</span>
         </span>
@@ -162,6 +161,12 @@ function ProfileHero({
         <span className="profile-eyebrow">Player Profile</span>
         <h2>{profile.username}</h2>
         <p>Level {getLevel(profile.exp)}</p>
+        <div className="profile-exp" aria-label={`${levelProgress}% to next level`}>
+          <div className="profile-exp-track">
+            <span style={{ width: `${levelProgress}%` }} />
+          </div>
+          <small>{levelProgress} / 100 EXP to next level</small>
+        </div>
       </div>
 
       <div className="profile-actions">
@@ -178,7 +183,7 @@ function ProfileHero({
           </button>
         )}
         {!editing && (
-          <button type="button" className="secondary" onClick={handleLogout}>
+          <button type="button" className="secondary signout" onClick={handleLogout}>
             Sign out
           </button>
         )}
@@ -326,7 +331,11 @@ function AchievementsPanel() {
 }
 
 function FavoriteKoiPanel() {
-  const favoriteKoi = ["Kohaku", "Showa", "Sanke"];
+  const favoriteKoi = [
+    { name: "Kohaku", image: kohakuImage, level: 18 },
+    { name: "Showa", image: showaImage, level: 19 },
+    { name: "Sanke", image: sankeImage, level: 20 },
+  ];
 
   return (
     <section className="profile-favorite-koi">
@@ -336,11 +345,13 @@ function FavoriteKoiPanel() {
       </div>
 
       <div className="profile-koi-grid">
-        {favoriteKoi.map((name, index) => (
-          <div className="profile-koi-card" key={name}>
-            <div className="profile-koi-image">🐟</div>
-            <strong>{name}</strong>
-            <span>Lv. {18 + index}</span>
+        {favoriteKoi.map((koi) => (
+          <div className="profile-koi-card" key={koi.name}>
+            <div className="profile-koi-image">
+              <img src={koi.image} alt={koi.name} />
+            </div>
+            <strong>{koi.name}</strong>
+            <span>Lv. {koi.level}</span>
           </div>
         ))}
       </div>

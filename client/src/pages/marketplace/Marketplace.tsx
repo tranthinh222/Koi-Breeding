@@ -17,9 +17,12 @@ import {
 import { getBalanceWallet } from "../../api/wallet";
 
 import PondSelectDialog from "../../components/pond/PondSelectDialog";
-import TransactionNavigation from "../history/TransactionNavigation";
+import TransactionNavigation from "../../components/marketplace/TransactionNavigation";
+import MarketplaceState from "../../components/marketplace/MarketplaceState";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Marketplace() {
+  const { currentUserId } = useAuth();
   const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(
     null,
   );
@@ -27,6 +30,7 @@ export default function Marketplace() {
   const [items, setItems] = useState<MarketplaceItem[]>([]);
 
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const [filters, setFilters] = useState<ShopFilters>(EMPTY_FILTERS);
 
@@ -45,6 +49,7 @@ export default function Marketplace() {
     const fetchMarketplace = async () => {
       try {
         setLoading(true);
+        setLoadError(false);
 
         const apiParams: MarketplaceApiParams = {
           category: filters.category,
@@ -80,6 +85,7 @@ export default function Marketplace() {
 
         setItems([]);
         setTotalPages(0);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -99,7 +105,8 @@ export default function Marketplace() {
       setBuyError(null);
       setBuySuccess(null);
 
-      const userId = 1;
+      if (!currentUserId) throw new Error("You must be signed in to buy koi.");
+      const userId = currentUserId;
 
       const result = await buyKoi(
         userId,
@@ -122,7 +129,7 @@ export default function Marketplace() {
         console.error("Failed to refresh wallet balance:", error);
       }
 
-      setBuySuccess("Mua Koi thành công!");
+      setBuySuccess("Koi purchased successfully!");
 
       setShowPondDialog(false);
 
@@ -135,7 +142,7 @@ export default function Marketplace() {
     } catch (error: any) {
       console.error("Buy koi failed:", error);
 
-      const message = error?.response?.data?.message || "Mua Koi thất bại.";
+      const message = error?.response?.data?.message || "Unable to purchase this koi.";
 
       setBuyError(message);
     } finally {
@@ -158,9 +165,11 @@ export default function Marketplace() {
           <ShopFiltersBar filters={filters} onChange={setFilters} />
 
           {loading ? (
-            <p>Loading marketplace items...</p>
+            <MarketplaceState icon="🐟" title="Loading marketplace" description="Looking for koi currently available for sale..." />
+          ) : loadError ? (
+            <MarketplaceState icon="⚠️" title="Marketplace unavailable" description="We could not load marketplace listings. Please check your connection and try again." actionLabel="Try Again" onAction={() => setFilters({ ...filters })} />
           ) : items.length === 0 ? (
-            <p>No items found. Try adjusting your filters.</p>
+            <MarketplaceState icon="🐟" title="No koi found" description="There are no active listings matching your filters right now." actionLabel="Clear Filters" onAction={() => { setFilters(EMPTY_FILTERS); setCurrentPage(0); }} />
           ) : (
             <>
               <MarketplaceGrid
@@ -219,7 +228,7 @@ export default function Marketplace() {
       {/* Pond Select Dialog */}
       <PondSelectDialog
         open={showPondDialog}
-        userId={1}
+        userId={currentUserId ?? 0}
         onClose={() => {
           if (!buying) {
             setShowPondDialog(false);

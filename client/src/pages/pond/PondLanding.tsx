@@ -1,7 +1,6 @@
 import { AlertTriangle, Bubbles, CheckCheck, Droplets, Gauge, Thermometer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { CURRENT_USER_ID } from '../../api/currentUser'
 import {
   callBuyPond,
   callFetchAllPonds,
@@ -12,45 +11,20 @@ import {
   type IResponseUpgradePondDTO,
 } from '../../api/pond'
 import { getUser, type User } from '../../api/user'
-import ShopHeader from '../../components/Header'
-import { toast } from '../../components/share/Toast/toast'
-import Toaster from '../../components/share/Toast/Toaster'
-import BuyPondForm from '../../components/user/pond/BuyPondForm/BuyPondForm'
-import ShopBackground from '../../components/user/ShopBackground'
-import ShopNavigation from '../../components/user/ShopNavigation'
+import { useAuth } from '../../context/AuthContext'
+import ShopHeader from '../../components/layout/Header'
+import { toast } from '../../components/shared/Toast/toast'
+import Toaster from '../../components/shared/Toast/Toaster'
+import BuyPondForm from '../../components/pond/BuyPondForm/BuyPondForm'
+import ShopBackground from '../../components/shop/ShopBackground'
+import ShopNavigation from '../../components/layout/ShopNavigation'
 import type { IKoi, IModelPagination, IOwner, IPond } from '../../types/backend'
 import { getPondAlert } from '../../utils/pondHealth'
 import Pond from './Pond'
 import styles from './PondLanding.module.css'
 
-const MOCK_PONDS: IPond[] = [
-  'Kohaku Pond',
-  'Uia Pond',
-  'A Pond',
-  'Showa Pond',
-  'Ronaldo Pond',
-  'Pikachu Pond',
-].map((name, index) => ({
-  id: index + 1,
-  owner: {
-    id: CURRENT_USER_ID,
-    username: 'demo_user',
-  },
-  name,
-  level: index === 0 ? 15 : 10,
-  currentQuantity: 0,
-  nextLevelPrice: 900,
-  capacity: index === 0 ? 15 : 10,
-  waterQuality: index === 0 ? 70 : 100,
-  temperature: index === 0 ? 20 : 24,
-  pH: index === 0 ? 3.6 : 7.1,
-  oxygen: 6.2,
-  environmentScore: index === 0 ? 54 : 100,
-  createdAt: new Date(),
-  description: 'This pond is used to raise Kohaku koi fishes',
-}))
-
 function PondLanding() {
+  const { currentUserId } = useAuth()
   const location = useLocation()
   const routePond = (location.state as { openPond?: IPond } | null)?.openPond
   const [userLogin, setUserLogin] = useState<User | null>(null)
@@ -67,8 +41,10 @@ function PondLanding() {
 
   useEffect(() => {
     const loadUser = async () => {
+      if (!currentUserId) return
+
       try {
-        const user = await getUser(CURRENT_USER_ID)
+        const user = await getUser(currentUserId)
         setUserLogin(user)
       } catch (error) {
         toast.error('Failed to fetch current user login.')
@@ -76,7 +52,7 @@ function PondLanding() {
     }
 
     loadUser()
-  }, [])
+  }, [currentUserId])
 
   // Fetch the page data
   useEffect(() => {
@@ -89,11 +65,10 @@ function PondLanding() {
         const response = await fetchData(page, 6)
 
         if (response.meta.totalElements === 0) {
-          console.info(
-            'No ponds returned by the backend; using frontend sample data.',
-          )
-          setPondList(MOCK_PONDS)
+          setPondList([])
+          setSelectedPond(null)
           setTotalPages(1)
+          setTotalPonds(0)
 
           if (page !== 1) setPage(1)
           return
@@ -108,12 +83,12 @@ function PondLanding() {
         setTotalPages(response.meta.totalPages)
         setTotalPonds(response.meta.totalElements)
       } catch (error) {
-        console.error(
-          'Failed to fetch ponds; using frontend sample data:',
-          error,
-        )
-        setPondList(MOCK_PONDS)
+        console.error('Failed to fetch ponds:', error)
+        setPondList([])
+        setSelectedPond(null)
         setTotalPages(1)
+        setTotalPonds(0)
+        toast.error('Failed to fetch ponds.')
         if (page !== 1) setPage(1)
       }
     }

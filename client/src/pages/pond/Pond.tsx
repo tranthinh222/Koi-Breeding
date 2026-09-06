@@ -20,11 +20,11 @@ import {
 	callReleaseKoiToPond,
 } from "../../api/koi";
 import { CURRENT_USER_ID } from "../../api/currentUser";
-import { toast } from "../../components/share/Toast/toast";
-import ImportKoiForm from "../../components/user/pond/ImportKoiForm/ImportKoiForm";
-import { PondCanvas } from "../../components/user/pond/PondCanvas/PondCanvas";
-import PondInformation from "../../components/user/pond/PondInformation/PondInformation";
-import PondUpgradeForm from "../../components/user/pond/PondUpgradeForm/PondUpgradeForm";
+import { toast } from "../../components/shared/Toast/toast";
+import ImportKoiForm from "../../components/pond/ImportKoiForm/ImportKoiForm";
+import { PondCanvas } from "../../components/pond/PondCanvas/PondCanvas";
+import PondInformation from "../../components/pond/PondInformation/PondInformation";
+import PondUpgradeForm from "../../components/pond/PondUpgradeForm/PondUpgradeForm";
 import type {
 	IItemInventory,
 	IKoi,

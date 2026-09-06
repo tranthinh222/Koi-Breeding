@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import ShopBackground from "../../components/user/ShopBackground";
+import ShopBackground from "../../components/shop/ShopBackground";
 import AuthModal from "../../components/auth/AuthModal";
 
 import "./Landing.css";

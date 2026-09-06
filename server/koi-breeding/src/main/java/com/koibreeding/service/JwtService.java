@@ -51,22 +51,26 @@ public class JwtService {
 
     //verify Token
     public String verifyToken(String token){
-        Claims claims = Jwts.parser()
+        Claims claims = parseClaims(token);
+        return String.valueOf(claims.getSubject());
+    }
+
+    public String getRole(String token) {
+        return parseClaims(token).get("role", String.class);
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return String.valueOf(claims.getSubject());
     }
 
     // Kiem tra token (con han va hop le)
     public boolean isAccessTokenValid(String token){
         try{
-            Claims claims = Jwts.parser()
-                    .verifyWith(getSigningKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+            Claims claims = parseClaims(token);
 
             String tokenType = claims.get("type", String.class);
             return  "access".equals(tokenType) && claims.getExpiration().after(new Date());
@@ -77,11 +81,7 @@ public class JwtService {
 
     public boolean isRefreshTokenValid(String token){
         try{
-            Claims claims = Jwts.parser()
-                    .verifyWith(getSigningKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+            Claims claims = parseClaims(token);
 
             String tokenType = claims.get("type", String.class);
             return "refresh".equals(tokenType) && claims.getExpiration().after(new Date());

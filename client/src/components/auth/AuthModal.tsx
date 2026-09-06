@@ -8,7 +8,7 @@ import {
   verifyResetCode,
 } from "../../api/auth";
 import { useAuth } from "../../context/AuthContext";
-import "./auth.css";
+import "./AuthModal.css";
 
 type AuthMode = "login" | "register";
 type ViewMode = AuthMode | "forgot";

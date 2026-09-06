@@ -4,13 +4,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.context.annotation.Profile;
 
 import com.koibreeding.repository.VarietyRepository;
 
 @Component
-@Profile("seed")
-@ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "app.seed.catalog", name = "enabled", havingValue = "true")
 @Order(1)
 public class VarietySeeder implements CommandLineRunner {
     private final VarietyRepository varietyRepository;

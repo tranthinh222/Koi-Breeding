@@ -1,6 +1,8 @@
 package com.koibreeding.service;
 
 import com.koibreeding.domain.User;
+import com.koibreeding.domain.Pond;
+import com.koibreeding.domain.Wallet;
 import com.koibreeding.dto.request.ForgotPasswordRequest;
 import com.koibreeding.dto.request.LoginRequest;
 import com.koibreeding.dto.request.ResetPasswordRequest;
@@ -14,6 +16,9 @@ import com.koibreeding.enums.Role;
 import com.koibreeding.enums.UserStatus;
 import com.koibreeding.repository.AuthRepository;
 import com.koibreeding.repository.UserRepository;
+import com.koibreeding.repository.PondRepository;
+import com.koibreeding.repository.WalletRepository;
+import com.koibreeding.enums.PhTrend;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +37,8 @@ import jakarta.mail.internet.MimeMessage;
 import javax.security.sasl.AuthenticationException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Locale;
 import java.util.Random;
@@ -42,6 +49,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AuthService {
     private final AuthRepository authRepository;
     private final UserRepository userRepository;
+    private final PondRepository pondRepository;
+    private final WalletRepository walletRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -51,6 +60,7 @@ public class AuthService {
     @Value("${spring.mail.username:}")
     private String mailFrom;
     private static final Duration RESET_CODE_TTL = Duration.ofMinutes(15);
+    private static final BigDecimal STARTER_KOINS = new BigDecimal("2000");
 
     private static class ResetCodeInfo {
         private final String code;
@@ -104,6 +114,8 @@ public class AuthService {
         user.setUpdatedAt(Instant.now());
 
         User newUser = userRepository.save(user);
+        createStarterWallet(newUser);
+        createStarterPond(newUser);
         return ResUserDto.builder()
                 .id(newUser.getId())
                 .username(newUser.getUsername())
@@ -118,6 +130,29 @@ public class AuthService {
                 .createdAt(newUser.getCreatedAt())
                 .updatedAt(newUser.getUpdatedAt())
                 .build();
+    }
+
+    private void createStarterWallet(User owner) {
+        Wallet wallet = new Wallet();
+        wallet.setUser(owner);
+        wallet.setBalance(STARTER_KOINS);
+        walletRepository.save(wallet);
+    }
+
+    private void createStarterPond(User owner) {
+        Pond pond = new Pond();
+        pond.setOwner(owner);
+        pond.setName("Starter Pond");
+        pond.setDescription("Your first pond for raising koi.");
+        pond.setLevel(1);
+        pond.setCapacity(1);
+        pond.setWaterQuality(BigDecimal.valueOf(100));
+        pond.setTemperature(BigDecimal.valueOf(25));
+        pond.setPH(BigDecimal.valueOf(7));
+        pond.setOxygen(BigDecimal.valueOf(6.8));
+        pond.setPhTrend(PhTrend.ALKALINE);
+        pond.setPhTrendChangedAt(OffsetDateTime.now());
+        pondRepository.save(pond);
     }
 
     public LoginResponse Login(LoginRequest request) {
@@ -153,6 +188,11 @@ public class AuthService {
             // 3. Login thành công → reset số lần sai
             user.setFailedLoginAttempts(0);
             userRepository.save(user);
+
+            // Repair accounts created before starter-pond onboarding was added.
+            if (pondRepository.findFirstByOwner_IdOrderByIdAsc(user.getId()).isEmpty()) {
+                createStarterPond(user);
+            }
 
             // 4. Tạo token
             String accessToken = jwtService.generateAccessToken(user);

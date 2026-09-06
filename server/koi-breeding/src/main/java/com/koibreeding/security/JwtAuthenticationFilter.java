@@ -2,7 +2,6 @@ package com.koibreeding.security;
 
 import com.koibreeding.enums.Role;
 import com.koibreeding.service.JwtService;
-import com.koibreeding.repository.UserRepository;
 
 import com.koibreeding.util.CookieUtil;
 import jakarta.servlet.FilterChain;
@@ -24,7 +23,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final UserRepository userRepository;
     private final CookieUtil cookieUtil;
 
     // Ưu tiên lấy cookie, ko có cookie mới lấy header
@@ -48,18 +46,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String token = resolveToken(request);
     if (token != null && jwtService.isAccessTokenValid(token)){
         String username = jwtService.verifyToken(token);
-
-        var user = userRepository.findByUsername(username).orElse(null);
-        if (user != null){
-            Role role = user.getRole() != null ? user.getRole() : Role.USER;
-
-            var authToken = new UsernamePasswordAuthenticationToken(
-                    username,
-                    null,
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
-            );
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        String roleClaim = jwtService.getRole(token);
+        Role role;
+        try {
+            role = roleClaim == null ? Role.USER : Role.valueOf(roleClaim);
+        } catch (IllegalArgumentException ignored) {
+            role = Role.USER;
         }
+
+        var authToken = new UsernamePasswordAuthenticationToken(
+                username,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
     filterChain.doFilter(request, response);
     }

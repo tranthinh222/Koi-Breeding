@@ -1,5 +1,5 @@
 import { useEffect, useState, type KeyboardEvent } from "react";
-import "../../style/market.css";
+import "./MarketplaceTabs.css";
 
 export type MarketplaceCategory = "ALL" | "KOHAKU" | "SHOWA" | "OGON";
 export type FishGender = "ALL" | "MALE" | "FEMALE";

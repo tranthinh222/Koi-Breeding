@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -169,11 +170,14 @@ public class AuthService {
                                 )
                 );
 
-        // 1. Kiểm tra tài khoản đã bị ban
-        if (Boolean.TRUE.equals(user.getIsBanned())) {
+        // 1. Kiểm tra tài khoản đã bị ban hoặc bị xóa
+        if (user.getStatus() == UserStatus.DELETED) {
+            throw new DisabledException("Your account has been marked as deleted. Contact the administrators.");
+        }
+        if (user.getStatus() == UserStatus.BANNED || Boolean.TRUE.equals(user.getIsBanned())) {
             throw new RuntimeException("Your account has been banned");
         }
-
+        
         try {
 
             // 2. Authentication

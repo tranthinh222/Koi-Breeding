@@ -1,24 +1,37 @@
 package com.koibreeding.service;
 
-import com.koibreeding.domain.*;
-import com.koibreeding.dto.request.*;
-import com.koibreeding.dto.response.ResMarketDto;
-import com.koibreeding.dto.response.ResTradeDto;
-import com.koibreeding.repository.KoiRepository;
-import com.koibreeding.repository.MarketRepository;
-import com.koibreeding.repository.PondRepository;
-import com.koibreeding.repository.UserRepository;
-import jakarta.persistence.criteria.Join;
-import lombok.RequiredArgsConstructor;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.List;
+import com.koibreeding.domain.Dictionary;
+import com.koibreeding.domain.Koi;
+import com.koibreeding.domain.Marketplace;
+import com.koibreeding.domain.Pond;
+import com.koibreeding.domain.Trade;
+import com.koibreeding.domain.User;
+import com.koibreeding.domain.Variety;
+import com.koibreeding.dto.request.ReqBuyKoi;
+import com.koibreeding.dto.request.ReqMarketDeleteKoi;
+import com.koibreeding.dto.request.ResMarketKois;
+import com.koibreeding.dto.request.ResMarketListKoi;
+import com.koibreeding.dto.request.ResMarketSellKoi;
+import com.koibreeding.dto.response.ResMarketDto;
+import com.koibreeding.dto.response.ResTradeDto;
+import com.koibreeding.repository.KoiRepository;
+import com.koibreeding.repository.MarketRepository;
+import com.koibreeding.repository.PondRepository;
+import com.koibreeding.repository.TradeRepository;
+import com.koibreeding.repository.UserRepository;
+
+import jakarta.persistence.criteria.Join;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +42,8 @@ public class MarketService {
     private final WalletService walletService;
     private final UserRepository userRepository;
     private final PondRepository pondRepository;
+    private final TradeRepository tradeRepository;
+
     public List<ResMarketDto> getMarketItems() {
         return marketRepository.findAll().stream()
                 .map(marketplace -> new ResMarketDto(
@@ -42,8 +57,7 @@ public class MarketService {
                         marketplace.getSeller().getUsername(),
                         marketplace.getKoi().getGender(),
                         marketplace.getKoi().getWeight(),
-                        marketplace.getKoi().getLength()
-                ))
+                        marketplace.getKoi().getLength()))
                 .toList();
     }
 
@@ -57,16 +71,12 @@ public class MarketService {
             BigDecimal minWeight,
             BigDecimal maxWeight,
             String gender,
-            Pageable pageable
-    ) {
+            Pageable pageable) {
 
-        Specification<Marketplace> spec =
-                (root, query, cb) -> cb.conjunction();
+        Specification<Marketplace> spec = (root, query, cb) -> cb.conjunction();
 
         // Chỉ lấy tin đang ACTIVE
-        spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("status"), "ACTIVE")
-        );
+        spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), "ACTIVE"));
 
         // Keyword search trong Koi name và Variety name
         if (keyword != null && !keyword.isBlank()) {
@@ -75,25 +85,19 @@ public class MarketService {
 
             spec = spec.and((root, query, cb) -> {
 
-                Join<Marketplace, Koi> koi =
-                        root.join("koi");
+                Join<Marketplace, Koi> koi = root.join("koi");
 
-                Join<Koi, Dictionary> dictionary =
-                        koi.join("dictionary");
+                Join<Koi, Dictionary> dictionary = koi.join("dictionary");
 
-                Join<Dictionary, Variety> variety =
-                        dictionary.join("variety");
+                Join<Dictionary, Variety> variety = dictionary.join("variety");
 
                 return cb.or(
                         cb.like(
                                 cb.lower(koi.get("name")),
-                                search
-                        ),
+                                search),
                         cb.like(
                                 cb.lower(variety.get("name")),
-                                search
-                        )
-                );
+                                search));
             });
         }
 
@@ -109,39 +113,29 @@ public class MarketService {
 
             spec = spec.and((root, query, cb) -> {
 
-                Join<Marketplace, Koi> koi =
-                        root.join("koi");
+                Join<Marketplace, Koi> koi = root.join("koi");
 
-                Join<Koi, Dictionary> dictionary =
-                        koi.join("dictionary");
+                Join<Koi, Dictionary> dictionary = koi.join("dictionary");
 
-                Join<Dictionary, Variety> variety =
-                        dictionary.join("variety");
+                Join<Dictionary, Variety> variety = dictionary.join("variety");
 
                 return cb.equal(
                         variety.get("name"),
-                        varietyName
-                );
+                        varietyName);
             });
         }
 
         // Price range filter
         if (minPrice != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(
-                            root.get("price"),
-                            minPrice
-                    )
-            );
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(
+                    root.get("price"),
+                    minPrice));
         }
 
         if (maxPrice != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.lessThanOrEqualTo(
-                            root.get("price"),
-                            maxPrice
-                    )
-            );
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(
+                    root.get("price"),
+                    maxPrice));
         }
 
         // Length range filter (cm)
@@ -150,8 +144,7 @@ public class MarketService {
                 Join<Marketplace, Koi> koi = root.join("koi");
                 return cb.greaterThanOrEqualTo(
                         koi.get("length"),
-                        minLength
-                );
+                        minLength);
             });
         }
 
@@ -160,8 +153,7 @@ public class MarketService {
                 Join<Marketplace, Koi> koi = root.join("koi");
                 return cb.lessThanOrEqualTo(
                         koi.get("length"),
-                        maxLength
-                );
+                        maxLength);
             });
         }
 
@@ -171,8 +163,7 @@ public class MarketService {
                 Join<Marketplace, Koi> koi = root.join("koi");
                 return cb.greaterThanOrEqualTo(
                         koi.get("weight"),
-                        minWeight
-                );
+                        minWeight);
             });
         }
 
@@ -181,8 +172,7 @@ public class MarketService {
                 Join<Marketplace, Koi> koi = root.join("koi");
                 return cb.lessThanOrEqualTo(
                         koi.get("weight"),
-                        maxWeight
-                );
+                        maxWeight);
             });
         }
 
@@ -191,13 +181,11 @@ public class MarketService {
 
             spec = spec.and((root, query, cb) -> {
 
-                Join<Marketplace, Koi> koi =
-                        root.join("koi");
+                Join<Marketplace, Koi> koi = root.join("koi");
 
                 return cb.equal(
                         koi.get("gender"),
-                        gender
-                );
+                        gender);
             });
         }
 
@@ -213,14 +201,13 @@ public class MarketService {
                         marketplace.getSeller().getUsername(),
                         marketplace.getKoi().getGender(),
                         marketplace.getKoi().getWeight(),
-                        marketplace.getKoi().getLength()
-                ));
+                        marketplace.getKoi().getLength()));
     }
 
-    public List<ResMarketListKoi> getMarketListKois(Integer userId){
+    public List<ResMarketListKoi> getMarketListKois(Integer userId) {
         List<Koi> listKoi = koiRepository.findAvailableKoisByUserId(userId);
 
-        if(listKoi.isEmpty()){
+        if (listKoi.isEmpty()) {
             throw new RuntimeException("Your pond has not fish");
         }
 
@@ -233,14 +220,13 @@ public class MarketService {
                         koi.getGender(),
                         koi.getWeight(),
                         koi.getLength(),
-                        koi.getName()
-                        )
-                ).toList();
+                        koi.getName()))
+                .toList();
     }
 
-    public List<ResMarketKois> getMarketListBuyKois(Integer userId){
+    public List<ResMarketKois> getMarketListBuyKois(Integer userId) {
         List<Marketplace> marketKois = marketRepository.findBySellerId(userId);
-        if(marketKois == null) {
+        if (marketKois == null) {
             throw new RuntimeException("Your pond has not fish");
         }
         return marketKois.stream()
@@ -253,14 +239,13 @@ public class MarketService {
                         marketplace.getKoi().getWeight(),
                         marketplace.getKoi().getLength(),
                         marketplace.getKoi().getName(),
-                        marketplace.getPrice()
-                        )
-                ).toList();
+                        marketplace.getPrice()))
+                .toList();
     }
 
-    public ResMarketDto sellKoi(Integer userId, ResMarketSellKoi request){
+    public ResMarketDto sellKoi(Integer userId, ResMarketSellKoi request) {
         Koi koi = koiRepository.findById(request.getKoiId()).orElse(null);
-        if(!koi.getPond().getOwner().getId().equals(userId)){
+        if (!koi.getPond().getOwner().getId().equals(userId)) {
             throw new RuntimeException("Not find your koi fish");
         }
 
@@ -268,8 +253,7 @@ public class MarketService {
                 request.getPrice() <= 0) {
 
             throw new RuntimeException(
-                    "The selling price must be greater than 0."
-            );
+                    "The selling price must be greater than 0.");
         }
 
         Marketplace marketplace = new Marketplace();
@@ -289,11 +273,10 @@ public class MarketService {
                 marketplaceNew.getSeller().getUsername(),
                 marketplaceNew.getKoi().getGender(),
                 marketplaceNew.getKoi().getWeight(),
-                marketplaceNew.getKoi().getLength()
-        );
+                marketplaceNew.getKoi().getLength());
     }
 
-    public void deleteKoi(ReqMarketDeleteKoi request){
+    public void deleteKoi(ReqMarketDeleteKoi request) {
         Marketplace marketplace = marketRepository.findBySellerIdAndKoiId(request.getUserId(), request.getKoiId())
                 .orElseThrow(() -> new RuntimeException("Not found koi in marketplace"));
 
@@ -303,22 +286,16 @@ public class MarketService {
     @Transactional
     public ResTradeDto buyKoi(Integer userId, ReqBuyKoi request) {
 
-        Marketplace marketplace =
-                marketRepository
-                        .findBySellerIdAndKoiId(
-                                request.getSellerId(),
-                                request.getKoiId()
-                        )
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Koi not found in marketplace"
-                                )
-                        );
+        Marketplace marketplace = marketRepository
+                .findBySellerIdAndKoiId(
+                        request.getSellerId(),
+                        request.getKoiId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Koi not found in marketplace"));
 
         if (request.getSellerId().equals(userId)) {
             throw new RuntimeException(
-                    "You are not allowed to buy fish from yourself."
-            );
+                    "You are not allowed to buy fish from yourself.");
         }
 
         if (marketplace.getPrice().compareTo(request.getPrice()) != 0) {
@@ -328,28 +305,20 @@ public class MarketService {
         User seller = userRepository.findById(request.getSellerId()).orElse(null);
 
         User buyer = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found")
-                );
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Koi koi = koiRepository.findById(request.getKoiId())
-                .orElseThrow(() ->
-                        new RuntimeException("Koi not found")
-                );
+                .orElseThrow(() -> new RuntimeException("Koi not found"));
 
         Pond pond = pondRepository.findById(request.getPondId())
-                .orElseThrow(() ->
-                        new RuntimeException("Pond not found")
-                );
+                .orElseThrow(() -> new RuntimeException("Pond not found"));
 
         if (!pond.getOwner().getId().equals(userId)) {
             throw new RuntimeException(
-                    "Pond does not belong to buyer"
-            );
+                    "Pond does not belong to buyer");
         }
 
-        long currentKoi =
-                koiRepository.countByPond_Id(pond.getId());
+        long currentKoi = koiRepository.countByPond_Id(pond.getId());
 
         if (currentKoi >= pond.getCapacity()) {
             throw new RuntimeException("Pond is full");
@@ -357,13 +326,11 @@ public class MarketService {
 
         walletService.deduct(
                 userId,
-                BigDecimal.valueOf(marketplace.getPrice())
-        );
+                BigDecimal.valueOf(marketplace.getPrice()));
 
         walletService.credit(
                 seller.getId(),
-                BigDecimal.valueOf(marketplace.getPrice())
-        );
+                BigDecimal.valueOf(marketplace.getPrice()));
 
         pond.setOwner(buyer);
         pondRepository.save(pond);
@@ -371,7 +338,6 @@ public class MarketService {
         koi.setPond(pond);
 
         koiRepository.save(koi);
-
 
         marketRepository.delete(marketplace);
 
@@ -381,14 +347,14 @@ public class MarketService {
         trade.setListing(marketplace);
         trade.setPrice(request.getPrice());
         trade.setTradeAt(OffsetDateTime.now());
+        tradeRepository.save(trade);
 
         return new ResTradeDto(
                 marketplace.getId(),
-                buyer.getId(),
-                seller.getId(),
+                buyer.getUsername(),
+                seller.getUsername(),
                 marketplace.getPrice(),
-                trade.getTradeAt()
-        );
+                trade.getTradeAt());
     }
 
 }

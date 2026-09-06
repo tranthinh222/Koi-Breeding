@@ -1,13 +1,8 @@
 package com.koibreeding.service;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,13 +10,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.koibreeding.domain.User;
-import com.koibreeding.dto.response.ResultPaginationDTO;
-import com.koibreeding.dto.response.ResUserDto;
-import com.koibreeding.repository.UserRepository;
-
 import com.koibreeding.config.PondEnvironmentConfig;
+import com.koibreeding.domain.User;
+import com.koibreeding.dto.response.ResUserDto;
+import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.admin.AdminUserDto;
 import com.koibreeding.enums.Location;
+import com.koibreeding.enums.Role;
+import com.koibreeding.repository.UserRepository;
 
 @Service
 public class UserService {
@@ -39,6 +35,7 @@ public class UserService {
     public User handleFetchUserById(Integer userId) {
         return userRepository.findById(userId).orElse(null);
     }
+
     public User handleFetchUserByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
     }
@@ -62,7 +59,8 @@ public class UserService {
 
     public ResUserDto updateLocation(Integer userId, Location location) {
         User user = handleFetchUserById(userId);
-        if (user == null) throw new IllegalArgumentException("User not found: " + userId);
+        if (user == null)
+            throw new IllegalArgumentException("User not found: " + userId);
         Instant now = Instant.now();
         if (user.getLocationUpdatedAt() != null
                 && user.getLocationUpdatedAt().plus(environmentConfig.getLocationChangeCooldownDays(),
@@ -155,73 +153,59 @@ public class UserService {
             throw new RuntimeException("Failed to upload avatar for user id '" + userId + "'.", e);
         }
     }
-/*
-    public String handleUploadAvatar(Integer userId, MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Avatar file is required.");
-        }
 
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.toLowerCase().startsWith("image/")) {
-            throw new IllegalArgumentException("Avatar file format is invalid. Only image files are allowed.");
-        }
-
-        User currentUser = this.handleFetchProfileByUserId(userId);
-        String oldAvatarUrl = currentUser.getAvatarUrl();
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        if (fileName.isBlank()) {
-            throw new IllegalArgumentException("Avatar file name is invalid.");
-        }
-
-        String extension = StringUtils.getFilenameExtension(fileName);
-        if (extension == null || extension.isBlank()) {
-            throw new IllegalArgumentException("Avatar file extension is invalid.");
-        }
-
-        String safeFileName = "user-" + userId + "-" + System.currentTimeMillis() + "." + extension;
-
-        Path uploadDir = Paths.get("uploads", "avatars").toAbsolutePath().normalize();
-        try {
-            Files.createDirectories(uploadDir);
-            Path target = uploadDir.resolve(safeFileName);
-            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-
-            String avatarUrl = "/uploads/avatars/" + safeFileName;
-            currentUser.setAvatarUrl(avatarUrl);
-            this.userRepository.save(currentUser);
-            deleteOldAvatar(oldAvatarUrl, avatarUrl, uploadDir);
-
-            return avatarUrl;
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload avatar for user id '" + userId + "'.", e);
-        }
-
-
-    }
-*/
-    private void deleteOldAvatar(String oldAvatarUrl, String newAvatarUrl, Path uploadDir) throws IOException {
-        if (oldAvatarUrl == null || oldAvatarUrl.isBlank() || oldAvatarUrl.equals(newAvatarUrl)) {
-            return;
-        }
-
-        String avatarPrefix = "/uploads/avatars/";
-        if (!oldAvatarUrl.startsWith(avatarPrefix)) {
-            return;
-        }
-
-        String oldFileName = StringUtils.cleanPath(oldAvatarUrl.substring(avatarPrefix.length()));
-        if (oldFileName.isBlank() || oldFileName.contains("..")) {
-            return;
-        }
-
-        Path oldAvatarPath = uploadDir.resolve(oldFileName).normalize();
-        if (oldAvatarPath.startsWith(uploadDir)) {
-            Files.deleteIfExists(oldAvatarPath);
-        }
-    }
-
+    /*
+     * public String handleUploadAvatar(Integer userId, MultipartFile file) {
+     * if (file == null || file.isEmpty()) {
+     * throw new IllegalArgumentException("Avatar file is required.");
+     * }
+     * 
+     * String contentType = file.getContentType();
+     * if (contentType == null || !contentType.toLowerCase().startsWith("image/")) {
+     * throw new
+     * IllegalArgumentException("Avatar file format is invalid. Only image files are allowed."
+     * );
+     * }
+     * 
+     * User currentUser = this.handleFetchProfileByUserId(userId);
+     * String oldAvatarUrl = currentUser.getAvatarUrl();
+     * String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+     * if (fileName.isBlank()) {
+     * throw new IllegalArgumentException("Avatar file name is invalid.");
+     * }
+     * 
+     * String extension = StringUtils.getFilenameExtension(fileName);
+     * if (extension == null || extension.isBlank()) {
+     * throw new IllegalArgumentException("Avatar file extension is invalid.");
+     * }
+     * 
+     * String safeFileName = "user-" + userId + "-" + System.currentTimeMillis() +
+     * "." + extension;
+     * 
+     * Path uploadDir = Paths.get("uploads",
+     * "avatars").toAbsolutePath().normalize();
+     * try {
+     * Files.createDirectories(uploadDir);
+     * Path target = uploadDir.resolve(safeFileName);
+     * Files.copy(file.getInputStream(), target,
+     * StandardCopyOption.REPLACE_EXISTING);
+     * 
+     * String avatarUrl = "/uploads/avatars/" + safeFileName;
+     * currentUser.setAvatarUrl(avatarUrl);
+     * this.userRepository.save(currentUser);
+     * deleteOldAvatar(oldAvatarUrl, avatarUrl, uploadDir);
+     * 
+     * return avatarUrl;
+     * } catch (IOException e) {
+     * throw new RuntimeException("Failed to upload avatar for user id '" + userId +
+     * "'.", e);
+     * }
+     * 
+     * 
+     * }
+     */
     public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {
-        Page<User> pageUser = this.userRepository.findAll(pageable);
+        Page<User> pageUser = this.userRepository.findAllByRole(Role.USER, pageable);
         ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 
@@ -232,11 +216,30 @@ public class UserService {
 
         resultPaginationDTO.setMeta(meta);
 
-        List<User> userList = pageUser.getContent();
-
-        resultPaginationDTO.setResult(userList);
+        resultPaginationDTO.setResult(
+                pageUser.getContent()
+                        .stream()
+                        .map(this::convertToAdminUserDto)
+                        .toList());
 
         return resultPaginationDTO;
+    }
+
+    public AdminUserDto convertToAdminUserDto(User user) {
+        return AdminUserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
+                .role(user.getRole())
+                .status(user.getStatus())
+                .isBanned(user.getIsBanned())
+                .exp(user.getExp())
+                .avatarUrl(user.getAvatarUrl())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
     }
 
     public void handleDeleteUser(Integer id) {

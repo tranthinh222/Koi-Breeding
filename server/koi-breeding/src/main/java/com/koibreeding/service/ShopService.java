@@ -1,6 +1,13 @@
 package com.koibreeding.service;
 
-import com.koibreeding.domain.Inventory;
+import java.math.BigDecimal;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Transaction;
 import com.koibreeding.domain.Wallet;
@@ -9,15 +16,9 @@ import com.koibreeding.enums.ItemType;
 import com.koibreeding.enums.NotificationType;
 import com.koibreeding.enums.TransactionStatus;
 import com.koibreeding.enums.TransactionType;
-import com.koibreeding.repository.*;
-import lombok.RequiredArgsConstructor;
+import com.koibreeding.repository.ItemRepository;
 
-import java.math.BigDecimal;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

@@ -1,17 +1,15 @@
 package com.koibreeding.config;
 
-import com.koibreeding.security.CustomAuthenticationEntryPoint;
-import com.koibreeding.security.JwtAuthenticationFilter;
-import jakarta.servlet.DispatcherType;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpMethod;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +19,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import com.koibreeding.security.CustomAuthenticationEntryPoint;
+import com.koibreeding.security.JwtAuthenticationFilter;
+
+import jakarta.servlet.DispatcherType;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -51,8 +53,7 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
                 "http://127.0.0.1:*",
-                "http://127.0.0.2:*"
-        ));
+                "http://127.0.0.2:*"));
 
         configuration.setAllowedMethods(List.of(
                 "GET",
@@ -60,15 +61,13 @@ public class SecurityConfig {
                 "PUT",
                 "DELETE",
                 "PATCH",
-                "OPTIONS"
-        ));
+                "OPTIONS"));
 
         configuration.setAllowedHeaders(List.of("*"));
 
         configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         source.registerCorsConfiguration("/**", configuration);
 
@@ -82,13 +81,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
+                        .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD)
+                        .permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error", "/auth/**", "/api/v1/auth/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(customAuthenticationEntryPoint))
+                        .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

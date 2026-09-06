@@ -1,30 +1,29 @@
 package com.koibreeding.controller;
 
-import com.koibreeding.domain.Transaction;
-import com.koibreeding.domain.User;
-import com.koibreeding.dto.response.ResTransactionDto;
-import com.koibreeding.dto.response.ResultPaginationDTO;
-import com.koibreeding.enums.TransactionStatus;
-import com.koibreeding.enums.TransactionType;
-import com.koibreeding.service.TransactionService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+
+import com.koibreeding.domain.User;
+import com.koibreeding.dto.response.ResTransactionDto;
+import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.enums.TransactionStatus;
+import com.koibreeding.enums.TransactionType;
+import com.koibreeding.service.TransactionService;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionControllerTest {
@@ -40,16 +39,14 @@ public class TransactionControllerTest {
     private OffsetDateTime createdAt;
 
     @BeforeEach
-    void initData(){
+    void initData() {
         user = new User();
         user.setId(1);
 
-         createdAt =
-                OffsetDateTime.of(
-                        2026, 8, 14,
-                        21, 56, 42, 0,
-                        ZoneOffset.ofHours(7)
-                );
+        createdAt = OffsetDateTime.of(
+                2026, 8, 14,
+                21, 56, 42, 0,
+                ZoneOffset.ofHours(7));
 
         resTransactionDto = new ResTransactionDto(
                 1,
@@ -59,8 +56,7 @@ public class TransactionControllerTest {
                 TransactionType.BUY_FOOD,
                 TransactionStatus.SUCCESSED,
                 "Koi Food",
-                createdAt
-        );
+                createdAt);
         resTransactionDto1 = new ResTransactionDto(
                 2,
                 1,
@@ -69,26 +65,42 @@ public class TransactionControllerTest {
                 TransactionType.BUY_FISH,
                 TransactionStatus.SUCCESSED,
                 "Koi Fish",
-                createdAt
-        );
-
+                createdAt);
 
     }
 
     @Test
-    void getTransactions_success(){
+    void getTransactions_success() {
+        // given
         Pageable pageable = PageRequest.of(0, 10);
-        ResultPaginationDTO pagination = new ResultPaginationDTO();
-        pagination.setResult(List.of(resTransactionDto, resTransactionDto1));
-        //given
-        when(transactionService.getTransactions(1, "ALL", pageable))
-                .thenReturn(pagination);
-        //when
-        ResponseEntity<ResultPaginationDTO> result =
-                transactionController.getTransactions(1, "ALL", pageable);
-        assertEquals(2, ((List<?>) result.getBody().getResult()).size());
+        String filter = "ALL";
 
-        assertEquals(1,resTransactionDto.getId());
+        // Khởi tạo ResultPaginationDTO giả lập
+        ResultPaginationDTO mockResult = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setPage(1);
+        meta.setPageSize(10);
+        meta.setTotalElements(2);
+        meta.setTotalPages(1);
+        mockResult.setMeta(meta);
+        mockResult.setResult(List.of(resTransactionDto, resTransactionDto1));
+
+        // Mock service gọi đúng 3 tham số
+        when(transactionService.getTransactions(1, filter, pageable)).thenReturn(mockResult);
+
+        // when (Lưu ý: giả định Controller của bạn cũng đã cập nhật nhận 3 tham số)
+        ResponseEntity<ResultPaginationDTO> response = transactionController.getTransactions(1, filter,
+                pageable);
+
+        // then
+        ResultPaginationDTO responseBody = response.getBody();
+        @SuppressWarnings("unchecked")
+        List<ResTransactionDto> result = (List<ResTransactionDto>) responseBody.getResult();
+
+        assertEquals(2, result.size());
+        assertEquals(1, responseBody.getMeta().getPage());
+
+        assertEquals(1, resTransactionDto.getId());
         assertEquals("Food", resTransactionDto.getItemName());
         assertEquals(1, resTransactionDto.getItemId());
         assertEquals(BigDecimal.valueOf(100.0), resTransactionDto.getAmount());
@@ -96,7 +108,7 @@ public class TransactionControllerTest {
         assertEquals("Koi Food", resTransactionDto.getDescription());
         assertEquals(createdAt, resTransactionDto.getCreatedAt());
 
-        assertEquals(2,resTransactionDto1.getId());
+        assertEquals(2, resTransactionDto1.getId());
         assertEquals("Fish", resTransactionDto1.getItemName());
         assertEquals(1, resTransactionDto1.getItemId());
         assertEquals(BigDecimal.valueOf(50.0), resTransactionDto1.getAmount());

@@ -15,7 +15,11 @@ interface KoiFormProps {
 	koi: IKoiVarient | null;
 	varietyList: IVariety[];
 	onClose: () => void;
-	onSubmit: (koi: IKoiVarient, image: File | null) => Promise<void>;
+	onSubmit: (
+		koi: IKoiVarient,
+		image: File | null,
+		mode: "create" | "edit",
+	) => Promise<void>;
 }
 
 export interface KoiDataForm {
@@ -245,6 +249,7 @@ function KoiForm({ koi, varietyList, onClose, onSubmit }: KoiFormProps) {
 				alphaPrice: alphaPrice,
 			},
 			imageFile,
+			koi ? "edit" : "create",
 		);
 
 		setIsProcessing(false);

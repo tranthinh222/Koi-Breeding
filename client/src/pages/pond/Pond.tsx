@@ -1,6 +1,6 @@
 import {
-	Bubbles,
 	AlertTriangle,
+	Bubbles,
 	CheckCheck,
 	ChevronsLeft,
 	ChevronsRight,
@@ -13,26 +13,28 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CURRENT_USER_ID } from "../../api/currentUser";
 import {
-	callFetchKoisInPond,
 	callFeedKoi,
+	callFetchKoisInPond,
 	callMoveKoi,
 	callReleaseKoiToPond,
 } from "../../api/koi";
-import { CURRENT_USER_ID } from "../../api/currentUser";
-import { toast } from "../../components/shared/Toast/toast";
+import { getBalanceWallet } from "../../api/wallet";
 import ImportKoiForm from "../../components/pond/ImportKoiForm/ImportKoiForm";
 import { PondCanvas } from "../../components/pond/PondCanvas/PondCanvas";
 import PondInformation from "../../components/pond/PondInformation/PondInformation";
 import PondUpgradeForm from "../../components/pond/PondUpgradeForm/PondUpgradeForm";
+import { toast } from "../../components/shared/Toast/toast";
+import { useAuth } from "../../context/AuthContext";
 import type {
 	IItemInventory,
 	IKoi,
 	IKoiVarient,
 	IPond,
 } from "../../types/backend";
-import styles from "./Pond.module.css";
 import { getPondAlert } from "../../utils/pondHealth";
+import styles from "./Pond.module.css";
 
 interface PondProps {
 	pond: IPond;
@@ -55,8 +57,10 @@ function Pond({
 	onSwitchPond,
 	onClearIncomingKoi,
 }: PondProps) {
+	const { currentUserId } = useAuth();
 	const navigate = useNavigate();
 	const pondAlert = getPondAlert(pond);
+	const [balance, setBalance] = useState<number>(0);
 	const [isInformationDialogOpen, setIsInformationDialogOpen] =
 		useState<boolean>(false);
 	const [koiList, setKoiList] = useState<IKoi[]>([]);
@@ -66,6 +70,20 @@ function Pond({
 		useState<boolean>(false);
 	const [isInitialLoaded, setIsInitialLoaded] = useState<boolean>(false);
 	const [isHudExpanded, setIsHudExpanded] = useState<boolean>(true);
+
+	useEffect(() => {
+		const loadUserBalance = async () => {
+			try {
+				if (!currentUserId) return;
+				const wallet = await getBalanceWallet(currentUserId);
+				setBalance(wallet.balance);
+			} catch (error) {
+				toast.error("Failed to load user's balance");
+			}
+		};
+
+		loadUserBalance();
+	}, [currentUserId, onUpgradePond]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -159,7 +177,10 @@ function Pond({
 		}
 	};
 
-	const handleFeedKoi = async (koi: IKoi, itemId: number): Promise<IKoi | null> => {
+	const handleFeedKoi = async (
+		koi: IKoi,
+		itemId: number,
+	): Promise<IKoi | null> => {
 		try {
 			const response = await callFeedKoi(koi.id, {
 				userId: CURRENT_USER_ID,
@@ -167,12 +188,17 @@ function Pond({
 				quantity: 1,
 			});
 			const result = response.data.data;
-			if (!result) throw new Error("The server returned no feeding result.");
+			if (!result)
+				throw new Error("The server returned no feeding result.");
 
 			setKoiList((previous) =>
-				previous.map((item) => item.id === result.koi.id ? result.koi : item),
+				previous.map((item) =>
+					item.id === result.koi.id ? result.koi : item,
+				),
 			);
-			toast.success(`${koi.name} recovered ${result.foodRestored} hunger points!`);
+			toast.success(
+				`${koi.name} recovered ${result.foodRestored} hunger points!`,
+			);
 			return result.koi;
 		} catch (error) {
 			console.error("Failed to feed koi:", error);
@@ -186,9 +212,20 @@ function Pond({
 			<main className={styles.wrapper}>
 				<section className={styles.pondShell}>
 					{pondAlert && (
-						<div className={`${styles.pondWarningBanner} ${pondAlert.severity === "critical" ? styles.critical : styles.warning}`} title={pondAlert.message} role="alert">
+						<div
+							className={`${styles.pondWarningBanner} ${pondAlert.severity === "critical" ? styles.critical : styles.warning}`}
+							title={pondAlert.message}
+							role="alert"
+						>
 							<AlertTriangle />
-							<div><strong>{pondAlert.severity === "critical" ? "Dangerous pond conditions" : "Pond needs attention"}</strong><span>{pondAlert.issues.join(" • ")}</span></div>
+							<div>
+								<strong>
+									{pondAlert.severity === "critical"
+										? "Dangerous pond conditions"
+										: "Pond needs attention"}
+								</strong>
+								<span>{pondAlert.issues.join(" • ")}</span>
+							</div>
 						</div>
 					)}
 					{isInitialLoaded && (
@@ -203,7 +240,7 @@ function Pond({
 					{/* <DebugCanvas /> */}
 					<div className={styles.coins}>
 						<img src="/pond/coin.svg" alt="coin" />
-						<span>9.000</span>
+						<span>{balance}</span>
 					</div>
 
 					<div

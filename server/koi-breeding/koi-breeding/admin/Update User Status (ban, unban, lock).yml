@@ -1,0 +1,23 @@
+info:
+  name: Update User Status (ban, unban, lock)
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: localhost:8090/koi_breeding/admin/users
+  body:
+    type: json
+    data: |-
+      {
+          "id": 1,
+          "status": "ACTIVE", 
+          "reason" : "No reason"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

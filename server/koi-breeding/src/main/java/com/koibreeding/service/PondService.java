@@ -6,8 +6,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.koibreeding.dto.request.PondSelectDto;
-import com.koibreeding.repository.KoiRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +16,7 @@ import com.koibreeding.domain.Inventory;
 import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Pond;
 import com.koibreeding.domain.User;
+import com.koibreeding.dto.request.PondSelectDto;
 import com.koibreeding.dto.request.RequestBuyPondDTO;
 import com.koibreeding.dto.response.ResBuyOrUpgradePondDTO;
 import com.koibreeding.dto.response.ResPondDTO;
@@ -311,17 +310,16 @@ public class PondService {
         result.setEnvironmentCoefficient(pondFormula.getEnvironmentCoefficient(score));
     }
 
-    public List<PondSelectDto> selectPond(Integer id){
+    public List<PondSelectDto> selectPond(Integer id) {
         return pondRepository.findByOwnerId(id)
                 .stream()
-                .map(pond ->{
-        long currentKoi = koiRepository.countByPond_Id(pond.getId());
-        return new PondSelectDto(
-                pond.getId(),
-                pond.getName(),
-                pond.getCapacity(),
-                currentKoi
-        );
-        }).toList();
+                .map(pond -> {
+                    long currentKoi = koiRepository.countByPond_Id(pond.getId());
+                    return new PondSelectDto(
+                            pond.getId(),
+                            pond.getName(),
+                            pond.getCapacity(),
+                            currentKoi);
+                }).toList();
     }
 }

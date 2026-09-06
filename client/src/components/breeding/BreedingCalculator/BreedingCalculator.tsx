@@ -48,7 +48,12 @@ function BreedingCalculator({
 	useEffect(() => {
 		const handleBreeding = async () => {
 			const response = await onCalculate(calcP1, calcP2);
-			setBreedingResult(response);
+			setBreedingResult(
+				response.sort(
+					(a, b) =>
+						(b.targetRate as number) - (a.targetRate as number),
+				),
+			);
 		};
 
 		handleBreeding();

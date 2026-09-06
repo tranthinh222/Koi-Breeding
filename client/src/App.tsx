@@ -14,14 +14,31 @@ import MarketAddList from "./components/marketplace/MarketAddList";
 import MarketListing from "./components/marketplace/MarketListing";
 import Profile from "./pages/profile/Profile";
 import Home from "./pages/home/Home";
+import { useAuth } from "./context/AuthContext";
+import type { ReactNode } from "react";
 import "./style/global.css";
+
+function RequireAuth({ children }: { children: ReactNode }) {
+	const { currentUser, loading } = useAuth();
+
+	if (loading) return null;
+	if (!currentUser) return <Navigate to="/login" replace />;
+
+	return children;
+}
 
 function App() {
 	return (
 		<>
 			<BrowserRouter>
 				<Routes>
-					<Route element={<AppLayout />}>
+					<Route
+						element={
+							<RequireAuth>
+								<AppLayout />
+							</RequireAuth>
+						}
+					>
 						<Route path="/home" element={<Home />} />
 						<Route path="/shop" element={<Shop />} />
 						<Route path="/inventory" element={<Inventory />} />
@@ -38,16 +55,32 @@ function App() {
 
 					<Route
 						path="/admin/dictionary"
-						element={<KoiVarientList />}
+						element={
+							<RequireAuth>
+								<KoiVarientList />
+							</RequireAuth>
+						}
 					/>
 
-					<Route path="/pond" element={<PondLanding />} />
+					<Route
+						path="/pond"
+						element={<RequireAuth><PondLanding /></RequireAuth>}
+					/>
 
-					<Route path="/dictionary" element={<Dictionary />} />
+					<Route
+						path="/dictionary"
+						element={<RequireAuth><Dictionary /></RequireAuth>}
+					/>
 
-					<Route path="/breeding" element={<Breeding />} />
+					<Route
+						path="/breeding"
+						element={<RequireAuth><Breeding /></RequireAuth>}
+					/>
 
-					<Route path="/payment/:itemId" element={<Payment />} />
+					<Route
+						path="/payment/:itemId"
+						element={<RequireAuth><Payment /></RequireAuth>}
+					/>
 					<Route path="/landing" element={<Landing />} />
 					<Route path="/login" element={<Landing initialAuthMode="login" />} />
 					<Route path="/register" element={<Landing initialAuthMode="register" />} />

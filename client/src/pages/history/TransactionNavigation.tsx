@@ -10,28 +10,28 @@ export default function TransactionNavigation() {
         className={location.pathname === "/marketplace" ? "tab active" : "tab"}
         onClick={() => navigate("/marketplace")}
       >
-        🛒 Buy
+        🛒 BUY
       </button>
 
       <button
         className={location.pathname === "/sell" ? "tab active" : "tab"}
         onClick={() => navigate("/sell")}
       >
-        💰 Sell
+        💰 SELL
       </button>
 
       <button
         className={location.pathname === "/buy" ? "tab active" : "tab"}
         onClick={() => navigate("/buy")}
       >
-        📋 My Listings
+        📋 MY LISTINGS
       </button>
 
       <button
         className={location.pathname === "/transactions" ? "tab active" : "tab"}
         onClick={() => navigate("/transactions")}
       >
-        📜 History
+        📜 HISTORY
       </button>
     </nav>
   );

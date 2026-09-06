@@ -92,18 +92,20 @@ public class AuthService {
         user.setUpdatedAt(Instant.now());
 
         User newUser = userRepository.save(user);
-        return new ResUserDto(
-                newUser.getId(),
-                newUser.getUsername(),
-                newUser.getEmail(),
-                newUser.getBirthday(),
-                newUser.getGender(),
-                newUser.getLocation(),
-                newUser.getRole(),
-                newUser.getExp(),
-                newUser.getAvatarUrl(),
-                newUser.getCreatedAt(),
-                newUser.getUpdatedAt());
+        return ResUserDto.builder()
+                .id(newUser.getId())
+                .username(newUser.getUsername())
+                .email(newUser.getEmail())
+                .birthday(newUser.getBirthday())
+                .gender(newUser.getGender())
+                .role(newUser.getRole())
+                .exp(newUser.getExp())
+                .avatarUrl(newUser.getAvatarUrl())
+                .location(newUser.getLocation())
+                .locationUpdatedAt(newUser.getLocationUpdatedAt())
+                .createdAt(newUser.getCreatedAt())
+                .updatedAt(newUser.getUpdatedAt())
+                .build();
     }
 
     public LoginResponse Login(LoginRequest request) {

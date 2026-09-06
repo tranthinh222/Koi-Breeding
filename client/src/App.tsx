@@ -12,6 +12,7 @@ import Landing from "./pages/landing/Landing";
 import Marketplace from "./pages/marketplace/Marketplace";
 import MarketAddList from "./components/marketplace/MarketAddList";
 import MarketListing from "./components/marketplace/MarketListing";
+import Profile from "./pages/profile/Profile";
 import "./style/global.css";
 
 function App() {
@@ -25,6 +26,8 @@ function App() {
 						<Route path="/marketplace" element={<Marketplace />} />
 						<Route path="/sell" element={<MarketAddList />} />
 						<Route path="/buy" element={<MarketListing />} />
+						<Route path="/profile" element={<Profile />} />
+						<Route path="/profile/:userId" element={<Profile />} />
 						<Route
 							path="/transactions"
 							element={<TransactionHistory />}
@@ -44,6 +47,8 @@ function App() {
 
 					<Route path="/payment/:itemId" element={<Payment />} />
 					<Route path="/landing" element={<Landing />} />
+					<Route path="/login" element={<Landing initialAuthMode="login" />} />
+					<Route path="/register" element={<Landing initialAuthMode="register" />} />
 
 					<Route path="/" element={<Navigate to="/shop" replace />} />
 				</Routes>

@@ -163,9 +163,9 @@ function MediaTeam() {
 	);
 }
 
-function Landing() {
-	const [authOpen, setAuthOpen] = useState(false);
-	const [authMode, setAuthMode] = useState<AuthMode>("login");
+function Landing({ initialAuthMode }: { initialAuthMode?: AuthMode }) {
+	const [authOpen, setAuthOpen] = useState(Boolean(initialAuthMode));
+	const [authMode, setAuthMode] = useState<AuthMode>(initialAuthMode ?? "login");
 
 	const openLogin = () => {
 		setAuthMode("login");

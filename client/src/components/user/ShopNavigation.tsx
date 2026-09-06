@@ -49,7 +49,10 @@ export default function ShopNavigation() {
         <span>Marketplace</span>
       </button>
 
-      <button>
+      <button
+        className={location.pathname.startsWith("/profile") ? "active" : ""}
+        onClick={() => navigate("/profile")}
+      >
         <UserRound />
         <span>Profile</span>
       </button>

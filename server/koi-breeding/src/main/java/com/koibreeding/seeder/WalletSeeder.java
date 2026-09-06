@@ -41,15 +41,18 @@ public class WalletSeeder implements CommandLineRunner {
         List<User> existingUserList = userRepository.findAll().stream()
                 .filter(user -> defaultUsers.contains(user.getUsername())).collect(Collectors.toList());
 
+        List<Wallet> walletsToSave = new ArrayList<>();
+
         for (User user : existingUserList) {
             Wallet wallet = new Wallet();
             wallet.setUser(user);
             wallet.setBalance(BigDecimal.valueOf(1000));
 
-            walletRepository.save(wallet);
+            walletsToSave.add(wallet);
         }
 
-        System.out.println(">>> Seeded Wallets");
+        walletRepository.saveAll(walletsToSave);
+        System.out.println(">>> Seeded Wallets Successfully");
     }
 
 }

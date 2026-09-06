@@ -2,6 +2,8 @@ package com.koibreeding.seeder;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -33,10 +35,11 @@ public class UserSeeder implements CommandLineRunner {
         seedAdmin();
         seedPlayer();
 
-        System.out.println(">>> Seeded Users");
+        System.out.println(">>> Seeded Users Successfully");
     }
 
     public void seedAdmin() {
+        List<User> admins = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
             String username = "admin" + i;
             String email = "admin" + i + "@gmail.com";
@@ -51,11 +54,15 @@ public class UserSeeder implements CommandLineRunner {
 
             User admin = user(username, email, plainPassword, birthDate, gender, status, role, false, exp, null,
                     location, null);
-            userRepository.save(admin);
+
+            admins.add(admin);
         }
+
+        userRepository.saveAll(admins);
     }
 
     public void seedPlayer() {
+        List<User> players = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
             String username = "player" + i;
             String email = "player" + i + "@gmail.com";
@@ -68,10 +75,12 @@ public class UserSeeder implements CommandLineRunner {
             int exp = i * 100;
             Location location = Location.HO_CHI_MINH_CITY;
 
-            User admin = user(username, email, plainPassword, birthDate, gender, status, role, false, exp, null,
+            User player = user(username, email, plainPassword, birthDate, gender, status, role, false, exp, null,
                     location, null);
-            userRepository.save(admin);
+            players.add(player);
         }
+
+        userRepository.saveAll(players);
     }
 
     public User user(String username, String email, String password, LocalDate birthday, Gender gender,

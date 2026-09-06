@@ -10,7 +10,9 @@ http:
     - name: size
       value: "2"
       type: query
-  auth: inherit
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJraG9hMTIzIiwidHlwZSI6ImFjY2VzcyIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzg4NDM4ODAzLCJleHAiOjE3ODg0NDA2MDN9.sxldHY2LoU2TFcsk6bLNl5wgFN-IhLWl77rU0uqCnMU
 
 settings:
   encodeUrl: true

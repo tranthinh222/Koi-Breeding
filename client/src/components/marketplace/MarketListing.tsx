@@ -5,6 +5,7 @@ import "../../style/marketaddlist.css";
 
 import { getMarketBuyKois, deleteKoiFromMarket } from "../../api/marketplace";
 import { type MarketplaceKoi } from "../../api/marketplace";
+import TransactionNavigation from "../../pages/history/TransactionNavigation";
 
 // interface MarketListing {
 //   id: number;
@@ -143,24 +144,11 @@ const Listings: React.FC = () => {
             <div className="koi-title-container"></div>
             <h1 className="koi-title-desktop">HOME</h1>
             <p>User Info</p>
-            <h1 className="koi-title-mobile">HOME</h1>
           </div>
         </header>
-
-        {/* VIEW SWITCH */}
-        <div className="view-switch">
-          <button className="view-btn" onClick={() => navigate("/addlist")}>
-            🐟 Cá của tôi
-          </button>
-
-          <button
-            className="view-btn active"
-            onClick={() => navigate("/listings")}
-          >
-            🏪 Danh sách đang bán
-          </button>
-        </div>
       </div>
+
+      <TransactionNavigation />
 
       {/* SUMMARY */}
       <div className="listings-container">

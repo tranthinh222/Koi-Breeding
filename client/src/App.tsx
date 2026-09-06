@@ -26,9 +26,9 @@ function App() {
             <Route path="/breeding" element={<Breeding />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/addlist" element={<MarketAddList />} />
-            <Route path="/listings" element={<MarketListing />} />
-            <Route path="/transactions" element={<TransactionHistory />} />
+            <Route path="/sell" element={<MarketAddList />} />
+            <Route path="/buy" element={<MarketListing />} />
+            <Route path="/history" element={<TransactionHistory />} />
           </Route>
 
           <Route path="/payment/:itemId" element={<Payment />} />

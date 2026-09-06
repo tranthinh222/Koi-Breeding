@@ -22,10 +22,13 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .or(() -> userRepository.findByEmail(loginInput))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + loginInput));
 
+        boolean isLocked = Boolean.TRUE.equals(user.getIsBanned());
+
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .authorities(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                .accountLocked(isLocked)
                 .build();
     }
 }

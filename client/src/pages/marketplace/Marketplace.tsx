@@ -17,6 +17,7 @@ import {
 import { getBalanceWallet } from "../../api/wallet";
 
 import PondSelectDialog from "../../components/pond/PondSelectDialog";
+import TransactionNavigation from "../history/TransactionNavigation";
 
 export default function Marketplace() {
   const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(
@@ -39,7 +40,7 @@ export default function Marketplace() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  const PAGE_SIZE = 12;
+  const PAGE_SIZE = 8;
   useEffect(() => {
     const fetchMarketplace = async () => {
       try {
@@ -145,6 +146,8 @@ export default function Marketplace() {
   return (
     <>
       <MarketplaceTitle />
+
+      <TransactionNavigation />
 
       <main
         className={`marketplace-main ${

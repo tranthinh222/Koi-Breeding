@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJraG9hMTIzIiwidHlwZSI6InJlZnJlc2giLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4ODI0NTIxMSwiZXhwIjoxNzg4MzMxNjExfQ.mJk8qGoID_1PEuyxqzaP4oLXzBCEmT_IBP1ExXGrt-g"
+        "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJraG9hMTIzIiwidHlwZSI6InJlZnJlc2giLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4ODQzNzkyMywiZXhwIjoxNzg4NTI0MzIzfQ.HpA7rz86-lu_GuaHEVlm0JgEa54wNuyzgBsSNiaObVY"
       }
   auth: inherit
 

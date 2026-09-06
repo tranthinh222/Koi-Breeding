@@ -35,7 +35,7 @@
 }
 
 .history-tabs .tab {
-  cursor: default;
+  cursor: pointer;
 }
 
 .history-message {

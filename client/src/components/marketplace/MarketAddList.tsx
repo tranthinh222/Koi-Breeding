@@ -4,6 +4,7 @@ import "../../style/marketaddlist.css";
 
 import { getMarketListKois, sellKoi } from "../../api/marketplace";
 import { type MarketplaceKoi } from "../../api/marketplace";
+import TransactionNavigation from "../../pages/history/TransactionNavigation";
 
 // interface KoiCard {
 //   id: number;
@@ -167,23 +168,10 @@ const AddList: React.FC = () => {
             <div className="koi-title-container"></div>
             <h1 className="koi-title-desktop">HOME</h1>
             <p>User Info</p>
-            <h1 className="koi-title-mobile">HOME</h1>
           </div>
         </header>
 
-        {/* VIEW SWITCH */}
-        <div className="view-switch">
-          <button
-            className="view-btn active"
-            onClick={() => navigate("/addlist")}
-          >
-            🐟 Cá của tôi
-          </button>
-
-          <button className="view-btn" onClick={() => navigate("/listings")}>
-            🏪 Danh sách đang bán
-          </button>
-        </div>
+        <TransactionNavigation />
 
         {/* FILTER */}
         <div className="filters-section">

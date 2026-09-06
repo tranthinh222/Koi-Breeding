@@ -58,3 +58,23 @@ export async function getPondsByOwner(userId: number): Promise<Pond[]> {
 	});
 	return response.data.data ?? [];
 }
+
+export async function getPonds(
+	page = 0,
+	size = 20,
+): Promise<IModelPagination<IPond>> {
+	const response = await apiClient.get<IRestResponse<IModelPagination<IPond>>>(
+		"/ponds",
+		{ params: { page, size } },
+	);
+
+	return response.data.data ?? {
+		meta: {
+			page: page + 1,
+			pageSize: size,
+			totalPages: 0,
+			totalElements: 0,
+		},
+		result: [],
+	};
+}

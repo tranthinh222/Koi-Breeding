@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 import ShopBackground from "../../components/user/ShopBackground";
-import ShopNavigation from "../../components/user/ShopNavigation";
 import AuthModal from "../../components/auth/AuthModal";
 
 import "./Landing.css";
@@ -190,8 +189,6 @@ function Landing({ initialAuthMode }: { initialAuthMode?: AuthMode }) {
 					onLogin={openLogin}
 					onRegister={openRegister}
 				/>
-
-				<ShopNavigation />
 
 				<Hero />
 

@@ -13,6 +13,7 @@ import Marketplace from "./pages/marketplace/Marketplace";
 import MarketAddList from "./components/marketplace/MarketAddList";
 import MarketListing from "./components/marketplace/MarketListing";
 import Profile from "./pages/profile/Profile";
+import Home from "./pages/home/Home";
 import "./style/global.css";
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
 			<BrowserRouter>
 				<Routes>
 					<Route element={<AppLayout />}>
+						<Route path="/home" element={<Home />} />
 						<Route path="/shop" element={<Shop />} />
 						<Route path="/inventory" element={<Inventory />} />
 						<Route path="/marketplace" element={<Marketplace />} />
@@ -50,7 +52,7 @@ function App() {
 					<Route path="/login" element={<Landing initialAuthMode="login" />} />
 					<Route path="/register" element={<Landing initialAuthMode="register" />} />
 
-					<Route path="/" element={<Navigate to="/shop" replace />} />
+					<Route path="/" element={<Navigate to="/login" replace />} />
 				</Routes>
 			</BrowserRouter>
 		</>

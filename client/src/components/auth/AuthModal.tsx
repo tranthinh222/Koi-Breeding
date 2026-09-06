@@ -239,7 +239,7 @@ export default function AuthModal({
       await refreshCurrentUser();
 
       onClose();
-      navigate("/shop");
+      navigate("/home");
     } catch (error: any) {
       console.error("Login failed:", error);
       setLoginError(

@@ -4,8 +4,10 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseCookie;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Optional;
 
 @Component
@@ -13,8 +15,11 @@ public class CookieUtil {
     private static final String ACCESS_TOKEN_COOKIE = "accessToken";
     private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
 
-    private static final int ACCESS_TOKEN_TIME = 30 * 60; //30 phút
-    private static final int REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60; //7 ngay
+    @Value("${jwt.expiration}")
+    private long accessTokenExpiration;
+
+    @Value("${jwt.refresh}")
+    private long refreshTokenExpiration;
 
     public void addAccessTokenCookie(HttpServletResponse response, String token){
         ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE, token)
@@ -22,7 +27,7 @@ public class CookieUtil {
                 .secure(false)
                 .path("/")
                 .sameSite("Lax")
-                .maxAge(ACCESS_TOKEN_TIME)
+                .maxAge(Duration.ofMillis(accessTokenExpiration))
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }
@@ -33,7 +38,7 @@ public class CookieUtil {
                 .secure(false)
                 .path("/")
                 .sameSite("Lax")
-                .maxAge(REFRESH_TOKEN_TIME)
+                .maxAge(Duration.ofMillis(refreshTokenExpiration))
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }
@@ -41,13 +46,15 @@ public class CookieUtil {
         ResponseCookie clearAccess = ResponseCookie.from(ACCESS_TOKEN_COOKIE, "")
                 .httpOnly(true)
                 .path("/")
+                .sameSite("Lax")
                 .maxAge(0)
                 .build();
         response.addHeader("Set-Cookie", clearAccess.toString());
 
         ResponseCookie clearRefresh = ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
                 .httpOnly(true)
-                .path("/auth/refresh")
+                .path("/")
+                .sameSite("Lax")
                 .maxAge(0)
                 .build();
         response.addHeader("Set-Cookie", clearRefresh.toString());

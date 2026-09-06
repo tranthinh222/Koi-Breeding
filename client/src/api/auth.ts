@@ -61,11 +61,6 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-}
-
 export interface AuthUser {
   id: number;
   username: string;
@@ -79,10 +74,10 @@ export interface AuthUser {
   updatedAt: string;
 }
 
-export const Login = async (data: LoginRequest): Promise<LoginResponse> => {
+export const Login = async (data: LoginRequest): Promise<void> => {
   try {
-    const response = await apiClient.post("/auth/login", data);
-    return response.data.data;
+    await apiClient.post("/auth/login", data);
+    return;
   } catch (error) {
     if (axios.isCancel(error)) throw error;
     console.error("Auth API request failed.", error);

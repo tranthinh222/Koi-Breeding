@@ -22,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -32,6 +33,7 @@ import javax.security.sasl.AuthenticationException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,12 +62,22 @@ public class AuthService {
         }
     }
 
+    @Transactional
     public ResUserDto SignUp(ResAuthDto userRes) {
-        if (userRepository.existsByUsername(userRes.getUsername())) {
+        String username = userRes.getUsername() != null ? userRes.getUsername().trim() : "";
+        String email = userRes.getEmail() != null
+                ? userRes.getEmail().trim().toLowerCase(Locale.ROOT)
+                : "";
+
+        if (username.isEmpty() || email.isEmpty()) {
+            throw new RuntimeException("Username and email are required");
+        }
+
+        if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("Username already exists");
         }
 
-        if (userRepository.existsByEmail(userRes.getEmail())) {
+        if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email already exists");
         }
 
@@ -77,8 +89,8 @@ public class AuthService {
 
         String hashPassword = passwordEncoder.encode(userRes.getPassword());
         User user = new User();
-        user.setUsername(userRes.getUsername());
-        user.setEmail(userRes.getEmail());
+        user.setUsername(username);
+        user.setEmail(email);
         user.setBirthday(userRes.getBirthday());
         user.setGender(userRes.getGender());
         user.setLocation(userRes.getLocation());

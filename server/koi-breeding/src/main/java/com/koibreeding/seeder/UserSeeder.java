@@ -3,6 +3,7 @@ package com.koibreeding.seeder;
 import java.time.Instant;
 import java.time.LocalDate;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,8 @@ import com.koibreeding.enums.UserStatus;
 import com.koibreeding.repository.UserRepository;
 
 @Component
-@Profile("!test")
+@Profile("seed")
+@ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
 @Order(5)
 public class UserSeeder implements CommandLineRunner {
     private final UserRepository userRepository;

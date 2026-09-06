@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   forgotPassword,
@@ -110,6 +110,7 @@ export default function AuthModal({
   const [, setShowRegisterConfirmPassword] =
     useState(false);
   const [registering, setRegistering] = useState(false);
+  const registrationInFlight = useRef(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
 
   // Forgot password state
@@ -163,6 +164,9 @@ export default function AuthModal({
   };
 
   const handleRegister = async () => {
+    if (registrationInFlight.current) return;
+    registrationInFlight.current = true;
+
     try {
       setRegistering(true);
       setRegisterError(null);
@@ -215,6 +219,7 @@ export default function AuthModal({
       );
     } finally {
       setRegistering(false);
+      registrationInFlight.current = false;
     }
   };
 
@@ -236,7 +241,10 @@ export default function AuthModal({
       await Login(payload);
 
       // ✓ Refresh user info từ context
-      await refreshCurrentUser();
+      const authenticatedUser = await refreshCurrentUser();
+      if (!authenticatedUser) {
+        throw new Error("Authenticated session was not established.");
+      }
 
       onClose();
       navigate("/home");

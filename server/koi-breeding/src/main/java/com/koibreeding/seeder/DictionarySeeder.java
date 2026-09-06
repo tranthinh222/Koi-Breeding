@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,8 @@ import com.koibreeding.repository.DictionaryRepository;
 import com.koibreeding.repository.VarietyRepository;
 
 @Component
-@Profile("!test")
+@Profile("seed")
+@ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
 @Order(3)
 public class DictionarySeeder implements CommandLineRunner {
     private DictionaryRepository dictionaryRepository;

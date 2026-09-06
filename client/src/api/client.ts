@@ -3,39 +3,24 @@ import axios, { AxiosError } from "axios";
 export const apiClient = axios.create({
   baseURL:
     import.meta.env.VITE_API_BASE_URL ??
-    "http://localhost:8090/koi_breeding/api/v1",
+    `http://${window.location.hostname}:8090/koi_breeding/api/v1`,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
-apiClient.interceptors.request.use(
-  (config) => {
-    const token =
-      localStorage.getItem("accessToken") ??
-      sessionStorage.getItem("accessToken");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
 // Response interceptor - handle 401 + refresh token
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (token: string) => void;
+  resolve: () => void;
   reject: (error: any) => void;
 }> = [];
 
-const processQueue = (error: any, token?: string) => {
+const processQueue = (error?: unknown) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else {
-      prom.resolve(token!);
+      prom.resolve();
     }
   });
   failedQueue = [];
@@ -63,13 +48,10 @@ apiClient.interceptors.response.use(
       !shouldNotRefresh
     ) {
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return apiClient(originalRequest);
-          })
+          .then(() => apiClient(originalRequest))
           .catch((err) => Promise.reject(err));
       }
 
@@ -77,7 +59,7 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const response = await axios.post(
+        await axios.post(
           `${apiClient.defaults.baseURL}/auth/refresh`,
           {},
           {
@@ -85,17 +67,7 @@ apiClient.interceptors.response.use(
           },
         );
 
-        const { accessToken, refreshToken: newRefreshToken } =
-          response.data.data;
-
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", newRefreshToken);
-
-        apiClient.defaults.headers.common["Authorization"] =
-          `Bearer ${accessToken}`;
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-
-        processQueue(null, accessToken);
+        processQueue();
         return apiClient(originalRequest);
       } catch (err) {
         processQueue(err);

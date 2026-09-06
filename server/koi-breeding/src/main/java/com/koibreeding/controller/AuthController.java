@@ -24,8 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
@@ -43,18 +41,18 @@ public class AuthController {
 
     @PostMapping("/auth/login")
     @ApiMessage("Login success")
-    public ResponseEntity<LoginResponse> login(
+    public ResponseEntity<Void> login(
             @RequestBody LoginRequest request,
             HttpServletResponse response) {
         LoginResponse result = authService.Login(request);
         cookieUtil.addAccessTokenCookie(response, result.getAccessToken());
         cookieUtil.addRefreshTokenCookie(response, result.getRefreshToken());
-        return ResponseEntity.status(HttpStatus.OK).body(result);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/auth/refresh")
     @ApiMessage("Refresh token success")
-    public ResponseEntity<?> refresh(
+    public ResponseEntity<Void> refresh(
             HttpServletRequest request,
             HttpServletResponse response) {
 
@@ -65,10 +63,10 @@ public class AuthController {
             String accessToken = authService.refresh(refreshToken);
             cookieUtil.addAccessTokenCookie(response, accessToken);
 
-            return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken));
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", e.getMessage()));
+                    .build();
         }
     }
 

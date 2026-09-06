@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,8 @@ import com.koibreeding.repository.UserRepository;
 import com.koibreeding.repository.WalletRepository;
 
 @Component
-@Profile("!test")
+@Profile("seed")
+@ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
 @Order(6)
 public class WalletSeeder implements CommandLineRunner {
     private WalletRepository walletRepository;

@@ -74,6 +74,16 @@ export interface AuthUser {
   updatedAt: string;
 }
 
+function normalizeRole(role: unknown): AuthUser["role"] {
+  if (typeof role !== "string") return null;
+
+  const normalizedRole = role.replace(/^ROLE_/i, "").toUpperCase();
+
+  return normalizedRole === "ADMIN" || normalizedRole === "USER"
+    ? normalizedRole
+    : null;
+}
+
 export const Login = async (data: LoginRequest): Promise<void> => {
   try {
     await apiClient.post("/auth/login", data);
@@ -88,7 +98,15 @@ export const Login = async (data: LoginRequest): Promise<void> => {
 export const getCurrentUser = async (): Promise<AuthUser | null> => {
   try {
     const response = await apiClient.get("/auth/me");
-    return response.data.data ?? response.data;
+    const payload = response.data?.data ?? response.data;
+    const user = payload?.user ?? payload;
+
+    if (!user) return null;
+
+    return {
+      ...user,
+      role: normalizeRole(user.role),
+    } as AuthUser;
   } catch (error: any) {
     if (error?.response?.status === 401) {
       console.log("User not authenticated");

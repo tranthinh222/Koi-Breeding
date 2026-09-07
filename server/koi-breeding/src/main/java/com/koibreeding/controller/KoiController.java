@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +35,7 @@ public class KoiController {
     }
 
     @PostMapping("/kois")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Koi> createNewKoi(@RequestBody Koi koi) {
         Koi newKoi = this.koiService.handleCreateKoi(koi);
 
@@ -91,6 +93,7 @@ public class KoiController {
     }
 
     @DeleteMapping("/kois/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteKoi(@PathVariable Integer id) throws Exception {
         if (!koiService.isKoiExistById(id)) {
             throw new Exception("Koi with id '" + id + "' is not exist.");

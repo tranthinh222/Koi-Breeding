@@ -24,8 +24,6 @@ import java.util.List;
 @CrossOrigin(originPatterns = { "http://localhost:*", "http://127.0.0.1:*", "http://127.0.0.2:*" })
 public class ShopController {
     private final ShopService shopService;
-    // private final ItemService itemService;
-
     @GetMapping("/shop/items")
     public ResponseEntity<Page<Item>> fetchItems(
             @RequestParam(required = false) ItemType category,
@@ -33,15 +31,6 @@ public class ShopController {
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.status(HttpStatus.OK).body(this.shopService.getItems(category, page, size));
     }
-
-    // @GetMapping("/shop/items/{itemId}")
-    // public ResponseEntity<Item> fetchAnItem(@RequestParam("itemId") int id) {
-    // Item item = this.itemService.findItemById(id);
-    // if (item == null) {
-    // throw new IdInvalidException("item with id " + id + " not found");
-    // }
-    // return ResponseEntity.status(HttpStatus.OK).body(item);
-    // }
 
     @PostMapping("/shop/items/{itemId}/purchase")
     public ResponseEntity<ResPurchaseDto> purchaseShopItem(

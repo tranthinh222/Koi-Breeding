@@ -3,6 +3,7 @@ package com.koibreeding.controller;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.koibreeding.domain.Mutation;
@@ -19,6 +20,7 @@ public class MutationController {
     }
 
     @PostMapping("/mutations")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Mutation> createNewMutation(@RequestBody Mutation mutation) {
         Mutation newMutation = this.mutationService.handleCreateMutation(mutation);
 
@@ -26,6 +28,7 @@ public class MutationController {
     }
 
     @PutMapping("/mutations")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Mutation> updateAMutation(@RequestBody Mutation mutation) throws Exception {
         if (this.mutationService.isMutationExistById(mutation.getId())) {
             throw new Exception("Mutation with id '" + mutation.getId() + "' is not exist.");
@@ -37,6 +40,7 @@ public class MutationController {
     }
 
     @GetMapping("/mutations/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Mutation> getMutationById(@PathVariable Integer id) throws Exception {
         Mutation fetchedMutation = mutationService.handleFetchMutationById(id);
         if (fetchedMutation == null) {
@@ -47,6 +51,7 @@ public class MutationController {
     }
 
     @GetMapping("/mutations")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResultPaginationDTO> getAllMutations(Pageable pageable) {
         ResultPaginationDTO mutationList = mutationService.handleFetchAllMutations(pageable);
 
@@ -54,6 +59,7 @@ public class MutationController {
     }
 
     @DeleteMapping("/mutations/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteMutation(@PathVariable Integer id) throws Exception {
         if (!mutationService.isMutationExistById(id)) {
             throw new Exception("Mutation with id '" + id + "' is not exist.");

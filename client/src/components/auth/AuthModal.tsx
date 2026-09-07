@@ -254,7 +254,7 @@ export default function AuthModal({
 			}
 
 			onClose();
-			navigate("/home");
+			navigate(authenticatedUser.role === "ADMIN" ? "/admin" : "/home");
 		} catch (error: any) {
 			console.error("Login failed:", error);
 			setLoginError(

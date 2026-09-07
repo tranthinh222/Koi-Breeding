@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +36,7 @@ public class UploadController {
 
     @PostMapping("/upload/item")
     @ApiMessage("upload item image")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> uploadItem(
             @RequestParam("file") MultipartFile file) throws IOException {
 
@@ -44,6 +46,7 @@ public class UploadController {
     }
 
     @PostMapping("/upload/dictionary")
+    @PreAuthorize("hasRole('ADMIN')")
     @ApiMessage("upload koi varient's image")
     public ResponseEntity<?> uploadDictionaryImage(
             @RequestParam("file") MultipartFile file) throws IOException {

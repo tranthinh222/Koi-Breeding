@@ -220,7 +220,7 @@ public class MarketService {
                         koi.getGender(),
                         koi.getWeight(),
                         koi.getLength(),
-                        koi.getName()))
+                        koi.getDictionary().getImageUrl()))
                 .toList();
     }
 

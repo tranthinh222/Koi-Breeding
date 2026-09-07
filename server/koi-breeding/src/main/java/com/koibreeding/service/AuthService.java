@@ -1,27 +1,20 @@
 package com.koibreeding.service;
 
-import com.koibreeding.domain.User;
-import com.koibreeding.domain.Pond;
-import com.koibreeding.domain.Wallet;
-import com.koibreeding.dto.request.ForgotPasswordRequest;
-import com.koibreeding.dto.request.LoginRequest;
-import com.koibreeding.dto.request.ResetPasswordRequest;
-import com.koibreeding.dto.request.VerifyResetCodeRequest;
-import com.koibreeding.dto.response.LoginResponse;
-import com.koibreeding.dto.response.ResAuthDto;
-import com.koibreeding.dto.response.ResUserDto;
-import com.koibreeding.enums.Gender;
-import com.koibreeding.enums.Location;
-import com.koibreeding.enums.Role;
-import com.koibreeding.enums.UserStatus;
-import com.koibreeding.repository.AuthRepository;
-import com.koibreeding.repository.UserRepository;
-import com.koibreeding.repository.PondRepository;
-import com.koibreeding.repository.WalletRepository;
-import com.koibreeding.enums.PhTrend;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,20 +23,29 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import com.koibreeding.domain.Pond;
+import com.koibreeding.domain.User;
+import com.koibreeding.domain.Wallet;
+import com.koibreeding.dto.request.ForgotPasswordRequest;
+import com.koibreeding.dto.request.LoginRequest;
+import com.koibreeding.dto.request.ResetPasswordRequest;
+import com.koibreeding.dto.request.VerifyResetCodeRequest;
+import com.koibreeding.dto.response.LoginResponse;
+import com.koibreeding.dto.response.ResAuthDto;
+import com.koibreeding.dto.response.ResUserDto;
+import com.koibreeding.enums.AuthProvider;
+import com.koibreeding.enums.Gender;
+import com.koibreeding.enums.Location;
+import com.koibreeding.enums.PhTrend;
+import com.koibreeding.enums.Role;
+import com.koibreeding.enums.UserStatus;
+import com.koibreeding.repository.AuthRepository;
+import com.koibreeding.repository.PondRepository;
+import com.koibreeding.repository.UserRepository;
+import com.koibreeding.repository.WalletRepository;
 
 import jakarta.mail.internet.MimeMessage;
-
-import javax.security.sasl.AuthenticationException;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Locale;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +55,7 @@ public class AuthService {
     private final PondRepository pondRepository;
     private final WalletRepository walletRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
+    private final ObjectProvider<AuthenticationManager> authenticationManagerProvider;
     private final JwtService jwtService;
     private final JavaMailSender mailSender;
     private final Map<String, ResetCodeInfo> resetCodeCache = new ConcurrentHashMap<>();
@@ -113,6 +115,7 @@ public class AuthService {
         user.setPassword(hashPassword);
         user.setCreatedAt(Instant.now());
         user.setUpdatedAt(Instant.now());
+        user.setProvider(AuthProvider.LOCAL);
 
         User newUser = userRepository.save(user);
         createStarterWallet(newUser);
@@ -163,12 +166,8 @@ public class AuthService {
                 : request.getEmail();
 
         User user = userRepository.findByUsername(loginInput)
-                .orElseGet(() ->
-                        userRepository.findByEmail(loginInput)
-                                .orElseThrow(() ->
-                                        new RuntimeException("Invalid username/email or password")
-                                )
-                );
+                .orElseGet(() -> userRepository.findByEmail(loginInput)
+                        .orElseThrow(() -> new RuntimeException("Invalid username/email or password")));
 
         // 1. Kiểm tra tài khoản đã bị ban hoặc bị xóa
         if (user.getStatus() == UserStatus.DELETED) {
@@ -177,17 +176,18 @@ public class AuthService {
         if (user.getStatus() == UserStatus.BANNED || Boolean.TRUE.equals(user.getIsBanned())) {
             throw new RuntimeException("Your account has been banned");
         }
-        
+
         try {
 
             // 2. Authentication
-            Authentication authentication =
-                    authenticationManager.authenticate(
-                            new UsernamePasswordAuthenticationToken(
-                                    loginInput,
-                                    request.getPassword()
-                            )
-                    );
+            AuthenticationManager authenticationManager = authenticationManagerProvider.getIfAvailable();
+            if (authenticationManager == null) {
+                throw new IllegalStateException("AuthenticationManager is not available");
+            }
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginInput,
+                            request.getPassword()));
 
             // 3. Login thành công → reset số lần sai
             user.setFailedLoginAttempts(0);
@@ -217,16 +217,14 @@ public class AuthService {
                 userRepository.save(user);
 
                 throw new RuntimeException(
-                        "Your account has been banned after 5 failed login attempts"
-                );
+                        "Your account has been banned after 5 failed login attempts");
             }
 
             userRepository.save(user);
 
             throw new RuntimeException(
                     "Invalid username/email or password. Attempt "
-                            + failedAttempts + "/5"
-            );
+                            + failedAttempts + "/5");
         }
     }
 
@@ -239,9 +237,7 @@ public class AuthService {
         String username = jwtService.verifyToken(refreshToken);
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found")
-                );
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         return jwtService.generateAccessToken(user);
     }
@@ -439,5 +435,68 @@ public class AuthService {
             throw new RuntimeException("Failed to send reset password email", e);
         }
 
+    }
+
+    @Transactional
+    public User processOAuthPostLogin(String email, String name, String avatarUrl) {
+        return userRepository.findByEmail(email).map(existingUser -> {
+            if (existingUser.getAvatarUrl() == null && avatarUrl != null) {
+                existingUser.setAvatarUrl(avatarUrl);
+                userRepository.save(existingUser);
+            }
+
+            return existingUser;
+        }).orElseGet(() -> {
+            User newUser = new User();
+            newUser.setEmail(email);
+
+            String baseUsername = normalizeUsername(name);
+            String uniqueUsername = baseUsername;
+            int suffix = 1;
+            while (userRepository.existsByUsername(uniqueUsername)) {
+                uniqueUsername = baseUsername + suffix;
+                suffix++;
+            }
+            newUser.setUsername(uniqueUsername);
+            newUser.setBirthday(LocalDate.now());
+            newUser.setGender(Gender.MALE);
+            newUser.setLocation(Location.HO_CHI_MINH_CITY);
+            newUser.setLevel(1);
+            newUser.setAvatarUrl(avatarUrl);
+            newUser.setStatus(UserStatus.ACTIVE);
+            newUser.setIsBanned(false);
+            newUser.setRole(Role.USER);
+            newUser.setFailedLoginAttempts(0);
+            newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString())); // Trash password to prevent user
+                                                                                       // from login directly
+            newUser.setCreatedAt(Instant.now());
+            newUser.setUpdatedAt(Instant.now());
+            newUser.setProvider(AuthProvider.GOOGLE);
+
+            User savedUser = userRepository.save(newUser);
+
+            createStarterWallet(savedUser);
+            createStarterPond(savedUser);
+
+            return savedUser;
+        });
+    }
+
+    private String normalizeUsername(String name) {
+        if (name == null || name.isEmpty())
+            return "user";
+
+        // 1. Separate diacritical marks from letters
+        String temp = java.text.Normalizer.normalize(name, java.text.Normalizer.Form.NFD);
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        temp = pattern.matcher(temp).replaceAll("");
+
+        // 2. The characters 'Đ' and 'đ' in Vietnamese are special cases that Normalizer
+        // cannot handle
+        temp = temp.replace("đ", "d").replace("Đ", "D");
+
+        // 3. Remove all whitespace and special characters (keep only a-z, 0-9) and
+        // convert to lowercase
+        return temp.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
     }
 }

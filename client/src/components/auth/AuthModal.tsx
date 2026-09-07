@@ -873,7 +873,10 @@ export default function AuthModal({
 
 	return (
 		<div className="auth-overlay" onClick={onClose}>
-			<div className="page-shell" onClick={(e) => e.stopPropagation()}>
+			<div
+				className={`page-shell page-shell--${view}`}
+				onClick={(e) => e.stopPropagation()}
+			>
 				<button
 					className="auth-close-btn"
 					onClick={onClose}

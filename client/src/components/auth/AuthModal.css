@@ -54,6 +54,19 @@
 	position: relative;
 }
 
+.auth-overlay .page-shell--login {
+	width: min(100%, 620px);
+	padding: 34px 40px 40px;
+}
+
+.auth-overlay .page-shell--forgot {
+	width: min(100%, 660px);
+}
+
+.auth-overlay .page-shell--login .logo-row {
+	margin-bottom: 22px;
+}
+
 .auth-overlay .auth-close-btn {
 	position: absolute;
 	top: 18px;
@@ -141,7 +154,7 @@
 }
 
 .auth-overlay .auth-layout--login {
-	grid-template-columns: minmax(0, 520px);
+	grid-template-columns: minmax(0, 480px);
 	justify-content: center;
 }
 
@@ -635,6 +648,10 @@
 @media (max-width: 520px) {
 	.auth-overlay .page-shell {
 		padding: 26px;
+	}
+
+	.auth-overlay .page-shell--login {
+		padding: 26px 20px 24px;
 	}
 
 	.auth-overlay .auth-panel {

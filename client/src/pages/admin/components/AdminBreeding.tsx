@@ -581,7 +581,7 @@ function BreedingTable1({
 							<th>Pattern</th>
 							<th>Possible mutation</th>
 							<th>Mutation rate</th>
-							<th>Mixed offspring</th>
+							<th>Failure</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
@@ -678,7 +678,9 @@ function TableRow1({ formula, idx, onEdit, onDelete }: TableRowProps) {
 
 			<td>
 				<span className="breeding-badge warning">
-					Mutation possible
+					{formula.fatherRate !== 0.0
+						? "Mutation possible"
+						: "No Mutation"}
 				</span>
 			</td>
 
@@ -759,7 +761,7 @@ function BreedingTable2({
 							<th>Target rate</th>
 							<th>Sire gene</th>
 							<th>Dam gene</th>
-							<th>Other outcome</th>
+							<th>Failure</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
@@ -921,7 +923,7 @@ function BreedingTable3({
 							<th>Target rate</th>
 							<th>Dam outcome</th>
 							<th>Sire outcome</th>
-							<th>Mixed offspring</th>
+							<th>Failure</th>
 							<th>Actions</th>
 						</tr>
 					</thead>

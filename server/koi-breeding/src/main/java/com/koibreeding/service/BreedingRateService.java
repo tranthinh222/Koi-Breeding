@@ -1,5 +1,6 @@
 package com.koibreeding.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -8,6 +9,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.koibreeding.domain.BreedingRate;
+import com.koibreeding.domain.Dictionary;
+import com.koibreeding.dto.request.RequestCreateOrUpdateBreedingRateDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.BreedingRecipeType;
 import com.koibreeding.enums.ScaleType;
@@ -17,9 +20,11 @@ import com.koibreeding.repository.BreedingRateRepository;
 @Service
 public class BreedingRateService {
     private final BreedingRateRepository repository;
+    private final DictionaryService dictionaryService;
 
-    public BreedingRateService(BreedingRateRepository repository) {
+    public BreedingRateService(BreedingRateRepository repository, DictionaryService dictionaryService) {
         this.repository = repository;
+        this.dictionaryService = dictionaryService;
     }
 
     public ResultPaginationDTO search(String search, BreedingRecipeType type, Integer varietyId,
@@ -49,8 +54,93 @@ public class BreedingRateService {
         return direct.isEmpty() ? findPair(motherDictionaryId, fatherDictionaryId) : direct;
     }
 
-    public BreedingRate handleCreateBreedingRate(BreedingRate rate) {
-        return repository.save(rate);
+    public BreedingRate handleCreateBreedingRate(RequestCreateOrUpdateBreedingRateDTO request) throws Exception {
+        Dictionary father = dictionaryService.handleFetchDictionaryById(request.getFatherId());
+        if (father == null) {
+            throw new Exception("Father with id='" + request.getFatherId() + "' does not exist");
+        }
+
+        Dictionary mother = dictionaryService.handleFetchDictionaryById(request.getMotherId());
+        if (mother == null) {
+            throw new Exception("Mother with id='" + request.getMotherId() + "' does not exist");
+        }
+
+        Dictionary target = dictionaryService.handleFetchDictionaryById(request.getChildId());
+        if (target == null) {
+            throw new Exception("Target with id='" + request.getChildId() + "' does not exist");
+        }
+
+        if (father.getVariety().getId().equals(mother.getVariety().getId())
+                && !request.getType().equals(BreedingRecipeType.PURE)) {
+            throw new Exception("Parent have the same variety, but received '" + request.getType() + "' breeding type");
+        }
+
+        if (repository.findByFatherIdAndMotherIdAndChildId(father.getId(), mother.getId(), target.getId())
+                .orElse(null) == null) {
+            throw new Exception("The Breeding Recipe '" + father.getName() + "' x '" + mother.getName() + "' = '"
+                    + target.getName() + "' already exists");
+        }
+
+        BigDecimal total = request.getFatherRate().add(request.getMotherRate()).add(request.getTargetRate());
+        if (total.compareTo(BigDecimal.valueOf(1.0)) > 0) {
+            throw new Exception("Total breeding rate (father_rate + mother_rate + target_rate) cannot exceed 100%");
+        }
+
+        BreedingRate newBreedingRate = new BreedingRate(null, father, mother, target, request.getType(),
+                request.getTargetRate(), request.getFatherRate(), request.getMotherRate());
+
+        return repository.save(newBreedingRate);
+    }
+
+    public BreedingRate handleUpdateBreedingRate(Integer id, RequestCreateOrUpdateBreedingRateDTO request)
+            throws Exception {
+        BreedingRate oldBreedingRate = repository.findById(id).orElse(null);
+        if (oldBreedingRate == null) {
+            throw new Exception("Breeding Rate with id='" + id + "' does not exist");
+        }
+
+        Dictionary father = dictionaryService.handleFetchDictionaryById(request.getFatherId());
+        if (father == null) {
+            throw new Exception("Father with id='" + request.getFatherId() + "' does not exist");
+        }
+
+        Dictionary mother = dictionaryService.handleFetchDictionaryById(request.getMotherId());
+        if (mother == null) {
+            throw new Exception("Mother with id='" + request.getMotherId() + "' does not exist");
+        }
+
+        Dictionary target = dictionaryService.handleFetchDictionaryById(request.getChildId());
+        if (target == null) {
+            throw new Exception("Target with id='" + request.getChildId() + "' does not exist");
+        }
+
+        if (father.getVariety().getId() == mother.getVariety().getId()
+                && !request.getType().equals(BreedingRecipeType.PURE)) {
+            throw new Exception("Parent have the same variety, but received '" + request.getType() + "' breeding type");
+        }
+
+        BreedingRate checkExist = repository
+                .findByFatherIdAndMotherIdAndChildId(father.getId(), mother.getId(), target.getId()).orElse(null);
+
+        if (!checkExist.getId().equals(oldBreedingRate.getId())) {
+            throw new Exception("The Breeding Recipe '" + father.getName() + "' x '" + mother.getName() + "' = '"
+                    + target.getName() + "' already exists");
+        }
+
+        BigDecimal total = request.getFatherRate().add(request.getMotherRate()).add(request.getTargetRate());
+        if (total.compareTo(BigDecimal.valueOf(1.0)) > 0) {
+            throw new Exception("Total breeding rate (father_rate + mother_rate + target_rate) cannot exceed 100%");
+        }
+
+        oldBreedingRate.setFather(father);
+        oldBreedingRate.setMother(mother);
+        oldBreedingRate.setChild(target);
+        oldBreedingRate.setType(request.getType());
+        oldBreedingRate.setTargetRate(request.getTargetRate());
+        oldBreedingRate.setFatherRate(request.getFatherRate());
+        oldBreedingRate.setMotherRate(request.getMotherRate());
+
+        return repository.save(oldBreedingRate);
     }
 
     public BreedingRate handleFetchBreedingRateById(Integer id) {

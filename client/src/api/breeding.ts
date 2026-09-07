@@ -17,6 +17,16 @@ export interface ICreateBreedingEventRequest {
 	userId: number;
 }
 
+export interface ICreateBreedingRateRequest {
+	fatherId: number;
+	motherId: number;
+	childId: number;
+	type: BreedingRecipeType;
+	targetRate: number;
+	fatherRate: number;
+	motherRate: number;
+}
+
 export interface IBreedingHistoryQuery {
 	userId: number;
 	page: number;
@@ -46,15 +56,42 @@ export const callFetchBreedingRates = (query: {
 	varietyId?: number;
 	shape?: string;
 	scaleType?: string;
-}) => apiClient.get<IRestResponse<IModelPagination<IBreedingRecipe>>>("/breeding-rates", { params: query });
+}) =>
+	apiClient.get<IRestResponse<IModelPagination<IBreedingRecipe>>>(
+		"/breeding-rates",
+		{ params: query },
+	);
 
 export const callFetchPairRates = (fatherId: number, motherId: number) =>
 	apiClient.get<IRestResponse<IBreedingRecipe[]>>("/breeding-rates/pair", {
 		params: { fatherId, motherId },
 	});
 
+export const callCreateBreedingRate = (request: ICreateBreedingRateRequest) =>
+	apiClient.post<IRestResponse<IBreedingRecipe>>("/breeding-rates", request);
+
+export const callUpdateBreedingRate = (
+	id: number,
+	request: ICreateBreedingRateRequest,
+) =>
+	apiClient.put<IRestResponse<IBreedingRecipe>>(
+		`/breeding-rates/${id}`,
+		request,
+	);
+
+export const callDeleteBreedingRate = (id: number) =>
+	apiClient.delete<IRestResponse<void>>(`/breeding-rates/${id}`);
+
 export const callAdvanceBreedingEvent = (eventId: number, userId: number) =>
-	apiClient.post<IRestResponse<IBreedingEvent>>(`/breeding-events/${eventId}/advance`, undefined, { params: { userId } });
+	apiClient.post<IRestResponse<IBreedingEvent>>(
+		`/breeding-events/${eventId}/advance`,
+		undefined,
+		{ params: { userId } },
+	);
 
 export const callCancelBreedingEvent = (eventId: number, userId: number) =>
-	apiClient.post<IRestResponse<IBreedingEvent>>(`/breeding-events/${eventId}/cancel`, undefined, { params: { userId } });
+	apiClient.post<IRestResponse<IBreedingEvent>>(
+		`/breeding-events/${eventId}/cancel`,
+		undefined,
+		{ params: { userId } },
+	);

@@ -149,7 +149,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         Map<String, Double> goshikiSubRates2 = Map.of(
                 "Goshiki", 0.12,
                 "Modern Goshiki", 0.03);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, asagis, taishoSankes,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, asagis,
+                taishoSankes,
                 BreedingRecipeType.CROSS,
                 0.15, 0.35,
                 0.4,
@@ -229,7 +230,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 13. Goromo x Showa Sanshoku
         Map<String, Double> koromoShowaSubRates1 = Map.of(
                 "Koromo Showa", 0.05);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, goromos, showaSanshokus,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, goromos,
+                showaSanshokus,
                 BreedingRecipeType.CROSS, 0.05, 0.15,
                 0.4,
                 koromoShowaSubRates1);
@@ -253,10 +255,10 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 1. Magoi x Magoi
         List<String> magoiPatterns = List.of("Magoi");
         Map<String, Double> magoiMutations = Map.ofEntries(
-                entry("Konjo Asagi", 0.075),
-                entry("Narumi Asagi", 0.075),
-                entry("Mizo Asagi", 0.075),
-                entry("Ginrin Asagi", 0.075),
+                entry("Konjo Asagi", 0.0075),
+                entry("Narumi Asagi", 0.0075),
+                entry("Mizo Asagi", 0.0075),
+                entry("Ginrin Asagi", 0.0075),
                 entry("Chagoi", 0.01),
                 entry("Midorigoi", 0.01),
                 entry("Soragoi", 0.01),
@@ -269,7 +271,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
                 entry("Ki Utsuri Doitsu", 0.005),
                 entry("Kigoi", 0.04),
                 entry("Karasugoi", 0.03));
-        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Magoi")), 0.78,
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Magoi")),
+                0.78,
                 magoiPatterns,
                 magoiMutations);
 
@@ -317,7 +320,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
                 "Benigoi");
         Map<String, Double> benigoiMutations = Map.of(
                 "Kigoi", 0.06);
-        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Benigoi")), 0.9,
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap,
+                List.of(dictMap.get("Benigoi")), 0.9,
                 benigoiPatterns,
                 benigoiMutations);
 
@@ -326,7 +330,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
                 "Karasugoi");
         Map<String, Double> karasugoiMutations = Map.of(
                 "Hajiro", 0.08);
-        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Karasugoi")),
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap,
+                List.of(dictMap.get("Karasugoi")),
                 0.85, karasugoiPatterns,
                 karasugoiMutations);
 
@@ -335,7 +340,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
                 "Hajiro");
         Map<String, Double> hajiroMutations = Map.of(
                 "Hagheshiro", 0.05);
-        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Hajiro")), 0.8,
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap,
+                List.of(dictMap.get("Hajiro")), 0.8,
                 hajiroPatterns,
                 hajiroMutations);
 
@@ -344,7 +350,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
                 "Hagheshiro");
         Map<String, Double> hagheshiroMutations = Map.of(
                 "Yotsujiro", 0.04);
-        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, List.of(dictMap.get("Hagheshiro")),
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap,
+                List.of(dictMap.get("Hagheshiro")),
                 0.8, hagheshiroPatterns,
                 hagheshiroMutations);
 
@@ -353,7 +360,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
                 "Platinum Ogon", "Nezu Ogon", "Yamabuki Ogon",
                 "Hi Ogon", "Orenji Ogon", "Mukashi Ogon");
         Map<String, Double> hikariMujiMutations = Map.of();
-        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, 0.9, hikariMujiPatterns,
+        addPureBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, 0.9,
+                hikariMujiPatterns,
                 hikariMujiMutations);
 
         // 11. Ginrin x Ginrin
@@ -382,7 +390,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 2. Ginrin x Taisho Sanke
         Map<String, Double> ginrinTaishoSankeSubRates = Map.of(
                 "Ginrin Sanke", 0.25);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins, taishoSankes,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins,
+                taishoSankes,
                 BreedingRecipeType.OVERLAY, 0.25, 0.1,
                 0.5,
                 ginrinTaishoSankeSubRates);
@@ -390,7 +399,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 3. Ginrin x Showa Sanshoku
         Map<String, Double> ginrinShowaSanshokuSubRates = Map.of(
                 "Ginrin Showa", 0.25);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins, showaSanshokus,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, ginrins,
+                showaSanshokus,
                 BreedingRecipeType.OVERLAY, 0.25, 0.1,
                 0.55,
                 ginrinShowaSanshokuSubRates);
@@ -426,7 +436,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
                 "Hikari Shiro Utsuri", 0.07,
                 "Hi Utsuri", 0.07,
                 "Ki Utsuri", 0.07);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, utsuris,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                utsuris,
                 BreedingRecipeType.OVERLAY, 0.21, 0.25,
                 0.39,
                 hikariMujiUtsuriSubRates);
@@ -434,7 +445,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 8. Hikari Muji x Kohaku
         Map<String, Double> hikariMujiKohakuSubRates = Map.of(
                 "Hariwake", 0.25);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, kohakus,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                kohakus,
                 BreedingRecipeType.OVERLAY, 0.25, 0.2,
                 0.4,
                 hikariMujiKohakuSubRates);
@@ -442,7 +454,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 9. Hikari Muji x Taisho Sanke
         Map<String, Double> hikariMujiTaishoSankeSubRates = Map.of(
                 "Yamato Nishiki", 0.2);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, taishoSankes,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                taishoSankes,
                 BreedingRecipeType.OVERLAY, 0.2, 0.1,
                 0.45,
                 hikariMujiTaishoSankeSubRates);
@@ -450,7 +463,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 10. Hikari Muji x Showa Sanshoku
         Map<String, Double> hikariMujiShowaSanshokuSubRates = Map.of(
                 "Ginrin Showa", 0.2);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, showaSanshokus,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                showaSanshokus,
                 BreedingRecipeType.OVERLAY, 0.2, 0.15,
                 0.5,
                 hikariMujiShowaSanshokuSubRates);
@@ -458,7 +472,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 11. Hikari Muji x Tancho
         Map<String, Double> hikariMujiTanchoSubRates = Map.of(
                 "Tancho Hariwake", 0.15);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, tanchos,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                tanchos,
                 BreedingRecipeType.OVERLAY, 0.15, 0.1,
                 0.5,
                 hikariMujiTanchoSubRates);
@@ -466,7 +481,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 12. Hikari Muji x Goromo
         Map<String, Double> hikariMujiGoromoSubRates = Map.of(
                 "Kujaku", 0.15);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, goromos,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                goromos,
                 BreedingRecipeType.OVERLAY, 0.15, 0.15,
                 0.45,
                 hikariMujiGoromoSubRates);
@@ -511,7 +527,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         Map<String, Double> hikariMujiShusuiSubRates = Map.of(
                 "Shusui", 0.1,
                 "Hi Shusui", 0.1);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, shusuis,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                shusuis,
                 BreedingRecipeType.OVERLAY, 0.2, 0.2,
                 0.5,
                 hikariMujiShusuiSubRates);
@@ -519,7 +536,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
         // 18. Hikari Muji x Goshiki
         Map<String, Double> hikariMujiGoshikiSubRates = Map.of(
                 "Kujaku", 0.15);
-        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis, goshikis,
+        addCrossOrOverlayBreedingRates(sampleBreedingRates, generatedCombinations, dictMap, hikariMujis,
+                goshikis,
                 BreedingRecipeType.OVERLAY, 0.15, 0.2,
                 0.4,
                 hikariMujiGoshikiSubRates);
@@ -563,14 +581,16 @@ public class BreedingRateSeeder implements CommandLineRunner {
                                     RoundingMode.HALF_UP);
 
                     // Calculate rate when swapping father and mother
-                    BigDecimal swapTargetRate = targetRate.multiply(BigDecimal.valueOf(0.25)).setScale(4,
-                            RoundingMode.HALF_UP);
+                    BigDecimal swapTargetRate = targetRate.multiply(BigDecimal.valueOf(0.25))
+                            .setScale(4,
+                                    RoundingMode.HALF_UP);
 
                     // 1. Check and add case Father x Mother
                     String key1 = father.getName() + "|" + mother.getName() + "|" + child.getName();
                     if (!generatedCombinations.contains(key1)) {
                         generatedCombinations.add(key1);
-                        rates.add(new BreedingRate(null, father, mother, child, recipeType, targetRate,
+                        rates.add(new BreedingRate(null, father, mother, child, recipeType,
+                                targetRate,
                                 normalizedFatherRate, normalizedMotherRate));
                     }
 
@@ -578,7 +598,8 @@ public class BreedingRateSeeder implements CommandLineRunner {
                     String key2 = mother.getName() + "|" + father.getName() + "|" + child.getName();
                     if (!generatedCombinations.contains(key2)) {
                         generatedCombinations.add(key2);
-                        rates.add(new BreedingRate(null, mother, father, child, recipeType, swapTargetRate,
+                        rates.add(new BreedingRate(null, mother, father, child, recipeType,
+                                swapTargetRate,
                                 swapFatherRate, swapMotherRate));
                     }
                 }
@@ -599,6 +620,10 @@ public class BreedingRateSeeder implements CommandLineRunner {
             Map<String, Double> mutations) {
         double ratePerPattern = baseRate / normalPatterns.size();
 
+        @SuppressWarnings("null")
+        double totalMutationsRate = mutations.values().stream().reduce(Double.valueOf(0.0), Double::sum);
+        double failureRate = 1 - (baseRate + totalMutationsRate);
+
         for (Dictionary father : parents) {
             for (Dictionary mother : parents) {
                 // 1. Distribute rates evenly for basic patterns
@@ -610,9 +635,12 @@ public class BreedingRateSeeder implements CommandLineRunner {
                     String key = father.getName() + "|" + mother.getName() + "|" + child.getName();
                     if (!generatedCombinations.contains(key)) {
                         generatedCombinations.add(key);
-                        BigDecimal targetRate = BigDecimal.valueOf(ratePerPattern).setScale(4, RoundingMode.HALF_UP);
-                        rates.add(new BreedingRate(null, father, mother, child, BreedingRecipeType.PURE, targetRate,
-                                BigDecimal.ZERO, BigDecimal.ZERO));
+                        BigDecimal targetRate = BigDecimal.valueOf(ratePerPattern).setScale(4,
+                                RoundingMode.HALF_UP);
+                        rates.add(new BreedingRate(null, father, mother, child,
+                                BreedingRecipeType.PURE, targetRate,
+                                BigDecimal.valueOf(totalMutationsRate),
+                                BigDecimal.valueOf(failureRate)));
                     }
                 }
 
@@ -625,9 +653,12 @@ public class BreedingRateSeeder implements CommandLineRunner {
                     String key = father.getName() + "|" + mother.getName() + "|" + child.getName();
                     if (!generatedCombinations.contains(key)) {
                         generatedCombinations.add(key);
-                        BigDecimal targetRate = BigDecimal.valueOf(entry.getValue()).setScale(4, RoundingMode.HALF_UP);
-                        rates.add(new BreedingRate(null, father, mother, child, BreedingRecipeType.PURE, targetRate,
-                                BigDecimal.ZERO, BigDecimal.ZERO));
+                        BigDecimal targetRate = BigDecimal.valueOf(entry.getValue()).setScale(4,
+                                RoundingMode.HALF_UP);
+                        rates.add(new BreedingRate(null, father, mother, child,
+                                BreedingRecipeType.PURE, targetRate,
+                                BigDecimal.valueOf(totalMutationsRate),
+                                BigDecimal.valueOf(failureRate)));
                     }
                 }
             }

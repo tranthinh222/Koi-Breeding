@@ -20,6 +20,7 @@ import PondSelectDialog from "../../components/pond/PondSelectDialog";
 import TransactionNavigation from "../../components/marketplace/TransactionNavigation";
 import MarketplaceState from "../../components/marketplace/MarketplaceState";
 import { useAuth } from "../../context/AuthContext";
+import "../../components/shared/Catalog/Catalog.css";
 
 export default function Marketplace() {
   const { currentUserId } = useAuth();

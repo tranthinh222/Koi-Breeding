@@ -1,0 +1,70 @@
+/* =========================================================
+   HUD - COMMON
+========================================================= */
+
+.hud {
+  width: 90%;
+  margin: 25px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.avatar {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: #fff;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 30px;
+
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.player h3 {
+  color: black;
+  font-size: 22px;
+}
+
+.player p {
+  color: black;
+}
+
+.wallet {
+  display: flex;
+  gap: 15px;
+}
+
+.wallet div {
+  padding: 12px 22px;
+  border-radius: 15px;
+  font-weight: bold;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.18);
+}
+
+.gold {
+  background: #ffd54f;
+}
+
+@media (max-width: 900px) {
+  .hud { flex-direction: column; gap: 20px; }
+  .wallet { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 500px) {
+  .hud { width: 94%; }
+  .player { gap: 10px; }
+  .avatar { width: 55px; height: 55px; font-size: 25px; }
+  .player h3 { font-size: 18px; }
+}

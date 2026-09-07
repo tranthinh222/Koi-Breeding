@@ -3,7 +3,7 @@ import { FileText, Search } from "lucide-react";
 
 import { getAdminTrades, type AdminTrade } from "../../../api/admin";
 import AdminPagination from "./AdminPagination";
-import "./admintrade.css";
+import "./AdminTrades.css";
 
 type DateFilter = "ALL" | "today" | "week" | "month";
 type PriceSort = "DEFAULT" | "ASC" | "DESC";

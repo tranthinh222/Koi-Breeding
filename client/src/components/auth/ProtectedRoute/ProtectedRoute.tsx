@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import type { AuthUser } from "../../../api/auth";
 import { useAuth } from "../../../context/AuthContext";
+import "./ProtectedRoute.css";
 
 type Props = {
 	allowedRoles?: AuthUser["role"][];

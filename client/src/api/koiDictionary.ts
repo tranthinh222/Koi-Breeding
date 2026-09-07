@@ -38,5 +38,6 @@ export const callUploadKoiVarientImage = (file: File) => {
 	return apiClient.post<IRestResponse<{ url: string }>>(
 		`/upload/dictionary`,
 		formData,
+		{ headers: { "Content-Type": "multipart/form-data" } },
 	);
 };

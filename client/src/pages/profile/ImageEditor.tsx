@@ -95,9 +95,12 @@ interface ImageEditorProps {
 	image: string;
 	onCancel: () => void;
 	onSave: (file: Blob) => void;
+	title?: string;
+	aspect?: number;
+	cropShape?: "rect" | "round";
 }
 
-function ImageEditor({ image, onCancel, onSave }: ImageEditorProps) {
+function ImageEditor({ image, onCancel, onSave, title = "Edit Avatar", aspect = 1, cropShape = "round" }: ImageEditorProps) {
 	const [crop, setCrop] = useState({ x: 0, y: 0 });
 	const [zoom, setZoom] = useState(1);
 	const [rotation, setRotation] = useState(0);
@@ -147,8 +150,8 @@ function ImageEditor({ image, onCancel, onSave }: ImageEditorProps) {
 		<div className="image-editor-overlay">
 			<div className="image-editor">
 				<div className="image-editor-header">
-					<h2>Edit Avatar</h2>
-					<button className="cancel-header-button" onClick={onCancel}>
+					<h2>{title}</h2>
+					<button type="button" className="image-editor-close-button" onClick={onCancel}>
 						✕
 					</button>
 				</div>
@@ -178,8 +181,8 @@ function ImageEditor({ image, onCancel, onSave }: ImageEditorProps) {
 							crop={crop}
 							zoom={zoom}
 							rotation={rotation}
-							aspect={1}
-							cropShape="round"
+							aspect={aspect}
+							cropShape={cropShape}
 							showGrid={true}
 							onCropChange={setCrop}
 							onZoomChange={setZoom}
@@ -221,6 +224,7 @@ function ImageEditor({ image, onCancel, onSave }: ImageEditorProps) {
 					{/* --- Flip Controls --- */}
 					<div className="flip-controls">
 						<button
+							type="button"
 							className="flip-horizontal"
 							onClick={() => setFlipH(!flipH)}
 						>
@@ -228,6 +232,7 @@ function ImageEditor({ image, onCancel, onSave }: ImageEditorProps) {
 						</button>
 
 						<button
+							type="button"
 							className="flip-vertical"
 							onClick={() => setFlipV(!flipV)}
 						>
@@ -238,7 +243,8 @@ function ImageEditor({ image, onCancel, onSave }: ImageEditorProps) {
 
 				<div className="image-editor-actions">
 					<button
-						className="cancel-button"
+						type="button"
+						className="image-editor-cancel-button"
 						onClick={onCancel}
 						disabled={isProcessing}
 					>
@@ -246,7 +252,8 @@ function ImageEditor({ image, onCancel, onSave }: ImageEditorProps) {
 					</button>
 
 					<button
-						className="save-button"
+						type="button"
+						className="image-editor-save-button"
 						onClick={handleApply}
 						disabled={isProcessing}
 					>

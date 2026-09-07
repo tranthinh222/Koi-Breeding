@@ -145,7 +145,7 @@ export default function AdminDictionary() {
         if (koiVarient) {
           toast.success('Koi entry created successfully.')
         } else {
-          toast.error('Unable to create the koi entry.')
+          throw new Error('The create API did not return the new koi entry.')
         }
       } else if ('edit' === mode && selectedItem) {
         const response = await callUpdateKoiVarient({
@@ -156,15 +156,18 @@ export default function AdminDictionary() {
         if (koiVarient) {
           toast.success('Koi entry updated successfully.')
         } else {
-          toast.error('Unable to update the koi entry.')
+          throw new Error('The update API did not return the updated koi entry.')
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(
-        mode === 'create'
-          ? 'Unable to create the koi entry.'
-          : 'Unable to update the koi entry.',
+        error?.response?.data?.message ??
+          error?.message ??
+          (mode === 'create'
+            ? 'Unable to create the koi entry.'
+            : 'Unable to update the koi entry.'),
       )
+      return
     }
     setIsAddModalOpen(false)
     setIsEditModalOpen(false)

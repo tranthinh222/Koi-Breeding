@@ -112,3 +112,4 @@ export default function DetailPanel({
     </aside>
   )
 }
+import './DetailPanel.css'

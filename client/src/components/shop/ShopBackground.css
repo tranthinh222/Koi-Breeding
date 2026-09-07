@@ -1,0 +1,99 @@
+/* =========================================================
+   BACKGROUND - COMMON
+========================================================= */
+
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+}
+
+/* Sky */
+.background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 38%;
+  background: #87ceeb;
+}
+
+/* Grass */
+.grass {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 62%;
+  background: #a9d18e;
+}
+
+/* Trees */
+.trees {
+  position: absolute;
+  top: 150px;
+  width: 220px;
+  height: 600px;
+  background: linear-gradient(#5d8c44, #487536);
+  border-radius: 30px;
+  opacity: 0.25;
+}
+
+.trees-left {
+  left: 0;
+}
+
+.trees-right {
+  right: 0;
+}
+
+/* =========================================================
+   CLOUD - COMMON
+========================================================= */
+
+.cloud {
+  position: fixed;
+  width: 180px;
+  height: 60px;
+  background: white;
+  border-radius: 50px;
+  opacity: 0.75;
+  z-index: -1;
+}
+
+.cloud::before {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  top: -30px;
+  left: 25px;
+}
+
+.cloud::after {
+  content: '';
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: white;
+  border-radius: 50%;
+  top: -20px;
+  right: 25px;
+}
+
+.cloud1 {
+  top: 40px;
+  left: 120px;
+}
+
+.cloud2 {
+  top: 120px;
+  right: 180px;
+}
+
+.cloud3 {
+  top: 210px;
+  left: 45%;
+}

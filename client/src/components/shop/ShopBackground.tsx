@@ -1,3 +1,5 @@
+import "./ShopBackground.css";
+
 export default function ShopBackground() {
   return (
     <>

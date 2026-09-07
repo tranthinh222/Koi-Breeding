@@ -9,7 +9,6 @@ import StoreIcon from "../../assets/icons/storefront.svg";
 import { useAuth } from "../../context/AuthContext";
 import type { IPond } from "../../types/backend";
 
-import "../../style/global.css";
 import "./Home.css";
 
 type HomeData = {

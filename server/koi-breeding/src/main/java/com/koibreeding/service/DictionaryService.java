@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.koibreeding.domain.Dictionary;
 import com.koibreeding.domain.Variety;
 import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.enums.ScaleType;
+import com.koibreeding.enums.Shape;
 import com.koibreeding.repository.DictionaryRepository;
 
 @Service
@@ -84,8 +87,36 @@ public class DictionaryService {
         return koiDictionaryRepository.findById(id).orElse(null);
     }
 
-    public ResultPaginationDTO handleFetchAllKoiDictionaries(Pageable pageable) {
-        Page<Dictionary> pageKoi = this.koiDictionaryRepository.findAll(pageable);
+    public ResultPaginationDTO handleFetchAllKoiDictionaries(
+            String search,
+            Integer varietyId,
+            ScaleType scaleType,
+            Shape shape,
+            Pageable pageable) {
+        Specification<Dictionary> specification = Specification.unrestricted();
+
+        if (search != null && !search.isBlank()) {
+            String normalizedSearch = search.trim().toLowerCase();
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(criteriaBuilder.lower(root.get("name")), normalizedSearch));
+        }
+
+        if (varietyId != null) {
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("variety").get("id"), varietyId));
+        }
+
+        if (scaleType != null) {
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("scaleType"), scaleType));
+        }
+
+        if (shape != null) {
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("shape"), shape));
+        }
+
+        Page<Dictionary> pageKoi = this.koiDictionaryRepository.findAll(specification, pageable);
         ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 
@@ -99,6 +130,25 @@ public class DictionaryService {
         List<Dictionary> koiDictionaryList = pageKoi.getContent();
 
         resultPaginationDTO.setResult(koiDictionaryList);
+
+        return resultPaginationDTO;
+    }
+
+    public ResultPaginationDTO handleFetchAllKoiDictionaries(Pageable pageable) {
+        return buildPaginationResult(this.koiDictionaryRepository.findAll(pageable), pageable);
+    }
+
+    private ResultPaginationDTO buildPaginationResult(Page<Dictionary> pageKoi, Pageable pageable) {
+        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotalPages(pageKoi.getTotalPages());
+        meta.setTotalElements(pageKoi.getTotalElements());
+
+        resultPaginationDTO.setMeta(meta);
+        resultPaginationDTO.setResult(pageKoi.getContent());
 
         return resultPaginationDTO;
     }

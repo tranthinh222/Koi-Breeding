@@ -662,5 +662,31 @@
 		flex-direction: column;
 		gap: 10px;
 	}
+}
 
+/* =========================================================
+   FIX DARK THEME CLASH & AUTOFILL FOR AUTH MODAL
+========================================================= */
+
+/* 1. Ngăn chặn global dark theme (theme.css) ép màu nền vào thẻ input của AuthModal */
+:root[data-theme="dark"] .auth-overlay input,
+:root[data-theme="dark"] .auth-overlay select,
+:root[data-theme="dark"] .auth-overlay textarea {
+	background-color: transparent !important;
+	border-color: transparent !important;
+	color: var(--text-primary) !important;
+}
+
+/* 2. Xử lý viền vàng Autofill của trình duyệt (Chrome/Edge) */
+.auth-overlay input:-webkit-autofill,
+.auth-overlay input:-webkit-autofill:hover,
+.auth-overlay input:-webkit-autofill:focus,
+.auth-overlay input:-webkit-autofill:active {
+	/* Dùng biến --input-bg (màu xám nhạt) lấp đầy phần nền vàng của autofill */
+	-webkit-box-shadow: 0 0 0 30px var(--input-bg) inset !important;
+	/* Giữ nguyên màu chữ gốc của ô input */
+	-webkit-text-fill-color: var(--text-primary) !important;
+	background-color: transparent !important;
+	transition: background-color 5000s ease-in-out 0s;
+	border-radius: 999px !important;
 }

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { callFetchKoiVarient } from "../../api/koiDictionary";
 import EmptyCard from "../../components/dictionary/EmptyCard/EmptyCard";
 import KoiDictionaryCard from "../../components/dictionary/KoiDictionaryCard/KoiDictionaryCard";
+import VarientProfile from "../../components/dictionary/VarientProfile/VarientProfile";
 import type { IKoiVarient, IModelPagination } from "../../types/backend";
 import styles from "./Dictionary.module.css";
-import { callFetchKoiVarient } from "../../api/koiDictionary";
 
 function Dictionary() {
 	const navigate = useNavigate();
@@ -20,6 +21,9 @@ function Dictionary() {
 	const [isFlippedNext, setIsFlippedNext] = useState<boolean>(false);
 	const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
+	const [selectedVarient, setSelectedVarient] = useState<IKoiVarient | null>(
+		null,
+	);
 	const bookPrevRef = useRef<HTMLDivElement>(null);
 	const bookNextRef = useRef<HTMLDivElement>(null);
 
@@ -177,11 +181,14 @@ function Dictionary() {
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
-											key={256 - index}
+											key={index}
 											koiVarient={item}
+											onClick={() =>
+												setSelectedVarient(item)
+											}
 										/>
 									) : (
-										<EmptyCard key={256 - index} />
+										<EmptyCard key={index} />
 									),
 								)}
 						</section>
@@ -199,11 +206,14 @@ function Dictionary() {
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
-											key={index}
+											key={5 + index}
 											koiVarient={item}
+											onClick={() =>
+												setSelectedVarient(item)
+											}
 										/>
 									) : (
-										<EmptyCard key={index} />
+										<EmptyCard key={5 + index} />
 									),
 								)}
 						</section>
@@ -215,11 +225,14 @@ function Dictionary() {
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
-											key={8 - index}
+											key={10 + index}
 											koiVarient={item}
+											onClick={() =>
+												setSelectedVarient(item)
+											}
 										/>
 									) : (
-										<EmptyCard key={8 - index} />
+										<EmptyCard key={10 + index} />
 									),
 								)}
 						</section>
@@ -241,11 +254,14 @@ function Dictionary() {
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
-											key={512 - index}
+											key={15 + index}
 											koiVarient={item}
+											onClick={() =>
+												setSelectedVarient(item)
+											}
 										/>
 									) : (
-										<EmptyCard key={512 - index} />
+										<EmptyCard key={15 + index} />
 									),
 								)}
 						</section>
@@ -263,11 +279,14 @@ function Dictionary() {
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
-											key={1024 - index}
+											key={20 + index}
 											koiVarient={item}
+											onClick={() =>
+												setSelectedVarient(item)
+											}
 										/>
 									) : (
-										<EmptyCard key={1024 - index} />
+										<EmptyCard key={20 + index} />
 									),
 								)}
 						</section>
@@ -279,17 +298,26 @@ function Dictionary() {
 								.map((item, index) =>
 									item ? (
 										<KoiDictionaryCard
-											key={192 - index}
+											key={25 + index}
 											koiVarient={item}
+											onClick={() =>
+												setSelectedVarient(item)
+											}
 										/>
 									) : (
-										<EmptyCard key={192 - index} />
+										<EmptyCard key={25 + index} />
 									),
 								)}
 						</section>
 					</div>
 				</div>
 			</div>
+			{selectedVarient && (
+				<VarientProfile
+					varient={selectedVarient}
+					onClose={() => setSelectedVarient(null)}
+				/>
+			)}
 		</main>
 	);
 }

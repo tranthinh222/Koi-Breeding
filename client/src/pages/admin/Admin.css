@@ -7,8 +7,14 @@
 
 body.admin-page {
 	margin: 0;
-	font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-		"Segoe UI", sans-serif;
+	font-family:
+		Inter,
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		sans-serif;
 	color: #0f172a;
 	overflow-x: hidden;
 }
@@ -302,24 +308,121 @@ body.admin-page::after {
 	color: inherit;
 }
 
-.admin-notification-wrap { position: relative; }
-.notification-count { position: absolute; top: -5px; right: -6px; min-width: 18px; height: 18px; padding: 0 4px; display: grid; place-items: center; box-sizing: border-box; border: 2px solid var(--surface-primary); border-radius: 999px; background: #ef4444; color: #fff; font-size: 9px; font-weight: 900; }
-.admin-notification-panel { position: absolute; z-index: 100; top: calc(100% + 12px); right: 0; width: min(390px, calc(100vw - 28px)); overflow: hidden; border: 1px solid var(--border-color); border-radius: 18px; background: var(--surface-primary); box-shadow: 0 24px 60px rgba(15,23,42,.2); }
-.admin-notification-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border-color); }
-.admin-notification-header > div { display: flex; align-items: center; gap: 8px; }
-.admin-notification-header > div:first-child { align-items: flex-start; flex-direction: column; gap: 2px; }
-.admin-notification-header span { color: var(--text-muted); font-size: 11px; }
-.admin-notification-header button { width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 9px; background: var(--surface-secondary); color: var(--text-muted); cursor: pointer; }
-.admin-notification-header button:hover:not(:disabled) { color: #0ea5e9; }
-.admin-notification-header button:disabled { opacity: .4; cursor: default; }
-.admin-notification-list { max-height: min(470px, 65vh); overflow-y: auto; }
-.admin-notification-item { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 11px; padding: 14px 18px; border-bottom: 1px solid var(--border-color); }
-.admin-notification-item.unread { background: rgba(14,165,233,.07); box-shadow: inset 3px 0 #0ea5e9; }
-.admin-notification-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 11px; background: var(--surface-tertiary); }
-.admin-notification-item strong, .admin-notification-item time { display: block; }
-.admin-notification-item p { margin: 4px 0 7px; color: var(--text-muted); font-size: 12px; line-height: 1.45; }
-.admin-notification-item time { color: var(--text-muted); font-size: 10px; }
-.admin-notification-empty { margin: 0; padding: 38px 20px; color: var(--text-muted); text-align: center; }
+.admin-notification-wrap {
+	position: relative;
+}
+.notification-count {
+	position: absolute;
+	top: -5px;
+	right: -6px;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 4px;
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	border: 2px solid var(--surface-primary);
+	border-radius: 999px;
+	background: #ef4444;
+	color: #fff;
+	font-size: 9px;
+	font-weight: 900;
+}
+.admin-notification-panel {
+	position: absolute;
+	z-index: 100;
+	top: calc(100% + 12px);
+	right: 0;
+	width: min(390px, calc(100vw - 28px));
+	overflow: hidden;
+	border: 1px solid var(--border-color);
+	border-radius: 18px;
+	background: var(--surface-primary);
+	box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+}
+.admin-notification-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 16px 18px;
+	border-bottom: 1px solid var(--border-color);
+}
+.admin-notification-header > div {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.admin-notification-header > div:first-child {
+	align-items: flex-start;
+	flex-direction: column;
+	gap: 2px;
+}
+.admin-notification-header span {
+	color: var(--text-muted);
+	font-size: 11px;
+}
+.admin-notification-header button {
+	width: 32px;
+	height: 32px;
+	display: grid;
+	place-items: center;
+	border: 0;
+	border-radius: 9px;
+	background: var(--surface-secondary);
+	color: var(--text-muted);
+	cursor: pointer;
+}
+.admin-notification-header button:hover:not(:disabled) {
+	color: #0ea5e9;
+}
+.admin-notification-header button:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+.admin-notification-list {
+	max-height: min(470px, 65vh);
+	overflow-y: auto;
+}
+.admin-notification-item {
+	display: grid;
+	grid-template-columns: 38px minmax(0, 1fr);
+	gap: 11px;
+	padding: 14px 18px;
+	border-bottom: 1px solid var(--border-color);
+}
+.admin-notification-item.unread {
+	background: rgba(14, 165, 233, 0.07);
+	box-shadow: inset 3px 0 #0ea5e9;
+}
+.admin-notification-icon {
+	width: 36px;
+	height: 36px;
+	display: grid;
+	place-items: center;
+	border-radius: 11px;
+	background: var(--surface-tertiary);
+}
+.admin-notification-item strong,
+.admin-notification-item time {
+	display: block;
+}
+.admin-notification-item p {
+	margin: 4px 0 7px;
+	color: var(--text-muted);
+	font-size: 12px;
+	line-height: 1.45;
+}
+.admin-notification-item time {
+	color: var(--text-muted);
+	font-size: 10px;
+}
+.admin-notification-empty {
+	margin: 0;
+	padding: 38px 20px;
+	color: var(--text-muted);
+	text-align: center;
+}
 
 .notification-dot {
 	position: absolute;
@@ -1048,36 +1151,165 @@ body.admin-page::after {
 }
 
 .settings-grid,
-.account-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.account-layout {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 20px;
+}
 .settings-saved-badge,
 .account-security-badge,
-.account-role-pill { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 999px; background: rgba(16, 185, 129, .1); color: #059669; font-size: 12px; font-weight: 800; }
-.settings-option { justify-content: space-between; gap: 20px; }
-.settings-option-copy { display: flex; align-items: flex-start; gap: 11px; }
-.settings-option-copy strong, .settings-option-copy small { display: block; }
-.settings-option-copy small { margin-top: 4px; color: var(--text-muted); line-height: 1.45; }
-.settings-option input { width: 18px; height: 18px; flex: 0 0 auto; accent-color: #0ea5e9; }
-.account-layout { grid-template-columns: minmax(250px, .7fr) minmax(0, 1.6fr); }
-.account-summary-card { text-align: center; }
-.account-avatar-wrap { position: relative; width: 108px; height: 108px; margin: 4px auto 16px; }
-.account-avatar-wrap img { width: 100%; height: 100%; border-radius: 28px; object-fit: cover; border: 4px solid var(--surface-primary); box-shadow: 0 12px 30px rgba(15,23,42,.15); }
-.account-avatar-wrap button { position: absolute; right: -5px; bottom: -5px; width: 38px; height: 38px; display: grid; place-items: center; border: 3px solid var(--surface-primary); border-radius: 12px; background: #0ea5e9; color: white; cursor: pointer; }
-.account-summary-card h2 { margin: 0; }
-.account-summary-card > p { margin: 5px 0 14px; overflow-wrap: anywhere; }
-.account-meta { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: left; }
-.account-meta span { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
-.account-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 22px; }
-.account-form-grid label > span { display: block; margin-bottom: 7px; color: var(--text-muted); font-size: 12px; font-weight: 800; }
-.account-form-grid input, .account-form-grid select { width: 100%; min-height: 46px; box-sizing: border-box; padding: 0 13px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--surface-secondary); color: var(--text-primary); outline: none; }
-.account-form-grid input:focus, .account-form-grid select:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.1); }
-.account-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-color); }
-.compact-tables table th, .compact-tables table td { padding-top: 9px !important; padding-bottom: 9px !important; }
+.account-role-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 8px 12px;
+	border-radius: 999px;
+	background: rgba(16, 185, 129, 0.1);
+	color: #059669;
+	font-size: 12px;
+	font-weight: 800;
+}
+.settings-option {
+	justify-content: space-between;
+	gap: 20px;
+}
+.settings-option-copy {
+	display: flex;
+	align-items: flex-start;
+	gap: 11px;
+}
+.settings-option-copy strong,
+.settings-option-copy small {
+	display: block;
+}
+.settings-option-copy small {
+	margin-top: 4px;
+	color: var(--text-muted);
+	line-height: 1.45;
+}
+.settings-option input {
+	width: 18px;
+	height: 18px;
+	flex: 0 0 auto;
+	accent-color: #0ea5e9;
+}
+.account-layout {
+	grid-template-columns: minmax(250px, 0.7fr) minmax(0, 1.6fr);
+}
+.account-summary-card {
+	text-align: center;
+}
+.account-avatar-wrap {
+	position: relative;
+	width: 108px;
+	height: 108px;
+	margin: 4px auto 16px;
+}
+.account-avatar-wrap img {
+	width: 100%;
+	height: 100%;
+	border-radius: 28px;
+	object-fit: cover;
+	border: 4px solid var(--surface-primary);
+	box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+}
+.account-avatar-wrap button {
+	position: absolute;
+	right: -5px;
+	bottom: -5px;
+	width: 38px;
+	height: 38px;
+	display: grid;
+	place-items: center;
+	border: 3px solid var(--surface-primary);
+	border-radius: 12px;
+	background: #0ea5e9;
+	color: white;
+	cursor: pointer;
+}
+.account-summary-card h2 {
+	margin: 0;
+}
+.account-summary-card > p {
+	margin: 5px 0 14px;
+	overflow-wrap: anywhere;
+}
+.account-meta {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 12px;
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid var(--border-color);
+	text-align: left;
+}
+.account-meta span {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--text-muted);
+}
+.account-form-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+	margin-top: 22px;
+}
+.account-form-grid label > span {
+	display: block;
+	margin-bottom: 7px;
+	color: var(--text-muted);
+	font-size: 12px;
+	font-weight: 800;
+}
+.account-form-grid input,
+.account-form-grid select {
+	width: 100%;
+	min-height: 46px;
+	box-sizing: border-box;
+	padding: 0 13px;
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	background: var(--surface-secondary);
+	color: var(--text-primary);
+	outline: none;
+}
+.account-form-grid input:focus,
+.account-form-grid select:focus {
+	border-color: #0ea5e9;
+	box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+.account-form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 24px;
+	padding-top: 18px;
+	border-top: 1px solid var(--border-color);
+}
+.compact-tables table th,
+.compact-tables table td {
+	padding-top: 9px !important;
+	padding-bottom: 9px !important;
+}
 
-@media (max-width: 900px) { .settings-grid, .account-layout { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+	.settings-grid,
+	.account-layout {
+		grid-template-columns: 1fr;
+	}
+}
 @media (max-width: 600px) {
-	.account-form-grid { grid-template-columns: 1fr; }
-	.account-form-actions { flex-direction: column-reverse; }
-	.account-form-actions button { width: 100%; justify-content: center; }
+	.account-form-grid {
+		grid-template-columns: 1fr;
+	}
+	.account-form-actions {
+		flex-direction: column-reverse;
+	}
+	.account-form-actions button {
+		width: 100%;
+		justify-content: center;
+	}
 }
 
 .account-card img {
@@ -3822,4 +4054,141 @@ Dashboard
 	background: rgba(0, 0, 0, 0.65);
 	z-index: 10000;
 	backdrop-filter: blur(5px);
+}
+
+/* Synchronized global */
+.admin-shell select,
+.admin-shell option,
+.items-filter-actions select,
+.items-filter-actions select option,
+.transaction-select,
+.transaction-select option,
+.trades-select,
+.trades-select option {
+	background-color: var(--surface-secondary) !important;
+	color: var(--text-primary) !important;
+	border-color: var(--border-color) !important;
+}
+
+.admin-shell select option {
+	background-color: var(--dropdown-bg) !important;
+	color: var(--dropdown-text) !important;
+}
+
+/* Ép toàn bộ các thẻ Input / Search Box (Kể cả của component con như admin trades, items, breeding) */
+.admin-shell input[type="text"],
+.admin-shell input[type="number"],
+.admin-shell textarea,
+.trades-search-input,
+.transaction-search input,
+.items-search input,
+.breeding-search input {
+	background-color: transparent !important;
+	color: var(--text-primary) !important;
+	border: none !important; /* Bắt buộc bỏ viền */
+	outline: none !important; /* Bắt buộc bỏ viền focus */
+	box-shadow: none !important; /* Bỏ bóng đổ mặc định */
+}
+
+/* Fix riêng cái khung bọc ngoài ô input (nếu component dùng div bọc ngoài để làm border/background) */
+.trades-search-input,
+.transaction-search,
+.items-search,
+.breeding-search input {
+	background-color: var(--surface-secondary) !important;
+	border: 1px solid var(--border-color) !important;
+}
+
+/* Đảm bảo các Placeholder (chữ mờ mờ gợi ý gõ) không bị chói */
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder,
+.trades-search-input::placeholder,
+.transaction-search-input::placeholder,
+.items-search input::placeholder,
+.breeding-search input::placeholder {
+	color: var(--text-muted) !important;
+	opacity: 1 !important;
+}
+
+/* Fix nút bấm / tabs bên trong các page con nếu bị sai màu */
+.trades-btn-secondary,
+.items-reset-button,
+.items-category-button {
+	background-color: var(--surface-secondary) !important;
+	color: var(--text-primary) !important;
+	border: 1px solid var(--border-color) !important;
+}
+
+.trades-btn-secondary:hover,
+.items-reset-button:hover,
+.items-category-button:hover {
+	background-color: var(--surface-tertiary) !important;
+}
+
+.trades-tab {
+	color: var(--text-muted) !important;
+}
+
+.trades-tab:hover {
+	color: var(--text-primary) !important;
+	background-color: var(--surface-secondary) !important;
+}
+
+.trades-tab-active {
+	color: #0ea5e9 !important; /* Đổi về màu accent blue đồng bộ với Admin_3.css */
+	background-color: rgba(14, 165, 233, 0.1) !important;
+	border: 1px solid rgba(14, 165, 233, 0.2) !important;
+}
+
+/* Fix bảng (Table) nền & chữ */
+.trades-table-card,
+.items-table-card,
+.breeding-table-panel {
+	background-color: var(--surface-primary) !important;
+	border: 1px solid var(--border-color) !important;
+}
+
+.trades-thead-row,
+.trades-table th,
+.items-table th,
+.breeding-table th {
+	background-color: var(--surface-secondary) !important;
+	color: var(--text-muted) !important;
+	border-bottom: 1px solid var(--border-color) !important;
+}
+
+.trades-table-row,
+.items-table td,
+.breeding-table td {
+	color: var(--text-primary) !important;
+	border-bottom: 1px solid var(--border-color) !important;
+}
+
+.trades-table-row:hover,
+.items-table tbody tr:hover,
+.breeding-table tbody tr:hover {
+	background-color: var(--surface-secondary) !important;
+}
+
+/* Fix thanh Pagination ở chân bảng */
+.trades-pagination,
+.items-pagination {
+	background-color: var(--surface-primary) !important;
+	border-top: 1px solid var(--border-color) !important;
+}
+
+.trades-page-btn {
+	background-color: var(--surface-secondary) !important;
+	color: var(--text-primary) !important;
+	border-color: var(--border-color) !important;
+}
+
+.trades-page-btn:hover:not(:disabled) {
+	background-color: var(--surface-tertiary) !important;
+}
+
+.trades-page-btn-active {
+	background-color: #0ea5e9 !important;
+	color: #ffffff !important;
+	border-color: transparent !important;
 }

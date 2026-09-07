@@ -4,16 +4,17 @@ import styles from "./KoiDictionaryCard.module.css";
 
 interface KoiDictionaryCardProps {
 	koiVarient: IKoiVarient;
+	onClick: () => void;
 }
 
-function KoiDictionaryCard({ koiVarient }: KoiDictionaryCardProps) {
+function KoiDictionaryCard({ koiVarient, onClick }: KoiDictionaryCardProps) {
 	const toCapitalString = (text: string) => {
 		const firstCharacter = text.at(0)?.toUpperCase();
 		return firstCharacter + text.toLowerCase().slice(1);
 	};
 
 	return (
-		<div className={styles.card}>
+		<div className={styles.card} onClick={onClick}>
 			<span className={styles.name}>{koiVarient.name}</span>
 			<section className={styles.image}>
 				<img

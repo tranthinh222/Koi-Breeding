@@ -53,7 +53,7 @@ public class UserService {
                 .locationUpdatedAt(user.getLocationUpdatedAt())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
-                .exp(user.getExp())
+                .level(user.getLevel())
                 .build();
     }
 
@@ -87,7 +87,7 @@ public class UserService {
             currentUser.setStatus(user.getStatus() != null ? user.getStatus() : currentUser.getStatus());
             currentUser.setRole(user.getRole() != null ? user.getRole() : currentUser.getRole());
             currentUser.setIsBanned(user.getIsBanned() != null ? user.getIsBanned() : currentUser.getIsBanned());
-            currentUser.setExp(user.getExp() != null ? user.getExp() : currentUser.getExp());
+            currentUser.setLevel(user.getLevel() != null ? user.getLevel() : currentUser.getLevel());
             currentUser.setAvatarUrl(user.getAvatarUrl() != null ? user.getAvatarUrl() : currentUser.getAvatarUrl());
 
             currentUser = this.userRepository.save(currentUser);
@@ -235,7 +235,7 @@ public class UserService {
                 .role(user.getRole())
                 .status(user.getStatus())
                 .isBanned(user.getIsBanned())
-                .exp(user.getExp())
+                .level(user.getLevel())
                 .avatarUrl(user.getAvatarUrl())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())

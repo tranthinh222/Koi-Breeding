@@ -7,7 +7,7 @@ export type UserProfile = {
   birthday: string | null;
   gender: Gender | null;
   role?: "USER" | "ADMIN" | null;
-  exp: number;
+  level: number;
   avatarUrl: string | null;
   createdAt?: string;
   updatedAt?: string;

@@ -117,7 +117,7 @@ export interface IUser {
 	email: string;
 	birthday: Date;
 	gender: Gender;
-	exp: number;
+	level: number;
 	avatarUrl: string | null;
 	createdAt: Date;
 	updatedAt: Date;

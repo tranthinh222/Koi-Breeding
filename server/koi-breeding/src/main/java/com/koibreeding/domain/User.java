@@ -68,7 +68,7 @@ public class User {
     private Integer failedLoginAttempts = 0;
 
     @Column(nullable = false)
-    private Integer exp = 1;
+    private Integer level = 1;
 
     @Column(columnDefinition = "TEXT")
     private String avatarUrl;

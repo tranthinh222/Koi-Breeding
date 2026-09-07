@@ -51,10 +51,10 @@ public class UserSeeder implements CommandLineRunner {
             Gender gender = (i % 2 == 0) ? Gender.MALE : Gender.FEMALE;
             UserStatus status = UserStatus.ACTIVE;
             Role role = Role.ADMIN;
-            int exp = i * 100;
+            int level = i * 100;
             Location location = Location.HO_CHI_MINH_CITY;
 
-            User admin = user(username, email, hashPassword, birthDate, gender, status, role, false, exp, null,
+            User admin = user(username, email, hashPassword, birthDate, gender, status, role, false, level, null,
                     location, null);
 
             admins.add(admin);
@@ -73,10 +73,10 @@ public class UserSeeder implements CommandLineRunner {
             Gender gender = (i % 2 == 0) ? Gender.MALE : Gender.FEMALE;
             UserStatus status = UserStatus.ACTIVE;
             Role role = Role.USER;
-            int exp = i * 100;
+            int level = i * 100;
             Location location = Location.HO_CHI_MINH_CITY;
 
-            User player = user(username, email, hashPassword, birthDate, gender, status, role, false, exp, null,
+            User player = user(username, email, hashPassword, birthDate, gender, status, role, false, level, null,
                     location, null);
             players.add(player);
         }
@@ -85,7 +85,7 @@ public class UserSeeder implements CommandLineRunner {
     }
 
     public User user(String username, String email, String password, LocalDate birthday, Gender gender,
-            UserStatus status, Role role, boolean isBanned, int exp, String avatarUrl, Location location,
+            UserStatus status, Role role, boolean isBanned, int level, String avatarUrl, Location location,
             Instant locationUpdateAt) {
         User user = new User();
         user.setUsername(username);
@@ -96,7 +96,7 @@ public class UserSeeder implements CommandLineRunner {
         user.setStatus(status);
         user.setRole(role);
         user.setIsBanned(isBanned);
-        user.setExp(exp);
+        user.setLevel(level);
         user.setAvatarUrl(avatarUrl);
         user.setLocation(location);
         user.setLocationUpdatedAt(locationUpdateAt);

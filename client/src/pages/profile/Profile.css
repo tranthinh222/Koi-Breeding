@@ -97,34 +97,6 @@
   font-weight: 800;
 }
 
-.profile-exp {
-  width: min(390px, 100%);
-}
-
-.profile-exp-track {
-  height: 13px;
-  padding: 2px;
-  overflow: hidden;
-  border: 2px solid var(--wood-border);
-  border-radius: 999px;
-  background: var(--surface-raised);
-}
-
-.profile-exp-track span {
-  display: block;
-  height: 100%;
-  min-width: 3px;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--control-active), #8ac75f);
-}
-
-.profile-exp small {
-  display: block;
-  margin-top: 5px;
-  color: var(--text-secondary);
-  font-weight: 700;
-}
-
 .profile-actions {
   display: grid;
   min-width: 150px;
@@ -363,8 +335,7 @@
     text-align: center;
   }
 
-  .profile-actions,
-  .profile-exp {
+  .profile-actions {
     width: 100%;
   }
 

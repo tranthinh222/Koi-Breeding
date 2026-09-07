@@ -92,7 +92,6 @@ public class AdminDashboardDto {
         private Integer id;
         private String username;
         private String avatarUrl;
-        private Integer exp;
         private Integer level;
     }
 

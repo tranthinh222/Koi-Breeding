@@ -17,7 +17,7 @@ export const callCreateKoiVarient = (koiVarient: IKoiVarient) => {
 };
 
 export const callUpdateKoiVarient = (koiVarient: IKoiVarient) => {
-	return apiClient.post<IRestResponse<IKoiVarient>>("/dictionaries", {
+	return apiClient.put<IRestResponse<IKoiVarient>>("/dictionaries", {
 		...koiVarient,
 	});
 };
@@ -38,10 +38,5 @@ export const callUploadKoiVarientImage = (file: File) => {
 	return apiClient.post<IRestResponse<{ url: string }>>(
 		`/upload/dictionary`,
 		formData,
-		{
-			headers: {
-				"Content-Type": "multipart/form-data",
-			},
-		},
 	);
 };

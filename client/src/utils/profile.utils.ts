@@ -4,9 +4,6 @@ export function getProfileUserId(userId: string | undefined, currentUserId: numb
   return Number.isFinite(parsedId) && parsedId > 0 ? parsedId : currentUserId;
 }
 
-export function getLevel(exp = 0) {
-  return Math.max(1, Math.floor(exp / 100));
-}
 
 export function formatDate(dateInput?: string | null) {
   if (!dateInput) return "Not updated.";

@@ -1,10 +1,6 @@
 import {
 	ArrowUpRight,
 	ChevronRight,
-	MoonStar,
-	SlidersHorizontal,
-	SunMedium,
-	UserCircle2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -44,6 +40,8 @@ import AdminBreeding from "./components/AdminBreeding";
 import AdminDictionary from "./components/AdminDictionary";
 import AdminItems from "./components/AdminItems";
 import AdminTrades from "./components/AdminTrades";
+import AdminAccount from "./components/AdminAccount";
+import AdminSettings, { type AdminPreferences } from "./components/AdminSettings";
 
 export type MenuTab =
 	| "dashboard"
@@ -98,10 +96,6 @@ function formatNumber(value: number | null | undefined) {
 
 function formatMoney(value: number | null | undefined) {
 	return new Intl.NumberFormat("en-US").format(value ?? 0);
-}
-
-function getLevel(exp: number | null | undefined) {
-	return Math.max(1, Math.floor((exp ?? 0) / 100));
 }
 
 function getStatusTone(status: AdminUserStatus | null) {
@@ -220,6 +214,10 @@ function Admin() {
 			? "dark"
 			: "light";
 	});
+	const [adminPreferences, setAdminPreferences] = useState<AdminPreferences>(() => {
+		try { return JSON.parse(localStorage.getItem("koi-admin-preferences") ?? "") as AdminPreferences; }
+		catch { return { notifications: true, compactTables: false }; }
+	});
 
 	// State Layout cho Grid Dashboard Mới
 	const [layouts, setLayouts] = useState<Layouts>(() =>
@@ -287,6 +285,10 @@ function Admin() {
 		document.documentElement.setAttribute("data-theme", theme);
 		localStorage.setItem("theme", theme);
 	}, [theme]);
+
+	useEffect(() => {
+		localStorage.setItem("koi-admin-preferences", JSON.stringify(adminPreferences));
+	}, [adminPreferences]);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -427,7 +429,7 @@ function Admin() {
 
 	return (
 		<div
-			className={`admin-shell ${theme === "dark" ? "theme-dark" : "theme-light"}`}
+			className={`admin-shell ${theme === "dark" ? "theme-dark" : "theme-light"} ${adminPreferences.compactTables ? "compact-tables" : ""}`}
 		>
 			<AdminSidebar
 				activeView={activeView}
@@ -442,6 +444,8 @@ function Admin() {
 					adminRole={adminProfileRole}
 					adminEmail={adminProfileEmail}
 					adminAvatar={adminProfileAvatar}
+					adminId={currentUser?.id ?? null}
+					notificationsEnabled={adminPreferences.notifications}
 				/>
 
 				<section className="admin-content">
@@ -848,13 +852,7 @@ function Admin() {
 														</span>
 														<span>
 															Level:{" "}
-															{getLevel(user.exp)}
-														</span>
-														<span>
-															{formatNumber(
-																user.exp,
-															)}{" "}
-															EXP
+													{user.level ?? 1}
 														</span>
 														<span>
 															Updated{" "}
@@ -988,99 +986,11 @@ function Admin() {
 					{activeView === "transactions" && <AdminTransactions />}
 					{activeView === "trade" && <AdminTrades />}
 					{activeView === "settings" && (
-						<div className="settings-page">
-							<div className="page-heading">
-								<div>
-									<p className="eyebrow">Settings</p>
-									<h1>Theme and admin behavior settings.</h1>
-								</div>
-							</div>
-
-							<article className="settings-card settings-card-inline">
-								<div className="settings-header">
-									<div>
-										<p className="eyebrow">Theme</p>
-										<h2>Switch display mode</h2>
-									</div>
-									<SlidersHorizontal size={18} />
-								</div>
-								<div className="settings-toggle-row">
-									<button
-										type="button"
-										className={`settings-toggle ${theme === "light" ? "is-active" : ""}`}
-										onClick={() => setTheme("light")}
-									>
-										<SunMedium size={16} />
-										Light
-									</button>
-									<button
-										type="button"
-										className={`settings-toggle ${theme === "dark" ? "is-active" : ""}`}
-										onClick={() => setTheme("dark")}
-									>
-										<MoonStar size={16} />
-										Dark
-									</button>
-								</div>
-								<label className="settings-option">
-									<input type="checkbox" defaultChecked />
-									<span>
-										Show admin notifications in the header
-									</span>
-								</label>
-								<label className="settings-option">
-									<input type="checkbox" defaultChecked />
-									<span>
-										Keep panel menus available on hover
-									</span>
-								</label>
-							</article>
-						</div>
+						<AdminSettings theme={theme} onThemeChange={setTheme} preferences={adminPreferences} onPreferencesChange={setAdminPreferences} />
 					)}
 
 					{activeView === "account" && (
-						<div className="settings-page">
-							<div className="page-heading">
-								<div>
-									<p className="eyebrow">Account</p>
-									<h1>Admin profile and security.</h1>
-								</div>
-							</div>
-
-							<aside className="settings-card account-card settings-card-inline">
-								<div className="settings-header">
-									<div>
-										<p className="eyebrow">Account</p>
-										<h2>Admin profile</h2>
-									</div>
-									<UserCircle2 size={18} />
-								</div>
-								<div className="account-profile">
-									<img
-										src={adminProfileAvatar}
-										alt={adminProfileName}
-									/>
-									<div>
-										<strong>{adminProfileName}</strong>
-										<span>{adminProfileEmail}</span>
-									</div>
-								</div>
-								<div className="account-actions">
-									<button
-										type="button"
-										className="action-button neutral"
-									>
-										Edit profile
-									</button>
-									<button
-										type="button"
-										className="action-button success"
-									>
-										Security
-									</button>
-								</div>
-							</aside>
-						</div>
+						<AdminAccount />
 					)}
 					{/* --- FULLSCREEN CHART MODAL --- */}
 					{fullScreenChart && (
@@ -1208,8 +1118,8 @@ function RankingRow({
 			</div>
 
 			<div className="ranking-stat">
-				<strong>{formatNumber(user.exp)}</strong>
-				<span>EXP</span>
+				<strong>{formatNumber(user.level)}</strong>
+				<span>LEVEL</span>
 			</div>
 		</div>
 	);

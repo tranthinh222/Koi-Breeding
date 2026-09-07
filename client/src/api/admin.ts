@@ -14,7 +14,7 @@ export interface AdminUserDto {
   role: "USER" | "ADMIN" | "SUPER_ADMIN";
   status: AdminUserStatus | null;
   isBanned: boolean | null;
-  exp: number;
+  level: number;
   avatarUrl: string | null;
   createdAt: string;
   updatedAt: string;
@@ -44,7 +44,6 @@ export interface AdminRankingUserDto {
   id: number;
   username: string;
   avatarUrl: string | null;
-  exp: number;
   level: number;
 }
 
@@ -200,6 +199,15 @@ export async function addAdminItem(
 ): Promise<AdminItem> {
   const response = await apiClient.post("/admin/items/addition", request);
   return response.data.data as AdminItem;
+}
+
+export async function uploadAdminItemImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await apiClient.post("/upload/item", formData);
+  const payload = response.data?.data ?? response.data;
+  if (!payload?.url) throw new Error("The upload API did not return an image URL.");
+  return payload.url as string;
 }
 
 export const updateAdminItem = async (

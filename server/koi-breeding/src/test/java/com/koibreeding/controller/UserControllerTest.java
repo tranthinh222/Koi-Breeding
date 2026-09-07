@@ -41,7 +41,7 @@ class UserControllerTest {
         resUserDto.setBirthday(LocalDate.of(1999,5,13));
         resUserDto.setGender(Gender.MALE);
         resUserDto.setAvatarUrl("1234567");
-        resUserDto.setExp(100);
+        resUserDto.setLevel(100);
     }
     @Test
     void getUserById_success() throws IdInvalidException {

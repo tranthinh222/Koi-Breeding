@@ -85,7 +85,7 @@ export default function ShopHeader() {
 
         <div>
           <h3>{currentUser?.username ?? ''}</h3>
-          <p>{loading ? 'Loading...' : `Level: ${currentUser?.exp ?? 1}`}</p>
+          <p>{loading ? 'Loading...' : `Level: ${currentUser?.level ?? 1}`}</p>
         </div>
       </div>
 

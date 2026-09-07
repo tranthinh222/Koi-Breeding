@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { X, Upload } from "lucide-react";
+import { toast } from "../../../components/shared/Toast/toast";
 
 import {
   addAdminItem,
   updateAdminItem,
+  uploadAdminItemImage,
   type AdminItem,
 } from "../../../api/admin";
 
@@ -30,6 +32,7 @@ export default function ItemDialog({
   const [effectType, setEffectType] = useState("GROWTH");
 
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   // =========================
   // FILL DATA KHI EDIT
@@ -63,16 +66,32 @@ export default function ItemDialog({
 
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose a valid image file.");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("The image must be smaller than 10 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setImageUrl(previewUrl);
+    setUploading(true);
     try {
-      const previewUrl = URL.createObjectURL(file);
-
-      setImageUrl(previewUrl);
-
-      // TODO:
-      // upload Cloudinary
-      // setImageUrl(response.url);
+      const uploadedUrl = await uploadAdminItemImage(file);
+      setImageUrl(uploadedUrl);
+      toast.success("Image uploaded successfully.");
     } catch (error) {
       console.error("Upload image failed:", error);
+      setImageUrl(item?.imageUrl ?? "");
+      toast.error("Unable to upload the image. Please try again.");
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      setUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -83,6 +102,7 @@ export default function ItemDialog({
     e.preventDefault();
 
     try {
+      if (uploading) return;
       setLoading(true);
 
       const itemData = {
@@ -153,9 +173,11 @@ export default function ItemDialog({
 
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/svg+xml"
                   onChange={handleImageChange}
+                  disabled={uploading || loading}
                 />
+                {uploading && <div className="image-upload-status">Uploading image…</div>}
               </div>
             </div>
 
@@ -236,7 +258,7 @@ export default function ItemDialog({
               Cancel
             </button>
 
-            <button type="submit" className="primary-button" disabled={loading}>
+            <button type="submit" className="primary-button" disabled={loading || uploading}>
               {loading
                 ? mode === "add"
                   ? "Adding..."

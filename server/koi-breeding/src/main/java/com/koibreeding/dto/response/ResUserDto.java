@@ -25,7 +25,7 @@ public class ResUserDto {
     private LocalDate birthday;
     private Gender gender;
     private Role role;
-    private Integer exp;
+    private Integer level;
     private String avatarUrl;
     private Location location;
     private Instant locationUpdatedAt;

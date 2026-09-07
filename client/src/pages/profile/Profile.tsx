@@ -40,10 +40,6 @@ function getProfileUserId(
 	return Number.isFinite(parsedId) && parsedId > 0 ? parsedId : currentUserId;
 }
 
-function getLevel(exp = 0) {
-	return Math.max(1, Math.floor(exp / 100));
-}
-
 function formatDate(dateInput?: string | null) {
 	if (!dateInput) return "Not updated.";
 
@@ -140,8 +136,6 @@ function ProfileHero({
 	onSave: () => void;
 }) {
 	const navigate = useNavigate();
-	const levelProgress = Math.max(0, Math.min(100, profile.exp % 100));
-
 	const handleLogout = async () => {
 		try {
 			await logoutRequest();
@@ -163,16 +157,7 @@ function ProfileHero({
 			<div className="profile-hero-content">
 				<span className="profile-eyebrow">Player Profile</span>
 				<h2>{profile.username}</h2>
-				<p>Level {getLevel(profile.exp)}</p>
-				<div
-					className="profile-exp"
-					aria-label={`${levelProgress}% to next level`}
-				>
-					<div className="profile-exp-track">
-						<span style={{ width: `${levelProgress}%` }} />
-					</div>
-					<small>{levelProgress} / 100 EXP to next level</small>
-				</div>
+				<p>Level {profile.level}</p>
 			</div>
 
 			<div className="profile-actions">
@@ -303,8 +288,7 @@ function AccountPanel({
 
 function StatisticsPanel({ profile }: { profile: UserProfile }) {
 	const stats = [
-		{ label: "Level", value: getLevel(profile.exp) },
-		{ label: "Experience", value: profile.exp.toLocaleString() },
+		{ label: "Level", value: profile.level },
 		{ label: "Total Fish", value: 0 },
 		{ label: "Marketplace Sales", value: 0 },
 	];

@@ -166,7 +166,7 @@ public class AdminService {
         List<AdminDashboardDto.RankingUserDto> topUsers = userRepository.findAll(PageRequest.of(
                         0,
                         Math.max(userLimit, 1),
-                        Sort.by(Sort.Direction.DESC, "exp")))
+                        Sort.by(Sort.Direction.DESC, "level")))
                 .stream()
                 .map(this::toRankingUserDto)
                 .toList();
@@ -174,7 +174,7 @@ public class AdminService {
         AdminDashboardDto.RankingUserDto highestLevelUser = userRepository.findAll(PageRequest.of(
                         0,
                         1,
-                        Sort.by(Sort.Direction.DESC, "exp")))
+                        Sort.by(Sort.Direction.DESC, "level")))
                 .stream()
                 .findFirst()
                 .map(this::toRankingUserDto)
@@ -251,8 +251,7 @@ public class AdminService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .avatarUrl(user.getAvatarUrl())
-                .exp(user.getExp())
-                .level(getLevel(user.getExp()))
+                .level(user.getLevel())
                 .build();
     }
 
@@ -270,14 +269,6 @@ public class AdminService {
                 .delta(delta)
                 .growthPercent(growthPercent)
                 .build();
-    }
-
-    private int getLevel(Integer exp) {
-        if (exp == null || exp <= 0) {
-            return 1;
-        }
-
-        return Math.max(1, exp / 100);
     }
 
     private record DashboardWindow(

@@ -61,7 +61,7 @@ public class SuperAdminInitializer implements ApplicationRunner {
         superAdmin.setRole(Role.SUPER_ADMIN);
         superAdmin.setIsBanned(false);
         superAdmin.setFailedLoginAttempts(0);
-        superAdmin.setExp(1);
+        superAdmin.setLevel(1);
 
         userRepository.save(superAdmin);
     }

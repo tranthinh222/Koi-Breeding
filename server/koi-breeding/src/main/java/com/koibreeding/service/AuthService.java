@@ -105,7 +105,7 @@ public class AuthService {
         user.setBirthday(userRes.getBirthday());
         user.setGender(userRes.getGender());
         user.setLocation(userRes.getLocation());
-        user.setExp(1);
+        user.setLevel(1);
         user.setAvatarUrl(userRes.getAvatarUrl());
         user.setStatus(UserStatus.ACTIVE);
         user.setIsBanned(false);
@@ -124,7 +124,7 @@ public class AuthService {
                 .birthday(newUser.getBirthday())
                 .gender(newUser.getGender())
                 .role(newUser.getRole())
-                .exp(newUser.getExp())
+                .level(newUser.getLevel())
                 .avatarUrl(newUser.getAvatarUrl())
                 .location(newUser.getLocation())
                 .locationUpdatedAt(newUser.getLocationUpdatedAt())

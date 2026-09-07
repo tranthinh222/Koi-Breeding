@@ -1,5 +1,6 @@
-import { CheckCircle2, Download, Edit2, Plus, Trash2, X } from "lucide-react";
+import { Download, Edit2, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "../../../components/shared/Toast/toast";
 
 import {
 	callCreateBreedingRate,
@@ -69,9 +70,18 @@ export default function BreedingManagement() {
 
 	const handleSearch = () => {
 		setAppliedSearchTerm(searchQuery);
-		setPage1(1);
-		setPage2(1);
-		setPage3(1);
+		setPage1(0);
+		setPage2(0);
+		setPage3(0);
+	};
+
+	const allFormulas = [...formulas1, ...formulas2, ...formulas3];
+	const exportMatrices = () => {
+		if (!allFormulas.length) { toast("There are no visible recipes to export."); return; }
+		const rows = [["ID", "Type", "Father", "Mother", "Child", "Target rate", "Father rate", "Mother rate"], ...allFormulas.map((f) => [f.id, f.type, f.father.name, f.mother.name, f.child.name, f.targetRate ?? 0, f.fatherRate, f.motherRate])];
+		const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+		const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+		const anchor = document.createElement("a"); anchor.href = url; anchor.download = "breeding-recipes.csv"; anchor.click(); URL.revokeObjectURL(url);
 	};
 
 	useEffect(() => {
@@ -195,7 +205,7 @@ export default function BreedingManagement() {
 			const newRecipe: IBreedingRecipe | undefined = response.data.data;
 			console.log(`Res: ${JSON.stringify(response)}`);
 			if (newRecipe && response.status === 200) {
-				alert("Create new koi successfully!");
+				toast.success("Breeding recipe created.");
 				if (newRecipe.type === "PURE") {
 					setFormulas1((prev) => [newRecipe, ...prev]);
 				} else if (newRecipe.type === "CROSS") {
@@ -204,10 +214,10 @@ export default function BreedingManagement() {
 					setFormulas3((prev) => [newRecipe, ...prev]);
 				}
 			} else {
-				alert("Failed to create new breeding recipe!");
+				toast.error("Unable to create the breeding recipe.");
 			}
 		} catch (error) {
-			alert("Failed to create new breeding recipe");
+			toast.error("Unable to create the breeding recipe.");
 		}
 		setIsModalOpen(false);
 	};
@@ -225,19 +235,19 @@ export default function BreedingManagement() {
 		try {
 			const response = await callDeleteBreedingRate(id);
 			if (response.status === 204) {
-				alert(`Delete recipe #${id} successfully.`);
+				toast.success(`Recipe #${id} deleted.`);
 				setReload1((prev) => !prev);
 				setReload2((prev) => !prev);
 				setReload3((prev) => !prev);
 			} else {
-				alert(`Delete recipe #${id} locally. API not connected yet.`);
+				toast(`Recipe #${id} removed from the current view.`);
 
 				setFormulas1((prev) => prev.filter((f) => f.id !== id));
 				setFormulas2((prev) => prev.filter((f) => f.id !== id));
 				setFormulas3((prev) => prev.filter((f) => f.id !== id));
 			}
 		} catch (error) {
-			alert("Failed to delete breeding recipe.");
+			toast.error("Unable to delete the breeding recipe.");
 		}
 	};
 
@@ -255,7 +265,7 @@ export default function BreedingManagement() {
 			);
 			const newRow: IBreedingRecipe | undefined = response.data.data;
 			if (newRow) {
-				alert(`Update recipe #${selectedFormula.id} successfully!`);
+				toast.success(`Recipe #${selectedFormula.id} updated.`);
 				if (newRow.type === "PURE") {
 					setReload1((prev) => !prev);
 				} else if (newRow.type === "CROSS") {
@@ -267,7 +277,7 @@ export default function BreedingManagement() {
 			setIsEditModalOpen(false);
 			setSelectedFormula(null);
 		} catch (error) {
-			alert("Failed to update breeding recipe");
+			toast.error("Unable to update the breeding recipe.");
 		}
 	};
 
@@ -289,7 +299,7 @@ export default function BreedingManagement() {
 						</h1>
 
 						<p className="breeding-page-subtitle">
-							Manage genetic matrices, inheritance rates, and koi
+							Manage inheritance rates, offspring outcomes, and koi
 							breeding recipes.
 						</p>
 					</div>
@@ -299,22 +309,10 @@ export default function BreedingManagement() {
 						<button
 							type="button"
 							className="breeding-action-button"
-							onClick={() =>
-								alert(
-									"All three genetic matrices are valid. Each outcome totals 1.00 (100%).",
-								)
-							}
-						>
-							<CheckCircle2 size={16} />
-							<span>Validate probabilities</span>
-						</button>
-
-						<button
-							type="button"
-							className="breeding-action-button"
+							onClick={exportMatrices}
 						>
 							<Download size={16} />
-							<span>Export matrices</span>
+							<span>Export recipes</span>
 						</button>
 
 						<button
@@ -344,7 +342,7 @@ export default function BreedingManagement() {
 				</div>
 
 				{/* STATISTICS */}
-				<StatCards formulasCount={totalElements} />
+				<StatCards formulasCount={totalElements} formulas={allFormulas} />
 
 				{/* TABS */}
 				<BreedingTabs
@@ -427,31 +425,33 @@ export default function BreedingManagement() {
 // STAT CARDS
 // ============================================================
 
-function StatCards({ formulasCount }: { formulasCount: number }) {
+function StatCards({ formulasCount, formulas }: { formulasCount: number; formulas: IBreedingRecipe[] }) {
+	const averageTarget = formulas.length ? formulas.reduce((sum, item) => sum + (item.targetRate ?? 0), 0) / formulas.length : 0;
+	const highestMutation = formulas.length ? Math.max(...formulas.map((item) => Math.min(item.fatherRate, item.motherRate))) : 0;
 	const stats = [
 		{
 			label: "TOTAL RECIPES",
 			value: formulasCount.toString(),
 			icon: "🔗",
-			detail: "Across 3 matrices",
+			detail: "Across all recipe types",
 		},
 		{
 			label: "HIGHEST MUTATION RATE",
-			value: "18.0%",
+			value: `${(highestMutation * 100).toFixed(1)}%`,
 			icon: "✨",
 			detail: "Magoi x Magoi",
 		},
 		{
 			label: "SCALE TRAIT GENES",
-			value: "Ginrin & Hikarimono",
+			value: formulas.filter((item) => item.type === "OVERLAY").length.toString(),
 			icon: "💎",
-			detail: "14 breeding recipes",
+			detail: "Overlay recipes in this view",
 		},
 		{
 			label: "AVERAGE SUCCESS RATE",
-			value: "88.5%",
+			value: `${(averageTarget * 100).toFixed(1)}%`,
 			icon: "✔️",
-			detail: "Stable outcomes",
+			detail: "Visible target outcomes",
 		},
 	];
 
@@ -493,19 +493,19 @@ function BreedingTabs({
 	}[] = [
 		{
 			id: "all",
-			label: "All matrices (3)",
+			label: "All recipes",
 		},
 		{
 			id: "table1",
-			label: "Matrix 1: Same-variety breeding",
+			label: "Same-variety breeding",
 		},
 		{
 			id: "table2",
-			label: "Matrix 2: Cross-variety breeding",
+			label: "Cross-variety breeding",
 		},
 		{
 			id: "table3",
-			label: "Matrix 3: Trait-gene breeding",
+			label: "Trait-gene breeding",
 		},
 	];
 
@@ -557,7 +557,7 @@ function BreedingTable1({
 			<div className="breeding-table-header">
 				<div className="breeding-table-heading">
 					<span className="breeding-table-label">
-						MATRIX 1 • SAME VARIETY
+						SAME-VARIETY BREEDING
 					</span>
 
 					<h2 className="breeding-table-title">
@@ -612,7 +612,7 @@ function BreedingTable1({
 				currentPage={page}
 				totalPages={totalPages}
 				onPageChange={setPage}
-				summary={`Page ${page + 1} of ${totalPages} - Matrix 1`}
+				summary={`Page ${page + 1} of ${totalPages} · Same-variety recipes`}
 			/>
 		</section>
 	);
@@ -737,7 +737,7 @@ function BreedingTable2({
 			<div className="breeding-table-header">
 				<div className="breeding-table-heading">
 					<span className="breeding-table-label">
-						MATRIX 2 • TARGET CROSS-BREEDING
+						CROSS-VARIETY BREEDING
 					</span>
 
 					<h2 className="breeding-table-title">
@@ -792,7 +792,7 @@ function BreedingTable2({
 				currentPage={page}
 				totalPages={totalPages}
 				onPageChange={setPage}
-				summary={`Page ${page + 1} of ${totalPages} - Matrix 2`}
+				summary={`Page ${page + 1} of ${totalPages} · Cross-variety recipes`}
 			/>
 		</section>
 	);
@@ -900,7 +900,7 @@ function BreedingTable3({
 			<div className="breeding-table-header">
 				<div className="breeding-table-heading">
 					<span className="breeding-table-label">
-						MATRIX 3 • TRAIT GENES
+						TRAIT-GENE BREEDING
 					</span>
 
 					<h2 className="breeding-table-title">
@@ -954,7 +954,7 @@ function BreedingTable3({
 				currentPage={page}
 				totalPages={totalPages}
 				onPageChange={setPage}
-				summary={`Page ${page + 1} of ${totalPages} - Matrix 1`}
+				summary={`Page ${page + 1} of ${totalPages} · Trait-gene recipes`}
 			/>
 		</section>
 	);

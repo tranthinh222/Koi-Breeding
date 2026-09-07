@@ -21,9 +21,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
     long countByCreatedAtBetween(Instant start, Instant end);
-    List<User> findTopByOrderByExpDesc();
-    List<User> findTop3ByOrderByExpDesc();
-    Optional<User> findFirstByOrderByExpDesc();
+    List<User> findTopByOrderByLevelDesc();
+    List<User> findTop3ByOrderByLevelDesc();
+    Optional<User> findFirstByOrderByLevelDesc();
 
     // 1. Interface hứng dữ liệu biểu đồ Location
     interface LocationCount {

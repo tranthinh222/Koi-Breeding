@@ -21,7 +21,7 @@ public class AdminUserDto {
     private Role role;
     private UserStatus status;
     private Boolean isBanned;
-    private Integer exp;
+    private Integer level;
     private String avatarUrl;
     private Instant createdAt;
     private Instant updatedAt;

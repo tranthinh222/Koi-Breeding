@@ -17,8 +17,6 @@ type HomeData = {
   ponds: IPond[];
 };
 
-const getLevel = (exp = 0) => Math.max(1, Math.floor(exp / 100));
-
 export default function Home() {
   const { currentUser, currentUserId } = useAuth();
   const navigate = useNavigate();
@@ -72,8 +70,7 @@ export default function Home() {
     [ponds],
   );
   const activePond = ponds[0] ?? null;
-  const exp = currentUser?.exp ?? 0;
-  const expProgress = Math.max(0, Math.min(100, exp % 100));
+  const level = currentUser?.level ?? 0;
 
   const nextStep = !activePond
     ? {
@@ -151,9 +148,8 @@ export default function Home() {
         <article className="home-overview-card level-card">
           <span className="home-overview-icon">⭐</span>
           <div className="home-level-summary">
-            <small>Level {getLevel(exp)}</small>
-            <strong>{expProgress} / 100 EXP</strong>
-            <div className="home-exp-track"><span style={{ width: `${expProgress}%` }} /></div>
+            <small>Player level</small>
+            <strong>{level || 1}</strong>
           </div>
         </article>
       </section>

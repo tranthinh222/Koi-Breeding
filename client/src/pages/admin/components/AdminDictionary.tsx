@@ -131,16 +131,14 @@ export default function AdminDictionary() {
     image: File | null,
     mode: 'create' | 'edit',
   ) => {
-    if (image) {
-      const imageResponse = await callUploadKoiVarientImage(image)
-      if (imageResponse && imageResponse.data) {
-        requestKoi.imageUrl = imageResponse.data.data?.url as string
-      } else {
-        toast.error("Unable to upload the koi image.")
-      }
-    }
-
     try {
+      if (image) {
+        const imageResponse = await callUploadKoiVarientImage(image)
+        const imageUrl = imageResponse.data.data?.url
+        if (!imageUrl) throw new Error('The upload API did not return an image URL.')
+        requestKoi.imageUrl = imageUrl
+      }
+
       if ('create' === mode) {
         const response = await callCreateKoiVarient(requestKoi)
         const koiVarient: IKoiVarient | undefined = response.data.data
@@ -150,7 +148,10 @@ export default function AdminDictionary() {
           toast.error('Unable to create the koi entry.')
         }
       } else if ('edit' === mode && selectedItem) {
-        const response = await callUpdateKoiVarient(selectedItem)
+        const response = await callUpdateKoiVarient({
+          ...requestKoi,
+          id: selectedItem.id,
+        })
         const koiVarient: IKoiVarient | undefined = response.data.data
         if (koiVarient) {
           toast.success('Koi entry updated successfully.')

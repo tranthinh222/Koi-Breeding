@@ -19,7 +19,7 @@ export interface AuthRegisterResponse {
     | "BIEN_HOA"
     | "QUY_NHON"
     | "BUON_MA_THUOT";
-  exp: Number;
+  level: Number;
   avatarUrl: String;
   password: String;
   confirmPassword: String;
@@ -68,7 +68,7 @@ export interface AuthUser {
   birthday: string | null;
   gender: "MALE" | "FEMALE" | null;
   role: "USER" | "ADMIN" | "SUPER_ADMIN" | null;
-  exp: number;
+  level: number;
   avatarUrl: string | null;
   createdAt: string;
   updatedAt: string;

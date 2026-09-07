@@ -206,7 +206,7 @@ public class SampleDataInitializer {
                         demoUser.setStatus(UserStatus.ACTIVE);
                         demoUser.setRole(Role.USER);
                         demoUser.setIsBanned(false);
-                        demoUser.setExp(0);
+                        demoUser.setLevel(0);
                         demoUser.setAvatarUrl(null);
                         demoUser.setLocation(Location.HO_CHI_MINH_CITY);
                         demoUser.setLocationUpdatedAt(null);
@@ -229,7 +229,7 @@ public class SampleDataInitializer {
                         sampleUser.setStatus(UserStatus.ACTIVE);
                         sampleUser.setRole(Role.USER);
                         sampleUser.setIsBanned(false);
-                        sampleUser.setExp(250);
+                        sampleUser.setLevel(250);
                         sampleUser.setAvatarUrl(null);
                         sampleUser.setLocation(Location.HANOI);
                         sampleUser.setLocationUpdatedAt(null);

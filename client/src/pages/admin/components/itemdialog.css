@@ -121,6 +121,20 @@
   cursor: pointer;
 }
 
+.image-upload-status {
+  position: absolute;
+  inset: auto 12px 12px;
+  z-index: 2;
+  padding: 8px 12px;
+  border-radius: 9px;
+  background: rgba(15, 23, 42, 0.84);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  pointer-events: none;
+}
+
 .image-placeholder {
   height: 100%;
 

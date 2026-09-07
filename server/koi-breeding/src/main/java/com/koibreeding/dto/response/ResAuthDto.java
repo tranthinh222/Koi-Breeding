@@ -19,6 +19,6 @@ public class ResAuthDto {
     private Location location;
     private String password;
     private String confirmPassword;
-    private Integer exp;
+    private Integer level;
     private String avatarUrl;
 }

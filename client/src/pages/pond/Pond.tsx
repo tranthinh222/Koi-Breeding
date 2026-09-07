@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CURRENT_USER_ID } from "../../api/currentUser";
 import {
 	callFeedKoi,
 	callFetchKoisInPond,
@@ -183,7 +182,7 @@ function Pond({
 	): Promise<IKoi | null> => {
 		try {
 			const response = await callFeedKoi(koi.id, {
-				userId: CURRENT_USER_ID,
+				userId: currentUserId as number,
 				itemId,
 				quantity: 1,
 			});

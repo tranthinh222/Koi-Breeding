@@ -1,10 +1,10 @@
 import { Import, Minus, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CURRENT_USER_ID } from "../../../api/currentUser";
 import { callFetchInventoryByType } from "../../../api/inventory";
+import { useAuth } from "../../../context/AuthContext";
 import type { IItemInventory } from "../../../types/backend";
-import { toast } from "../../shared/Toast/toast";
 import KoiItem from "../../koi/KoiItem/KoiItem";
+import { toast } from "../../shared/Toast/toast";
 import styles from "./ImportKoiForm.module.css";
 
 interface ImportKoiFormProps {
@@ -20,6 +20,7 @@ function ImportKoiForm({
 	onClose,
 	onSubmit,
 }: ImportKoiFormProps) {
+	const { currentUserId } = useAuth();
 	const [koiItemList, setKoiItemList] = useState<IItemInventory[]>([]);
 	const [selectedItem, setSelectedItem] = useState<IItemInventory | null>(
 		null,
@@ -30,7 +31,7 @@ function ImportKoiForm({
 		const fetchData = async () => {
 			try {
 				const response = await callFetchInventoryByType(
-					CURRENT_USER_ID,
+					currentUserId as number,
 					"KOI",
 				);
 				const itemList: IItemInventory[] = response.data.data ?? [];

@@ -1,7 +1,7 @@
 import { Fish, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CURRENT_USER_ID } from "../../../api/currentUser";
 import { callFetchInventoryByType } from "../../../api/inventory";
+import { useAuth } from "../../../context/AuthContext";
 import type { IItemInventory, IKoi } from "../../../types/backend";
 import styles from "./FeedKoiForm.module.css";
 
@@ -18,15 +18,18 @@ function FeedKoiForm({
 	onClose,
 	onSubmit,
 }: FeedKoiFormProps) {
+	const { currentUserId } = useAuth();
 	const [foods, setFoods] = useState<IItemInventory[]>([]);
-	const [selectedFood, setSelectedFood] = useState<IItemInventory | null>(null);
+	const [selectedFood, setSelectedFood] = useState<IItemInventory | null>(
+		null,
+	);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchFoods = async () => {
 			try {
 				const response = await callFetchInventoryByType(
-					CURRENT_USER_ID,
+					currentUserId as number,
 					"FOOD",
 				);
 				setFoods(response.data.data ?? []);
@@ -63,7 +66,9 @@ function FeedKoiForm({
 			{isLoading ? (
 				<p className={styles.message}>Loading food...</p>
 			) : foods.length === 0 ? (
-				<p className={styles.message}>There is no food in your inventory.</p>
+				<p className={styles.message}>
+					There is no food in your inventory.
+				</p>
 			) : (
 				<div className={styles.foodGrid}>
 					{foods.map((food) => (
@@ -79,7 +84,9 @@ function FeedKoiForm({
 								<span className={styles.foodIcon}>🍤</span>
 							)}
 							<span>{food.name}</span>
-							<small>+{food.effectValue} · x{food.quantity}</small>
+							<small>
+								+{food.effectValue} · x{food.quantity}
+							</small>
 						</button>
 					))}
 				</div>
@@ -91,7 +98,11 @@ function FeedKoiForm({
 				disabled={!selectedFood || isProcessing || koi.foodBar >= 100}
 				onClick={() => selectedFood && void onSubmit(selectedFood)}
 			>
-				{isProcessing ? "Feeding..." : koi.foodBar >= 100 ? "Koi is full" : "Feed now"}
+				{isProcessing
+					? "Feeding..."
+					: koi.foodBar >= 100
+						? "Koi is full"
+						: "Feed now"}
 			</button>
 		</div>
 	);

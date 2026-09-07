@@ -1,12 +1,9 @@
 import { Filter, Mars, Undo2, Venus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "../../components/shared/Toast/toast";
 import { callCreateBreedingEvent } from "../../api/breeding";
-import { CURRENT_USER_ID } from "../../api/currentUser";
 import { callFetchKoisInPond } from "../../api/koi";
 import { callFetchAllPonds } from "../../api/pond";
-import Toaster from "../../components/shared/Toast/Toaster";
 import BreedingGuide from "../../components/breeding/BreedingGuide/BreedingGuide";
 import BreedingHistory from "../../components/breeding/BreedingHistory/BreedingHistory";
 import BreedingKoiCard from "../../components/breeding/BreedingKoiCard/BreedingKoiCard";
@@ -15,10 +12,14 @@ import FilterModal, {
 } from "../../components/breeding/FilterModal/FilterModal";
 import ModeSwitcher from "../../components/breeding/ModeSwitcher/ModeSwitcher";
 import PondSelectForm from "../../components/pond/PondSelectForm/PondSelectForm";
+import { toast } from "../../components/shared/Toast/toast";
+import Toaster from "../../components/shared/Toast/Toaster";
+import { useAuth } from "../../context/AuthContext";
 import type { IKoi, IPond } from "../../types/backend";
 import styles from "./Breeding.module.css";
 
 function Breeding() {
+	const { currentUserId } = useAuth();
 	const navigate = useNavigate();
 	const [koiList, setKoiList] = useState<IKoi[]>([]);
 
@@ -57,9 +58,13 @@ function Breeding() {
 
 	const handleFetchUserKoiList = async (): Promise<IKoi[]> => {
 		try {
-			const ponds = await callFetchAllPonds(`owner=${CURRENT_USER_ID}&page=0&size=100`);
+			const ponds = await callFetchAllPonds(
+				`owner=${currentUserId}&page=0&size=100`,
+			);
 			const pondList = ponds.data.data?.result ?? [];
-			const responses = await Promise.all(pondList.map((pond) => callFetchKoisInPond(pond.id)));
+			const responses = await Promise.all(
+				pondList.map((pond) => callFetchKoisInPond(pond.id)),
+			);
 			return responses.flatMap((response) => response.data.data ?? []);
 		} catch (error) {
 			toast.error("Failed to load your koi.");
@@ -72,17 +77,37 @@ function Breeding() {
 		setIsSubmitting(true);
 		try {
 			const response = await callCreateBreedingEvent({
-				fatherId: slot1.id, motherId: slot2.id, pondId: targetPond.id,
-				breedingType: isAutoMode ? "AUTOMATIC" : "MANUAL", userId: CURRENT_USER_ID,
+				fatherId: slot1.id,
+				motherId: slot2.id,
+				pondId: targetPond.id,
+				breedingType: isAutoMode ? "AUTOMATIC" : "MANUAL",
+				userId: currentUserId as number,
 			});
 			const event = response.data.data;
-			setIsSelectingPond(false); setSlot1(null); setSlot2(null);
-			toast.success(`Breeding started in ${targetPond.name}${event ? ` with ${event.expectedEggCount} estimated eggs` : ""}.`);
-			setKoiList((list) => list.map((koi) => koi.id === slot1.id || koi.id === slot2.id ? { ...koi, pondId: targetPond.id } : koi));
+			setIsSelectingPond(false);
+			setSlot1(null);
+			setSlot2(null);
+			toast.success(
+				`Breeding started in ${targetPond.name}${event ? ` with ${event.expectedEggCount} estimated eggs` : ""}.`,
+			);
+			setKoiList((list) =>
+				list.map((koi) =>
+					koi.id === slot1.id || koi.id === slot2.id
+						? { ...koi, pondId: targetPond.id }
+						: koi,
+				),
+			);
 		} catch (error) {
-			const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message;
-			toast.error(message ?? "Could not start breeding. Please check the selected pond.");
-		} finally { setIsSubmitting(false); }
+			const message = (
+				error as { response?: { data?: { message?: string } } }
+			).response?.data?.message;
+			toast.error(
+				message ??
+					"Could not start breeding. Please check the selected pond.",
+			);
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	// Logic Click chọn cá
@@ -214,12 +239,12 @@ function Breeding() {
 								>
 									{slot1 && (
 										<img
-										src={
-											slot1.dictionary.imageUrl ??
-											"/kois/koi-fish-null.svg"
-										}
-										alt="Father"
-										style={{ transform: "scaleX(-1)" }}
+											src={
+												slot1.dictionary.imageUrl ??
+												"/kois/koi-fish-null.svg"
+											}
+											alt="Father"
+											style={{ transform: "scaleX(-1)" }}
 										/>
 									)}
 								</div>
@@ -252,11 +277,11 @@ function Breeding() {
 								>
 									{slot2 && (
 										<img
-										src={
-											slot2.dictionary.imageUrl ??
-											"/kois/koi-fish-null.svg"
-										}
-										alt="Mother"
+											src={
+												slot2.dictionary.imageUrl ??
+												"/kois/koi-fish-null.svg"
+											}
+											alt="Mother"
 										/>
 									)}
 								</div>
@@ -410,7 +435,9 @@ function Breeding() {
 						selectedKoi={slot1}
 						currentPond={{ id: -1 } as IPond}
 						onClose={() => setIsSelectingPond(false)}
-						onSubmit={(targetPond: IPond) => void handleStartBreeding(targetPond)}
+						onSubmit={(targetPond: IPond) =>
+							void handleStartBreeding(targetPond)
+						}
 					/>
 				</div>
 			)}

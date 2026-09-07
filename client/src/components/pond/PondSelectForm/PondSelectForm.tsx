@@ -1,6 +1,5 @@
 import { MapPin, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CURRENT_USER_ID } from "../../../api/currentUser";
 import { callFetchAllPonds } from "../../../api/pond";
 import { useAuth } from "../../../context/AuthContext";
 import type { IKoi, IModelPagination, IPond } from "../../../types/backend";
@@ -35,7 +34,7 @@ function PondSelectForm({
 					console.info(
 						"No ponds returned by the backend; using frontend sample data.",
 					);
-					setPondList(MOCK_PONDS);
+					// setPondList(MOCK_PONDS);
 					setTotalPages(1);
 					if (page !== 1) setPage(1);
 					return;
@@ -48,7 +47,7 @@ function PondSelectForm({
 					"Failed to fetch ponds; using frontend sample data:",
 					error,
 				);
-				setPondList(MOCK_PONDS);
+				// setPondList(MOCK_PONDS);
 				setTotalPages(1);
 				if (page !== 1) setPage(1);
 			}
@@ -177,30 +176,3 @@ function PondSelectForm({
 }
 
 export default PondSelectForm;
-
-const MOCK_PONDS: IPond[] = [
-	"Kohaku Pond",
-	"Uia Pond",
-	"A Pond",
-	"Showa Pond",
-	"Ronaldo Pond",
-	"Pikachu Pond",
-].map((name, index) => ({
-	id: index + 1,
-	owner: {
-		id: CURRENT_USER_ID,
-		username: "demo_user",
-	},
-	name,
-	level: 10,
-	nextLevelPrice: 900,
-	currentQuantity: 0,
-	capacity: index === 0 ? 15 : 10,
-	waterQuality: index === 0 ? 70 : 100,
-	temperature: index === 0 ? 20 : 24,
-	pH: index === 0 ? 3.6 : 7.1,
-	oxygen: 6.2,
-	environmentScore: index === 0 ? 54 : 100,
-	createdAt: new Date(),
-	description: "This pond is used to raise Kohaku koi fishes",
-}));

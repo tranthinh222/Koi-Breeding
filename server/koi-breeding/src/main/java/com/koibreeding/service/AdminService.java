@@ -462,6 +462,7 @@ public class AdminService {
     public Page<ResTransactionDto> getAdminTransaction(
             int page,
             int size,
+            Integer transactionId,
             String search,
             TransactionType type,
             TransactionStatus status,
@@ -477,21 +478,40 @@ public class AdminService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
+        Integer parsedSearchId = null;
+        if (search != null && !search.isBlank()) {
+            try {
+                parsedSearchId = Integer.valueOf(search.trim());
+            } catch (NumberFormatException ignored) {
+                // A non-numeric search term is matched against text fields below.
+            }
+        }
+        final Integer searchId = parsedSearchId;
+
         // 2. Xây dựng Specification điều kiện lọc động
         Specification<Transaction> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Tìm kiếm theo tên (không phân biệt hoa thường)
+            if (transactionId != null) {
+                predicates.add(cb.equal(root.get("id"), transactionId));
+            }
+
+            // Search transaction/item/wallet IDs or human-readable text fields.
             if (search != null && !search.trim().isEmpty()) {
                 String keyword = "%" + search.trim().toLowerCase() + "%";
                 Join<Transaction, Item> itemJoin = root.join("item");
+                List<Predicate> searchPredicates = new ArrayList<>();
 
-                predicates.add(
-                        cb.like(
-                                cb.lower(itemJoin.get("name")),
-                                keyword
-                        )
-                );
+                searchPredicates.add(cb.like(cb.lower(itemJoin.get("name")), keyword));
+                searchPredicates.add(cb.like(cb.lower(root.get("description")), keyword));
+
+                if (searchId != null) {
+                    searchPredicates.add(cb.equal(root.get("id"), searchId));
+                    searchPredicates.add(cb.equal(itemJoin.get("id"), searchId));
+                    searchPredicates.add(cb.equal(root.get("wallet").get("id"), searchId));
+                }
+
+                predicates.add(cb.or(searchPredicates.toArray(new Predicate[0])));
             }
 
             // Lọc theo Enum ItemType

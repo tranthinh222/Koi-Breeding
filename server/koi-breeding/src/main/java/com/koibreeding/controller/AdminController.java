@@ -129,6 +129,7 @@ public class AdminController {
     public ResponseEntity<Page<ResTransactionDto>> getTransaction(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) Integer transactionId,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) TransactionType transactionType,
             @RequestParam(required = false) TransactionStatus transactionStatus,
@@ -137,6 +138,7 @@ public class AdminController {
                 adminService.getAdminTransaction(
                         page,
                         size,
+                        transactionId,
                         search,
                         transactionType,
                         transactionStatus,

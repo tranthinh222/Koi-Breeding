@@ -25,4 +25,4 @@ spring:
 
 app:
   seed:
-    enabled: false
+    enabled: true

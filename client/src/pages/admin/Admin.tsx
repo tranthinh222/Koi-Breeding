@@ -28,6 +28,7 @@ import UserModerationModal from "./components/UserModerationModal";
 
 // --- IMPORT CÁC COMPONENT TỪ DASHBOARD MỚI ---
 import { KoiLifeStageChart } from "./components/charts/KoiLifeStageChart";
+import { MarketplaceStatusChart } from "./components/charts/MarketplaceStatusChart";
 import { UserGrowthChart } from "./components/charts/UserGrowthChart";
 import { UserLocationChart } from "./components/charts/UserLocationChart";
 import {
@@ -68,23 +69,26 @@ interface PanelDescriptor {
 
 // --- CONFIG CHO LƯỚI KÉO THẢ MỚI ---
 // Đổi key để trình duyệt tạo lại lưới layout mới
-const STORAGE_KEY = "koi-admin-dashboard-layout-v3";
+const STORAGE_KEY = "koi-admin-dashboard-layout-v4";
 
 const DEFAULT_LAYOUTS: Layouts = {
 	lg: [
-		{ i: "users", x: 0, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
-		{ i: "lifestage", x: 4, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
-		{ i: "location", x: 8, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
+		{ i: "users", x: 0, y: 0, w: 6, h: 4, minW: 3, minH: 3 },
+		{ i: "marketplace", x: 6, y: 0, w: 6, h: 4, minW: 3, minH: 3 },
+		{ i: "lifestage", x: 0, y: 4, w: 6, h: 4, minW: 3, minH: 3 },
+		{ i: "location", x: 6, y: 4, w: 6, h: 4, minW: 3, minH: 3 },
 	],
 	md: [
 		{ i: "users", x: 0, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
-		{ i: "lifestage", x: 4, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
-		{ i: "location", x: 0, y: 4, w: 8, h: 4, minW: 3, minH: 3 },
+		{ i: "marketplace", x: 4, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
+		{ i: "lifestage", x: 0, y: 4, w: 4, h: 4, minW: 3, minH: 3 },
+		{ i: "location", x: 4, y: 4, w: 4, h: 4, minW: 3, minH: 3 },
 	],
 	sm: [
 		{ i: "users", x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 3 },
-		{ i: "lifestage", x: 0, y: 4, w: 4, h: 4, minW: 2, minH: 3 },
-		{ i: "location", x: 0, y: 8, w: 4, h: 4, minW: 2, minH: 3 },
+		{ i: "marketplace", x: 0, y: 4, w: 4, h: 4, minW: 2, minH: 3 },
+		{ i: "lifestage", x: 0, y: 8, w: 4, h: 4, minW: 2, minH: 3 },
+		{ i: "location", x: 0, y: 12, w: 4, h: 4, minW: 2, minH: 3 },
 	],
 };
 
@@ -152,8 +156,8 @@ function buildDashboardPanels(
 		},
 		{
 			id: "shop",
-			title: "Shop purchases",
-			subtitle: "Completed item purchases",
+			title: "Koin payments",
+			subtitle: "All payment orders",
 			value: formatNumber(dashboard?.shopPurchases.total),
 			change:
 				shopGrowth == null
@@ -232,6 +236,7 @@ function Admin() {
 	);
 	const [dashboardLoading, setDashboardLoading] = useState(true);
 	const [dashboardError, setDashboardError] = useState<string | null>(null);
+	const [lastDashboardUpdate, setLastDashboardUpdate] = useState<Date | null>(null);
 
 	const [users, setUsers] = useState<AdminUserDto[]>([]);
 	const [usersLoading, setUsersLoading] = useState(true);
@@ -291,7 +296,10 @@ function Admin() {
 			setDashboardError(null);
 			try {
 				const response = await getAdminDashboard(3, 3);
-				if (!cancelled) setDashboard(response);
+				if (!cancelled) {
+					setDashboard(response);
+					setLastDashboardUpdate(new Date());
+				}
 			} catch {
 				if (!cancelled)
 					setDashboardError(
@@ -365,6 +373,7 @@ function Admin() {
 		try {
 			const response = await getAdminDashboard(3, 3);
 			setDashboard(response);
+			setLastDashboardUpdate(new Date());
 		} catch {
 			setDashboardError(
 				"Unable to load dashboard data from the database.",
@@ -446,15 +455,25 @@ function Admin() {
 										Monitor player activity, shop purchases, and marketplace performance.
 									</p>
 								</div>
-								<button
-									type="button"
-									className="primary-button"
-									onClick={refreshDashboard}
-									disabled={dashboardLoading}
-								>
-									{dashboardLoading ? "Refreshing…" : "Refresh data"}
-									<ArrowUpRight size={16} />
-								</button>
+								<div className="dashboard-heading-actions">
+									<div className="dashboard-update-info">
+										<strong>This month</strong>
+										<span>
+											{lastDashboardUpdate
+												? `Updated ${lastDashboardUpdate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`
+												: "Waiting for data"}
+										</span>
+									</div>
+									<button
+										type="button"
+										className="primary-button"
+										onClick={refreshDashboard}
+										disabled={dashboardLoading}
+									>
+										{dashboardLoading ? "Refreshing…" : "Refresh data"}
+										<ArrowUpRight size={16} />
+									</button>
+								</div>
 							</div>
 
 							{dashboardError ? (
@@ -524,8 +543,7 @@ function Admin() {
 									>
 										{!dashboard?.userGrowthChart?.length ? (
 											<div
-												className="empty-state"
-												style={{ height: "100%" }}
+												className="empty-state dashboard-chart-state"
 											>
 												{dashboardLoading
 													? "Loading user growth…"
@@ -534,6 +552,28 @@ function Admin() {
 										) : (
 											<UserGrowthChart
 												data={dashboard.userGrowthChart}
+											/>
+										)}
+									</Panel>
+
+									<Panel
+										key="marketplace"
+										panelId="chart-marketplace"
+										title="Marketplace activity"
+										subtitle="Listing outcomes over the last seven days"
+										openPanelMenu={panelMenuOpenId}
+										setOpenPanelMenu={setPanelMenuOpenId}
+										onView={() => setFullScreenChart("marketplace")}
+									>
+										{!dashboard?.marketplaceChart?.length ? (
+											<div className="empty-state dashboard-chart-state">
+												{dashboardLoading
+													? "Loading marketplace activity…"
+													: "No marketplace activity is available yet."}
+											</div>
+										) : (
+											<MarketplaceStatusChart
+												data={dashboard.marketplaceChart}
 											/>
 										)}
 									</Panel>
@@ -552,8 +592,7 @@ function Admin() {
 										{!dashboard?.koiLifeStageChart
 											?.length ? (
 											<div
-												className="empty-state"
-												style={{ height: "100%" }}
+												className="empty-state dashboard-chart-state"
 											>
 												{dashboardLoading
 													? "Loading koi life stages…"
@@ -581,8 +620,7 @@ function Admin() {
 									>
 										{!dashboard?.locationChart?.length ? (
 											<div
-												className="empty-state"
-												style={{ height: "100%" }}
+												className="empty-state dashboard-chart-state"
 											>
 												{dashboardLoading
 													? "Loading player locations…"
@@ -716,7 +754,7 @@ function Admin() {
 											}
 										/>
 										<MetricSummary
-											label="Shop purchases"
+											label="Koin payments this month"
 											value={
 												dashboard?.shopPurchases
 													.currentMonth
@@ -727,7 +765,7 @@ function Admin() {
 											}
 										/>
 										<MetricSummary
-											label="Marketplace trades"
+											label="Marketplace trades this month"
 											value={
 												dashboard?.marketplaceTrades
 													.currentMonth
@@ -1057,13 +1095,13 @@ function Admin() {
 								<div className="chart-modal-header">
 									<h2>
 										{fullScreenChart === "users" &&
-											"New Users"}
+											"New users"}
 										{fullScreenChart === "lifestage" &&
-											"Koi Lifestage"}
+											"Koi life stages"}
 										{fullScreenChart === "location" &&
-											"Users' Location"}
+											"Player locations"}
 										{fullScreenChart === "marketplace" &&
-											"Market liquidity"}
+											"Marketplace activity"}
 									</h2>
 									<button
 										type="button"
@@ -1094,6 +1132,11 @@ function Admin() {
 											data={
 												dashboard?.locationChart || []
 											}
+										/>
+									)}
+									{fullScreenChart === "marketplace" && (
+										<MarketplaceStatusChart
+											data={dashboard?.marketplaceChart || []}
 										/>
 									)}
 								</div>
@@ -1165,7 +1208,8 @@ function RankingRow({
 			</div>
 
 			<div className="ranking-stat">
-				<span>{formatNumber(user.exp)} EXP</span>
+				<strong>{formatNumber(user.exp)}</strong>
+				<span>EXP</span>
 			</div>
 		</div>
 	);

@@ -1,4 +1,4 @@
-import { Edit, Filter, Plus, RotateCcw, Trash2 } from 'lucide-react'
+import { Edit, Plus, RotateCcw, Search, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
   callCreateKoiVarient,
@@ -17,10 +17,12 @@ export default function AdminDictionary() {
   const [varietyList, setVarietyList] = useState<IVariety[]>([])
   const [currentPage, setCurrentPage] = useState<number>(0)
   const [totalPages, setTotalPages] = useState<number>(0)
+  const [totalElements, setTotalElements] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
 
   // --- STATE BỘ LỌC ---
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [varietyFilter, setVarietyFilter] = useState('ALL')
   const [scaleTypeFilter, setScaleTypeFilter] = useState('ALL')
   const [shapeFilter, setShapeFilter] = useState('ALL')
@@ -29,6 +31,14 @@ export default function AdminDictionary() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<IKoiVarient | null>(null)
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(
+      () => setDebouncedSearch(search.trim()),
+      300,
+    )
+    return () => window.clearTimeout(timeoutId)
+  }, [search])
 
   // Load danh sách Variety cho bộ lọc và Form
   useEffect(() => {
@@ -49,22 +59,30 @@ export default function AdminDictionary() {
     try {
       setLoading(true)
 
-      // Xây dựng query string kết hợp bộ lọc (Tùy thuộc backend của bạn có hỗ trợ param hay không)
-      let query = `page=${currentPage}&size=8`
-      if (search) query += `&search=${search}`
-      if (varietyFilter !== 'ALL') query += `&varietyId=${varietyFilter}`
-      if (scaleTypeFilter !== 'ALL') query += `&scaleType=${scaleTypeFilter}`
-      if (shapeFilter !== 'ALL') query += `&shape=${shapeFilter}`
+      const queryParams = new URLSearchParams({
+        page: String(currentPage),
+        size: '8',
+      })
+      if (debouncedSearch) queryParams.set('search', debouncedSearch)
+      if (varietyFilter !== 'ALL')
+        queryParams.set('varietyId', varietyFilter)
+      if (scaleTypeFilter !== 'ALL')
+        queryParams.set('scaleType', scaleTypeFilter)
+      if (shapeFilter !== 'ALL') queryParams.set('shape', shapeFilter)
 
-      const response = await callFetchKoiVarient(query)
+      const response = await callFetchKoiVarient(queryParams.toString())
       const data = response.data.data
 
       if (data) {
         setItems(data.result)
         setTotalPages(data.meta.totalPages)
+        setTotalElements(data.meta.totalElements)
       }
     } catch (error) {
       console.error('Failed to fetch dictionary items:', error)
+      setItems([])
+      setTotalPages(0)
+      setTotalElements(0)
     } finally {
       setLoading(false)
     }
@@ -72,7 +90,13 @@ export default function AdminDictionary() {
 
   useEffect(() => {
     fetchDictionary()
-  }, [currentPage, search, varietyFilter, scaleTypeFilter, shapeFilter])
+  }, [
+    currentPage,
+    debouncedSearch,
+    varietyFilter,
+    scaleTypeFilter,
+    shapeFilter,
+  ])
 
   const handleReset = () => {
     setSearch('')
@@ -112,7 +136,7 @@ export default function AdminDictionary() {
       if (imageResponse && imageResponse.data) {
         requestKoi.imageUrl = imageResponse.data.data?.url as string
       } else {
-        toast.error("Failed to upload koi varient's image!")
+        toast.error("Unable to upload the koi image.")
       }
     }
 
@@ -121,21 +145,25 @@ export default function AdminDictionary() {
         const response = await callCreateKoiVarient(requestKoi)
         const koiVarient: IKoiVarient | undefined = response.data.data
         if (koiVarient) {
-          toast.success('Create new koi successfully!')
+          toast.success('Koi entry created successfully.')
         } else {
-          toast.error('Failed to create new koi varient!')
+          toast.error('Unable to create the koi entry.')
         }
       } else if ('edit' === mode && selectedItem) {
         const response = await callUpdateKoiVarient(selectedItem)
         const koiVarient: IKoiVarient | undefined = response.data.data
         if (koiVarient) {
-          toast.success('Update koi successfully!')
+          toast.success('Koi entry updated successfully.')
         } else {
-          toast.error('Failed to create new koi varient!')
+          toast.error('Unable to update the koi entry.')
         }
       }
     } catch (error) {
-      toast.error('Failed to create new koi varient!')
+      toast.error(
+        mode === 'create'
+          ? 'Unable to create the koi entry.'
+          : 'Unable to update the koi entry.',
+      )
     }
     setIsAddModalOpen(false)
     setIsEditModalOpen(false)
@@ -145,15 +173,56 @@ export default function AdminDictionary() {
   }
 
   return (
-    <div className="items-view">
+    <div className="items-view dictionary-view">
+      <div className="items-page-header dictionary-page-header">
+        <div className="items-page-heading-copy">
+          <div className="dictionary-title-row">
+            <h2>Koi dictionary</h2>
+            <span className="dictionary-result-count">
+              {loading
+                ? 'Loading…'
+                : `${totalElements} ${totalElements === 1 ? 'entry' : 'entries'}`}
+            </span>
+          </div>
+          <p>Manage koi varieties, classifications, and base values.</p>
+        </div>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setIsAddModalOpen(true)}
+        >
+          <Plus size={18} />
+          Add koi entry
+        </button>
+      </div>
+
       {/* FILTER CARD */}
-      <div className="items-filter-card">
+      <div className="items-filter-card dictionary-filter-card">
+        <div className="dictionary-filter-heading">
+          <div>
+            <h3>Filter dictionary</h3>
+            <p>Enter a complete koi name for an exact match.</p>
+          </div>
+          {(search ||
+            varietyFilter !== 'ALL' ||
+            scaleTypeFilter !== 'ALL' ||
+            shapeFilter !== 'ALL') && (
+            <button
+              type="button"
+              className="dictionary-clear-filters"
+              onClick={handleReset}
+            >
+              Clear all filters
+            </button>
+          )}
+        </div>
         <div className="items-filter-row">
           <div className="items-search">
-            <Filter size={18} />
+            <Search size={18} />
             <input
               type="text"
-              placeholder="Search by Koi name..."
+              aria-label="Search by exact koi name"
+              placeholder="Enter an exact koi name..."
               value={search}
               onChange={(e) => handleFilterChange(setSearch, e.target.value)}
             />
@@ -162,6 +231,7 @@ export default function AdminDictionary() {
           <div className="items-filter-actions">
             {/* VARIETY FILTER */}
             <select
+              aria-label="Filter by variety"
               value={varietyFilter}
               onChange={(e) =>
                 handleFilterChange(setVarietyFilter, e.target.value)
@@ -177,6 +247,7 @@ export default function AdminDictionary() {
 
             {/* SCALE TYPE FILTER */}
             <select
+              aria-label="Filter by scale type"
               value={scaleTypeFilter}
               onChange={(e) =>
                 handleFilterChange(setScaleTypeFilter, e.target.value)
@@ -217,22 +288,6 @@ export default function AdminDictionary() {
           ))}
         </div>
       </div>
-
-      <div className="items-page-header">
-        <div className="items-page-heading-copy">
-          <h2>Koi dictionary</h2>
-          <p>Manage koi varieties, classifications, and base values.</p>
-        </div>
-        <button
-          type="button"
-          className="primary-button"
-          onClick={() => setIsAddModalOpen(true)}
-        >
-          <Plus size={18} />
-          Add koi entry
-        </button>
-      </div>
-
       {/* TABLE */}
       <div className="items-table-card">
         <div className="items-table-wrapper">
@@ -242,7 +297,7 @@ export default function AdminDictionary() {
                 <th>Image</th>
                 <th>Koi details</th>
                 <th>Classification</th>
-                <th>Base Stats</th>
+                <th>Base stats</th>
                 <th>Pricing (Koins)</th>
                 <th className="text-right">Actions</th>
               </tr>
@@ -360,7 +415,16 @@ export default function AdminDictionary() {
               ) : (
                 <tr>
                   <td colSpan={6} className="items-empty">
-                    No Koi found.
+                    <div className="dictionary-empty-state">
+                      <Search size={28} />
+                      <strong>No koi entries found</strong>
+                      <span>
+                        Try another exact name or clear the active filters.
+                      </span>
+                      <button type="button" onClick={handleReset}>
+                        Clear filters
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )}

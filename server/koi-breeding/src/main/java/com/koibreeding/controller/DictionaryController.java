@@ -11,10 +11,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.domain.Dictionary;
 import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.enums.ScaleType;
+import com.koibreeding.enums.Shape;
 import com.koibreeding.service.DictionaryService;
 import com.koibreeding.util.annotation.ApiMessage;
 
@@ -64,8 +67,18 @@ public class DictionaryController {
 
     @ApiMessage("Get all koi varients in dictionary with pagination")
     @GetMapping("/dictionaries")
-    public ResponseEntity<ResultPaginationDTO> getAllKoiDictionaries(Pageable pageable) {
-        ResultPaginationDTO koiDictionaryList = koiDictionaryService.handleFetchAllKoiDictionaries(pageable);
+    public ResponseEntity<ResultPaginationDTO> getAllKoiDictionaries(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer varietyId,
+            @RequestParam(required = false) ScaleType scaleType,
+            @RequestParam(required = false) Shape shape,
+            Pageable pageable) {
+        ResultPaginationDTO koiDictionaryList = koiDictionaryService.handleFetchAllKoiDictionaries(
+                search,
+                varietyId,
+                scaleType,
+                shape,
+                pageable);
 
         return ResponseEntity.ok(koiDictionaryList);
     }

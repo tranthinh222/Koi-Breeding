@@ -404,6 +404,39 @@ body.admin-page::after {
 	line-height: 1.6;
 }
 
+.dashboard-heading-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+}
+
+.dashboard-update-info {
+	min-height: 50px;
+	padding: 7px 14px;
+	border: 1px solid var(--border-color);
+	border-radius: 14px;
+	background: var(--surface-primary);
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.dashboard-update-info strong,
+.dashboard-update-info span {
+	display: block;
+}
+
+.dashboard-update-info strong {
+	font-size: 12px;
+}
+
+.dashboard-update-info span {
+	margin-top: 2px;
+	color: var(--text-muted);
+	font-size: 11px;
+}
+
 .primary-button {
 	min-height: 50px;
 	border-radius: 16px;
@@ -707,7 +740,6 @@ body.admin-page::after {
 	margin-top: 18px;
 }
 
-.ranking-item,
 .transaction-item,
 .user-section-card {
 	display: flex;
@@ -719,17 +751,59 @@ body.admin-page::after {
 	background: var(--surface-secondary);
 }
 
-.ranking-order {
-	font-weight: 900;
-	color: var(--text-primary);
-	width: 38px;
-}
-
-.ranking-user {
-	flex: 1;
-	display: flex;
+.admin-shell .ranking-item {
+	display: grid;
+	grid-template-columns: 36px minmax(0, 1fr) auto;
 	align-items: center;
 	gap: 12px;
+	min-height: 72px;
+	padding: 12px 14px;
+	border: 1px solid var(--border-color);
+	border-radius: 16px;
+	background: var(--surface-secondary);
+}
+
+.admin-shell .ranking-item:first-child {
+	border-color: #f1d58a;
+	background: linear-gradient(90deg, #fffaf0, var(--surface-secondary));
+}
+
+.admin-shell .ranking-order {
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 10px;
+	font-weight: 900;
+	color: var(--text-primary);
+	background: #e8edf3;
+}
+
+.admin-shell .ranking-order.gold {
+	color: #8a5a00;
+	background: #ffe6a3;
+}
+
+.admin-shell .ranking-order.silver {
+	color: #536171;
+	background: #e4e9ef;
+}
+
+.admin-shell .ranking-order.bronze {
+	color: #8a4b24;
+	background: #f5d1b9;
+}
+
+.admin-shell .ranking-user {
+	flex: 1;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.admin-shell .ranking-user > div:last-child {
 	min-width: 0;
 }
 
@@ -754,25 +828,46 @@ body.admin-page::after {
 	object-fit: cover;
 }
 
-.ranking-user strong,
+.admin-shell .ranking-user strong,
 .user-section-copy strong,
 .transaction-item strong {
 	display: block;
 }
 
-.ranking-user span,
-.ranking-stat small,
+.admin-shell .ranking-user strong {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.admin-shell .ranking-user span,
+.admin-shell .ranking-stat span,
 .user-section-copy p,
 .user-meta-row,
 .transaction-source {
 	color: var(--text-muted);
 }
 
-.ranking-stat {
+.admin-shell .ranking-stat {
 	text-align: right;
 }
 
-.ranking-stat span,
+.admin-shell .ranking-stat strong {
+	display: block;
+	font-size: 16px;
+	font-weight: 900;
+	color: var(--text-primary);
+}
+
+.admin-shell .ranking-stat span {
+	display: block;
+	margin-top: 2px;
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	color: var(--text-muted);
+}
+
 .transaction-amount {
 	font-weight: 800;
 }
@@ -836,6 +931,12 @@ body.admin-page::after {
 	padding: 20px;
 	color: var(--text-muted);
 	background: var(--surface-secondary);
+}
+
+.dashboard-chart-state {
+	height: 100%;
+	min-height: 0;
+	text-align: center;
 }
 
 .inline-alert {
@@ -1182,11 +1283,15 @@ body.admin-page::after {
 	}
 
 	.page-heading,
-	.ranking-item,
 	.transaction-item,
 	.user-section-card {
 		flex-direction: column;
 		align-items: flex-start;
+	}
+
+	.dashboard-heading-actions {
+		width: 100%;
+		justify-content: space-between;
 	}
 
 	.user-actions {
@@ -1230,6 +1335,15 @@ body.admin-page::after {
 
 	.panel-grid-metrics {
 		grid-template-columns: 1fr;
+	}
+
+	.dashboard-heading-actions {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.dashboard-heading-actions .primary-button {
+		justify-content: center;
 	}
 
 	.panel-grid-secondary {
@@ -3435,6 +3549,15 @@ Dashboard
 }
 
 @media (max-width: 640px) {
+	.dictionary-filter-heading {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.dictionary-clear-filters {
+		padding: 0;
+	}
+
 	.transaction-stats-grid {
 		grid-template-columns: 1fr;
 	}
@@ -3487,6 +3610,111 @@ Dashboard
 /* ========================================
    ADMIN DICTIONARY (KOI VARIENTS)
 ======================================== */
+
+.dictionary-view {
+	gap: 20px;
+}
+
+.dictionary-page-header {
+	margin: 0;
+	padding-bottom: 4px;
+}
+
+.dictionary-title-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.dictionary-result-count {
+	display: inline-flex;
+	align-items: center;
+	min-height: 28px;
+	padding: 0 10px;
+	border-radius: 999px;
+	background: rgba(14, 165, 233, 0.1);
+	color: #0284c7;
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.dictionary-filter-card {
+	padding: 18px 20px;
+	border-radius: 18px;
+	box-shadow: 0 10px 32px rgba(15, 23, 42, 0.05);
+}
+
+.dictionary-filter-heading {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.dictionary-filter-heading h3 {
+	margin: 0;
+	font-size: 15px;
+}
+
+.dictionary-filter-heading p {
+	margin: 4px 0 0;
+	color: var(--text-muted);
+	font-size: 12px;
+}
+
+.dictionary-clear-filters {
+	border: 0;
+	background: transparent;
+	color: #0284c7;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.dictionary-clear-filters:hover {
+	text-decoration: underline;
+}
+
+.dictionary-empty-state {
+	display: flex;
+	min-height: 190px;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.dictionary-empty-state svg {
+	color: #0ea5e9;
+}
+
+.dictionary-empty-state strong {
+	color: var(--text-primary);
+	font-size: 16px;
+}
+
+.dictionary-empty-state span {
+	font-size: 13px;
+}
+
+.dictionary-empty-state button {
+	margin-top: 6px;
+	min-height: 36px;
+	padding: 0 14px;
+	border: 1px solid var(--border-color);
+	border-radius: 10px;
+	background: var(--surface-primary);
+	color: var(--text-primary);
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.dictionary-empty-state button:hover {
+	border-color: rgba(14, 165, 233, 0.45);
+	color: #0284c7;
+}
 
 .dict-badges {
 	display: flex;

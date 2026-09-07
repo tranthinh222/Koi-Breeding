@@ -1,0 +1,154 @@
+import { useEffect, useState } from 'react'
+import { getBalanceWallet } from '../../api/wallet'
+import {
+  getNotifications,
+  markAllNotificationsRead,
+  notificationStreamUrl,
+  type AppNotification,
+} from '../../api/notification'
+import ThemeControl from '../../theme/ThemeControl'
+import SoundControl from '../../sound/SoundControl'
+import { useAuth } from '../../context/AuthContext'
+import './Header.css'
+import './HeaderNotifications.css'
+
+export default function ShopHeader() {
+  const { currentUser, currentUserId } = useAuth()
+  const [balance, setBalance] = useState<number>(0)
+  const [notifications, setNotifications] = useState<AppNotification[]>([])
+  const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadHeaderInfo = async () => {
+      try {
+        if (!currentUserId) return
+        const wallet = await getBalanceWallet(currentUserId)
+        setBalance(wallet.balance)
+      } catch (error) {
+        console.error('Failed to load header information:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadHeaderInfo()
+  }, [currentUserId])
+
+  useEffect(() => {
+    if (!currentUserId) return
+
+    getNotifications(currentUserId)
+      .then(setNotifications)
+      .catch((error) => console.error('Failed to load notifications:', error))
+
+    const eventSource = new EventSource(notificationStreamUrl(currentUserId), {
+      withCredentials: true,
+    })
+    eventSource.addEventListener('notification', (event) => {
+      const notification = JSON.parse(event.data) as AppNotification
+      setNotifications((current) => [notification, ...current])
+    })
+    eventSource.onerror = () => {
+      console.error('Notification stream disconnected; the browser will retry.')
+    }
+
+    return () => eventSource.close()
+  }, [currentUserId])
+
+  useEffect(() => {
+    const updateBalance = (event: Event) => {
+      setBalance((event as CustomEvent<number>).detail)
+    }
+    window.addEventListener('wallet:updated', updateBalance)
+    return () => window.removeEventListener('wallet:updated', updateBalance)
+  }, [])
+
+  const unreadCount = notifications.filter(
+    (notification) => !notification.isRead,
+  ).length
+
+  const markAllRead = async () => {
+    try {
+      if (!currentUserId) return
+      await markAllNotificationsRead(currentUserId)
+      setNotifications((current) =>
+        current.map((notification) => ({ ...notification, isRead: true })),
+      )
+    } catch (error) {
+      console.error('Failed to mark notifications as read:', error)
+    }
+  }
+
+  return (
+    <header className="hud">
+      <div className="player">
+        <div className="avatar">🧑</div>
+
+        <div>
+          <h3>{currentUser?.username ?? ''}</h3>
+          <p>{loading ? 'Loading...' : `Level: ${currentUser?.level ?? 1}`}</p>
+        </div>
+      </div>
+
+      <div className="hud-actions">
+        <ThemeControl />
+        <SoundControl />
+        <div className="notification-wrapper">
+          <button
+            className="notification-btn"
+            aria-label="Notifications"
+            aria-expanded={isNotificationPanelOpen}
+            onClick={() => setNotificationPanelOpen((isOpen) => !isOpen)}
+          >
+            🔔
+            {unreadCount > 0 && (
+              <span className="notification-badge">{unreadCount}</span>
+            )}
+          </button>
+
+          {isNotificationPanelOpen && (
+            <div className="notification-panel show">
+              <div className="notification-header">
+                <h3>Notifications</h3>
+                <button onClick={markAllRead} disabled={unreadCount === 0}>
+                  Mark all as read
+                </button>
+              </div>
+
+              <div className="notification-list">
+                {notifications.length === 0 ? (
+                  <p className="notification-empty">No notifications yet.</p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      className={`notification-item ${notification.isRead ? '' : 'unread'}`}
+                      key={notification.id}
+                    >
+                      <div className="notification-icon">
+                        {notification.type === 'PURCHASE_SUCCESS' ? '🛒' : '🔔'}
+                      </div>
+                      <div>
+                        <strong>{notification.title}</strong>
+                        <p>{notification.message}</p>
+                        <small>
+                          {new Date(notification.createdAt).toLocaleString()}
+                        </small>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="wallet">
+          <div className="gold">
+            🪙 {loading ? '...' : balance.toLocaleString()}
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}

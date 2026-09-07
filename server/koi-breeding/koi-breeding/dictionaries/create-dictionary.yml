@@ -1,0 +1,19 @@
+info:
+  name: Create dictionary
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/dictionaries"
+  body:
+    type: json
+    data: |-
+      {"name":"Bruno Kohaku","shape":"STANDARD","scaleType":"WAGOI","variety":{"id":1},"origin":"Japan","baseMaxLength":80.0,"baseGrowthRate":0.015,"midAge":365,"alphaWeight":0.000015,"basePrice":100,"alphaPrice":1.75,"imageUrl":null}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,14 +1,19 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-// import Profile from './profile/Profile.tsx'
-import Home from './home/Home.tsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
+import { SoundProvider } from "./sound/SoundProvider";
+import { ThemeProvider } from "./theme/ThemeProvider";
+import { AuthProvider } from "./context/AuthContext";
+import "./theme/theme.css";
 
-// const CurrentPage = window.location.pathname === '/' ? Home : Profile
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
-// Đổi Profile thành những route khác
+createRoot(document.getElementById("root")!).render(
+	<StrictMode>
+		<AuthProvider>
+			<ThemeProvider>
+				<SoundProvider>
+					<App />
+				</SoundProvider>
+			</ThemeProvider>
+		</AuthProvider>
+	</StrictMode>,
+);

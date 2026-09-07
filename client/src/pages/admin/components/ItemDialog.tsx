@@ -1,0 +1,288 @@
+import { useEffect, useState } from "react";
+import { X, Upload } from "lucide-react";
+import { toast } from "../../../components/shared/Toast/toast";
+import ImageEditor from "../../profile/ImageEditor";
+
+import {
+  addAdminItem,
+  updateAdminItem,
+  uploadAdminItemImage,
+  type AdminItem,
+} from "../../../api/admin";
+
+import "./ItemDialog.css";
+
+interface ItemDialogProps {
+  mode: "add" | "edit";
+  item?: AdminItem | null;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export default function ItemDialog({
+  mode,
+  item,
+  onClose,
+  onSuccess,
+}: ItemDialogProps) {
+  const [imageUrl, setImageUrl] = useState("");
+  const [nameItem, setNameItem] = useState("");
+  const [description, setDescription] = useState("");
+  const [itemType, setItemType] = useState("FOOD");
+  const [price, setPrice] = useState<number>(0);
+  const [effectType, setEffectType] = useState("GROWTH");
+
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  // =========================
+  // FILL DATA KHI EDIT
+  // =========================
+  useEffect(() => {
+    if (mode === "edit" && item) {
+      setImageUrl(item.imageUrl || "");
+      setNameItem(item.nameItem || "");
+      setDescription(item.description || "");
+      setItemType(item.itemType || "FOOD");
+      setPrice(item.price || 0);
+      setEffectType(item.effectType || "GROWTH");
+    }
+
+    // Reset form khi Add
+    if (mode === "add") {
+      setImageUrl("");
+      setNameItem("");
+      setDescription("");
+      setItemType("FOOD");
+      setPrice(0);
+      setEffectType("GROWTH");
+    }
+  }, [mode, item]);
+
+  // =========================
+  // IMAGE
+  // =========================
+  const closePreview = () => {
+    if (selectedImage) URL.revokeObjectURL(selectedImage);
+    setSelectedImage(null);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose a valid image file.");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("The image must be smaller than 10 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setSelectedImage(URL.createObjectURL(file));
+    e.target.value = "";
+  };
+
+  const handlePreviewSave = async (blob: Blob) => {
+    setUploading(true);
+    try {
+      const file = new File([blob], `admin-item-${Date.now()}.jpg`, { type: "image/jpeg" });
+      const uploadedUrl = await uploadAdminItemImage(file);
+      setImageUrl(uploadedUrl);
+      toast.success("Image uploaded successfully.");
+    } catch (error: any) {
+      console.error("Upload image failed:", error);
+      setImageUrl(item?.imageUrl ?? "");
+      toast.error(error?.response?.data?.message ?? error?.message ?? "Unable to upload the image. Please try again.");
+    } finally {
+      setUploading(false);
+      closePreview();
+    }
+  };
+
+  // =========================
+  // SUBMIT
+  // =========================
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (uploading) return;
+      setLoading(true);
+
+      const itemData = {
+        imageUrl,
+        nameItem,
+        description,
+        itemType,
+        price,
+        effectType,
+      };
+
+      if (mode === "add") {
+        await addAdminItem(itemData);
+        alert("Item created successfully.");
+      }
+
+      if (mode === "edit" && item) {
+        await updateAdminItem(item.id, itemData);
+        alert("Item updated successfully.");
+      }
+
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.error("Item operation failed:", error);
+
+      alert(mode === "add" ? "Unable to create the item." : "Unable to update the item.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+    <div className="dialog-overlay">
+      <div className="add-item-dialog">
+        {/* HEADER */}
+        <div className="dialog-header">
+          <div>
+            <h2>{mode === "add" ? "Add New Item" : "Edit Item"}</h2>
+
+            <p>
+              {mode === "add"
+                ? "Add a new item to the shop catalog"
+                : "Update item details"}
+            </p>
+          </div>
+
+          <button type="button" className="dialog-close" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="dialog-body">
+            {/* IMAGE */}
+            <div className="form-group">
+              <label>Image</label>
+
+              <div className="image-upload-area">
+                {imageUrl ? (
+                  <img src={imageUrl} alt="Preview" className="image-preview" />
+                ) : (
+                  <div className="image-placeholder">
+                    <Upload size={32} />
+                    <span>Upload Image</span>
+                  </div>
+                )}
+
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                  onChange={handleImageChange}
+                  disabled={uploading || loading}
+                />
+                {uploading && <div className="image-upload-status">Uploading image…</div>}
+              </div>
+            </div>
+
+            {/* NAME */}
+            <div className="form-group">
+              <label>Item name</label>
+
+              <input
+                type="text"
+                value={nameItem}
+                onChange={(e) => setNameItem(e.target.value)}
+                placeholder="Enter an item name"
+                required
+              />
+            </div>
+
+            {/* DESCRIPTION */}
+            <div className="form-group">
+              <label>Description</label>
+
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe the item"
+                rows={3}
+              />
+            </div>
+
+            <div className="form-row">
+              {/* TYPE */}
+              <div className="form-group">
+                <label>Item category</label>
+
+                <select
+                  value={itemType}
+                  onChange={(e) => setItemType(e.target.value)}
+                >
+                  <option value="FOOD">FOOD</option>
+                  <option value="KOI">KOI</option>
+                  <option value="MEDICINE">MEDICINE</option>
+                  <option value="CURRENCY">CURRENCY</option>
+                </select>
+              </div>
+
+              {/* PRICE */}
+              <div className="form-group">
+                <label>Price</label>
+
+                <input
+                  type="number"
+                  min="0"
+                  value={price}
+                  onChange={(e) => setPrice(Number(e.target.value))}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* EFFECT */}
+            <div className="form-group">
+              <label>Effect Type</label>
+
+              <select
+                value={effectType}
+                onChange={(e) => setEffectType(e.target.value)}
+              >
+                <option value="GROWTH">GROWTH</option>
+                <option value="HEALTH">HEALTH</option>
+                <option value="WATER_QUALITY">WATER QUALITY</option>
+                <option value="OTHER">OTHER</option>
+              </select>
+            </div>
+          </div>
+
+          {/* FOOTER */}
+          <div className="dialog-footer">
+            <button type="button" className="cancel-button" onClick={onClose}>
+              Cancel
+            </button>
+
+            <button type="submit" className="primary-button" disabled={loading || uploading}>
+              {loading
+                ? mode === "add"
+                  ? "Adding..."
+                  : "Updating..."
+                : mode === "add"
+                  ? "Add Item"
+                  : "Update Item"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {selectedImage && <ImageEditor image={selectedImage} title="Preview item image" cropShape="rect" aspect={1} onCancel={closePreview} onSave={(blob) => void handlePreviewSave(blob)} />}
+    </>
+  );
+}

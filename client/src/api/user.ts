@@ -7,7 +7,7 @@ export interface User {
   email: string
   birthday: string | null
   gender: 'MALE' | 'FEMALE' | null
-  exp: number
+  level: number
   avatarUrl: string | null
   createdAt: string
   updatedAt: string
@@ -25,4 +25,30 @@ export async function getUser(userId: number): Promise<User> {
     )
     throw error
   }
+}
+
+export type UpdateUserProfileRequest = Pick<
+  User,
+  'username' | 'email' | 'birthday' | 'gender'
+>
+
+export async function updateUserProfile(
+  userId: number,
+  data: UpdateUserProfileRequest,
+): Promise<User> {
+  const response = await apiClient.put('/users/profile', data, {
+    params: { id: userId },
+  })
+  return (response.data?.data ?? response.data) as User
+}
+
+export async function uploadUserAvatar(userId: number, file: File): Promise<string> {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await apiClient.post('/users/avatar', formData, {
+    params: { id: userId },
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  const payload = response.data?.data ?? response.data
+  return payload.avatarUrl as string
 }

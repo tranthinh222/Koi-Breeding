@@ -1,0 +1,7 @@
+info:
+  name: dictionaries
+  type: folder
+  seq: 11
+
+request:
+  auth: inherit

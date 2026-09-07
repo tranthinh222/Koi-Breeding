@@ -1,0 +1,102 @@
+.overlay {
+	position: fixed;
+	inset: 0;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	background: rgba(0, 0, 0, 0.45);
+
+	z-index: 1000;
+}
+
+.pondCanvas {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.fishMenu {
+	position: absolute;
+	z-index: 100;
+	transform: translate(0, -100%);
+	background-color: rgba(4, 67, 85, 0.8);
+	backdrop-filter: blur(4px);
+	padding: 8px;
+	border-radius: 12px;
+	display: flex;
+	gap: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.fishInfoButton {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #f2e943;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+}
+
+.fishInfoButton svg {
+	width: 15px;
+	height: 15px;
+}
+
+.fishInfoButton span {
+	font-family: "Grandstander";
+	font-size: 14px;
+}
+
+.feedFishButton {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #f6a623;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+}
+
+.feedFishButton svg { width: 15px; height: 15px; }
+.feedFishButton span { font-family: "Grandstander"; font-size: 14px; }
+
+.moveFishButton {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #43f2af;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+}
+
+.moveFishButton svg {
+	width: 15px;
+	height: 15px;
+}
+
+.moveFishButton span {
+	font-family: "Grandstander";
+	font-size: 14px;
+}
+
+.fishMenuCloseButton {
+	padding: 5px 10px;
+	cursor: pointer;
+	border-radius: 6px;
+	border: none;
+	background: #e74c3c;
+	color: white;
+}

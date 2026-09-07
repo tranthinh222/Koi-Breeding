@@ -1,0 +1,19 @@
+info:
+  name: Update pond
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "http://localhost:8090/koi_breeding/api/v1/ponds"
+  body:
+    type: json
+    data: |-
+      {"id": 1, "name": "Updated Bruno Pond", "description": "Updated from Bruno"}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,23 @@
+info:
+  name: Purchase shop item
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/shop/items/:itemId/purchase"
+  params:
+    - name: itemId
+      value: "1"
+      type: path
+  body:
+    type: json
+    data: |-
+      {"userId": 1, "quantity": 1}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

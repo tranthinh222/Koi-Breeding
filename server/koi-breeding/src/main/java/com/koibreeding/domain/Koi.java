@@ -55,9 +55,6 @@ public class Koi {
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private Integer foodBar = 100;
 
-    @Column(nullable = false, columnDefinition = "SMALLINT")
-    private Integer cureBar = 100;
-
     @Column(nullable = false)
     private Integer price;
 

@@ -1,0 +1,19 @@
+info:
+  name: Create mutation
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/mutations"
+  body:
+    type: json
+    data: |-
+      {"name":"Bruno Mutation","rate":0.1,"value":1.1,"description":"Created from Bruno"}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

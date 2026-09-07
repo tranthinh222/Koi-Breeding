@@ -1,0 +1,19 @@
+info:
+  name: Import kois into pond
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/kois/import"
+  body:
+    type: json
+    data: |-
+      {"pondId": 1, "inventoryId": 1, "quantity": 1}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

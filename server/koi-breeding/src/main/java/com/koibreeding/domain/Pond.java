@@ -5,14 +5,21 @@ import java.time.OffsetDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.koibreeding.enums.PhTrend;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +29,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Pond {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,14 +42,16 @@ public class Pond {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    @Min(value = 1)
+    @Max(value = 20)
     @Column(nullable = false)
     private Integer level = 1;
 
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private Integer capacity = 1;
 
-    @Column(nullable = false, columnDefinition = "SMALLINT")
-    private Integer waterQuality;
+    @Column(nullable = false, precision = 5, scale = 1)
+    private BigDecimal waterQuality;
 
     @Column(nullable = false, precision = 4, scale = 1)
     private BigDecimal temperature;
@@ -51,6 +61,20 @@ public class Pond {
 
     @Column(nullable = false, precision = 4, scale = 2)
     private BigDecimal oxygen;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private PhTrend phTrend = PhTrend.ALKALINE;
+
+    @Column(nullable = false)
+    private OffsetDateTime phTrendChangedAt;
+
+    private OffsetDateTime lastEnvironmentUpdateAt;
+
+    @Column(precision = 4, scale = 1)
+    private BigDecimal temperatureAdjustment = BigDecimal.ZERO;
+
+    private OffsetDateTime temperatureAdjustmentExpiresAt;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

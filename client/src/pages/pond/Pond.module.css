@@ -1,0 +1,316 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
+
+* {
+	box-sizing: border-box;
+}
+
+.overlay {
+	position: fixed;
+	inset: 0;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	background: rgba(0, 0, 0, 0.45);
+
+	z-index: 1000;
+}
+
+.wrapper {
+	/* width: min(1100px, calc(100% - 40px)); */
+	width: 100%;
+	height: 100vh;
+	margin: 0 auto;
+	overflow: hidden;
+}
+
+.pondShell {
+	/* height: min(64vw, 590px); */
+	height: 100%;
+	min-height: 380px;
+	position: relative;
+	overflow: hidden;
+	border: 9px solid #c8e5dc;
+	/* border-radius: 48% 52% 45% 55% / 44% 49% 51% 56%; */
+	box-shadow:
+		0 0 0 8px #368c8a,
+		0 28px 60px rgba(0, 9, 20, 0.35);
+	background: #087d9d;
+}
+
+.pondWarningBanner {
+	position: absolute;
+	top: 92px;
+	left: 50%;
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	max-width: min(620px, calc(100% - 40px));
+	padding: 10px 16px;
+	border: 2px solid rgba(255, 255, 255, 0.9);
+	border-radius: 14px;
+	color: white;
+	font-family: "Grandstander", sans-serif;
+	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.32);
+	transform: translateX(-50%);
+	backdrop-filter: blur(8px);
+}
+
+.pondWarningBanner.warning { background: rgba(180, 83, 9, 0.94); }
+.pondWarningBanner.critical { background: rgba(185, 28, 28, 0.95); animation: warningPulse 1.8s ease-in-out infinite; }
+.pondWarningBanner svg { width: 28px; height: 28px; flex: 0 0 auto; }
+.pondWarningBanner div { display: grid; gap: 2px; }
+.pondWarningBanner strong { font-size: 16px; }
+.pondWarningBanner span { font-size: 13px; }
+
+@keyframes warningPulse {
+	0%, 100% { box-shadow: 0 6px 22px rgba(0, 0, 0, 0.32); }
+	50% { box-shadow: 0 6px 28px rgba(239, 68, 68, 0.75); }
+}
+
+.coins {
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	padding: 10px 14px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+}
+
+.coins > img {
+	width: 50px;
+}
+
+.coins > span {
+	font-family: "Grandstander";
+	font-size: 30px;
+	font-weight: bold;
+	color: #f2e943;
+}
+
+.statsHud {
+	position: absolute;
+	top: 15px;
+	left: 200px;
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	background: rgba(4, 67, 85, 0.6);
+	backdrop-filter: blur(8px);
+	padding: 5px 5px;
+	border-radius: 25px;
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+	overflow: hidden;
+	max-width: 900px;
+	transition:
+		max-width 0.4s cubic-bezier(0.2, 0, 0, 1),
+		background-color 0.3s ease;
+}
+
+.statsHud.collapsed {
+	max-width: 64px;
+	background: rgba(4, 67, 85, 0.85);
+}
+
+.hudToggleButton {
+	background: transparent;
+	border: none;
+	color: white;
+	padding: 10px 14px;
+	border-radius: 25px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition:
+		background-color 0.2s ease,
+		transform 0.2s ease;
+}
+
+.hudToggleButton:hover {
+	background-color: rgba(255, 255, 255, 0.15);
+}
+
+.hudToggleButton:active {
+	transform: scale(0.85);
+}
+
+.hudContent {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	padding-right: 20px;
+	flex-shrink: 0;
+	white-space: nowrap;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.statsHud.collapsed .hudContent {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.hudItem {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: white;
+	font-family: "Grandstander", sans-serif;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.hudItem svg {
+	width: 22px;
+	height: 22px;
+	filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+.hudSeparator {
+	width: 2px;
+	height: 20px;
+	background-color: rgba(255, 255, 255, 0.3);
+	border-radius: 2px;
+}
+
+.header {
+	position: absolute;
+	top: 22px;
+	right: 22px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+}
+
+.navButton {
+	width: 80px;
+	height: 80px;
+	background: none;
+	border: none;
+
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+.navButton:hover {
+	transform: translateY(-2px);
+}
+
+.navButton:active {
+	transform: translateY(1px);
+}
+
+.navButton > img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.navButton:disabled {
+	transform: none;
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.footer {
+	position: absolute;
+	bottom: 22px;
+	left: 22px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+}
+
+.back {
+	position: absolute;
+	bottom: 12px;
+	right: 12px;
+}
+
+.nextPond {
+	position: absolute;
+	right: 12px;
+	top: 45%;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.pagination svg {
+	color: #fad550;
+	width: 60px;
+	height: 60px;
+}
+
+.pagination:hover {
+	opacity: 1;
+}
+
+.prevPond {
+	position: absolute;
+	left: 12px;
+	top: 45%;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.pondLabel {
+	position: absolute;
+	top: 22px;
+	left: 25px;
+	padding: 10px 14px;
+	border: 1px solid rgba(255, 255, 255, 0.28);
+	border-radius: 14px;
+	background: rgba(4, 67, 85, 0.55);
+	backdrop-filter: blur(8px);
+	display: grid;
+	gap: 2px;
+}
+.pondLabel span {
+	color: #b4e6e2;
+	font-size: 0.73rem;
+}
+.pondLabel strong {
+	font-size: 0.9rem;
+}
+
+@media (max-width: 560px) {
+	main {
+		width: min(100% - 28px, 1100px);
+		padding-top: 34px;
+	}
+	.pondShell {
+		min-height: 330px;
+		border-width: 6px;
+	}
+	.pondLabel {
+		left: 14px;
+		top: 14px;
+	}
+}
+
+/* .toastMessage {
+	width: 100%;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 10px;
+	font-family: "Grandstander", sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.toastMessage svg {
+	flex-shrink: 0;
+	color: white;
+	font-size: 70px;
+} */

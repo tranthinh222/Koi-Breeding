@@ -1,0 +1,96 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
+
+.overlay {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: rgba(0, 0, 0, 0.75);
+	z-index: 2000;
+	backdrop-filter: blur(5px);
+}
+
+.modal {
+	width: 90vw;
+	max-width: 1200px;
+	height: 90vh;
+	background: radial-gradient(circle at center, #3b2456 0%, #1a0b2e 100%);
+	border: 6px solid #b77b3e;
+	border-radius: 20px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+	position: relative;
+}
+
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 15px 30px;
+	background: rgba(0, 0, 0, 0.4);
+	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.headerTitle {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	color: white;
+	font-family: "Grandstander", sans-serif;
+	font-size: 32px;
+	font-weight: bold;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.closeBtn {
+	background: rgba(255, 0, 0, 0.2);
+	border: 2px solid #ff4757;
+	color: #ff4757;
+	width: 40px;
+	height: 40px;
+	border-radius: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.closeBtn:hover {
+	background: #ff4757;
+	color: white;
+}
+
+.tabs {
+	display: flex;
+	padding: 0 30px;
+	background: rgba(0, 0, 0, 0.3);
+}
+
+.tabBtn {
+	padding: 15px 30px;
+	background: none;
+	border: none;
+	color: #a39c98;
+	font-family: "Grandstander", sans-serif;
+	font-size: 20px;
+	font-weight: bold;
+	cursor: pointer;
+	border-bottom: 4px solid transparent;
+	transition: all 0.2s;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.tabBtn.active {
+	color: #f2e943;
+	border-bottom-color: #f2e943;
+}
+
+.tabBtn:hover:not(.active) {
+	color: white;
+}

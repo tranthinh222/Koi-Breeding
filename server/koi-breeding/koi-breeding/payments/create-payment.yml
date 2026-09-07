@@ -1,0 +1,19 @@
+info:
+  name: Create payment
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/payments/items/:itemId?userId=1"
+  params:
+    - name: itemId
+      value: "20"
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

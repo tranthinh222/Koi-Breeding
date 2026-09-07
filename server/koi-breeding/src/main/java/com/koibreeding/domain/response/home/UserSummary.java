@@ -16,6 +16,6 @@ public class UserSummary {
     private Integer id;
     private String username;
     private String email;
-    private Integer exp;
+    private Integer level;
     private String avatarUrl;
 }

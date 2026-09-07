@@ -1,0 +1,19 @@
+info:
+  name: Buy pond
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/ponds"
+  body:
+    type: json
+    data: |-
+      {"name": "Bruno Pond", "description": "Pond created from Bruno", "price": 100, "ownerId": 1}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

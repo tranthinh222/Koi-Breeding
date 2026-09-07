@@ -30,6 +30,7 @@ export interface IKoiVarient {
 	alphaWeight: number;
 	basePrice: number;
 	alphaPrice: number;
+	imageUrl?: string;
 }
 
 export interface IVariety {
@@ -37,6 +38,9 @@ export interface IVariety {
 	name: string;
 	description: string;
 }
+
+export type Gender = "MALE" | "FEMALE";
+export type LifeStage = "EGG" | "LARVA" | "FRY" | "JUVENILE" | "ADULT";
 
 export interface IKoi {
 	id: number;
@@ -46,22 +50,38 @@ export interface IKoi {
 	weight: number;
 	health: number;
 	foodBar: number;
-	cureBar: number;
-	gender: string;
+	gender: Gender;
 	price: number;
-	mutation?: IMutation;
+	mutation: IKoiMutation | null;
 	bornedAt: Date;
-	pond?: Pond;
-	lifeStage: string;
-	father?: Koi;
-	mother?: Koi;
+	pondId: number;
+	lifeStage: LifeStage;
+	father: IKoiParent | null;
+	mother: IKoiParent | null;
 	potential: number;
-	dictionary?: IKoiVarient;
+	dictionary: IKoiVarient;
 	patternScore: number;
 	colorScore: number;
 	bodyScore: number;
 	skinScore: number;
 	scaleScore: number;
+}
+
+export interface IKoiParent {
+	id: number;
+	name: string;
+	imageUrl?: string;
+	isBelongToUser: boolean;
+}
+
+export interface IKoiMutation {
+	id: number;
+	name: string;
+}
+
+export interface IKoiPond {
+	id: number;
+	name: string;
 }
 
 export interface IMutation {
@@ -74,39 +94,100 @@ export interface IMutation {
 
 export interface IPond {
 	id: number;
-	owner?: IUserData;
+	owner: IOwner;
 	name: string;
 	level: number;
+	currentQuantity: number;
+	nextLevelPrice: number;
 	capacity: number;
 	waterQuality: number;
 	temperature: number;
 	pH: number;
 	oxygen: number;
+	environmentScore: number;
 	createdAt: Date;
 	description: string;
 }
 
+export type USER_ROLE = "ADMIN" | "USER";
+
 export interface IUser {
 	id: number;
 	username: string;
-	password: string;
 	email: string;
 	birthday: Date;
-	gender: string;
+	gender: Gender;
+	level: number;
+	avatarUrl: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-	status: string;
-	role: string;
-	isBanned: boolean;
-	exp: number;
-	avatarUrl: string;
 }
 
-export interface IUserData {
+export interface IOwner {
 	id: number;
 	username: string;
-	email: string;
-	birthday: Date;
-	gender: string;
-	avatarUrl: string;
+}
+
+export type ItemType = "FOOD" | "KOI" | "MEDICINE" | "CURRENCY";
+export type EffectType = "GROWTH" | "MUTATION" | "WATER_QUALITY";
+
+export interface IItem {
+	id: number;
+	name: string;
+	price: number;
+	usageLimit: number;
+	itemType: ItemType;
+	effectType: EffectType;
+	effectValue: number;
+	description: string;
+	image?: string;
+}
+
+export interface IItemInventory {
+	id: number;
+	itemId: number;
+	name: string;
+	price: number;
+	itemType: ItemType;
+	effectType: EffectType;
+	effectValue: number;
+	description: string;
+	quantity: number;
+	image?: string;
+}
+
+export type BreedingRecipeType = "CROSS" | "PURE" | "OVERLAY";
+
+export interface IBreedingRecipe {
+	id: number;
+	father: IKoiVarient;
+	mother: IKoiVarient;
+	child: IKoiVarient;
+	type: BreedingRecipeType;
+	targetRate?: number;
+	fatherRate: number;
+	motherRate: number;
+}
+
+export type BreedingType = "MANUAL" | "AUTOMATIC";
+export type BreedingStatus =
+	| "STARTED"
+	| "EGG_LAID"
+	| "ISOLATED"
+	| "HATCHED"
+	| "COMPLETED"
+	| "CANCELLED";
+
+export interface IBreedingEvent {
+	id: number;
+	user: IOwner;
+	male: IKoi;
+	female: IKoi;
+	pond: IKoiPond;
+	breedingType: BreedingType;
+	startedAt: string | Date;
+	expectedHatchDate: string | Date;
+	endedAt: string | Date | null;
+	status: BreedingStatus;
+	expectedEggCount: number;
 }

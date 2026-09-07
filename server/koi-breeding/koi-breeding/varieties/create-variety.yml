@@ -1,0 +1,19 @@
+info:
+  name: Create variety
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "http://localhost:8090/koi_breeding/api/v1/varieties"
+  body:
+    type: json
+    data: |-
+      {"name":"Bruno Variety","description":"Created from Bruno"}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

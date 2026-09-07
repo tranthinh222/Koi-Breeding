@@ -102,7 +102,7 @@
 	border: 1px solid #bfc2c7;
 	border-radius: 10px;
 	background-color: white;
-	color: #111827;
+	color: var(--text-primary);
 	box-sizing: border-box;
 
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -191,12 +191,12 @@
 	height: 30px;
 
 	padding: 0 10px;
-	border: 1px solid #e5e7eb;
+	border: 1px solid var(--border-neutral);
 	border-radius: 6px;
 	margin-right: 10px;
 
 	background-color: white;
-	color: #111827;
+	color: var(--text-primary);
 
 	font-size: 18px;
 	outline: none;
@@ -243,10 +243,11 @@
 	width: 50px;
 	height: 30px;
 	padding: 10 10px;
+	margin-bottom: 5px;
 	border: 1px solid #bfc2c7;
 	border-radius: 5px;
 	background-color: white;
-	color: #111827;
+	color: var(--text-primary);
 	text-align: center;
 
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -261,6 +262,11 @@
 	border-color: #667eea;
 	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 	outline: none;
+}
+
+.pageInput span {
+	width: 30px;
+	margin-right: 10px;
 }
 
 .pageButtons {

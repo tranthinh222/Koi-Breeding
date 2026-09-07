@@ -39,7 +39,7 @@ public class UserServiceTest {
         resUserDto.setBirthday(LocalDate.of(1999,5,13));
         resUserDto.setGender(Gender.MALE);
         resUserDto.setAvatarUrl("1234567");
-        resUserDto.setExp(100);
+        resUserDto.setLevel(100);
     }
     @Test
     void convertToResUserDto_success(){
@@ -51,6 +51,6 @@ public class UserServiceTest {
         assertEquals(user.getBirthday(), result.getBirthday());
         assertEquals(user.getGender(), result.getGender());
         assertEquals(user.getAvatarUrl(), result.getAvatarUrl());
-        assertEquals(user.getExp(), result.getExp());
+        assertEquals(user.getLevel(), result.getLevel());
     }
 }

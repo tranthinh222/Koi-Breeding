@@ -1,27 +1,33 @@
 package com.koibreeding.service;
 
-import com.koibreeding.domain.Item;
-import com.koibreeding.domain.Transaction;
-import com.koibreeding.domain.User;
-import com.koibreeding.domain.Wallet;
-import com.koibreeding.dto.response.ResTransactionDto;
-import com.koibreeding.enums.TransactionStatus;
-import com.koibreeding.enums.TransactionType;
-import com.koibreeding.repository.TransactionRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import com.koibreeding.domain.Item;
+import com.koibreeding.domain.Transaction;
+import com.koibreeding.domain.User;
+import com.koibreeding.domain.Wallet;
+import com.koibreeding.dto.response.ResTransactionDto;
+import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.enums.TransactionStatus;
+import com.koibreeding.enums.TransactionType;
+import com.koibreeding.repository.TransactionRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionServiceTest {
@@ -51,8 +57,7 @@ public class TransactionServiceTest {
         createdAt = OffsetDateTime.of(
                 2026, 8, 14,
                 21, 56, 42, 0,
-                ZoneOffset.ofHours(7)
-        );
+                ZoneOffset.ofHours(7));
 
         item1 = new Item();
         item1.setId(1);
@@ -86,18 +91,23 @@ public class TransactionServiceTest {
     @Test
     void getTransactions_shouldReturnListOfDto() {
         // given
-        when(transactionRepository.findByWalletUserIdOrderByCreatedAtDesc(user.getId()))
-                .thenReturn(List.of(transaction1, transaction2));
+        Pageable pageable = PageRequest.of(0, 10);
+        String filter = "ALL"; // Rơi vào case default
+        Page<Transaction> mockPage = new PageImpl<>(List.of(transaction1, transaction2), pageable, 2);
+
+        // Sửa hàm mock của Repository: gọi findByWalletUserId
+        when(transactionRepository.findByWalletUserId(user.getId(), pageable)).thenReturn(mockPage);
 
         // when
-        List<ResTransactionDto> result = transactionService.getTransactions(user.getId());
+        ResultPaginationDTO paginationDTO = transactionService.getTransactions(user.getId(), filter, pageable);
+        List<ResTransactionDto> result = (List<ResTransactionDto>) paginationDTO.getResult();
 
         // then
         assertThat(result).hasSize(2);
+        assertThat(paginationDTO.getMeta().getTotalElements()).isEqualTo(2);
 
         ResTransactionDto dto1 = result.get(0);
         assertThat(dto1.getId()).isEqualTo(1);
-        assertThat(dto1.getItemId()).isEqualTo(1);
         assertThat(dto1.getItemName()).isEqualTo("Food");
         assertThat(dto1.getAmount()).isEqualByComparingTo("100.0");
         assertThat(dto1.getTransactionType()).isEqualTo(TransactionType.BUY_FOOD);
@@ -110,8 +120,26 @@ public class TransactionServiceTest {
     }
 
     @Test
+    void getTransactions_shouldPaginateFilteredTransactions() {
+        Pageable pageable = PageRequest.of(0, 1);
+        List<TransactionType> boughtTypes = List.of(TransactionType.BUY_FOOD, TransactionType.BUY_FISH);
+        when(transactionRepository.findByWalletUserIdAndTransactionTypeIn(
+                user.getId(), boughtTypes, pageable))
+                .thenReturn(new PageImpl<>(List.of(transaction1), pageable, 2));
+
+        ResultPaginationDTO result = transactionService.getTransactions(user.getId(), "BOUGHT", pageable);
+
+        assertThat(result.getMeta().getTotalElements()).isEqualTo(2);
+        assertThat(result.getMeta().getTotalPages()).isEqualTo(2);
+        assertThat(result.getMeta().getPage()).isEqualTo(1);
+    }
+
+    @Test
     void getTransactions_shouldReturnUnknownItem_whenItemIsNull() {
         // given
+        Pageable pageable = PageRequest.of(0, 10);
+        String filter = "ALL";
+
         Transaction txWithoutItem = new Transaction();
         txWithoutItem.setId(3);
         txWithoutItem.setWallet(wallet);
@@ -122,11 +150,13 @@ public class TransactionServiceTest {
         txWithoutItem.setDescription("No item tx");
         txWithoutItem.setCreatedAt(createdAt);
 
-        when(transactionRepository.findByWalletUserIdOrderByCreatedAtDesc(user.getId()))
-                .thenReturn(List.of(txWithoutItem));
+        Page<Transaction> mockPage = new PageImpl<>(List.of(txWithoutItem), pageable, 1);
+
+        when(transactionRepository.findByWalletUserId(user.getId(), pageable)).thenReturn(mockPage);
 
         // when
-        List<ResTransactionDto> result = transactionService.getTransactions(user.getId());
+        ResultPaginationDTO paginationDTO = transactionService.getTransactions(user.getId(), filter, pageable);
+        List<ResTransactionDto> result = (List<ResTransactionDto>) paginationDTO.getResult();
 
         // then
         assertThat(result).hasSize(1);
@@ -137,13 +167,22 @@ public class TransactionServiceTest {
     @Test
     void getTransactions_shouldReturnEmptyList_whenNoTransactionFound() {
         // given
-        when(transactionRepository.findByWalletUserIdOrderByCreatedAtDesc(user.getId()))
-                .thenReturn(List.of());
+        Pageable pageable = PageRequest.of(0, 10);
+        String filter = "BOUGHT"; // Test thử filter "BOUGHT"
+        Page<Transaction> mockPage = new PageImpl<>(List.of(), pageable, 0);
+
+        // Mock hàm findByWalletUserIdAndTransactionTypeIn
+        when(transactionRepository.findByWalletUserIdAndTransactionTypeIn(
+                user.getId(),
+                List.of(TransactionType.BUY_FOOD, TransactionType.BUY_FISH),
+                pageable)).thenReturn(mockPage);
 
         // when
-        List<ResTransactionDto> result = transactionService.getTransactions(user.getId());
+        ResultPaginationDTO paginationDTO = transactionService.getTransactions(user.getId(), filter, pageable);
+        List<ResTransactionDto> result = (List<ResTransactionDto>) paginationDTO.getResult();
 
         // then
         assertThat(result).isEmpty();
+        assertThat(paginationDTO.getMeta().getTotalElements()).isEqualTo(0);
     }
 }

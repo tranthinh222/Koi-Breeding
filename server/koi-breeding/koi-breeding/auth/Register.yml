@@ -1,0 +1,27 @@
+info:
+  name: Register
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: localhost:8090/koi_breeding/auth/register
+  body:
+    type: json
+    data: |-
+      {
+        "username": "safekoi1",
+        "email": "nguyenvanphuoc1172@gmail.com",
+        "birthday": "2005-12-21",
+        "gender": "MALE",
+        "password": "SafeKoi@1",
+        "confirmPassword": "SafeKoi@1",
+        "avatarUrl": ""
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

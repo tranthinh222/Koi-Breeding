@@ -9,8 +9,13 @@ import {
 	Weight,
 } from "lucide-react";
 import { useState } from "react";
-import { callUpdateKoiVarient } from "../../../api/koiDictionary";
+import {
+	callUpdateKoiVarient,
+	callUploadKoiVarientImage,
+} from "../../../api/koiDictionary";
 import type { IKoiVarient, IVariety } from "../../../types/backend";
+import { toast } from "../../shared/Toast/toast";
+import Toaster from "../../shared/Toast/Toaster";
 import KoiForm from "../KoiForm/KoiForm";
 import styles from "./KoiVarientRow.module.css";
 
@@ -23,25 +28,45 @@ function KoiVarientRow({ koi, varietyList }: KoiDictionaryCardProps) {
 	const [isUpdateDialogOpen, setIsUpdateDialogOpen] =
 		useState<boolean>(false);
 
-	const handleUpdateKoiVarient = async (requestKoi: IKoiVarient) => {
-		const koiToUpdate: IKoiVarient = {
-			id: koi.id,
-			name: requestKoi.name,
-			origin: requestKoi.origin,
-			variety: requestKoi.variety,
-			scaleType: requestKoi.scaleType,
-			shape: requestKoi.shape,
-			baseMaxLength: requestKoi.baseMaxLength,
-			baseGrowthRate: requestKoi.baseGrowthRate,
-			midAge: requestKoi.midAge,
-			alphaWeight: requestKoi.alphaWeight,
-			basePrice: requestKoi.basePrice,
-			alphaPrice: requestKoi.alphaPrice,
-		};
+	const handleUpdateKoiVarient = async (
+		requestKoi: IKoiVarient,
+		image: File | null,
+	) => {
+		try {
+			if (image) {
+				const imageResponse = await callUploadKoiVarientImage(image);
+				if (imageResponse && imageResponse.data) {
+					requestKoi.imageUrl = imageResponse.data.data
+						?.url as string;
+				} else {
+					toast.error("Failed to update koi varient's image!");
+				}
+			}
 
-		await callUpdateKoiVarient(koiToUpdate);
+			const koiToUpdate: IKoiVarient = {
+				id: koi.id,
+				name: requestKoi.name,
+				origin: requestKoi.origin,
+				variety: requestKoi.variety,
+				scaleType: requestKoi.scaleType,
+				shape: requestKoi.shape,
+				baseMaxLength: requestKoi.baseMaxLength,
+				baseGrowthRate: requestKoi.baseGrowthRate,
+				midAge: requestKoi.midAge,
+				alphaWeight: requestKoi.alphaWeight,
+				basePrice: requestKoi.basePrice,
+				alphaPrice: requestKoi.alphaPrice,
+				imageUrl: requestKoi.imageUrl,
+			};
 
-		handleUpdateAttributes(requestKoi);
+			await callUpdateKoiVarient(koiToUpdate);
+
+			handleUpdateAttributes(koiToUpdate);
+
+			toast.success(`Update koi #${koi.id} successfully!`);
+		} catch (error) {
+			toast.error(`Failed to update koi #${koi.id}`);
+		}
 	};
 
 	const handleUpdateAttributes = (requestKoi: IKoiVarient) => {
@@ -56,6 +81,7 @@ function KoiVarientRow({ koi, varietyList }: KoiDictionaryCardProps) {
 		koi.alphaWeight = requestKoi.alphaWeight;
 		koi.basePrice = requestKoi.basePrice;
 		koi.alphaPrice = requestKoi.alphaPrice;
+		koi.imageUrl = requestKoi.imageUrl;
 	};
 
 	const toCapitalString = (text: string) => {
@@ -68,8 +94,8 @@ function KoiVarientRow({ koi, varietyList }: KoiDictionaryCardProps) {
 			<div className={styles.card}>
 				<section className={styles.image}>
 					<img
-						src={`/kois/${koi.name.toLowerCase().replace(" ", "-")}.png`}
-						alt="koi"
+						src={`${koi && koi.imageUrl ? koi.imageUrl : "/kois/koi-empty.png"}`}
+						alt="koi-varient"
 						onError={(e) => {
 							e.currentTarget.src = "/kois/koi-empty.png";
 						}}
@@ -181,6 +207,7 @@ function KoiVarientRow({ koi, varietyList }: KoiDictionaryCardProps) {
 					/>
 				</div>
 			) : null}
+			<Toaster />
 		</>
 	);
 }

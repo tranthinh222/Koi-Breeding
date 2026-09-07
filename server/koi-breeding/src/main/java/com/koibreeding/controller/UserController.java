@@ -6,12 +6,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.validation.Valid;
+import com.koibreeding.dto.request.UpdateLocationRequest;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.response.ResUserDto;
@@ -23,6 +28,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
+@RequestMapping("/api/v1")
 public class UserController {
     private final UserService userService;
 
@@ -36,5 +42,36 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertToResUserDto(fetchUser));
     }
+    @PatchMapping("/users/{id}/location")
+    public ResponseEntity<ResUserDto> updateLocation(@PathVariable Integer id,
+            @Valid @RequestBody UpdateLocationRequest request) {
+        return ResponseEntity.ok(userService.updateLocation(id, request.location()));
+    }
 
+    @GetMapping("/users/profile")
+    public ResponseEntity<ResUserDto> getUserProfile(@RequestParam Integer id) {
+        if (!userService.isUserExistById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id '" + id + "' does not exist.");
+        }
+        User profile = userService.handleFetchProfileByUserId(id);
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertToResUserDto(profile));
+    }
+    @PutMapping("/users/profile")
+    public ResponseEntity<ResUserDto> updateUserProfile(@RequestParam Integer id, @RequestBody User userUpdate) {
+        if (!userService.isUserExistById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id '" + id + "' does not exist.");
+        }
+        User updateUser = userService.handleUpdateProfile(id, userUpdate);
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertToResUserDto(updateUser));
+    }
+    @PostMapping("/users/avatar")
+    public ResponseEntity<Map<String, String>> uploadAvatar(@RequestParam Integer id,
+            @RequestParam("file") MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")){
+            throw new IllegalArgumentException("Content file must be an image.");
+        }
+        String avatarUrl = userService.handleUploadAvatar(id, file);
+        return ResponseEntity.ok(Map.of("avatarUrl", avatarUrl));
+    }
 }

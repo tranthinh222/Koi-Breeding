@@ -2,13 +2,14 @@ import { useState } from 'react'
 
 import type { ShopCategory, ShopItem } from '../../api/shop'
 
-import ShopTitle from '../../components/user/ShopTitle'
-import ShopTabs from '../../components/user/ShopTabs'
+import ShopTitle from '../../components/shop/ShopTitle'
+import ShopTabs from '../../components/shop/ShopTabs'
 
 import FoodShop from './FoodShop'
 import MedicineShop from './MedicineShop'
 import KoiShop from './KoiShop'
 import KoinShop from './KoinShop'
+import '../../components/shared/Catalog/Catalog.css'
 
 export default function Shop() {
   const [category, setCategory] = useState<ShopCategory>('FOOD')

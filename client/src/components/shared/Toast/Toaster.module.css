@@ -1,0 +1,18 @@
+.toastContainer {
+	position: fixed;
+	top: 40px;
+	left: 50%;
+	transform: translateX(-50%);
+
+	width: 380px;
+	z-index: 9999;
+	pointer-events: none;
+
+	display: flex;
+	justify-content: center;
+}
+
+.toastItem {
+	width: 100%;
+	pointer-events: auto;
+}

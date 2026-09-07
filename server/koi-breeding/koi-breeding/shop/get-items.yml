@@ -1,0 +1,15 @@
+info:
+  name: Get shop items
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "http://localhost:8090/koi_breeding/api/v1/shop/items?category=MEDICINE&page=0&size=10"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

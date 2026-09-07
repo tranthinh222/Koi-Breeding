@@ -1,21 +1,43 @@
 package com.koibreeding.service;
 
-import org.springframework.stereotype.Service;
+import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.koibreeding.config.PondEnvironmentConfig;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.response.ResUserDto;
+import com.koibreeding.dto.response.ResultPaginationDTO;
+import com.koibreeding.dto.response.admin.AdminUserDto;
+import com.koibreeding.enums.Location;
+import com.koibreeding.enums.Role;
 import com.koibreeding.repository.UserRepository;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PondEnvironmentConfig environmentConfig;
+    private final CloudinaryUploadService cloudinaryUploadService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PondEnvironmentConfig environmentConfig,
+            CloudinaryUploadService cloudinaryUploadService) {
         this.userRepository = userRepository;
+        this.environmentConfig = environmentConfig;
+        this.cloudinaryUploadService = cloudinaryUploadService;
     }
 
     public User handleFetchUserById(Integer userId) {
         return userRepository.findById(userId).orElse(null);
+    }
+
+    public User handleFetchUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
     }
 
     public ResUserDto convertToResUserDto(User user) {
@@ -25,11 +47,29 @@ public class UserService {
                 .email(user.getEmail())
                 .birthday(user.getBirthday())
                 .gender(user.getGender())
+                .role(user.getRole())
                 .avatarUrl(user.getAvatarUrl())
+                .location(user.getLocation())
+                .locationUpdatedAt(user.getLocationUpdatedAt())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
-                .exp(user.getExp())
+                .level(user.getLevel())
                 .build();
+    }
+
+    public ResUserDto updateLocation(Integer userId, Location location) {
+        User user = handleFetchUserById(userId);
+        if (user == null)
+            throw new IllegalArgumentException("User not found: " + userId);
+        Instant now = Instant.now();
+        if (user.getLocationUpdatedAt() != null
+                && user.getLocationUpdatedAt().plus(environmentConfig.getLocationChangeCooldownDays(),
+                        ChronoUnit.DAYS).isAfter(now)) {
+            throw new IllegalStateException("Location can only be changed once every 60 days");
+        }
+        user.setLocation(location);
+        user.setLocationUpdatedAt(now);
+        return convertToResUserDto(userRepository.save(user));
     }
 
     public User handleCreateUser(User user) {
@@ -47,13 +87,159 @@ public class UserService {
             currentUser.setStatus(user.getStatus() != null ? user.getStatus() : currentUser.getStatus());
             currentUser.setRole(user.getRole() != null ? user.getRole() : currentUser.getRole());
             currentUser.setIsBanned(user.getIsBanned() != null ? user.getIsBanned() : currentUser.getIsBanned());
-            currentUser.setExp(user.getExp() != null ? user.getExp() : currentUser.getExp());
+            currentUser.setLevel(user.getLevel() != null ? user.getLevel() : currentUser.getLevel());
             currentUser.setAvatarUrl(user.getAvatarUrl() != null ? user.getAvatarUrl() : currentUser.getAvatarUrl());
 
             currentUser = this.userRepository.save(currentUser);
         }
 
         return currentUser;
+    }
+
+    public User handleFetchProfileByUserId(Integer userId) {
+        return this.userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User with id '" + userId + "' is not exist."));
+    }
+
+    public User handleUpdateProfile(Integer userId, User userUpdate) {
+        User currentUser = this.handleFetchProfileByUserId(userId);
+
+        if (userUpdate.getUsername() != null && !userUpdate.getUsername().isBlank()) {
+            currentUser.setUsername(userUpdate.getUsername());
+        }
+        if (userUpdate.getEmail() != null && !userUpdate.getEmail().isBlank()) {
+            currentUser.setEmail(userUpdate.getEmail());
+        }
+        if (userUpdate.getBirthday() != null) {
+            currentUser.setBirthday(userUpdate.getBirthday());
+        }
+        if (userUpdate.getGender() != null) {
+            currentUser.setGender(userUpdate.getGender());
+        }
+        if (userUpdate.getAvatarUrl() != null && !userUpdate.getAvatarUrl().isBlank()) {
+            currentUser.setAvatarUrl(userUpdate.getAvatarUrl());
+        }
+
+        return this.userRepository.save(currentUser);
+    }
+
+    public String handleUploadAvatar(Integer userId, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Avatar file is required.");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.toLowerCase().startsWith("image/")) {
+            throw new IllegalArgumentException("Avatar file format is invalid. Only image files are allowed.");
+        }
+
+        User currentUser = this.handleFetchProfileByUserId(userId);
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        if (fileName.isBlank()) {
+            throw new IllegalArgumentException("Avatar file name is invalid.");
+        }
+
+        String fileExtension = StringUtils.getFilenameExtension(fileName);
+        if (fileExtension == null || fileExtension.isBlank()) {
+            throw new IllegalArgumentException("Avatar file extension is invalid.");
+        }
+
+        try {
+            String avatarUrl = this.cloudinaryUploadService.uploadImage(file);
+            currentUser.setAvatarUrl(avatarUrl);
+            this.userRepository.save(currentUser);
+            return avatarUrl;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload avatar for user id '" + userId + "'.", e);
+        }
+    }
+
+    /*
+     * public String handleUploadAvatar(Integer userId, MultipartFile file) {
+     * if (file == null || file.isEmpty()) {
+     * throw new IllegalArgumentException("Avatar file is required.");
+     * }
+     * 
+     * String contentType = file.getContentType();
+     * if (contentType == null || !contentType.toLowerCase().startsWith("image/")) {
+     * throw new
+     * IllegalArgumentException("Avatar file format is invalid. Only image files are allowed."
+     * );
+     * }
+     * 
+     * User currentUser = this.handleFetchProfileByUserId(userId);
+     * String oldAvatarUrl = currentUser.getAvatarUrl();
+     * String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+     * if (fileName.isBlank()) {
+     * throw new IllegalArgumentException("Avatar file name is invalid.");
+     * }
+     * 
+     * String extension = StringUtils.getFilenameExtension(fileName);
+     * if (extension == null || extension.isBlank()) {
+     * throw new IllegalArgumentException("Avatar file extension is invalid.");
+     * }
+     * 
+     * String safeFileName = "user-" + userId + "-" + System.currentTimeMillis() +
+     * "." + extension;
+     * 
+     * Path uploadDir = Paths.get("uploads",
+     * "avatars").toAbsolutePath().normalize();
+     * try {
+     * Files.createDirectories(uploadDir);
+     * Path target = uploadDir.resolve(safeFileName);
+     * Files.copy(file.getInputStream(), target,
+     * StandardCopyOption.REPLACE_EXISTING);
+     * 
+     * String avatarUrl = "/uploads/avatars/" + safeFileName;
+     * currentUser.setAvatarUrl(avatarUrl);
+     * this.userRepository.save(currentUser);
+     * deleteOldAvatar(oldAvatarUrl, avatarUrl, uploadDir);
+     * 
+     * return avatarUrl;
+     * } catch (IOException e) {
+     * throw new RuntimeException("Failed to upload avatar for user id '" + userId +
+     * "'.", e);
+     * }
+     * 
+     * 
+     * }
+     */
+    public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {
+        Page<User> pageUser = this.userRepository.findAllByRole(Role.USER, pageable);
+        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotalPages(pageUser.getTotalPages());
+        meta.setTotalElements(pageUser.getTotalElements());
+
+        resultPaginationDTO.setMeta(meta);
+
+        resultPaginationDTO.setResult(
+                pageUser.getContent()
+                        .stream()
+                        .map(this::convertToAdminUserDto)
+                        .toList());
+
+        return resultPaginationDTO;
+    }
+
+    public AdminUserDto convertToAdminUserDto(User user) {
+        return AdminUserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
+                .role(user.getRole())
+                .status(user.getStatus())
+                .isBanned(user.getIsBanned())
+                .level(user.getLevel())
+                .avatarUrl(user.getAvatarUrl())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
     }
 
     public void handleDeleteUser(Integer id) {

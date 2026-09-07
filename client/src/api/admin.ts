@@ -1,5 +1,6 @@
 import type { LifeStagePoint } from "../pages/admin/components/charts/KoiLifeStageChart";
 import type { LocationPoint } from "../pages/admin/components/charts/UserLocationChart";
+import type { MarketplacePoint } from "../pages/admin/components/charts/MarketplaceStatusChart";
 import { apiClient } from "./client";
 
 export type AdminUserStatus = "ACTIVE" | "BANNED" | "DELETED";
@@ -68,6 +69,7 @@ export interface AdminDashboardResponse {
   userGrowthChart: TimeSeriesPoint[];
   locationChart: LocationPoint[];
   koiLifeStageChart: LifeStagePoint[];
+  marketplaceChart: MarketplacePoint[];
 }
 
 export interface AdminModerationUserRequest {
@@ -231,6 +233,7 @@ export interface TransactionFilterParams {
   page?: number;
   size?: number;
   search?: string;
+  transactionId?: number;
   transactionType?: string;
   transactionStatus?: string;
   sortPrice?: string;
@@ -240,6 +243,7 @@ export const getAdminTransactions = async ({
   page = 0,
   size = 8,
   search = "",
+  transactionId,
   transactionType = "ALL",
   transactionStatus = "ALL",
   sortPrice = "DEFAULT",
@@ -247,6 +251,7 @@ export const getAdminTransactions = async ({
   const params: Record<string, any> = { page, size };
 
   if (search.trim()) params.search = search.trim();
+  if (transactionId != null) params.transactionId = transactionId;
   if (transactionType !== "ALL") params.transactionType = transactionType;
   if (transactionStatus !== "ALL") params.transactionStatus = transactionStatus;
   if (sortPrice !== "DEFAULT") params.sortPrice = sortPrice.toLowerCase(); // 'asc' hoặc 'desc'

@@ -136,7 +136,7 @@ export default function AdminDictionary() {
       if (imageResponse && imageResponse.data) {
         requestKoi.imageUrl = imageResponse.data.data?.url as string
       } else {
-        toast.error("Failed to upload koi varient's image!")
+        toast.error("Unable to upload the koi image.")
       }
     }
 
@@ -145,21 +145,25 @@ export default function AdminDictionary() {
         const response = await callCreateKoiVarient(requestKoi)
         const koiVarient: IKoiVarient | undefined = response.data.data
         if (koiVarient) {
-          toast.success('Create new koi successfully!')
+          toast.success('Koi entry created successfully.')
         } else {
-          toast.error('Failed to create new koi varient!')
+          toast.error('Unable to create the koi entry.')
         }
       } else if ('edit' === mode && selectedItem) {
         const response = await callUpdateKoiVarient(selectedItem)
         const koiVarient: IKoiVarient | undefined = response.data.data
         if (koiVarient) {
-          toast.success('Update koi successfully!')
+          toast.success('Koi entry updated successfully.')
         } else {
-          toast.error('Failed to create new koi varient!')
+          toast.error('Unable to update the koi entry.')
         }
       }
     } catch (error) {
-      toast.error('Failed to create new koi varient!')
+      toast.error(
+        mode === 'create'
+          ? 'Unable to create the koi entry.'
+          : 'Unable to update the koi entry.',
+      )
     }
     setIsAddModalOpen(false)
     setIsEditModalOpen(false)
@@ -175,7 +179,9 @@ export default function AdminDictionary() {
           <div className="dictionary-title-row">
             <h2>Koi dictionary</h2>
             <span className="dictionary-result-count">
-              {totalElements} {totalElements === 1 ? 'entry' : 'entries'}
+              {loading
+                ? 'Loading…'
+                : `${totalElements} ${totalElements === 1 ? 'entry' : 'entries'}`}
             </span>
           </div>
           <p>Manage koi varieties, classifications, and base values.</p>
@@ -282,22 +288,6 @@ export default function AdminDictionary() {
           ))}
         </div>
       </div>
-
-      <div className="items-page-header">
-        <div className="items-page-heading-copy">
-          <h2>Koi dictionary</h2>
-          <p>Manage koi varieties, classifications, and base values.</p>
-        </div>
-        <button
-          type="button"
-          className="primary-button"
-          onClick={() => setIsAddModalOpen(true)}
-        >
-          <Plus size={18} />
-          Add koi entry
-        </button>
-      </div>
-
       {/* TABLE */}
       <div className="items-table-card">
         <div className="items-table-wrapper">
@@ -307,7 +297,7 @@ export default function AdminDictionary() {
                 <th>Image</th>
                 <th>Koi details</th>
                 <th>Classification</th>
-                <th>Base Stats</th>
+                <th>Base stats</th>
                 <th>Pricing (Koins)</th>
                 <th className="text-right">Actions</th>
               </tr>
@@ -425,7 +415,16 @@ export default function AdminDictionary() {
               ) : (
                 <tr>
                   <td colSpan={6} className="items-empty">
-                    No Koi found.
+                    <div className="dictionary-empty-state">
+                      <Search size={28} />
+                      <strong>No koi entries found</strong>
+                      <span>
+                        Try another exact name or clear the active filters.
+                      </span>
+                      <button type="button" onClick={handleReset}>
+                        Clear filters
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )}

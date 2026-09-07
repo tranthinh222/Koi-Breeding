@@ -56,6 +56,7 @@ function getTransactionIcon(type: AdminTransaction["transactionType"]) {
 
 function AdminTransactions() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortPrice, setSortPrice] = useState("DEFAULT");
@@ -66,14 +67,27 @@ function AdminTransactions() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const timeoutId = window.setTimeout(
+      () => setDebouncedSearch(searchTerm.trim()),
+      300,
+    );
+    return () => window.clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  useEffect(() => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
         setError("");
+        const normalizedSearch = debouncedSearch.replace(/^#/, "");
+        const isTransactionId = /^\d+$/.test(normalizedSearch);
         const response = await getAdminTransactions({
           page: currentPage,
           size: 8,
-          search: searchTerm,
+          search: isTransactionId ? "" : debouncedSearch,
+          transactionId: isTransactionId
+            ? Number(normalizedSearch)
+            : undefined,
           transactionType: typeFilter,
           transactionStatus: statusFilter,
           sortPrice,
@@ -91,7 +105,7 @@ function AdminTransactions() {
     };
 
     void fetchTransactions();
-  }, [currentPage, searchTerm, typeFilter, statusFilter, sortPrice]);
+  }, [currentPage, debouncedSearch, typeFilter, statusFilter, sortPrice]);
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -123,7 +137,8 @@ function AdminTransactions() {
                 setSearchTerm(event.target.value);
                 setCurrentPage(0);
               }}
-              placeholder="Search by ID, item, or description..."
+              aria-label="Search shop transactions"
+              placeholder="Search transaction ID or item name..."
             />
           </div>
 
@@ -191,7 +206,7 @@ function AdminTransactions() {
             <thead>
               <tr>
                 <th>Transaction & date</th>
-                <th>Wallet & item</th>
+                <th>Item</th>
                 <th>Type</th>
                 <th className="text-right">Amount</th>
                 <th>Description</th>

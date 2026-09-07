@@ -109,7 +109,7 @@
 }
 
 /* Ranking List */
-.ranking-list {
+.home-body .ranking-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -117,7 +117,7 @@
   gap: 12px;
 }
 
-.ranking-item {
+.home-body .ranking-item {
   display: grid;
   grid-template-columns: 54px 1fr;
   align-items: center;
@@ -127,7 +127,7 @@
   border-radius: 14px;
 }
 
-.ranking-item .rank {
+.home-body .ranking-item .rank {
   position: absolute;
   width: 30px;
   height: 30px;
@@ -143,7 +143,7 @@
   margin-top: -38px;
 }
 
-.ranking-item img {
+.home-body .ranking-item img {
   width: 54px;
   height: 54px;
   border-radius: 50%;
@@ -152,18 +152,18 @@
   padding: 6px;
 }
 
-.ranking-item div {
+.home-body .ranking-item div {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.ranking-item strong {
+.home-body .ranking-item strong {
   color: #5b3a1f;
   display: block;
 }
 
-.ranking-item small {
+.home-body .ranking-item small {
   color: #666;
   font-size: 14px;
   font-weight: bold;
@@ -565,7 +565,7 @@
     padding: 16px;
   }
 
-  .ranking-item {
+  .home-body .ranking-item {
     padding: 12px;
   }
 

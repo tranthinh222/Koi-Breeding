@@ -1,0 +1,235 @@
+@import url("https://fonts.googleapis.com/css2?family=Grandstander:wght@400;500;600;700&display=swap");
+
+.overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.65);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 3000;
+	backdrop-filter: blur(4px);
+}
+
+.card {
+	position: relative;
+	width: min(90vw, 850px);
+	background: linear-gradient(180deg, #f9f6f0 0%, #ebdcb8 100%);
+	border: 6px solid #8b572a;
+	border-radius: 20px;
+	padding: 30px;
+	box-shadow:
+		0 20px 50px rgba(0, 0, 0, 0.4),
+		inset 0 0 40px rgba(139, 87, 42, 0.1);
+	display: flex;
+	flex-direction: column;
+	gap: 25px;
+	box-sizing: border-box;
+}
+
+.closeButton {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	display: grid;
+	place-items: center;
+	padding: 5px;
+	border: none;
+	background: transparent;
+	color: #8b572a;
+	cursor: pointer;
+	border-radius: 8px;
+	transition:
+		background-color 0.2s ease,
+		transform 0.2s ease;
+}
+
+.closeButton:hover {
+	background-color: rgba(139, 87, 42, 0.15);
+	transform: scale(1.1);
+}
+
+.header {
+	display: flex;
+	gap: 25px;
+	align-items: stretch;
+}
+
+.imageContainer {
+	width: 220px;
+	height: 220px;
+	background: radial-gradient(circle, #49a5d6, #377394);
+	border: 5px solid white;
+	border-radius: 15px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-shrink: 0;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.imageContainer img {
+	width: 85%;
+	max-height: 85%;
+	object-fit: contain;
+	filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.4));
+	transition: transform 0.3s ease;
+}
+
+.imageContainer img:hover {
+	transform: scale(1.08);
+}
+
+.headerInfo {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 15px;
+	flex: 1;
+}
+
+.name {
+	font-family: "Grandstander", cursive;
+	font-size: 38px;
+	font-weight: 800;
+	color: #4a2f1d;
+	margin: 0;
+	text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+}
+
+.badges {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.badge {
+	padding: 6px 14px;
+	border-radius: 8px;
+	font-family: "Grandstander", cursive;
+	font-weight: 700;
+	color: white;
+	font-size: 14px;
+	text-transform: uppercase;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.badgeOrigin {
+	background: #059669;
+}
+.badgeVariety {
+	background: #8b5cf6;
+}
+.badgeScale {
+	background: #0ea5e9;
+}
+.badgeShape {
+	background: #d97706;
+}
+
+.seperate {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin: 5px 0;
+}
+
+.line {
+	flex: 1;
+	height: 3px;
+	background: #c9a26b;
+	border-radius: 5px;
+}
+
+.seperate span {
+	font-family: "Grandstander", cursive;
+	font-weight: 700;
+	font-size: 18px;
+	color: #8b572a;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+/* Sửa lại Grid hiển thị tròn 3 cột thay vì tự động rớt dòng */
+.statsGrid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 15px;
+}
+
+.statBox {
+	background: rgba(255, 255, 255, 0.6);
+	border: 2px solid rgba(139, 87, 42, 0.2);
+	border-radius: 14px;
+	padding: 14px 18px;
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	transition:
+		background 0.2s ease,
+		transform 0.2s ease;
+}
+
+.statBox:hover {
+	background: rgba(255, 255, 255, 0.9);
+	transform: translateY(-2px);
+	border-color: rgba(139, 87, 42, 0.4);
+}
+
+.statIcon {
+	width: 44px;
+	height: 44px;
+	background: white;
+	border-radius: 12px;
+	display: grid;
+	place-items: center;
+	color: #8b572a;
+	box-shadow: 0 4px 8px rgba(139, 87, 42, 0.15);
+	flex-shrink: 0;
+}
+
+.statInfo {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.statLabel {
+	font-size: 11px;
+	font-weight: 800;
+	color: #9c7b60;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.statValue {
+	font-size: 18px;
+	font-weight: 800;
+	color: #3e2723;
+	font-family: "Grandstander", cursive;
+}
+
+.highlight {
+	color: #059669;
+}
+
+.highlightGold {
+	color: #d97706;
+}
+
+@media (max-width: 640px) {
+	.header {
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+	}
+	.badges {
+		justify-content: center;
+	}
+	.statsGrid {
+		grid-template-columns: 1fr;
+	}
+}

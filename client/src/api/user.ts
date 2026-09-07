@@ -47,6 +47,7 @@ export async function uploadUserAvatar(userId: number, file: File): Promise<stri
   formData.append('file', file)
   const response = await apiClient.post('/users/avatar', formData, {
     params: { id: userId },
+    headers: { 'Content-Type': 'multipart/form-data' },
   })
   const payload = response.data?.data ?? response.data
   return payload.avatarUrl as string

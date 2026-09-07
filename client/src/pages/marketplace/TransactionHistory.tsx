@@ -3,6 +3,7 @@ import { getTransactions, type Transaction } from '../../api/transaction'
 import TransactionNavigation from '../../components/marketplace/TransactionNavigation'
 import MarketplaceState from '../../components/marketplace/MarketplaceState'
 import { useAuth } from '../../context/AuthContext'
+import './TransactionHistory.css'
 
 type TransactionFilter = 'ALL' | 'BOUGHT' | 'SOLD'
 type TransactionSort = 'NEWEST' | 'OLDEST'

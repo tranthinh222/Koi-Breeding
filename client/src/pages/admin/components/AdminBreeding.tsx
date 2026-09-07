@@ -15,7 +15,7 @@ import type {
 	IBreedingRecipe,
 	IKoiVarient,
 } from "../../../types/backend";
-import "./adminbreeding.css";
+import "./AdminBreeding.css";
 import AdminPagination from "./AdminPagination";
 
 // ============================================================

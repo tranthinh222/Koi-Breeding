@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { InventoryCategory, ItemInventory } from "../../api/inventory";
 import { getInventory, useItemFromInventory } from "../../api/inventory";
 import { useAuth } from "../../context/AuthContext";
+import "./Inventory.css";
 
 export default function Inventory() {
 	const { currentUserId } = useAuth();

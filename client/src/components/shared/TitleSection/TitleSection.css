@@ -1,0 +1,44 @@
+/* =========================================================
+   WOODEN TITLE - COMMON
+========================================================= */
+
+.title-section {
+  display: flex;
+  justify-content: center;
+
+  margin-top: 25px;
+  margin-bottom: 30px;
+}
+
+.wood-sign {
+  width: 420px;
+  padding: 20px;
+
+  background: var(--wood);
+  color: white;
+
+  border-radius: 18px;
+  border: 8px solid var(--wood-dark);
+
+  text-align: center;
+
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.wood-sign h1 {
+  font-size: 42px;
+  letter-spacing: 2px;
+}
+
+.wood-sign p {
+  margin-top: 10px;
+  color: #ffe9b7;
+}
+
+@media (max-width: 900px) {
+  .wood-sign { width: 90%; }
+}
+
+@media (max-width: 500px) {
+  .wood-sign h1 { font-size: 30px; }
+}

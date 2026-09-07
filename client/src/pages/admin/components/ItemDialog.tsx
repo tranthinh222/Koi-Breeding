@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, Upload } from "lucide-react";
 import { toast } from "../../../components/shared/Toast/toast";
+import ImageEditor from "../../profile/ImageEditor";
 
 import {
   addAdminItem,
@@ -9,7 +10,7 @@ import {
   type AdminItem,
 } from "../../../api/admin";
 
-import "./itemdialog.css";
+import "./ItemDialog.css";
 
 interface ItemDialogProps {
   mode: "add" | "edit";
@@ -33,6 +34,7 @@ export default function ItemDialog({
 
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // =========================
   // FILL DATA KHI EDIT
@@ -61,7 +63,12 @@ export default function ItemDialog({
   // =========================
   // IMAGE
   // =========================
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const closePreview = () => {
+    if (selectedImage) URL.revokeObjectURL(selectedImage);
+    setSelectedImage(null);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
@@ -77,21 +84,24 @@ export default function ItemDialog({
       return;
     }
 
-    const previewUrl = URL.createObjectURL(file);
-    setImageUrl(previewUrl);
+    setSelectedImage(URL.createObjectURL(file));
+    e.target.value = "";
+  };
+
+  const handlePreviewSave = async (blob: Blob) => {
     setUploading(true);
     try {
+      const file = new File([blob], `admin-item-${Date.now()}.jpg`, { type: "image/jpeg" });
       const uploadedUrl = await uploadAdminItemImage(file);
       setImageUrl(uploadedUrl);
       toast.success("Image uploaded successfully.");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload image failed:", error);
       setImageUrl(item?.imageUrl ?? "");
-      toast.error("Unable to upload the image. Please try again.");
+      toast.error(error?.response?.data?.message ?? error?.message ?? "Unable to upload the image. Please try again.");
     } finally {
-      URL.revokeObjectURL(previewUrl);
       setUploading(false);
-      e.target.value = "";
+      closePreview();
     }
   };
 
@@ -136,6 +146,7 @@ export default function ItemDialog({
   };
 
   return (
+    <>
     <div className="dialog-overlay">
       <div className="add-item-dialog">
         {/* HEADER */}
@@ -271,5 +282,7 @@ export default function ItemDialog({
         </form>
       </div>
     </div>
+    {selectedImage && <ImageEditor image={selectedImage} title="Preview item image" cropShape="rect" aspect={1} onCancel={closePreview} onSave={(blob) => void handlePreviewSave(blob)} />}
+    </>
   );
 }

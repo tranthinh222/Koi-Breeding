@@ -85,7 +85,7 @@
 	gap: 10px;
 	margin-top: 20px;
 }
-.save-button {
+.image-editor-save-button {
 	min-height: 28px;
 	padding: 0 18px;
 	border: none;
@@ -96,7 +96,7 @@
 	font-weight: bold;
 	transition: 0.25s;
 }
-.cancel-button {
+.image-editor-cancel-button {
 	min-height: 28px;
 	padding: 0 18px;
 	border: none;
@@ -107,7 +107,7 @@
 	font-weight: bold;
 	transition: 0.25s;
 }
-.cancel-header-button {
+.image-editor-close-button {
 	min-width: 32px;
 	min-height: 32px;
 
@@ -126,6 +126,6 @@
 
 	transition: 0.25s;
 }
-.cancel-header-button:hover {
+.image-editor-close-button:hover {
 	background-color: #d6382c;
 }

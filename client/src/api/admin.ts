@@ -204,7 +204,9 @@ export async function addAdminItem(
 export async function uploadAdminItemImage(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
-  const response = await apiClient.post("/upload/item", formData);
+  const response = await apiClient.post("/upload/item", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   const payload = response.data?.data ?? response.data;
   if (!payload?.url) throw new Error("The upload API did not return an image URL.");
   return payload.url as string;

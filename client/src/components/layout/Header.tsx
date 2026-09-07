@@ -9,6 +9,8 @@ import {
 import ThemeControl from '../../theme/ThemeControl'
 import SoundControl from '../../sound/SoundControl'
 import { useAuth } from '../../context/AuthContext'
+import './Header.css'
+import './HeaderNotifications.css'
 
 export default function ShopHeader() {
   const { currentUser, currentUserId } = useAuth()

@@ -9,6 +9,7 @@ import FoodShop from './FoodShop'
 import MedicineShop from './MedicineShop'
 import KoiShop from './KoiShop'
 import KoinShop from './KoinShop'
+import '../../components/shared/Catalog/Catalog.css'
 
 export default function Shop() {
   const [category, setCategory] = useState<ShopCategory>('FOOD')

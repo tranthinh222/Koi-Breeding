@@ -368,7 +368,7 @@ export default function AuthModal({
 		) : null;
 
 	const renderLoginView = () => (
-		<div className="auth-layout">
+		<div className="auth-layout auth-layout--login">
 			<section className="auth-panel">
 				<div className="auth-section-title">Login</div>
 
@@ -463,9 +463,7 @@ export default function AuthModal({
 					</a>
 				</div>
 
-				<div
-					className="link-row"
-				>
+				<div className="link-row">
 					<span>Don't have an account?</span>
 					<a
 						href="#"
@@ -478,30 +476,6 @@ export default function AuthModal({
 					</a>
 				</div>
 			</section>
-
-			<aside className="auth-panel">
-				<div className="auth-section-title">Switch account</div>
-				<div className="switch-account">
-					<div className="account-chip">
-						<div className="account-info">
-							<div className="avatar">P</div>
-							<div className="account-meta">
-								<strong>PHUOC67</strong>
-								<span>9 hours</span>
-							</div>
-						</div>
-					</div>
-					<div className="account-chip">
-						<div className="account-info">
-							<div className="avatar">D</div>
-							<div className="account-meta">
-								<strong>DoNguCaoBang</strong>
-								<span>2 days</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</aside>
 		</div>
 	);
 
@@ -728,7 +702,7 @@ export default function AuthModal({
 				</button>
 
 				<div className="link-row">
-					Already have an account?{" "}
+					<span>Already have an account?</span>
 					<a
 						href="#"
 						onClick={(e) => {
@@ -741,7 +715,8 @@ export default function AuthModal({
 				</div>
 
 				<div className="link-row">
-					Other options? <a href="#">Google</a>
+					<span>Other options?</span>
+					<a href="#">Google</a>
 				</div>
 			</aside>
 		</div>

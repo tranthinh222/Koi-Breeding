@@ -96,12 +96,12 @@ export default function ItemDialog({
 
       if (mode === "add") {
         await addAdminItem(itemData);
-        alert("Thêm Item thành công");
+        alert("Item created successfully.");
       }
 
       if (mode === "edit" && item) {
         await updateAdminItem(item.id, itemData);
-        alert("Cập nhật Item thành công");
+        alert("Item updated successfully.");
       }
 
       onSuccess();
@@ -109,7 +109,7 @@ export default function ItemDialog({
     } catch (error) {
       console.error("Item operation failed:", error);
 
-      alert(mode === "add" ? "Thêm Item thất bại" : "Cập nhật Item thất bại");
+      alert(mode === "add" ? "Unable to create the item." : "Unable to update the item.");
     } finally {
       setLoading(false);
     }
@@ -125,8 +125,8 @@ export default function ItemDialog({
 
             <p>
               {mode === "add"
-                ? "Thêm vật phẩm mới vào hệ thống"
-                : "Chỉnh sửa thông tin vật phẩm"}
+                ? "Add a new item to the shop catalog"
+                : "Update item details"}
             </p>
           </div>
 
@@ -139,7 +139,7 @@ export default function ItemDialog({
           <div className="dialog-body">
             {/* IMAGE */}
             <div className="form-group">
-              <label>Hình ảnh</label>
+              <label>Image</label>
 
               <div className="image-upload-area">
                 {imageUrl ? (
@@ -161,25 +161,25 @@ export default function ItemDialog({
 
             {/* NAME */}
             <div className="form-group">
-              <label>Tên Item</label>
+              <label>Item name</label>
 
               <input
                 type="text"
                 value={nameItem}
                 onChange={(e) => setNameItem(e.target.value)}
-                placeholder="Nhập tên Item..."
+                placeholder="Enter an item name"
                 required
               />
             </div>
 
             {/* DESCRIPTION */}
             <div className="form-group">
-              <label>Mô tả</label>
+              <label>Description</label>
 
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Nhập mô tả..."
+                placeholder="Describe the item"
                 rows={3}
               />
             </div>
@@ -187,7 +187,7 @@ export default function ItemDialog({
             <div className="form-row">
               {/* TYPE */}
               <div className="form-group">
-                <label>Loại Item</label>
+                <label>Item category</label>
 
                 <select
                   value={itemType}
@@ -202,7 +202,7 @@ export default function ItemDialog({
 
               {/* PRICE */}
               <div className="form-group">
-                <label>Giá</label>
+                <label>Price</label>
 
                 <input
                   type="number"

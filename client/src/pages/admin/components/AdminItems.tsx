@@ -72,7 +72,7 @@ export default function AdminItems() {
 
   const handleDelete = async (id: number) => {
     const confirmed = window.confirm(
-      "Bạn có chắc chắn muốn xóa Item này không?",
+      "Delete this item? This action cannot be undone.",
     );
 
     if (!confirmed) return;
@@ -80,13 +80,13 @@ export default function AdminItems() {
     try {
       await deleteAdminItem(id);
 
-      alert("Xóa Item thành công");
+      alert("Item deleted successfully.");
 
       // Load lại danh sách
       await fetchItems();
     } catch (error) {
       console.error("Delete item failed:", error);
-      alert("Xóa Item thất bại");
+      alert("Unable to delete the item.");
     }
   };
 
@@ -100,7 +100,7 @@ export default function AdminItems() {
 
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên vật phẩm..."
+              placeholder="Search items by name..."
               value={search}
               onChange={(e) => handleFilterChange(setSearch, e.target.value)}
             />
@@ -124,16 +124,16 @@ export default function AdminItems() {
               value={sortPrice}
               onChange={(e) => handleFilterChange(setSortPrice, e.target.value)}
             >
-              <option value="DEFAULT">Sắp xếp theo giá</option>
-              <option value="ASC">Giá tăng dần</option>
-              <option value="DESC">Giá giảm dần</option>
+              <option value="DEFAULT">Sort by price</option>
+              <option value="ASC">Price: low to high</option>
+              <option value="DESC">Price: high to low</option>
             </select>
 
             <button
               type="button"
               className="items-reset-button"
               onClick={handleReset}
-              title="Đặt lại bộ lọc"
+              title="Reset filters"
             >
               <RotateCcw size={18} />
             </button>
@@ -163,13 +163,17 @@ export default function AdminItems() {
         </div>
       </div>
       <div className="items-page-header">
+        <div className="items-page-heading-copy">
+          <h2>Shop catalog</h2>
+          <p>Manage items, pricing, and gameplay effects.</p>
+        </div>
         <button
           type="button"
           className="primary-button"
           onClick={() => setIsAddModalOpen(true)}
         >
           <Plus size={18} />
-          Add Item
+          Add item
         </button>
       </div>
       {/* TABLE */}
@@ -178,12 +182,12 @@ export default function AdminItems() {
           <table className="items-table">
             <thead>
               <tr>
-                <th>Hình ảnh</th>
-                <th>Tên Item</th>
-                <th>Phân loại</th>
-                <th>Đơn giá</th>
-                <th>Chỉ số</th>
-                <th className="text-right">Thao tác</th>
+                <th>Image</th>
+                <th>Item</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Effect</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
 
@@ -191,7 +195,7 @@ export default function AdminItems() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="items-empty">
-                    Đang tải dữ liệu...
+                    Loading items...
                   </td>
                 </tr>
               ) : items.length > 0 ? (
@@ -230,7 +234,7 @@ export default function AdminItems() {
                       <div className="item-actions">
                         <button
                           type="button"
-                          title="Chỉnh sửa"
+                          title="Edit item"
                           onClick={() => {
                             setSelectedItem(item);
                             setIsEditModalOpen(true);
@@ -241,7 +245,7 @@ export default function AdminItems() {
                         <button
                           type="button"
                           className="delete"
-                          title="Xóa"
+                          title="Delete item"
                           onClick={() => handleDelete(item.id)}
                         >
                           <Trash2 size={17} />
@@ -253,7 +257,7 @@ export default function AdminItems() {
               ) : (
                 <tr>
                   <td colSpan={6} className="items-empty">
-                    Không tìm thấy Item phù hợp.
+                    No items match the current filters.
                   </td>
                 </tr>
               )}

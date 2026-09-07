@@ -18,7 +18,22 @@ import {
 } from "../../../api/admin";
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("vi-VN").format(Math.abs(value));
+  return new Intl.NumberFormat("en-US").format(Math.abs(value));
+}
+
+function formatTransactionType(type: AdminTransaction["transactionType"]) {
+  return {
+    DEPOSIT: "Deposit",
+    BUY_FOOD: "Food purchase",
+    BUY_FISH: "Koi purchase",
+    SELL_FISH: "Koi sale",
+  }[type];
+}
+
+function formatTransactionStatus(status: AdminTransaction["status"]) {
+  return status === "SUCCESSED"
+    ? "Completed"
+    : status.charAt(0) + status.slice(1).toLowerCase();
 }
 
 function getTransactionIcon(type: AdminTransaction["transactionType"]) {
@@ -50,7 +65,6 @@ function AdminTransactions() {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -67,10 +81,9 @@ function AdminTransactions() {
         });
         setTransactions(response.content);
         setTotalPages(response.totalPages);
-        setSelectedIds([]);
       } catch (fetchError) {
         console.error("Failed to fetch admin transactions:", fetchError);
-        setError("Không thể tải danh sách giao dịch.");
+        setError("Unable to load transactions.");
         setTransactions([]);
         setTotalPages(0);
       } finally {
@@ -80,20 +93,6 @@ function AdminTransactions() {
 
     void fetchTransactions();
   }, [currentPage, searchTerm, typeFilter, statusFilter, sortPrice]);
-
-  const toggleSelectAll = () => {
-    if (selectedIds.length === transactions.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(transactions.map((item) => item.id));
-    }
-  };
-
-  const toggleTransaction = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
-  };
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -110,8 +109,8 @@ function AdminTransactions() {
       <section className="transaction-filter-card">
         <div className="transaction-filter-header">
           <div>
-            <h2>Lịch sử giao dịch</h2>
-            <p>Quản lý và theo dõi toàn bộ giao dịch trong hệ thống.</p>
+            <h2>Transaction history</h2>
+            <p>Review and monitor shop transactions across the platform.</p>
           </div>
         </div>
 
@@ -125,7 +124,7 @@ function AdminTransactions() {
                 setSearchTerm(event.target.value);
                 setCurrentPage(0);
               }}
-              placeholder="Tìm ID, tên item hoặc mô tả..."
+              placeholder="Search by ID, item, or description..."
             />
           </div>
 
@@ -137,11 +136,11 @@ function AdminTransactions() {
             }}
             className="transaction-select"
           >
-            <option value="ALL">Loại GD: ALL</option>
-            <option value="DEPOSIT">DEPOSIT</option>
-            <option value="BUY_FOOD">BUY_FOOD</option>
-            <option value="BUY_FISH">BUY_FISH</option>
-            <option value="SELL_FISH">SELL_FISH</option>
+            <option value="ALL">All transaction types</option>
+            <option value="DEPOSIT">Deposit</option>
+            <option value="BUY_FOOD">Food purchase</option>
+            <option value="BUY_FISH">Koi purchase</option>
+            <option value="SELL_FISH">Koi sale</option>
           </select>
 
           <select
@@ -152,11 +151,11 @@ function AdminTransactions() {
             }}
             className="transaction-select"
           >
-            <option value="ALL">Trạng thái: ALL</option>
-            <option value="SUCCESSED">SUCCESSED</option>
-            <option value="PENDING">PENDING</option>
-            <option value="FAILED">FAILED</option>
-            <option value="CANCELLED">CANCELLED</option>
+            <option value="ALL">All statuses</option>
+            <option value="SUCCESSED">Completed</option>
+            <option value="PENDING">Pending</option>
+            <option value="FAILED">Failed</option>
+            <option value="CANCELLED">Cancelled</option>
           </select>
 
           <select
@@ -167,16 +166,16 @@ function AdminTransactions() {
             }}
             className="transaction-select"
           >
-            <option value="DEFAULT">DEFAULT</option>
-            <option value="ASC">ASC</option>
-            <option value="DESC">DESC</option>
+            <option value="DEFAULT">Sort by amount</option>
+            <option value="ASC">Amount: low to high</option>
+            <option value="DESC">Amount: high to low</option>
           </select>
 
           <button
             type="button"
             className="transaction-reset-button"
             onClick={resetFilters}
-            title="Làm mới bộ lọc"
+            title="Reset filters"
           >
             <RotateCcw size={18} />
           </button>
@@ -192,21 +191,21 @@ function AdminTransactions() {
           <table className="transaction-table">
             <thead>
               <tr>
-                <th>ID GD & THỜI GIAN</th>
-                <th>VÍ & ITEM</th>
-                <th>LOẠI GIAO DỊCH</th>
-                <th className="text-right">SỐ TIỀN</th>
-                <th>MÔ TẢ</th>
-                <th className="text-center">TRẠNG THÁI</th>
-                <th className="text-center">THAO TÁC</th>
+                <th>Transaction & date</th>
+                <th>Wallet & item</th>
+                <th>Type</th>
+                <th className="text-right">Amount</th>
+                <th>Description</th>
+                <th className="text-center">Status</th>
+                <th className="text-center">Actions</th>
               </tr>
             </thead>
 
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="transaction-empty">
-                    Đang tải dữ liệu...
+                  <td colSpan={7} className="transaction-empty">
+                    Loading transactions...
                   </td>
                 </tr>
               ) : (
@@ -228,17 +227,17 @@ function AdminTransactions() {
                       <div className="wallet-cell">
                         <Wallet size={15} />
 
-                        <span>{transaction.itemName || "Không có item"}</span>
+                        <span>{transaction.itemName || "No item"}</span>
                       </div>
 
                       <div className="item-id-cell">
-                        itemId:
+                        Item ID:
                         <span
                           className={
                             transaction.itemId ? "has-item" : "empty-item"
                           }
                         >
-                          {transaction.itemId ?? "null"}
+                          {transaction.itemId ?? "Not linked"}
                         </span>
                       </div>
                     </td>
@@ -251,7 +250,7 @@ function AdminTransactions() {
                       >
                         {getTransactionIcon(transaction.transactionType)}
 
-                        {transaction.transactionType}
+                        {formatTransactionType(transaction.transactionType)}
                       </span>
                     </td>
 
@@ -265,7 +264,7 @@ function AdminTransactions() {
                       }`}
                     >
                       {transaction.amount >= 0 ? "+" : "-"}
-                      {formatCurrency(transaction.amount)} đ
+                      {formatCurrency(transaction.amount)} Koins
                     </td>
 
                     {/* Description */}
@@ -285,9 +284,9 @@ function AdminTransactions() {
                         }`}
                       >
                         {transaction.status === "FAILED"
-                          ? "Giao dịch thất bại"
+                          ? "Transaction failed"
                           : transaction.status === "PENDING"
-                            ? "Đang chờ xử lý"
+                            ? "Pending"
                             : ""}
                       </div>
                     </td>
@@ -300,7 +299,7 @@ function AdminTransactions() {
                       >
                         <span className="status-dot" />
 
-                        {transaction.status}
+                        {formatTransactionStatus(transaction.status)}
                       </span>
                     </td>
 
@@ -308,7 +307,7 @@ function AdminTransactions() {
 
                     <td>
                       <div className="transaction-actions">
-                        <button type="button" title="Xem chi tiết">
+                        <button type="button" title="View transaction details">
                           <Eye size={17} />
                         </button>
                       </div>
@@ -319,8 +318,8 @@ function AdminTransactions() {
 
               {!loading && !transactions.length && (
                 <tr>
-                  <td colSpan={8} className="transaction-empty">
-                    Không tìm thấy giao dịch phù hợp.
+                  <td colSpan={7} className="transaction-empty">
+                    No transactions match the current filters.
                   </td>
                 </tr>
               )}

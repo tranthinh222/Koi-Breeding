@@ -19,9 +19,9 @@ const menuItems: Array<{ id: MenuTab; label: string; icon: LucideIcon }> = [
 	{ id: "users", label: "Users", icon: Users },
 	{ id: "breeding", label: "Breeding", icon: Fish },
 	{ id: "dictionary", label: "Dictionary", icon: Fish },
-	{ id: "items", label: "Items", icon: Package },
-	{ id: "transactions", label: "Transactions", icon: Package },
-	{ id: "trade", label: "Trades", icon: Package },
+	{ id: "items", label: "Shop Catalog", icon: Package },
+	{ id: "transactions", label: "Shop Transactions", icon: Package },
+	{ id: "trade", label: "Marketplace Trades", icon: Package },
 ];
 
 const otherItems: Array<{ id: OtherTab; label: string; icon: LucideIcon }> = [
@@ -61,7 +61,7 @@ export function AdminSidebar({ activeView, onSelectView }: AdminSidebarProps) {
 			</div>
 
 			<div className="sidebar-group">
-				<div className="sidebar-group-label">MENU</div>
+				<div className="sidebar-group-label">MANAGEMENT</div>
 				<div className="sidebar-group-list">
 					{menuItems.map((item) => {
 						const Icon = item.icon;
@@ -82,7 +82,7 @@ export function AdminSidebar({ activeView, onSelectView }: AdminSidebarProps) {
 			</div>
 
 			<div className="sidebar-group">
-				<div className="sidebar-group-label">OTHER</div>
+				<div className="sidebar-group-label">PREFERENCES</div>
 				<div className="sidebar-group-list">
 					{otherItems.map((item) => {
 						const Icon = item.icon;
@@ -109,7 +109,7 @@ export function AdminSidebar({ activeView, onSelectView }: AdminSidebarProps) {
 					onClick={handleLogout}
 				>
 					<LogOut size={16} />
-					<span>Logout</span>
+					<span>Sign out</span>
 				</button>
 			</div>
 		</aside>

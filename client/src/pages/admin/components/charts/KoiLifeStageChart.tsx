@@ -28,7 +28,7 @@ export function KoiLifeStageChart({ data }: { data: LifeStagePoint[] }) {
           cursor={{ fill: "var(--surface-secondary)" }}
         />
         {/* Tạo hiệu ứng phễu với màu Gradient/Tím */}
-        <Bar dataKey="count" name="Số lượng cá" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
+        <Bar dataKey="count" name="Koi count" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
       </ComposedChart>
     </ResponsiveContainer>
   );

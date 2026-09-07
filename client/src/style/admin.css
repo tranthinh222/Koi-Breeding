@@ -2575,8 +2575,23 @@ Dashboard
 }
 .items-page-header {
 	display: flex;
-	justify-content: flex-end;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	flex-wrap: wrap;
 	margin: 16px 0;
+}
+
+.items-page-heading-copy h2 {
+	margin: 0;
+	font-size: 1.35rem;
+	color: var(--text-primary);
+}
+
+.items-page-heading-copy p {
+	margin: 5px 0 0;
+	font-size: 0.9rem;
+	color: var(--text-muted);
 }
 
 .primary-button {

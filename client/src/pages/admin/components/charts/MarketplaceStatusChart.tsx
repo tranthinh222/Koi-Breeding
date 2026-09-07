@@ -33,9 +33,9 @@ export function MarketplaceStatusChart({ data }: { data: MarketplacePoint[] }) {
           cursor={{ fill: "var(--surface-secondary)" }}
         />
         <Legend iconType="circle" wrapperStyle={{ fontSize: 12, color: "var(--text-muted)", paddingTop: 10 }} />
-        <Bar dataKey="sold" name="Đã bán" stackId="a" fill="#22c55e" />
-        <Bar dataKey="active" name="Đang rao" stackId="a" fill="#0ea5e9" />
-        <Bar dataKey="cancelled" name="Hủy/Hết hạn" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="sold" name="Sold" stackId="a" fill="#22c55e" />
+        <Bar dataKey="active" name="Active" stackId="a" fill="#0ea5e9" />
+        <Bar dataKey="cancelled" name="Cancelled or expired" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

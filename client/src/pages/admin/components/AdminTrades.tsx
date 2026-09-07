@@ -7,15 +7,15 @@ import "./admintrade.css";
 type DateFilter = "ALL" | "today" | "week" | "month";
 type PriceSort = "DEFAULT" | "ASC" | "DESC";
 
-function formatVND(amount: number): string {
-  return `${new Intl.NumberFormat("vi-VN").format(amount)} đ`;
+function formatKoins(amount: number): string {
+  return `${new Intl.NumberFormat("en-US").format(amount)} Koins`;
 }
 
 function formatDateTime(dateTime: string): string {
   const date = new Date(dateTime);
   if (Number.isNaN(date.getTime())) return dateTime;
 
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -87,7 +87,7 @@ function TradeRow({ trade, checked, onCheck }: TradeRowProps) {
         <div className="trades-user-name">{trade.seller}</div>
       </td>
       <td className="trades-td">
-        <div className="trades-price">{formatVND(trade.price)}</div>
+        <div className="trades-price">{formatKoins(trade.price)}</div>
       </td>
       <td className="trades-td">
         <div className="trades-date">{formatDateTime(trade.tradeAt)}</div>
@@ -97,7 +97,7 @@ function TradeRow({ trade, checked, onCheck }: TradeRowProps) {
           <button
             type="button"
             className="trades-action-btn"
-            title="Xem chi tiết giao dịch"
+            title="View trade details"
           >
             <FileText size={16} />
           </button>
@@ -140,7 +140,7 @@ export default function AdminTrades() {
         setTrades([]);
         setTotalPages(0);
         setTotalElements(0);
-        setError("Không thể tải danh sách giao dịch marketplace.");
+        setError("Unable to load marketplace trades.");
       } finally {
         setLoading(false);
       }
@@ -184,38 +184,48 @@ export default function AdminTrades() {
 
   return (
     <div className="trades-view">
+      <header className="trades-header">
+        <div>
+          <p className="trades-breadcrumb">MARKETPLACE / TRADE HISTORY</p>
+          <h1 className="trades-title">Marketplace trades</h1>
+          <p className="trades-subtitle">
+            Review completed koi sales between players.
+          </p>
+        </div>
+      </header>
+
       <div className="trades-kpi-grid">
         <KpiCard
-          label="TỔNG GIAO DỊCH"
-          value={totalElements.toLocaleString("vi-VN")}
-          subtext="Tổng số giao dịch từ hệ thống"
+          label="TOTAL TRADES"
+          value={totalElements.toLocaleString("en-US")}
+          subtext="All completed marketplace trades"
           dotColor="#22c55e"
           icon={<FileText size={20} />}
           iconBg="trades-icon-green"
           accentClass="trades-accent-green"
         />
         <KpiCard
-          label="GIÁ TRỊ TRANG HIỆN TẠI"
-          value={formatVND(totalValue)}
-          subtext="Tổng giá trị giao dịch trong trang"
+          label="PAGE VOLUME"
+          value={formatKoins(totalValue)}
+          subtext="Combined value on this page"
           dotColor="#3b82f6"
           icon={<FileText size={20} />}
           iconBg="trades-icon-blue"
           accentClass="trades-accent-blue"
         />
         <KpiCard
-          label="SỐ GIAO DỊCH TRANG NÀY"
-          value={trades.length.toLocaleString("vi-VN")}
-          subtext="Dữ liệu nhận từ API"
+          label="TRADES ON THIS PAGE"
+          value={trades.length.toLocaleString("en-US")}
+          subtext="Records currently displayed"
           dotColor="#f59e0b"
           icon={<FileText size={20} />}
           iconBg="trades-icon-orange"
           accentClass="trades-accent-orange"
         />
         <KpiCard
-          label="GIÁ TRỊ TRUNG BÌNH"
-          value={formatVND(averageValue)}
-          subtext="Trung bình trên trang hiện tại"
+          label="AVERAGE TRADE VALUE"
+          value={formatKoins(averageValue)}
+          subtext="Average value on this page"
           dotColor="#a855f7"
           icon={<FileText size={20} />}
           iconBg="trades-icon-purple"
@@ -230,7 +240,7 @@ export default function AdminTrades() {
               <Search size={16} className="trades-search-icon" />
               <input
                 className="trades-search-input"
-                placeholder="Tìm người mua..."
+                placeholder="Search by buyer or seller..."
                 value={search}
                 onChange={(event) => {
                   setSearch(event.target.value);
@@ -246,10 +256,10 @@ export default function AdminTrades() {
                 resetPage();
               }}
             >
-              <option value="ALL">Thời gian: Tất cả</option>
-              <option value="today">Hôm nay</option>
-              <option value="week">7 ngày gần đây</option>
-              <option value="month">30 ngày gần đây</option>
+              <option value="ALL">All dates</option>
+              <option value="today">Today</option>
+              <option value="week">Last 7 days</option>
+              <option value="month">Last 30 days</option>
             </select>
             <select
               className="trades-select"
@@ -259,9 +269,9 @@ export default function AdminTrades() {
                 resetPage();
               }}
             >
-              <option value="DEFAULT">Sắp xếp giá</option>
-              <option value="ASC">Giá tăng dần</option>
-              <option value="DESC">Giá giảm dần</option>
+              <option value="DEFAULT">Sort by price</option>
+              <option value="ASC">Price: low to high</option>
+              <option value="DESC">Price: high to low</option>
             </select>
           </div>
         </div>
@@ -282,19 +292,19 @@ export default function AdminTrades() {
                 </th>
                 <th className="trades-th">LISTING ID</th>
 
-                <th className="trades-th">NGƯỜI MUA</th>
-                <th className="trades-th">NGƯỜI BÁN</th>
+                <th className="trades-th">BUYER</th>
+                <th className="trades-th">SELLER</th>
 
-                <th className="trades-th">GIÁ GIAO DỊCH</th>
-                <th className="trades-th">THỜI GIAN GIAO DỊCH</th>
-                <th className="trades-th trades-th-right">THAO TÁC</th>
+                <th className="trades-th">TRADE VALUE</th>
+                <th className="trades-th">TRADE DATE</th>
+                <th className="trades-th trades-th-right">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td colSpan={7} className="trades-empty">
-                    Đang tải dữ liệu...
+                    Loading marketplace trades...
                   </td>
                 </tr>
               ) : trades.length ? (
@@ -309,7 +319,7 @@ export default function AdminTrades() {
               ) : (
                 <tr>
                   <td colSpan={7} className="trades-empty">
-                    Không tìm thấy giao dịch phù hợp.
+                    No trades match the current filters.
                   </td>
                 </tr>
               )}
@@ -319,8 +329,8 @@ export default function AdminTrades() {
 
         <div className="trades-pagination">
           <div className="trades-pagination-info">
-            Hiển thị {trades.length ? currentPage * 8 + 1 : 0} -{" "}
-            {currentPage * 8 + trades.length} / {totalElements} giao dịch
+            Showing {trades.length ? currentPage * 8 + 1 : 0}–
+            {currentPage * 8 + trades.length} of {totalElements} trades
           </div>
           <div className="trades-pagination-btns">
             <button

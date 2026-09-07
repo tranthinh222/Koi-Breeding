@@ -254,7 +254,10 @@ export default function AuthModal({
 			}
 
 			onClose();
-			navigate(authenticatedUser.role === "ADMIN" ? "/admin" : "/home");
+			const isAdmin =
+				authenticatedUser.role === "ADMIN" ||
+				authenticatedUser.role === "SUPER_ADMIN";
+			navigate(isAdmin ? "/admin" : "/home");
 		} catch (error: any) {
 			console.error("Login failed:", error);
 			setLoginError(

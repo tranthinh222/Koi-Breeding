@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext"; // sửa lại path đúng chỗ bạn đặt AuthContext
-import type { AuthUser } from "../..//../api/auth"; // sửa lại path đúng chỗ định nghĩa AuthUser
+import type { AuthUser } from "../../../api/auth";
+import { useAuth } from "../../../context/AuthContext";
 
 type Props = {
 	allowedRoles?: AuthUser["role"][];
@@ -38,7 +38,18 @@ function ProtectedRoute({ allowedRoles }: Props) {
 				role?.toUpperCase() === currentUserRole?.toUpperCase(),
 		)
 	) {
-		return <Navigate to="/home" replace />;
+		if (
+			currentUserRole === "ADMIN" ||
+			currentUserRole === "SUPER_ADMIN"
+		) {
+			return <Navigate to="/admin" replace />;
+		}
+
+		if (currentUserRole === "USER") {
+			return <Navigate to="/home" replace />;
+		}
+
+		return <Navigate to="/landing" replace />;
 	}
 
 	return <Outlet />;

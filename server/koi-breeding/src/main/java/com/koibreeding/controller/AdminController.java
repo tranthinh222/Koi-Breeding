@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.dto.request.AdminModerationUserRequest;
+import com.koibreeding.dto.request.AdminRoleUpdateRequest;
 import com.koibreeding.dto.request.ReqAdminItems;
 import com.koibreeding.dto.response.ResTradeDto;
 import com.koibreeding.dto.response.ResTransactionDto;
@@ -52,6 +53,15 @@ public class AdminController {
     @ApiMessage("Update user for admin")
     public ResponseEntity<AdminUserDto> updateUser(@Valid @RequestBody AdminModerationUserRequest request) {
         return ResponseEntity.ok(adminService.handleUpdateUser(request));
+    }
+
+    @PatchMapping("/users/{id}/role")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @ApiMessage("Update user role")
+    public ResponseEntity<AdminUserDto> updateUserRole(
+            @PathVariable Integer id,
+            @Valid @RequestBody AdminRoleUpdateRequest request) {
+        return ResponseEntity.ok(adminService.handleUpdateUserRole(id, request.role()));
     }
 
     @DeleteMapping("/users")

@@ -54,10 +54,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             role = Role.USER;
         }
 
+        var authorities = role == Role.SUPER_ADMIN
+                ? List.of(
+                        new SimpleGrantedAuthority("ROLE_SUPER_ADMIN"),
+                        new SimpleGrantedAuthority("ROLE_ADMIN"))
+                : List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+
         var authToken = new UsernamePasswordAuthenticationToken(
                 username,
                 null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
+                authorities
         );
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }

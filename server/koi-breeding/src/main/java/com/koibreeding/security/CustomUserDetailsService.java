@@ -10,6 +10,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+import com.koibreeding.enums.Role;
+
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -24,10 +28,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         boolean isLocked = Boolean.TRUE.equals(user.getIsBanned());
 
+        var authorities = user.getRole() == Role.SUPER_ADMIN
+                ? List.of(
+                        new SimpleGrantedAuthority("ROLE_SUPER_ADMIN"),
+                        new SimpleGrantedAuthority("ROLE_ADMIN"))
+                : List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .authorities(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                .authorities(authorities)
                 .accountLocked(isLocked)
                 .build();
     }

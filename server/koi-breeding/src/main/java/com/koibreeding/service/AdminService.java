@@ -58,6 +58,9 @@ public class AdminService {
     @Transactional
     public AdminUserDto handleUpdateUser(AdminModerationUserRequest request) {
         User user = userRepository.findById(request.getId()).orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.getRole() == Role.SUPER_ADMIN) {
+            throw new IllegalArgumentException("The SUPER_ADMIN account cannot be moderated");
+        }
         //Update password implement later
 
         UserStatus currentStatus = user.getStatus();
@@ -82,9 +85,29 @@ public class AdminService {
     }
 
     @Transactional
+    public AdminUserDto handleUpdateUserRole(Integer id, Role role) {
+        if (role != Role.USER && role != Role.ADMIN) {
+            throw new IllegalArgumentException("Role can only be changed to USER or ADMIN");
+        }
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.getRole() == Role.SUPER_ADMIN) {
+            throw new IllegalArgumentException("The SUPER_ADMIN role cannot be changed");
+        }
+
+        user.setRole(role);
+        return userService.convertToAdminUserDto(userRepository.save(user));
+    }
+
+    @Transactional
     public void handleDeleteUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() == Role.SUPER_ADMIN) {
+            throw new IllegalArgumentException("The SUPER_ADMIN account cannot be deleted");
+        }
 
         if (user.getStatus() != UserStatus.DELETED) {
             throw new RuntimeException("Only users with DELETED status can be removed");

@@ -89,7 +89,7 @@ export default function AdminDictionary() {
 		setCurrentPage(0);
 	};
 
-	const handleDelete = async (id: number) => {
+	const handleDelete = async (_id: number) => {
 		const confirmed = window.confirm(
 			"Are you sure you want to delete this Koi Varient?",
 		);
@@ -97,10 +97,10 @@ export default function AdminDictionary() {
 
 		try {
 			// await callDeleteKoiVarient(id); // Gọi API Delete
-			alert("Xóa thành công (Tính năng cần gắn API)");
+			alert("Entry removed locally. The delete API is not connected yet.");
 			await fetchDictionary();
 		} catch (error) {
-			alert("Xóa thất bại");
+			alert("Unable to delete the dictionary entry.");
 		}
 	};
 
@@ -231,13 +231,17 @@ export default function AdminDictionary() {
 			</div>
 
 			<div className="items-page-header">
+				<div className="items-page-heading-copy">
+					<h2>Koi dictionary</h2>
+					<p>Manage koi varieties, classifications, and base values.</p>
+				</div>
 				<button
 					type="button"
 					className="primary-button"
 					onClick={() => setIsAddModalOpen(true)}
 				>
 					<Plus size={18} />
-					Add Koi
+					Add koi entry
 				</button>
 			</div>
 

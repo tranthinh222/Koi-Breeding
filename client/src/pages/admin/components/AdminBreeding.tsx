@@ -106,11 +106,11 @@ export default function BreedingManagement() {
             <p className="breeding-eyebrow">BREEDING MANAGEMENT</p>
 
             <h1 className="breeding-page-title">
-              Quản lý công thức phối giống
+              Breeding recipe management
             </h1>
 
             <p className="breeding-page-subtitle">
-              Quản lý ma trận di truyền, tỷ lệ lai và công thức sinh sản cá Koi.
+              Manage genetic matrices, inheritance rates, and koi breeding recipes.
             </p>
           </div>
 
@@ -121,17 +121,17 @@ export default function BreedingManagement() {
               className="breeding-action-button"
               onClick={() =>
                 alert(
-                  "Đã kiểm tra toàn bộ 3 bảng ma trận di truyền: Tổng xác suất các nhánh đạt chuẩn 1.00 (100%)!",
+                  "All three genetic matrices are valid. Each outcome totals 1.00 (100%).",
                 )
               }
             >
               <CheckCircle2 size={16} />
-              <span>Kiểm tra tỷ lệ 100%</span>
+              <span>Validate probabilities</span>
             </button>
 
             <button type="button" className="breeding-action-button">
               <Download size={16} />
-              <span>Xuất ma trận</span>
+              <span>Export matrices</span>
             </button>
 
             <button
@@ -140,7 +140,7 @@ export default function BreedingManagement() {
               onClick={() => setIsModalOpen(true)}
             >
               <Plus size={16} />
-              <span>Thêm công thức</span>
+              <span>Add recipe</span>
             </button>
           </div>
         </section>
@@ -151,7 +151,7 @@ export default function BreedingManagement() {
             type="text"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Tìm dòng bố mẹ, con mục tiêu..."
+            placeholder="Search parent varieties or target offspring..."
           />
         </div>
 
@@ -194,28 +194,28 @@ export default function BreedingManagement() {
 function StatCards({ formulasCount }: { formulasCount: number }) {
   const stats = [
     {
-      label: "TỔNG CÔNG THỨC",
+      label: "TOTAL RECIPES",
       value: formulasCount.toString(),
       icon: "🔗",
-      detail: "3 Bảng ma trận",
+      detail: "Across 3 matrices",
     },
     {
-      label: "ĐỘT BIẾN CAO NHẤT",
+      label: "HIGHEST MUTATION RATE",
       value: "18.0%",
       icon: "✨",
       detail: "Magoi x Magoi",
     },
     {
-      label: "GEN ĐẶC TÍNH VẢY",
+      label: "SCALE TRAIT GENES",
       value: "Ginrin & Hikarimono",
       icon: "💎",
-      detail: "14 công thức lai",
+      detail: "14 breeding recipes",
     },
     {
-      label: "TỈ LỆ THÀNH CÔNG TB",
+      label: "AVERAGE SUCCESS RATE",
       value: "88.5%",
       icon: "✔️",
-      detail: "Tỉ lệ ổn định",
+      detail: "Stable outcomes",
     },
   ];
 
@@ -255,19 +255,19 @@ function BreedingTabs({
   }[] = [
     {
       id: "all",
-      label: "Tất cả bảng (3)",
+      label: "All matrices (3)",
     },
     {
       id: "table1",
-      label: "Bảng 1: Lai Cùng Loài",
+      label: "Matrix 1: Same-variety breeding",
     },
     {
       id: "table2",
-      label: "Bảng 2: Lai Khác Loài",
+      label: "Matrix 2: Cross-variety breeding",
     },
     {
       id: "table3",
-      label: "Bảng 3: Lai Gen Đặc Tính",
+      label: "Matrix 3: Trait-gene breeding",
     },
   ];
 
@@ -287,7 +287,7 @@ function BreedingTabs({
       </div>
 
       <span className="breeding-tab-description">
-        Quy chuẩn nhân giống di truyền thực tế 1:1
+        Genetic breeding probability reference
       </span>
     </section>
   );
@@ -302,14 +302,14 @@ function BreedingTable1({ formulas }: { formulas: BreedingFormula[] }) {
     <section className="breeding-table-panel">
       <div className="breeding-table-header">
         <div className="breeding-table-heading">
-          <span className="breeding-table-label">BẢNG 1 • MA TRẬN 1</span>
+          <span className="breeding-table-label">MATRIX 1 • SAME VARIETY</span>
 
           <h2 className="breeding-table-title">
-            Bố x Mẹ (Cùng loài) & Tỉ lệ Đột biến
+            Parent Pairing and Mutation Outcomes
           </h2>
 
           <p className="breeding-table-description">
-            Quy chuẩn lai cùng loài và tỉ lệ xuất hiện cá con.
+            Expected offspring and mutation rates for the same variety.
           </p>
         </div>
       </div>
@@ -318,14 +318,14 @@ function BreedingTable1({ formulas }: { formulas: BreedingFormula[] }) {
         <table className="breeding-table">
           <thead>
             <tr>
-              <th>(1) Bố x Mẹ</th>
-              <th>(2) Con Cơ Bản</th>
-              <th>(3) Tỉ Lệ</th>
-              <th>(4) Họa Tiết</th>
-              <th>(5) Đột Biến Khả Thi</th>
-              <th>(6) Tổng Đột Biến</th>
-              <th>(7) Cá Tạp</th>
-              <th>Thao tác</th>
+              <th>Parent pairing</th>
+              <th>Base offspring</th>
+              <th>Base rate</th>
+              <th>Pattern</th>
+              <th>Possible mutation</th>
+              <th>Mutation rate</th>
+              <th>Mixed offspring</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
@@ -394,7 +394,7 @@ function TableRow1({
       </td>
 
       <td>
-        <span className="breeding-badge warning">Có thể đột biến</span>
+        <span className="breeding-badge warning">Mutation possible</span>
       </td>
 
       <td>
@@ -432,15 +432,15 @@ function BreedingTable2({ formulas }: { formulas: BreedingFormula[] }) {
       <div className="breeding-table-header">
         <div className="breeding-table-heading">
           <span className="breeding-table-label">
-            BẢNG 2 • TARGET CROSS-BREEDING
+            MATRIX 2 • TARGET CROSS-BREEDING
           </span>
 
           <h2 className="breeding-table-title">
-            Lai Khác Loài Ra Con Mục Tiêu
+            Targeted Cross-Variety Breeding
           </h2>
 
           <p className="breeding-table-description">
-            Công thức lai khác loài để tạo ra dòng cá mục tiêu.
+            Cross-variety recipes designed to produce specific offspring.
           </p>
         </div>
       </div>
@@ -449,14 +449,14 @@ function BreedingTable2({ formulas }: { formulas: BreedingFormula[] }) {
         <table className="breeding-table breeding-special-table">
           <thead>
             <tr>
-              <th>Con Mục Tiêu</th>
-              <th>Bố</th>
-              <th>Mẹ</th>
-              <th>Tỉ Lệ Target</th>
-              <th>Gen Bố</th>
-              <th>Gen Mẹ</th>
-              <th>Thất Bại</th>
-              <th>Thao tác</th>
+              <th>Target offspring</th>
+              <th>Sire</th>
+              <th>Dam</th>
+              <th>Target rate</th>
+              <th>Sire gene</th>
+              <th>Dam gene</th>
+              <th>Other outcome</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
@@ -541,9 +541,9 @@ function BreedingTable3({
     <section className="breeding-table-panel">
       <div className="breeding-table-header">
         <div className="breeding-table-heading">
-          <span className="breeding-table-label">BẢNG 3 • SPECIAL GENE</span>
+          <span className="breeding-table-label">MATRIX 3 • TRAIT GENES</span>
 
-          <h2 className="breeding-table-title">Lai Gen Đặc Tính (Vảy)</h2>
+          <h2 className="breeding-table-title">Scale Trait Inheritance</h2>
 
           <p className="breeding-table-description">Ginrin & Hikarimono</p>
         </div>
@@ -553,14 +553,14 @@ function BreedingTable3({
         <table className="breeding-table breeding-special-table">
           <thead>
             <tr>
-              <th>Gen Bố</th>
-              <th>Nền Mẹ</th>
-              <th>Con Mục Tiêu</th>
-              <th>Tỉ Lệ Target</th>
-              <th>Trả Về Mẹ</th>
-              <th>Ra Bố</th>
-              <th>Cá Tạp</th>
-              <th>Thao tác</th>
+              <th>Sire gene</th>
+              <th>Dam base</th>
+              <th>Target offspring</th>
+              <th>Target rate</th>
+              <th>Dam outcome</th>
+              <th>Sire outcome</th>
+              <th>Mixed offspring</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
@@ -634,10 +634,10 @@ function BreedingEmpty() {
   return (
     <div className="breeding-empty">
       <div>
-        <h3 className="breeding-empty-title">Không có dữ liệu</h3>
+        <h3 className="breeding-empty-title">No breeding recipes found</h3>
 
         <p className="breeding-empty-description">
-          Không tìm thấy công thức phối giống phù hợp.
+          Try changing the search term or matrix filter.
         </p>
       </div>
     </div>
@@ -686,7 +686,7 @@ function AddFormulaModal({
       !formData.motherType.trim() ||
       !formData.target.trim()
     ) {
-      alert("Vui lòng nhập đầy đủ dòng cá bố, dòng cá mẹ và con mục tiêu.");
+      alert("Select the sire, dam, and target offspring before saving.");
       return;
     }
 
@@ -713,11 +713,11 @@ function AddFormulaModal({
         <div className="breeding-modal-header">
           <div>
             <h2 className="breeding-modal-title">
-              Thêm công thức phối giống mới
+              Add breeding recipe
             </h2>
 
             <p className="breeding-modal-description">
-              Cấu hình công thức và tỉ lệ di truyền.
+              Configure the parent pairing and inheritance probabilities.
             </p>
           </div>
 
@@ -739,7 +739,7 @@ function AddFormulaModal({
         >
           <div className="breeding-form-grid">
             <div className="breeding-form-group">
-              <label className="breeding-form-label">Dòng Cá Bố</label>
+              <label className="breeding-form-label">Sire variety</label>
 
               <input
                 type="text"
@@ -753,7 +753,7 @@ function AddFormulaModal({
             </div>
 
             <div className="breeding-form-group">
-              <label className="breeding-form-label">Dòng Cá Mẹ</label>
+              <label className="breeding-form-label">Dam variety</label>
 
               <input
                 type="text"
@@ -768,7 +768,7 @@ function AddFormulaModal({
 
             <div className="breeding-form-group full">
               <label className="breeding-form-label">
-                Con Mục Tiêu (Target)
+                Target offspring
               </label>
 
               <input
@@ -781,7 +781,7 @@ function AddFormulaModal({
             </div>
 
             <div className="breeding-form-group">
-              <label className="breeding-form-label">Tỉ Lệ Target</label>
+              <label className="breeding-form-label">Target rate</label>
 
               <input
                 type="number"
@@ -797,7 +797,7 @@ function AddFormulaModal({
             </div>
 
             <div className="breeding-form-group">
-              <label className="breeding-form-label">Trả Về Mẹ</label>
+              <label className="breeding-form-label">Dam outcome rate</label>
 
               <input
                 type="number"
@@ -813,7 +813,7 @@ function AddFormulaModal({
             </div>
 
             <div className="breeding-form-group">
-              <label className="breeding-form-label">Cá Tạp</label>
+              <label className="breeding-form-label">Mixed offspring rate</label>
 
               <input
                 type="number"
@@ -830,8 +830,8 @@ function AddFormulaModal({
           </div>
 
           <div className="breeding-form-note">
-            <strong>* Lưu ý:</strong> Hệ thống sẽ tự động đối soát tổng xác suất
-            các nhánh con = 1.0 (100%).
+            <strong>Note:</strong> The system validates that all outcome
+            probabilities add up to 1.00 (100%).
           </div>
 
           <div className="breeding-modal-footer">
@@ -840,11 +840,11 @@ function AddFormulaModal({
               className="breeding-modal-button cancel"
               onClick={onClose}
             >
-              Hủy
+              Cancel
             </button>
 
             <button type="submit" className="breeding-modal-button submit">
-              Lưu công thức
+              Save recipe
             </button>
           </div>
         </form>

@@ -67,7 +67,7 @@ export interface AuthUser {
   email: string;
   birthday: string | null;
   gender: "MALE" | "FEMALE" | null;
-  role: "USER" | "ADMIN" | null;
+  role: "USER" | "ADMIN" | "SUPER_ADMIN" | null;
   exp: number;
   avatarUrl: string | null;
   createdAt: string;
@@ -79,7 +79,9 @@ function normalizeRole(role: unknown): AuthUser["role"] {
 
   const normalizedRole = role.replace(/^ROLE_/i, "").toUpperCase();
 
-  return normalizedRole === "ADMIN" || normalizedRole === "USER"
+  return normalizedRole === "ADMIN" ||
+    normalizedRole === "SUPER_ADMIN" ||
+    normalizedRole === "USER"
     ? normalizedRole
     : null;
 }

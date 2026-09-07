@@ -10,7 +10,7 @@ export interface AdminUserDto {
   email: string;
   birthday: string | null;
   gender: "MALE" | "FEMALE" | null;
-  role: "USER" | "ADMIN";
+  role: "USER" | "ADMIN" | "SUPER_ADMIN";
   status: AdminUserStatus | null;
   isBanned: boolean | null;
   exp: number;
@@ -126,6 +126,14 @@ export async function updateStatusUser(
   request: AdminModerationUserRequest,
 ): Promise<AdminUserDto> {
   const response = await apiClient.put("/admin/users", request);
+  return response.data.data as AdminUserDto;
+}
+
+export async function updateAdminUserRole(
+  id: number,
+  role: "USER" | "ADMIN",
+): Promise<AdminUserDto> {
+  const response = await apiClient.patch(`/admin/users/${id}/role`, { role });
   return response.data.data as AdminUserDto;
 }
 

@@ -42,7 +42,7 @@ export function UserLocationChart({ data }: { data: LocationPoint[] }) {
           }}
           cursor={{ fill: "var(--surface-secondary)" }}
         />
-        <Bar dataKey="users" name="Số lượng" fill="#0ea5e9" radius={[0, 6, 6, 0]} barSize={20} />
+        <Bar dataKey="users" name="Users" fill="#0ea5e9" radius={[0, 6, 6, 0]} barSize={20} />
       </BarChart>
     </ResponsiveContainer>
   );

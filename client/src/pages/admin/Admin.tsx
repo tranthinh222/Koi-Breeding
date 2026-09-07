@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
 	getAdminDashboard,
 	getAdminUsers,
+	updateAdminUserRole,
 	type AdminDashboardResponse,
 	type AdminRankingUserDto,
 	type AdminUserDto,
@@ -26,14 +27,8 @@ import { AdminSidebar } from "./components/AdminSidebar";
 import UserModerationModal from "./components/UserModerationModal";
 
 // --- IMPORT CÁC COMPONENT TỪ DASHBOARD MỚI ---
-import { type BreedingPoint } from "./components/charts/BreedingSuccessChart";
 import { KoiLifeStageChart } from "./components/charts/KoiLifeStageChart";
-import { type RevenuePoint } from "./components/charts/RevenueAreaChart";
-import { type TransactionSlice } from "./components/charts/TransactionMixChart";
-import {
-	UserGrowthChart,
-	type TimeSeriesPoint,
-} from "./components/charts/UserGrowthChart";
+import { UserGrowthChart } from "./components/charts/UserGrowthChart";
 import { UserLocationChart } from "./components/charts/UserLocationChart";
 import {
 	DashboardGrid,
@@ -110,6 +105,10 @@ function getLevel(exp: number | null | undefined) {
 
 function getStatusTone(status: AdminUserStatus | null) {
 	return status === "BANNED" ? "status-banned" : "status-active";
+}
+
+function formatRole(role: AdminUserDto["role"]) {
+	return role === "SUPER_ADMIN" ? "Super Admin" : role === "ADMIN" ? "Admin" : "User";
 }
 
 function formatRelativeTime(dateValue: string | null | undefined) {
@@ -216,14 +215,6 @@ function Admin() {
 	const [layouts, setLayouts] = useState<Layouts>(() =>
 		loadDashboardLayouts(STORAGE_KEY, DEFAULT_LAYOUTS),
 	);
-
-	// States dữ liệu thực tế cho Biểu đồ
-	const [userGrowthData, setUserGrowthData] = useState<TimeSeriesPoint[]>([]);
-	const [breedingData, setBreedingData] = useState<BreedingPoint[]>([]);
-	const [transactionData, setTransactionData] = useState<TransactionSlice[]>(
-		[],
-	);
-	const [revenueData, setRevenueData] = useState<RevenuePoint[]>([]);
 
 	// State quản lý xem biểu đồ nào đang mở full-screen
 	const [fullScreenChart, setFullScreenChart] = useState<string | null>(null);
@@ -332,7 +323,7 @@ function Admin() {
 				 * if (!cancelled) setRevenueData(res.data.data);
 				 */
 			} catch (error) {
-				console.error("Lỗi khi tải dữ liệu biểu đồ:", error);
+				console.error("Unable to load chart data:", error);
 			}
 		};
 
@@ -389,6 +380,24 @@ function Admin() {
 			setUsersError("Unable to load users from the database.");
 		} finally {
 			setUsersLoading(false);
+		}
+	};
+
+	const changeUserRole = async (user: AdminUserDto) => {
+		const nextRole = user.role === "ADMIN" ? "USER" : "ADMIN";
+		const action = nextRole === "ADMIN" ? "promote" : "remove admin access from";
+		if (!window.confirm(`Do you want to ${action} ${user.username}?`)) return;
+
+		setUsersError(null);
+		try {
+			const updatedUser = await updateAdminUserRole(user.id, nextRole);
+			setUsers((current) =>
+				current.map((item) => (item.id === updatedUser.id ? updatedUser : item)),
+			);
+		} catch (error: any) {
+			setUsersError(
+				error?.response?.data?.message || "Unable to update the user's role.",
+			);
 		}
 	};
 
@@ -718,10 +727,7 @@ function Admin() {
 							<div className="page-heading">
 								<div>
 									<p className="eyebrow">Users</p>
-									<h1>
-										Manage active and banned users from the
-										database.
-									</h1>
+									<h1>Manage users, access, and account status.</h1>
 								</div>
 								<button
 									type="button"
@@ -779,7 +785,7 @@ function Admin() {
 													<p>{user.email}</p>
 													<div className="user-meta-row">
 														<span>
-															Role: {user.role}
+											Role: {formatRole(user.role)}
 														</span>
 														<span>
 															Level:{" "}
@@ -800,8 +806,18 @@ function Admin() {
 													</div>
 												</div>
 											</div>
-											<div className="user-actions">
-												{user.status === "ACTIVE" ? (
+							<div className="user-actions">
+								{currentUser?.role === "SUPER_ADMIN" &&
+									user.role !== "SUPER_ADMIN" ? (
+									<button
+										type="button"
+										className="action-button neutral"
+										onClick={() => void changeUserRole(user)}
+									>
+										{user.role === "ADMIN" ? "Remove admin role" : "Promote to admin"}
+									</button>
+								) : null}
+								{user.status === "ACTIVE" ? (
 													<>
 														<button
 															type="button"

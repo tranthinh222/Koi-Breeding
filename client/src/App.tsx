@@ -50,7 +50,11 @@ function App() {
           </Route>
 
           {/* Just for admin */}
-          <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} />
+            }
+          >
             <Route path="/admin" element={<Admin />} />
           </Route>
         </Routes>

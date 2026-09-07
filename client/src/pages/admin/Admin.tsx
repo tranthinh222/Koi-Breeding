@@ -2,7 +2,6 @@ import {
 	ArrowUpRight,
 	ChevronRight,
 	MoonStar,
-	MoreHorizontal,
 	SlidersHorizontal,
 	SunMedium,
 	UserCircle2,
@@ -21,9 +20,10 @@ import { useAuth } from "../../context/AuthContext";
 
 import femaleDefaultAvatar from "../../assets/avatars/female_blank_avatar.png";
 import maleDefaultAvatar from "../../assets/avatars/male_blank_avatar.png";
-import "../../style/admin.css";
+import "./Admin.css";
 import { AdminNavbar } from "./components/AdminNavbar";
 import { AdminSidebar } from "./components/AdminSidebar";
+import AdminPagination from "./components/AdminPagination";
 import UserModerationModal from "./components/UserModerationModal";
 
 // --- IMPORT CÁC COMPONENT TỪ DASHBOARD MỚI ---
@@ -54,7 +54,6 @@ export type MenuTab =
 	| "trade";
 export type OtherTab = "settings" | "account";
 type AdminView = MenuTab | OtherTab;
-type PanelAction = "View" | "Edit" | "Refresh";
 
 interface PanelDescriptor {
 	id: string;
@@ -62,32 +61,30 @@ interface PanelDescriptor {
 	subtitle: string;
 	value: string;
 	change: string;
+	caption: string;
 	trend: "up" | "down" | "flat";
 	accent: string;
 }
 
 // --- CONFIG CHO LƯỚI KÉO THẢ MỚI ---
 // Đổi key để trình duyệt tạo lại lưới layout mới
-const STORAGE_KEY = "koi-admin-dashboard-layout-v2";
+const STORAGE_KEY = "koi-admin-dashboard-layout-v3";
 
 const DEFAULT_LAYOUTS: Layouts = {
 	lg: [
-		{ i: "users", x: 0, y: 0, w: 6, h: 4, minW: 3, minH: 3 },
-		{ i: "lifestage", x: 6, y: 0, w: 6, h: 4, minW: 3, minH: 3 },
-		{ i: "location", x: 0, y: 4, w: 6, h: 4, minW: 3, minH: 3 },
-		{ i: "marketplace", x: 6, y: 4, w: 6, h: 4, minW: 3, minH: 3 },
+		{ i: "users", x: 0, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
+		{ i: "lifestage", x: 4, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
+		{ i: "location", x: 8, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
 	],
 	md: [
 		{ i: "users", x: 0, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
 		{ i: "lifestage", x: 4, y: 0, w: 4, h: 4, minW: 3, minH: 3 },
-		{ i: "location", x: 0, y: 4, w: 4, h: 4, minW: 3, minH: 3 },
-		{ i: "marketplace", x: 4, y: 4, w: 4, h: 4, minW: 3, minH: 3 },
+		{ i: "location", x: 0, y: 4, w: 8, h: 4, minW: 3, minH: 3 },
 	],
 	sm: [
 		{ i: "users", x: 0, y: 0, w: 4, h: 4, minW: 2, minH: 3 },
 		{ i: "lifestage", x: 0, y: 4, w: 4, h: 4, minW: 2, minH: 3 },
 		{ i: "location", x: 0, y: 8, w: 4, h: 4, minW: 2, minH: 3 },
-		{ i: "marketplace", x: 0, y: 12, w: 4, h: 4, minW: 2, minH: 3 },
 	],
 };
 
@@ -137,12 +134,12 @@ function buildDashboardPanels(
 	return [
 		{
 			id: "users",
-			title: "Total Users",
-			subtitle: "Growth vs previous month",
+			title: "Total users",
+			subtitle: "All registered accounts",
 			value: formatNumber(dashboard?.users.total),
 			change:
 				usersGrowth == null
-					? `${(dashboard?.users.delta ?? 0 >= 0) ? "+" : ""}${formatNumber(dashboard?.users.delta)}`
+					? `${(dashboard?.users.delta ?? 0) >= 0 ? "+" : ""}${formatNumber(dashboard?.users.delta)}`
 					: `${usersGrowth >= 0 ? "+" : ""}${usersGrowth.toFixed(1)}%`,
 			trend:
 				(dashboard?.users.delta ?? 0) > 0
@@ -151,15 +148,16 @@ function buildDashboardPanels(
 						? "down"
 						: "flat",
 			accent: "blue",
+			caption: "Compared with the previous month.",
 		},
 		{
 			id: "shop",
-			title: "Shop Purchases",
-			subtitle: "Paid orders this month",
+			title: "Shop purchases",
+			subtitle: "Completed item purchases",
 			value: formatNumber(dashboard?.shopPurchases.total),
 			change:
 				shopGrowth == null
-					? `${(dashboard?.shopPurchases.delta ?? 0 >= 0) ? "+" : ""}${formatNumber(dashboard?.shopPurchases.delta)}`
+					? `${(dashboard?.shopPurchases.delta ?? 0) >= 0 ? "+" : ""}${formatNumber(dashboard?.shopPurchases.delta)}`
 					: `${shopGrowth >= 0 ? "+" : ""}${shopGrowth.toFixed(1)}%`,
 			trend:
 				(dashboard?.shopPurchases.delta ?? 0) > 0
@@ -168,15 +166,16 @@ function buildDashboardPanels(
 						? "down"
 						: "flat",
 			accent: "amber",
+			caption: "Compared with the previous month.",
 		},
 		{
 			id: "market",
-			title: "Marketplace Trades",
-			subtitle: "Completed trade volume",
+			title: "Marketplace trades",
+			subtitle: "Completed player-to-player trades",
 			value: formatNumber(dashboard?.marketplaceTrades.total),
 			change:
 				marketGrowth == null
-					? `${(dashboard?.marketplaceTrades.delta ?? 0 >= 0) ? "+" : ""}${formatNumber(dashboard?.marketplaceTrades.delta)}`
+					? `${(dashboard?.marketplaceTrades.delta ?? 0) >= 0 ? "+" : ""}${formatNumber(dashboard?.marketplaceTrades.delta)}`
 					: `${marketGrowth >= 0 ? "+" : ""}${marketGrowth.toFixed(1)}%`,
 			trend:
 				(dashboard?.marketplaceTrades.delta ?? 0) > 0
@@ -185,22 +184,29 @@ function buildDashboardPanels(
 						? "down"
 						: "flat",
 			accent: "emerald",
+			caption: "Compared with the previous month.",
 		},
 		{
 			id: "koi",
-			title: "Highest Level User",
-			subtitle: "Top level account in the system",
+			title: "Highest-level player",
+			subtitle: "Current progression leader",
 			value: dashboard?.highestLevelUser
 				? `Lv. ${dashboard.highestLevelUser.level}`
-				: "Lv. 1",
+				: "—",
 			change: dashboard?.highestLevelUser?.username ?? "No data",
 			trend: "flat",
 			accent: "violet",
+			caption: "Current platform progression leader.",
 		},
 	];
 }
 
 function Admin() {
+	useEffect(() => {
+		document.body.classList.add("admin-page");
+		return () => document.body.classList.remove("admin-page");
+	}, []);
+
 	const { currentUser } = useAuth();
 	const [activeView, setActiveView] = useState<AdminView>("dashboard");
 	const [theme, setTheme] = useState<"light" | "dark">(() => {
@@ -434,18 +440,19 @@ function Admin() {
 						<div className="dashboard-view">
 							<div className="page-heading">
 								<div>
-									<p className="eyebrow">Dashboard</p>
-									<h1>
-										Control the game, economy, and community
-										in one place.
-									</h1>
+									<p className="eyebrow">Overview</p>
+									<h1>Dashboard</h1>
+									<p className="page-description">
+										Monitor player activity, shop purchases, and marketplace performance.
+									</p>
 								</div>
 								<button
 									type="button"
 									className="primary-button"
 									onClick={refreshDashboard}
+									disabled={dashboardLoading}
 								>
-									Refresh data
+									{dashboardLoading ? "Refreshing…" : "Refresh data"}
 									<ArrowUpRight size={16} />
 								</button>
 							</div>
@@ -482,17 +489,21 @@ function Admin() {
 											</div>
 											<p>
 												{dashboardLoading
-													? "Loading database snapshot..."
-													: "Updated from the live dashboard endpoint."}
+													? "Updating platform data…"
+													: panel.caption}
 											</p>
 										</div>
 									</article>
 								))}
 							</div>
-							<div
-								className="dashboard-grid-wrapper"
-								style={{ marginTop: "16px" }}
-							>
+							<div className="dashboard-section-header">
+								<div>
+									<h2>Platform trends</h2>
+									<p>Drag or resize cards to personalize your dashboard.</p>
+								</div>
+							</div>
+
+							<div className="dashboard-grid-wrapper">
 								<DashboardGrid
 									layouts={layouts}
 									onLayoutChange={(_current, all) =>
@@ -503,8 +514,8 @@ function Admin() {
 									<Panel
 										key="users"
 										panelId="chart-users"
-										title="New Users"
-										subtitle="Last 6 months."
+										title="New users"
+										subtitle="Registration trend over the last six months"
 										openPanelMenu={panelMenuOpenId}
 										setOpenPanelMenu={setPanelMenuOpenId}
 										onView={() =>
@@ -516,7 +527,9 @@ function Admin() {
 												className="empty-state"
 												style={{ height: "100%" }}
 											>
-												No data claimed.{" "}
+												{dashboardLoading
+													? "Loading user growth…"
+													: "No user growth data is available yet."}
 											</div>
 										) : (
 											<UserGrowthChart
@@ -528,8 +541,8 @@ function Admin() {
 									<Panel
 										key="lifestage"
 										panelId="chart-lifestage"
-										title="Koi Lifestage"
-										subtitle="Number of fish by lifestage"
+										title="Koi life stages"
+										subtitle="Koi population grouped by life stage"
 										openPanelMenu={panelMenuOpenId}
 										setOpenPanelMenu={setPanelMenuOpenId}
 										onView={() =>
@@ -542,7 +555,9 @@ function Admin() {
 												className="empty-state"
 												style={{ height: "100%" }}
 											>
-												No data claimed.{" "}
+												{dashboardLoading
+													? "Loading koi life stages…"
+													: "No koi life-stage data is available yet."}
 											</div>
 										) : (
 											<KoiLifeStageChart
@@ -556,8 +571,8 @@ function Admin() {
 									<Panel
 										key="location"
 										panelId="chart-location"
-										title="Users' Location"
-										subtitle="Province/city"
+										title="Player locations"
+										subtitle="Registered players by province or city"
 										openPanelMenu={panelMenuOpenId}
 										setOpenPanelMenu={setPanelMenuOpenId}
 										onView={() =>
@@ -569,7 +584,9 @@ function Admin() {
 												className="empty-state"
 												style={{ height: "100%" }}
 											>
-												No data claimed.{" "}
+												{dashboardLoading
+													? "Loading player locations…"
+													: "No player location data is available yet."}
 											</div>
 										) : (
 											<UserLocationChart
@@ -580,14 +597,18 @@ function Admin() {
 								</DashboardGrid>
 							</div>
 
-							<div
-								className="panel-grid panel-grid-secondary"
-								style={{ marginTop: "16px" }}
-							>
+							<div className="dashboard-section-header">
+								<div>
+									<h2>Highlights</h2>
+									<p>Quick access to leading players and high-value activity.</p>
+								</div>
+							</div>
+
+							<div className="panel-grid panel-grid-secondary">
 								<article className="dashboard-panel ranking-panel">
 									<PanelHeader
-										title="Top users"
-										subtitle="Top 3 strongest users from the database"
+										title="Top players"
+										subtitle="Players with the highest progression"
 										panelId="top-users"
 										openPanelMenu={panelMenuOpenId}
 										setOpenPanelMenu={setPanelMenuOpenId}
@@ -606,7 +627,7 @@ function Admin() {
 										</div>
 									) : (
 										<div className="empty-state">
-											No top users available yet.
+											No ranked players are available yet.
 										</div>
 									)}
 									<button
@@ -614,7 +635,7 @@ function Admin() {
 										className="view-more-button"
 										onClick={() => setActiveView("users")}
 									>
-										View more
+										View all users
 										<ChevronRight size={16} />
 									</button>
 								</article>
@@ -655,7 +676,7 @@ function Admin() {
 															{formatMoney(
 																transaction.amount,
 															)}{" "}
-															VND
+													Koins
 														</span>
 													</div>
 												),
@@ -669,9 +690,9 @@ function Admin() {
 									<button
 										type="button"
 										className="view-more-button"
-										onClick={() => setActiveView("users")}
+										onClick={() => setActiveView("transactions")}
 									>
-										View more
+										View transactions
 										<ChevronRight size={16} />
 									</button>
 								</article>
@@ -817,7 +838,11 @@ function Admin() {
 										{user.role === "ADMIN" ? "Remove admin role" : "Promote to admin"}
 									</button>
 								) : null}
-								{user.status === "ACTIVE" ? (
+								{user.role === "SUPER_ADMIN" ? (
+									<span className="protected-account-note">
+										Protected account
+									</span>
+								) : user.status === "ACTIVE" ? (
 													<>
 														<button
 															type="button"
@@ -907,44 +932,13 @@ function Admin() {
 								}
 								onSuccess={() => refreshUsers()}
 							/>
-							<div className="pagination-row">
-								<span>
-									Showing page {page} of{" "}
-									{Math.max(totalPages, 1)}
-								</span>
-								<div className="pagination-actions">
-									<button
-										type="button"
-										className="page-button"
-										onClick={() =>
-											void refreshUsers(
-												Math.max(page - 1, 1),
-											)
-										}
-										disabled={page <= 1}
-									>
-										Prev
-									</button>
-									<button
-										type="button"
-										className="page-button is-active"
-									>
-										{page}
-									</button>
-									<button
-										type="button"
-										className="page-button"
-										onClick={() =>
-											void refreshUsers(
-												Math.min(page + 1, totalPages),
-											)
-										}
-										disabled={page >= totalPages}
-									>
-										Next
-									</button>
-								</div>
-							</div>
+							<AdminPagination
+								currentPage={Math.max(page - 1, 0)}
+								totalPages={totalPages}
+								onPageChange={(nextPage) =>
+									void refreshUsers(nextPage + 1)
+								}
+							/>
 						</div>
 					)}
 
@@ -1115,9 +1109,6 @@ function Admin() {
 function PanelHeader({
 	title,
 	subtitle,
-	panelId,
-	openPanelMenu,
-	setOpenPanelMenu,
 }: {
 	title: string;
 	subtitle: string;
@@ -1125,39 +1116,11 @@ function PanelHeader({
 	openPanelMenu: string | null;
 	setOpenPanelMenu: (value: string | null) => void;
 }) {
-	const isOpen = openPanelMenu === panelId;
-	const actions: PanelAction[] = ["View", "Edit", "Refresh"];
-
 	return (
 		<div className="panel-header">
 			<div>
 				<h3>{title}</h3>
 				<p>{subtitle}</p>
-			</div>
-
-			<div className="panel-options-wrap">
-				<button
-					type="button"
-					className="panel-options-trigger"
-					onClick={() => setOpenPanelMenu(isOpen ? null : panelId)}
-				>
-					<MoreHorizontal size={16} />
-				</button>
-
-				{isOpen && (
-					<div className="panel-options-menu">
-						{actions.map((action) => (
-							<button
-								key={action}
-								type="button"
-								className="panel-option-item"
-								onClick={() => setOpenPanelMenu(null)}
-							>
-								{action}
-							</button>
-						))}
-					</div>
-				)}
 			</div>
 		</div>
 	);

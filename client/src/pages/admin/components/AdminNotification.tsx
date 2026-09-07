@@ -1,5 +1,5 @@
 import React from "react";
-import "../../../style/admin.css"
+import "../Admin.css"
 
 interface NotificationsProps {
     type: "success" | "error";

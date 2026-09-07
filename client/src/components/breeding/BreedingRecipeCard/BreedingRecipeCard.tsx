@@ -60,7 +60,7 @@ function BreedingRecipeCard({ recipe }: BreedingRecipeCardProps) {
 					</div>
 				</div>
 				<div className={styles.probBadge}>
-					{((recipe.childRate || 0) * 100).toFixed(0)}%
+					{((recipe.targetRate || 0) * 100).toFixed(0)}%
 				</div>
 			</div>
 		</div>

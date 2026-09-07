@@ -10,6 +10,7 @@ import { callFetchAllVarieties } from "../../../api/variety";
 import KoiForm from "../../../components/admin/KoiForm/KoiForm";
 import { toast } from "../../../components/shared/Toast/toast";
 import type { IKoiVarient, IVariety } from "../../../types/backend";
+import AdminPagination from "./AdminPagination";
 
 export default function AdminDictionary() {
 	const [items, setItems] = useState<IKoiVarient[]>([]);
@@ -91,7 +92,7 @@ export default function AdminDictionary() {
 
 	const handleDelete = async (_id: number) => {
 		const confirmed = window.confirm(
-			"Are you sure you want to delete this Koi Varient?",
+			"Delete this koi entry? This action cannot be undone.",
 		);
 		if (!confirmed) return;
 
@@ -174,10 +175,10 @@ export default function AdminDictionary() {
 								)
 							}
 						>
-							<option value="ALL">ALL VARIETIES</option>
+							<option value="ALL">All varieties</option>
 							{varietyList.map((v) => (
 								<option key={v.id} value={v.id}>
-									{v.name.toUpperCase()}
+									{v.name}
 								</option>
 							))}
 						</select>
@@ -192,17 +193,17 @@ export default function AdminDictionary() {
 								)
 							}
 						>
-							<option value="ALL">ALL SCALE TYPES</option>
-							<option value="WAGOI">WAGOI</option>
-							<option value="DOITSU">DOITSU</option>
-							<option value="GINRIN">GINRIN</option>
+							<option value="ALL">All scale types</option>
+							<option value="WAGOI">Wagoi</option>
+							<option value="DOITSU">Doitsu</option>
+							<option value="GINRIN">Ginrin</option>
 						</select>
 
 						<button
 							type="button"
 							className="items-reset-button"
 							onClick={handleReset}
-							title="Reset Filters"
+							title="Reset filters"
 						>
 							<RotateCcw size={18} />
 						</button>
@@ -212,9 +213,9 @@ export default function AdminDictionary() {
 				{/* CATEGORY (Dùng cho SHAPE) */}
 				<div className="items-category-list">
 					{[
-						{ id: "ALL", label: "ALL SHAPES" },
-						{ id: "STANDARD", label: "STANDARD" },
-						{ id: "BUTTERFLY", label: "BUTTERFLY" },
+						{ id: "ALL", label: "All shapes" },
+						{ id: "STANDARD", label: "Standard" },
+						{ id: "BUTTERFLY", label: "Butterfly" },
 					].map((cat) => (
 						<button
 							key={cat.id}
@@ -252,7 +253,7 @@ export default function AdminDictionary() {
 						<thead>
 							<tr>
 								<th>Image</th>
-								<th>Koi Info</th>
+								<th>Koi details</th>
 								<th>Classification</th>
 								<th>Base Stats</th>
 								<th>Pricing (Koins)</th>
@@ -264,7 +265,7 @@ export default function AdminDictionary() {
 							{loading ? (
 								<tr>
 									<td colSpan={6} className="items-empty">
-										Loading data...
+										Loading koi entries...
 									</td>
 								</tr>
 							) : items.length > 0 ? (
@@ -279,7 +280,7 @@ export default function AdminDictionary() {
 														alt={koi.name}
 													/>
 												) : (
-													<span>No Img</span>
+													<span>No image</span>
 												)}
 											</div>
 										</td>
@@ -411,36 +412,12 @@ export default function AdminDictionary() {
 			</div>
 
 			{/* PAGINATION */}
-			{totalPages > 1 && (
-				<div className="items-pagination">
-					<button
-						type="button"
-						disabled={currentPage === 0}
-						onClick={() => setCurrentPage((prev) => prev - 1)}
-					>
-						Previous
-					</button>
-
-					{Array.from({ length: totalPages }, (_, index) => (
-						<button
-							key={index}
-							type="button"
-							className={currentPage === index ? "active" : ""}
-							onClick={() => setCurrentPage(index)}
-						>
-							{index + 1}
-						</button>
-					))}
-
-					<button
-						type="button"
-						disabled={currentPage >= totalPages - 1}
-						onClick={() => setCurrentPage((prev) => prev + 1)}
-					>
-						Next
-					</button>
-				</div>
-			)}
+			<AdminPagination
+				currentPage={currentPage}
+				totalPages={totalPages}
+				loading={loading}
+				onPageChange={setCurrentPage}
+			/>
 
 			{/* MODALS - Reusing your KoiForm */}
 			{isAddModalOpen && (

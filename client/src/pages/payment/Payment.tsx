@@ -40,41 +40,45 @@ const Payment = () => {
 
 	if (loading) {
 		return (
-			<main className="payment-page">
-				<div className="payment-card">
-					<div className="payment-header">
-						<h1>KOI PAYMENT</h1>
-						<p>Creating your payment...</p>
+			<div className="payment-screen">
+				<main className="payment-page">
+					<div className="payment-card">
+						<div className="payment-header">
+							<h1>KOI PAYMENT</h1>
+							<p>Creating your payment...</p>
+						</div>
 					</div>
-				</div>
-			</main>
+				</main>
+			</div>
 		);
 	}
 
 	if (error || !payment) {
 		return (
-			<main className="payment-page">
-				<div className="payment-card">
-					<div className="payment-header">
-						<h1>KOI PAYMENT</h1>
-						<p>{error ?? "Payment could not be created."}</p>
-					</div>
+			<div className="payment-screen">
+				<main className="payment-page">
+					<div className="payment-card">
+						<div className="payment-header">
+							<h1>KOI PAYMENT</h1>
+							<p>{error ?? "Payment could not be created."}</p>
+						</div>
 
-					<div className="payment-footer">
-						<button
-							className="cancel-btn"
-							onClick={() => navigate("/shop")}
-						>
-							Back to Shop
-						</button>
+						<div className="payment-footer">
+							<button
+								className="cancel-btn"
+								onClick={() => navigate("/shop")}
+							>
+								Back to Shop
+							</button>
+						</div>
 					</div>
-				</div>
-			</main>
+				</main>
+			</div>
 		);
 	}
 
 	return (
-		<div>
+		<div className="payment-screen">
 			<div className="cloud cloud-one"></div>
 			<div className="cloud cloud-two"></div>
 

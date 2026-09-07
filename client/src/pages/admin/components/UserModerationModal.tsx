@@ -6,7 +6,7 @@ import type { AdminModerationUserRequest, AdminUserDto, AdminUserStatus } from "
 
 import ReasonForm from "./ReasonForm";
 import Notification from "./AdminNotification";
-import "../../../style/admin.css";
+import "../Admin.css";
 
 interface UserModerationModalProps {
     isOpen: boolean;

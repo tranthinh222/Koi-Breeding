@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, FileText, Search } from "lucide-react";
+import { FileText, Search } from "lucide-react";
 
 import { getAdminTrades, type AdminTrade } from "../../../api/admin";
+import AdminPagination from "./AdminPagination";
 import "./admintrade.css";
 
 type DateFilter = "ALL" | "today" | "week" | "month";
@@ -327,45 +328,13 @@ export default function AdminTrades() {
           </table>
         </div>
 
-        <div className="trades-pagination">
-          <div className="trades-pagination-info">
-            Showing {trades.length ? currentPage * 8 + 1 : 0}–
-            {currentPage * 8 + trades.length} of {totalElements} trades
-          </div>
-          <div className="trades-pagination-btns">
-            <button
-              type="button"
-              className="trades-page-btn"
-              disabled={currentPage === 0 || loading}
-              onClick={() => setCurrentPage((page) => page - 1)}
-            >
-              <ChevronLeft size={14} />
-            </button>
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                type="button"
-                key={index}
-                className={`trades-page-btn ${
-                  currentPage === index ? "trades-page-btn-active" : ""
-                }`}
-                disabled={loading}
-                onClick={() => setCurrentPage(index)}
-              >
-                {index + 1}
-              </button>
-            ))}
-            <button
-              type="button"
-              className="trades-page-btn"
-              disabled={
-                totalPages === 0 || currentPage >= totalPages - 1 || loading
-              }
-              onClick={() => setCurrentPage((page) => page + 1)}
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
+        <AdminPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          loading={loading}
+          onPageChange={setCurrentPage}
+          summary={`Showing ${trades.length ? currentPage * 8 + 1 : 0}–${currentPage * 8 + trades.length} of ${totalElements} trades`}
+        />
       </div>
     </div>
   );

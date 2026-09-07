@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Edit, Trash2, RotateCcw, Filter, Plus } from "lucide-react";
 
 import ItemDialog from "./ItemDialog";
+import AdminPagination from "./AdminPagination";
 
 import {
   getAdminItems,
@@ -10,7 +11,7 @@ import {
 } from "../../../api/admin";
 
 const formatMoney = (value: number) => {
-  return new Intl.NumberFormat("vi-VN").format(value) + " ₫";
+  return new Intl.NumberFormat("en-US").format(value) + " Koins";
 };
 
 export default function AdminItems() {
@@ -113,11 +114,11 @@ export default function AdminItems() {
                 handleFilterChange(setEffectFilter, e.target.value)
               }
             >
-              <option value="ALL">ALL EFFECT</option>
-              <option value="FOOD">FOOD</option>
-              <option value="KOI">KOI</option>
-              <option value="MEDICINE">MEDICINE</option>
-              <option value="CURRENCY">CURRENCY</option>
+              <option value="ALL">All effects</option>
+              <option value="FOOD">Food</option>
+              <option value="KOI">Koi</option>
+              <option value="MEDICINE">Medicine</option>
+              <option value="CURRENCY">Currency</option>
             </select>
 
             <select
@@ -143,11 +144,11 @@ export default function AdminItems() {
         {/* CATEGORY */}
         <div className="items-category-list">
           {[
-            { id: "ALL", label: "ALL" },
-            { id: "FOOD", label: "FOOD" },
-            { id: "KOI", label: "KOI" },
-            { id: "MEDICINE", label: "MEDICINE" },
-            { id: "CURRENCY", label: "CURRENCY" },
+            { id: "ALL", label: "All" },
+            { id: "FOOD", label: "Food" },
+            { id: "KOI", label: "Koi" },
+            { id: "MEDICINE", label: "Medicine" },
+            { id: "CURRENCY", label: "Currency" },
           ].map((category) => (
             <button
               key={category.id}
@@ -206,7 +207,7 @@ export default function AdminItems() {
                         {item.imageUrl ? (
                           <img src={item.imageUrl} alt={item.nameItem} />
                         ) : (
-                          <span>No Image</span>
+                          <span>No image</span>
                         )}
                       </div>
                     </td>
@@ -267,36 +268,12 @@ export default function AdminItems() {
       </div>
 
       {/* PAGINATION */}
-      {totalPages > 1 && (
-        <div className="items-pagination">
-          <button
-            type="button"
-            disabled={currentPage === 0}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-          >
-            Previous
-          </button>
-
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index}
-              type="button"
-              className={currentPage === index ? "active" : ""}
-              onClick={() => setCurrentPage(index)}
-            >
-              {index + 1}
-            </button>
-          ))}
-
-          <button
-            type="button"
-            disabled={currentPage >= totalPages - 1}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <AdminPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        loading={loading}
+        onPageChange={setCurrentPage}
+      />
 
       {isAddModalOpen && (
         <ItemDialog

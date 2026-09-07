@@ -48,7 +48,7 @@ export function RevenueAreaChart({ data }: { data: RevenuePoint[] }) {
             fontSize: "13px",
             boxShadow: "0 20px 48px rgba(15, 23, 42, 0.14)"
           }}
-          formatter={(value) => [`${Number(value).toLocaleString()} đ`, "Revenue"]}
+          formatter={(value) => [`${Number(value).toLocaleString("en-US")} Koins`, "Revenue"]}
         />
         <Area
           type="monotone"

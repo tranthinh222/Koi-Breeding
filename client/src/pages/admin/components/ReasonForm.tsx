@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../../style/admin.css";
+import "../Admin.css";
 
 interface ReasonFormProps {
     action: "ban" | "unban" | "delete" | "restore";

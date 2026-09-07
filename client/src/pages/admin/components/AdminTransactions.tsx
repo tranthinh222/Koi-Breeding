@@ -3,8 +3,6 @@ import {
   Search,
   RotateCcw,
   Eye,
-  ChevronLeft,
-  ChevronRight,
   Wallet,
   ArrowDown,
   ShoppingBag,
@@ -16,6 +14,7 @@ import {
   getAdminTransactions,
   type AdminTransaction,
 } from "../../../api/admin";
+import AdminPagination from "./AdminPagination";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-US").format(Math.abs(value));
@@ -329,39 +328,12 @@ function AdminTransactions() {
 
         {/* ================= PAGINATION ================= */}
 
-        <div className="transaction-pagination">
-          <div className="transaction-pagination-buttons">
-            <button
-              type="button"
-              disabled={currentPage === 0 || loading}
-              onClick={() => setCurrentPage((page) => page - 1)}
-            >
-              <ChevronLeft size={17} />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                type="button"
-                key={index}
-                className={currentPage === index ? "active" : ""}
-                disabled={loading}
-                onClick={() => setCurrentPage(index)}
-              >
-                {index + 1}
-              </button>
-            ))}
-
-            <button
-              type="button"
-              disabled={
-                totalPages === 0 || currentPage >= totalPages - 1 || loading
-              }
-              onClick={() => setCurrentPage((page) => page + 1)}
-            >
-              <ChevronRight size={17} />
-            </button>
-          </div>
-        </div>
+        <AdminPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          loading={loading}
+          onPageChange={setCurrentPage}
+        />
       </section>
     </div>
   );

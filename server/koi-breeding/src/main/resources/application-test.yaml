@@ -13,3 +13,8 @@ spring:
                 physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         database-platform: org.hibernate.dialect.H2Dialect
         show-sql: true
+cloudinary:
+    cloud-name: test-cloud
+    api-key: 123456789
+    api-secret: test-secret-key
+    url: cloudinary://123456789:test-secret-key@test-cloud

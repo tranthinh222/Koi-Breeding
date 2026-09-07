@@ -31,7 +31,13 @@ function ProtectedRoute({ allowedRoles }: Props) {
 		return <Navigate to="/landing" replace />;
 	}
 
-	if (allowedRoles && !allowedRoles.includes(currentUserRole)) {
+	if (
+		allowedRoles &&
+		!allowedRoles.some(
+			(role) =>
+				role?.toUpperCase() === currentUserRole?.toUpperCase(),
+		)
+	) {
 		return <Navigate to="/home" replace />;
 	}
 

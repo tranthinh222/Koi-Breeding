@@ -91,6 +91,7 @@ public class AdminController {
     }
 
     @PostMapping("/items/addition")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReqAdminItems> addItem(
             @RequestBody ReqAdminItems items) {
         return ResponseEntity.ok(adminService.addItem(items));

@@ -219,6 +219,7 @@
 	color: white;
 	background: var(--button-bg);
 	cursor: pointer;
+	justify-content: center;
 	transition: background 0.2s ease;
 }
 

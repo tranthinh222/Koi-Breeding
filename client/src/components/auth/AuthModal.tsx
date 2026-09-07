@@ -465,7 +465,6 @@ export default function AuthModal({
 
 				<div
 					className="link-row"
-					style={{ justifyContent: "center", marginTop: 8 }}
 				>
 					<span>Don't have an account?</span>
 					<a
@@ -728,7 +727,7 @@ export default function AuthModal({
 					{registering ? "Registering..." : "Register"}
 				</button>
 
-				<div className="footer-note">
+				<div className="link-row">
 					Already have an account?{" "}
 					<a
 						href="#"
@@ -741,7 +740,7 @@ export default function AuthModal({
 					</a>
 				</div>
 
-				<div className="footer-note">
+				<div className="link-row">
 					Other options? <a href="#">Google</a>
 				</div>
 			</aside>

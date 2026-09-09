@@ -48,9 +48,9 @@ public class MarketService {
         return marketRepository.findAll().stream()
                 .map(marketplace -> new ResMarketDto(
                         marketplace.getId(),
-                        marketplace.getKoi().getName(),
+                    marketplace.getKoi().getName(),
                         marketplace.getKoi().getId(),
-                        marketplace.getKoi().getName(),
+                        marketplace.getKoi().getDictionary().getImageUrl(),
                         marketplace.getPrice(),
                         marketplace.getDescription(),
                         marketplace.getSeller().getId(),
@@ -194,7 +194,7 @@ public class MarketService {
                         marketplace.getId(),
                         marketplace.getKoi().getName(),
                         marketplace.getKoi().getId(),
-                        marketplace.getKoi().getName(),
+                    marketplace.getKoi().getDictionary().getImageUrl(),
                         marketplace.getPrice(),
                         marketplace.getDescription(),
                         marketplace.getSeller().getId(),
@@ -215,12 +215,13 @@ public class MarketService {
                 .map(koi -> new ResMarketListKoi(
                         koi.getId(),
                         koi.getPond().getId(),
+                        koi.getPond().getName(),
                         koi.getName(),
                         koi.getName(),
                         koi.getGender(),
                         koi.getWeight(),
                         koi.getLength(),
-                        koi.getName()))
+                        koi.getDictionary().getImageUrl()))
                 .toList();
     }
 
@@ -233,12 +234,13 @@ public class MarketService {
                 .map(marketplace -> new ResMarketKois(
                         marketplace.getKoi().getId(),
                         marketplace.getKoi().getPond().getId(),
+                        marketplace.getKoi().getPond().getName(),
                         marketplace.getKoi().getName(),
                         marketplace.getKoi().getName(),
                         marketplace.getKoi().getGender(),
                         marketplace.getKoi().getWeight(),
                         marketplace.getKoi().getLength(),
-                        marketplace.getKoi().getName(),
+                        marketplace.getKoi().getDictionary().getImageUrl(),
                         marketplace.getPrice()))
                 .toList();
     }
@@ -266,7 +268,7 @@ public class MarketService {
                 marketplaceNew.getId(),
                 marketplaceNew.getKoi().getName(),
                 marketplaceNew.getKoi().getId(),
-                marketplaceNew.getKoi().getName(),
+                marketplaceNew.getKoi().getDictionary().getImageUrl(),
                 marketplaceNew.getPrice(),
                 marketplaceNew.getDescription(),
                 marketplace.getSeller().getId(),

@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./MarketplaceManagement.css";
 
-import { getMarketListKois, sellKoi } from "../../api/marketplace";
-import { type MarketplaceKoi } from "../../api/marketplace";
-import TransactionNavigation from "../../components/marketplace/TransactionNavigation";
+import {
+  getMarketListKois,
+  sellKoi,
+  type MarketplaceKoi,
+} from "../../api/marketplace";
 import MarketplaceState from "../../components/marketplace/MarketplaceState";
+import TransactionNavigation from "../../components/marketplace/TransactionNavigation";
 import { useAuth } from "../../context/AuthContext";
 
 // interface KoiCard {
@@ -140,12 +143,23 @@ const AddList: React.FC = () => {
     };
 
     return kois
-      .filter((koi) => selectedPond === "ALL" || String(koi.pondId) === selectedPond)
-      .filter((koi) => selectedGender === "ALL" || koi.gender === selectedGender)
+      .filter(
+        (koi) => selectedPond === "ALL" || String(koi.pondId) === selectedPond,
+      )
+      .filter(
+        (koi) => selectedGender === "ALL" || koi.gender === selectedGender,
+      )
       .sort((left, right) => {
-        if (sortBy === "RARITY") return (rarityRank[right.rarity] ?? 0) - (rarityRank[left.rarity] ?? 0);
-        if (sortBy === "SIZE") return Number(right.length) - Number(left.length);
-        return (prices[right.koiId] ?? right.price ?? 0) - (prices[left.koiId] ?? left.price ?? 0);
+        if (sortBy === "RARITY")
+          return (
+            (rarityRank[right.rarity] ?? 0) - (rarityRank[left.rarity] ?? 0)
+          );
+        if (sortBy === "SIZE")
+          return Number(right.length) - Number(left.length);
+        return (
+          (prices[right.koiId] ?? right.price ?? 0) -
+          (prices[left.koiId] ?? left.price ?? 0)
+        );
       });
   }, [kois, prices, selectedGender, selectedPond, sortBy]);
 
@@ -209,19 +223,33 @@ const AddList: React.FC = () => {
               <strong>Find a koi to sell</strong>
               <span>{visibleKois.length} eligible koi</span>
             </div>
-            <button type="button" onClick={clearFilters}>Reset</button>
+            <button type="button" onClick={clearFilters}>
+              Reset
+            </button>
           </div>
           <div className="filters-section">
             <label className="filter-field">
               <span>Pond</span>
-              <select className="filter-select" value={selectedPond} onChange={(e) => setSelectedPond(e.target.value)}>
+              <select
+                className="filter-select"
+                value={selectedPond}
+                onChange={(e) => setSelectedPond(e.target.value)}
+              >
                 <option value="ALL">All Ponds</option>
-                {pondIds.map((pondId) => <option key={pondId} value={String(pondId)}>Pond #{pondId}</option>)}
+                {pondIds.map((pondId) => (
+                  <option key={pondId} value={String(pondId)}>
+                    Pond #{pondId}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="filter-field">
               <span>Gender</span>
-              <select className="filter-select" value={selectedGender} onChange={(e) => setSelectedGender(e.target.value)}>
+              <select
+                className="filter-select"
+                value={selectedGender}
+                onChange={(e) => setSelectedGender(e.target.value)}
+              >
                 <option value="ALL">All Genders</option>
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
@@ -229,7 +257,11 @@ const AddList: React.FC = () => {
             </label>
             <label className="filter-field">
               <span>Sort by</span>
-              <select className="filter-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <select
+                className="filter-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
                 <option value="VALUE">Highest Value</option>
                 <option value="RARITY">Highest Rarity</option>
                 <option value="SIZE">Largest Size</option>
@@ -241,29 +273,45 @@ const AddList: React.FC = () => {
 
       {/* KOI GRID */}
       <div className="koi-grid">
-        {loading && <MarketplaceState icon="🐟" title="Loading your koi" description="Checking which koi are eligible to be listed..." />}
+        {loading && (
+          <MarketplaceState
+            icon="🐟"
+            title="Loading your koi"
+            description="Checking which koi are eligible to be listed..."
+          />
+        )}
         {!loading && error && (
-          <MarketplaceState icon="⚠️" title="Unable to load your koi" description="We could not retrieve your eligible koi. Check that the server is running, then try again." actionLabel="Try Again" onAction={() => setRefreshKey((value) => value + 1)} />
+          <MarketplaceState
+            icon="⚠️"
+            title="Unable to load your koi"
+            description="We could not retrieve your eligible koi. Check that the server is running, then try again."
+            actionLabel="Try Again"
+            onAction={() => setRefreshKey((value) => value + 1)}
+          />
         )}
         {!loading && !error && kois.length === 0 && (
-          <MarketplaceState icon="🌊" title="No koi available to sell" description="Koi already listed for sale or not currently in one of your ponds will not appear here." actionLabel="View My Ponds" onAction={() => { window.location.href = "/pond"; }} />
+          <MarketplaceState
+            icon="🌊"
+            title="No koi available to sell"
+            description="Koi already listed for sale or not currently in one of your ponds will not appear here."
+            actionLabel="View My Ponds"
+            onAction={() => {
+              window.location.href = "/pond";
+            }}
+          />
         )}
         {!loading && !error && kois.length > 0 && visibleKois.length === 0 && (
-          <MarketplaceState icon="🔎" title="No matching koi" description="None of your eligible koi match these filters." actionLabel="Reset Filters" onAction={clearFilters} />
+          <MarketplaceState
+            icon="🔎"
+            title="No matching koi"
+            description="None of your eligible koi match these filters."
+            actionLabel="Reset Filters"
+            onAction={clearFilters}
+          />
         )}
         {visibleKois.map((koi) => (
           <div key={koi.koiId} className="koi-card">
             <div className="card-content">
-              {/* RARITY */}
-              <div
-                className="rarity-badge"
-                style={{
-                  backgroundColor: getRarityColor(koi.rarity),
-                }}
-              >
-                {koi.rarity}
-              </div>
-
               {/* IMAGE */}
               <div className="koi-image-container">
                 <img
@@ -272,6 +320,16 @@ const AddList: React.FC = () => {
                   className="koi-image"
                 />
               </div>
+
+              {/* RARITY */}
+              {/* <div
+                className="rarity-badge"
+                style={{
+                  backgroundColor: getRarityColor(koi.rarity),
+                }}
+              >
+                {koi.rarity}
+              </div> */}
 
               {/* NAME */}
               <div className="koi-name">
@@ -283,7 +341,9 @@ const AddList: React.FC = () => {
               </div>
 
               {/* POND */}
-              <p className="koi-pond">Pond {koi.pondId}</p>
+              <p className="koi-pond">
+                Pond {koi.pondId}: {koi.pondName}
+              </p>
 
               {/* STATS */}
               <div className="koi-stats">

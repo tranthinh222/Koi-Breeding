@@ -1,27 +1,17 @@
 package com.koibreeding.service;
 
-import com.koibreeding.domain.User;
-import com.koibreeding.domain.Pond;
-import com.koibreeding.domain.Wallet;
-import com.koibreeding.dto.request.ForgotPasswordRequest;
-import com.koibreeding.dto.request.LoginRequest;
-import com.koibreeding.dto.request.ResetPasswordRequest;
-import com.koibreeding.dto.request.VerifyResetCodeRequest;
-import com.koibreeding.dto.response.LoginResponse;
-import com.koibreeding.dto.response.ResAuthDto;
-import com.koibreeding.dto.response.ResUserDto;
-import com.koibreeding.enums.Gender;
-import com.koibreeding.enums.Location;
-import com.koibreeding.enums.Role;
-import com.koibreeding.enums.UserStatus;
-import com.koibreeding.repository.AuthRepository;
-import com.koibreeding.repository.UserRepository;
-import com.koibreeding.repository.PondRepository;
-import com.koibreeding.repository.WalletRepository;
-import com.koibreeding.enums.PhTrend;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,20 +20,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import com.koibreeding.domain.Pond;
+import com.koibreeding.domain.User;
+import com.koibreeding.domain.Wallet;
+import com.koibreeding.dto.request.ForgotPasswordRequest;
+import com.koibreeding.dto.request.LoginRequest;
+import com.koibreeding.dto.request.ResetPasswordRequest;
+import com.koibreeding.dto.request.VerifyResetCodeRequest;
+import com.koibreeding.dto.response.LoginResponse;
+import com.koibreeding.dto.response.ResAuthDto;
+import com.koibreeding.dto.response.ResUserDto;
+import com.koibreeding.enums.PhTrend;
+import com.koibreeding.enums.Role;
+import com.koibreeding.enums.UserStatus;
+import com.koibreeding.repository.AuthRepository;
+import com.koibreeding.repository.PondRepository;
+import com.koibreeding.repository.UserRepository;
+import com.koibreeding.repository.WalletRepository;
 
 import jakarta.mail.internet.MimeMessage;
-
-import javax.security.sasl.AuthenticationException;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Locale;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -166,7 +162,7 @@ public class AuthService {
                 .orElseGet(() ->
                         userRepository.findByEmail(loginInput)
                                 .orElseThrow(() ->
-                                        new RuntimeException("Invalid username/email or password")
+                                        new RuntimeException("Invalid username/email")
                                 )
                 );
 
@@ -224,8 +220,8 @@ public class AuthService {
             userRepository.save(user);
 
             throw new RuntimeException(
-                    "Invalid username/email or password. Attempt "
-                            + failedAttempts + "/5"
+                    "Invalid password "
+                            + failedAttempts + "/5 password wrong 5/5 will be banned"
             );
         }
     }

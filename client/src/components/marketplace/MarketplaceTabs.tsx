@@ -80,16 +80,6 @@ export interface ShopFilters {
   gender: FishGender;
 }
 
-const categories: {
-  value: MarketplaceCategory;
-  label: string;
-}[] = [
-  { value: "ALL", label: "🐟 Breed" },
-  { value: "KOHAKU", label: "🐟 Kohaku" },
-  { value: "SHOWA", label: "🐟 Showa" },
-  { value: "OGON", label: "🐟 Ogon" },
-];
-
 const genders: {
   value: FishGender;
   label: string;
@@ -351,15 +341,6 @@ export default function ShopFiltersBar({
         placeholder="🔍 Search by fish name, breed..."
         value={draft.keyword}
         onChange={(e) => update("keyword", e.target.value)}
-      />
-
-      <OptionDropdown
-        value={draft.category}
-        options={categories}
-        placeholder="🐟 Breed"
-        onChange={(value) => update("category", value)}
-        open={openDropdown === "breed"}
-        onToggle={() => toggleDropdown("breed")}
       />
 
       <OptionDropdown

@@ -1,9 +1,14 @@
 package com.koibreeding.dto.request;
 
-import com.koibreeding.enums.Gender;
-import lombok.*;
-
 import java.math.BigDecimal;
+
+import com.koibreeding.enums.Gender;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Setter
 @Getter
@@ -20,4 +25,5 @@ public class ResMarketListKoi {
     BigDecimal weight;
     BigDecimal length;
     String imageUrl;
+    Integer price;
 }

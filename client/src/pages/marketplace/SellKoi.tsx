@@ -10,87 +10,12 @@ import MarketplaceState from "../../components/marketplace/MarketplaceState";
 import TransactionNavigation from "../../components/marketplace/TransactionNavigation";
 import { useAuth } from "../../context/AuthContext";
 
-// interface KoiCard {
-//   id: number;
-//   name: string;
-//   rarity: "Legendary" | "Premium" | "Standard";
-//   image: string;
-//   gender: "male" | "female";
-//   pond: string;
-//   length: string;
-//   weight: string;
-//   value: number;
-//   imageAlt: string;
-// }
-
 const AddList: React.FC = () => {
   const { currentUserId } = useAuth();
   const [selectedPond, setSelectedPond] = useState("ALL");
   const [selectedGender, setSelectedGender] = useState("ALL");
   const [sortBy, setSortBy] = useState("VALUE");
   const [refreshKey, setRefreshKey] = useState(0);
-
-  // Tạm thời mock data
-  // const koiCards: KoiCard[] = [
-  //   {
-  //     id: 1,
-  //     name: "Grand Kohaku",
-  //     rarity: "Legendary",
-  //     image:
-  //       "https://lh3.googleusercontent.com/aida-public/AB6AXuDuab3rqzvQzERwWp3eyiIWin63ZfkiGE_vQM8mTMZsHURdi3dgfbgC4jEVHUGZeL4rpTARUKQz3NR2Bn-4QtmLpEMA68zEPfibwd9ggKdCQ2Bb9Ok7mcrzkypqdO8GWQR0OdsvKBA0lK-OSGR2apI5skn2rQWpwF2IIVUlt-wThR1SCiJY6IUxNL9BmQj6YzCmzUujRC5YIbbwOQtulatS5PgI0LmDV7MWeBoZSKDDV24NQqW8otFp",
-  //     gender: "male",
-  //     pond: "Hồ #1",
-  //     length: "85 cm",
-  //     weight: "12.5 kg",
-  //     value: 15000,
-  //     imageAlt:
-  //       "A top-down view of a stunning legendary Kohaku Koi fish swimming in crystal clear, rippling blue water.",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Taisho Sanke",
-  //     rarity: "Premium",
-  //     image:
-  //       "https://lh3.googleusercontent.com/aida-public/AB6AXuCtDT-SgGecLPfNxRVspbEUxOP7w2Mqv7_-sJdA5aaNujfzhy6QGYUa8gLxEFtNqt-tP6hr7zz9nzT-QzeTPh_wcO86YKIp1U9qErGf-QMPgMhAuTQcJlllNv96EWwUr0784_8GYHFownfECTlVfDFOpAsziVvosGfwuyoU-mikO5vFZgn9Km-IOW5m8g1wpONq-JIVvQux2K5YeeuouP9y8G9BVsgna77zfzcusAPQkBt6q7RofXlT",
-  //     gender: "female",
-  //     pond: "Hồ #1",
-  //     length: "65 cm",
-  //     weight: "8.2 kg",
-  //     value: 5200,
-  //     imageAlt:
-  //       "A top-down view of a beautiful premium Taisho Sanke Koi Koi fish swimming in clear, rippling light blue water.",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Orange Ogon",
-  //     rarity: "Standard",
-  //     image:
-  //       "https://lh3.googleusercontent.com/aida-public/AB6AXuBhqxSRqyyjzjfjg4qUQ_pAhhTIcpvcOrx-NRZjxtxO2ozwU1hMNOxT9lz-TFsmY50RUOPZgnu3Ai3UQf8R2Rn7d5_cVOh0Owq1A0d5tJfZA4uw4zj6XVTYxnyBdGIu6fcuXm9X-OTfNjePt2cGJoK27uIcFtgX6fynCuOM6mVSNTW8lxTSVChV9liSBy1tAKyrn4k_nkrw5acpOg-Ozddm-dzK5RF5aSJKDopLVWv2yMp04uWIMKvu",
-  //     gender: "male",
-  //     pond: "Hồ #2",
-  //     length: "45 cm",
-  //     weight: "4.1 kg",
-  //     value: 1200,
-  //     imageAlt:
-  //       "A top-down view of a standard solid orange Ogon Koi fish swimming in calm, slightly green-tinted water.",
-  //   },
-  // ];
-
-  const getRarityColor = (rarity: string): string => {
-    switch (rarity) {
-      case "Legendary":
-        return "#f5b700";
-
-      case "Premium":
-        return "#db57fc";
-
-      case "Standard":
-        return "#51adf8";
-
-      default:
-        return "#8bc34a";
-    }
-  };
 
   const [kois, setKois] = useState<MarketplaceKoi[]>([]);
   const [loading, setLoading] = useState(false);
@@ -114,7 +39,7 @@ const AddList: React.FC = () => {
         const initialPrices: Record<number, number> = {};
 
         data.forEach((koi) => {
-          initialPrices[koi.koiId] = koi.price ?? 1000;
+          initialPrices[koi.koiId] = koi.price;
         });
 
         setPrices(initialPrices);
@@ -156,12 +81,9 @@ const AddList: React.FC = () => {
           );
         if (sortBy === "SIZE")
           return Number(right.length) - Number(left.length);
-        return (
-          (prices[right.koiId] ?? right.price ?? 0) -
-          (prices[left.koiId] ?? left.price ?? 0)
-        );
+        return right.price - left.price;
       });
-  }, [kois, prices, selectedGender, selectedPond, sortBy]);
+  }, [kois, selectedGender, selectedPond, sortBy]);
 
   const clearFilters = () => {
     setSelectedPond("ALL");
@@ -176,7 +98,7 @@ const AddList: React.FC = () => {
     }));
   };
   const handleSell = async (koi: MarketplaceKoi) => {
-    const price = prices[koi.koiId] ?? 1000;
+    const price = prices[koi.koiId] ?? koi.price;
 
     try {
       setSellingKoiId(koi.koiId);
@@ -367,7 +289,8 @@ const AddList: React.FC = () => {
                 <span className="gold-icon">🪙</span>
 
                 <span className="price">
-                  {(prices[koi.koiId] ?? 1000).toLocaleString("vi-VN")} Koins
+                  {(prices[koi.koiId] ?? koi.price).toLocaleString("vi-VN")}{" "}
+                  Koins
                 </span>
               </div>
 
@@ -378,7 +301,7 @@ const AddList: React.FC = () => {
                   onClick={() =>
                     handlePriceChange(
                       koi.koiId,
-                      Math.max(100, (prices[koi.koiId] ?? 1000) - 100),
+                      Math.max(0, (prices[koi.koiId] ?? koi.price) - 100),
                     )
                   }
                 >
@@ -387,10 +310,10 @@ const AddList: React.FC = () => {
 
                 <input
                   type="range"
-                  min="100"
-                  max="5000"
-                  step="100"
-                  value={prices[koi.koiId] ?? 1000}
+                  min="0"
+                  max={koi.price}
+                  step="1"
+                  value={prices[koi.koiId] ?? koi.price}
                   onChange={(e) =>
                     handlePriceChange(koi.koiId, Number(e.target.value))
                   }
@@ -403,7 +326,10 @@ const AddList: React.FC = () => {
                   onClick={() =>
                     handlePriceChange(
                       koi.koiId,
-                      Math.min(5000, (prices[koi.koiId] ?? 1000) + 100),
+                      Math.min(
+                        koi.price,
+                        (prices[koi.koiId] ?? koi.price) + 100,
+                      ),
                     )
                   }
                 >

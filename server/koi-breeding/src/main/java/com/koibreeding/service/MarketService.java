@@ -24,6 +24,7 @@ import com.koibreeding.dto.request.ResMarketListKoi;
 import com.koibreeding.dto.request.ResMarketSellKoi;
 import com.koibreeding.dto.response.ResMarketDto;
 import com.koibreeding.dto.response.ResTradeDto;
+import com.koibreeding.enums.ListingStatus;
 import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.repository.MarketRepository;
 import com.koibreeding.repository.PondRepository;
@@ -221,12 +222,13 @@ public class MarketService {
                         koi.getGender(),
                         koi.getWeight(),
                         koi.getLength(),
-                        koi.getDictionary().getImageUrl()))
+                        koi.getDictionary().getImageUrl(),
+                        koi.getPrice()))
                 .toList();
     }
 
     public List<ResMarketKois> getMarketListBuyKois(Integer userId) {
-        List<Marketplace> marketKois = marketRepository.findBySellerId(userId);
+        List<Marketplace> marketKois = marketRepository.findBySellerIdAndStatus(userId, ListingStatus.ACTIVE);
         if (marketKois == null) {
             throw new RuntimeException("Your pond has not fish");
         }
@@ -334,14 +336,12 @@ public class MarketService {
                 seller.getId(),
                 BigDecimal.valueOf(marketplace.getPrice()));
 
-        pond.setOwner(buyer);
-        pondRepository.save(pond);
-
         koi.setPond(pond);
 
         koiRepository.save(koi);
 
-        marketRepository.delete(marketplace);
+        marketplace.setStatus(ListingStatus.SOLD);
+        marketRepository.save(marketplace);
 
         Trade trade = new Trade();
         trade.setSeller(seller);

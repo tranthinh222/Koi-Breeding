@@ -97,8 +97,11 @@ public class InventoryService {
         if (quantityNew == 0) {
             inventoryRepository.delete(inventory);
             return new ResItemInventory(
-                    inventory.getItem().getId(), inventory.getItem().getName(), inventory.getItem().getPrice(),
-                    inventory.getItem().getItemType(), inventory.getItem().getEffectValue(),
+                    inventory.getItem().getId(),
+                    inventory.getItem().getName(),
+                    inventory.getItem().getPrice(),
+                    inventory.getItem().getItemType(),
+                    inventory.getItem().getEffectValue(),
                     inventory.getItem().getEffectType(),
                     inventory.getItem().getDescription(), 0, inventory.getItem().getItemUrl());
         }

@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: localhost:8090/koi_breeding/marketplace/listKoi?userId=1
+  url: localhost:8090/koi_breeding/api/v1/marketplace/listKoi?userId=1
   params:
     - name: userId
       value: "1"

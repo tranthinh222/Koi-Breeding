@@ -523,6 +523,35 @@
   text-align: center;
 }
 
+.inventory-target-field {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  margin-top: 12px;
+  color: #5b3a1f;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.inventory-target-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--wood-border);
+  border-radius: 10px;
+  background: white;
+  color: #5b3a1f;
+  font: inherit;
+}
+
+.action-hint {
+  margin: 0;
+  color: #7a5a3a;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
 /* =========================
    INVENTORY ACTIONS
 ========================= */

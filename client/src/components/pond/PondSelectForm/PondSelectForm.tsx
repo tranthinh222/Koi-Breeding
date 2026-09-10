@@ -23,6 +23,8 @@ function PondSelectForm({
   const [pondList, setPondList] = useState<IPond[]>([]);
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
 
   // Fetch the page data
   useEffect(() => {
@@ -33,7 +35,7 @@ function PondSelectForm({
       }
 
       try {
-        const response = await fetchData(page, 6);
+        const response = await fetchData(page, 6, appliedSearch);
 
         if (response.meta.totalElements === 0) {
           console.info(
@@ -46,7 +48,7 @@ function PondSelectForm({
         }
 
         setPondList(response.result);
-        setTotalPages(response.meta.totalPages);
+        setTotalPages(Math.max(1, response.meta.totalPages));
       } catch (error) {
         console.error(
           "Failed to fetch ponds; using frontend sample data:",
@@ -59,14 +61,15 @@ function PondSelectForm({
     };
 
     loadData();
-  }, [currentUserId, page]);
+  }, [currentUserId, page, appliedSearch]);
 
   const fetchData = async (
     page: number,
     pageSize: number,
+    search: string,
   ): Promise<IModelPagination<IPond>> => {
     const response = await callFetchAllPonds(
-      `owner=${currentUserId}&page=${page - 1}&size=${pageSize}`,
+      `owner=${currentUserId}&search=${encodeURIComponent(search)}&page=${page - 1}&size=${pageSize}`,
     );
 
     if (response && response.data) {
@@ -82,6 +85,11 @@ function PondSelectForm({
       },
       result: [],
     };
+  };
+
+  const handleSearch = () => {
+    setPage(1);
+    setAppliedSearch(searchTerm.trim());
   };
 
   const handlePageChange = (newPage: number) => {
@@ -123,16 +131,28 @@ function PondSelectForm({
           <div className={styles.searchPanel}>
             <div className={styles.searchWrapper}>
               <Search size="30" color="#a9acb1" />
-              <input type="text" placeholder="Search by name" />
+              <input
+                type="text"
+                placeholder="Search by name"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") handleSearch();
+                }}
+              />
             </div>
-            <button type="button" className={styles.searchButton}>
+            <button
+              type="button"
+              className={styles.searchButton}
+              onClick={handleSearch}
+            >
               <Search size="30" color="#ffffff" />
             </button>
           </div>
         </div>
 
         <div className={styles.pondGrid}>
-          {pondList.slice(0, 6).map((pond, index) => (
+          {pondList.map((pond, index) => (
             <div
               key={pond.id}
               className={styles.pondItem}

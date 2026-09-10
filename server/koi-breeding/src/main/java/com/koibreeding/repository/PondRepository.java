@@ -11,6 +11,7 @@ import com.koibreeding.domain.Pond;
 
 public interface PondRepository extends JpaRepository<Pond, Integer> {
     Page<Pond> findAllByOwner_Id(Integer ownerId, Pageable pageable);
+    Page<Pond> findByOwner_IdAndNameContainingIgnoreCase(Integer ownerId, String name, Pageable pageable);
     List<Pond> findByOwner_IdAndName(Integer ownerId, String name);
 
     List<Pond> findByOwnerId(Integer id);

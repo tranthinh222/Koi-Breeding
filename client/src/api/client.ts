@@ -1,5 +1,39 @@
 import axios, { AxiosError } from "axios";
 
+type ApiErrorPayload = {
+  message?: unknown;
+  error?: unknown;
+  data?: {
+    message?: unknown;
+  } | null;
+};
+
+export function getApiErrorMessage(
+  error: unknown,
+  fallbackMessage = "Something went wrong. Please try again.",
+): string {
+  if (axios.isAxiosError(error)) {
+    const payload = error.response?.data as
+      | ApiErrorPayload
+      | string
+      | undefined;
+    const responseMessage =
+      typeof payload === "string"
+        ? payload
+        : (payload?.message ?? payload?.error ?? payload?.data?.message);
+
+    if (typeof responseMessage === "string" && responseMessage.trim()) {
+      return responseMessage.trim();
+    }
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return fallbackMessage;
+}
+
 export const apiClient = axios.create({
   baseURL:
     import.meta.env.VITE_API_BASE_URL ??

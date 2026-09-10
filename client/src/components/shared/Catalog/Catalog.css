@@ -95,7 +95,7 @@
 }
 
 .shop-main .fish-card::before {
-  content: '';
+  content: "";
 
   position: absolute;
 
@@ -320,6 +320,9 @@
 }
 
 .shop-main .detail-panel .description {
+  box-sizing: border-box;
+  max-height: 120px;
+  overflow-y: auto;
   border-left: 4px solid #c8a46b;
   padding-left: 10px;
 }
@@ -357,11 +360,16 @@
 }
 
 @media (max-width: 1100px) {
-  .shop-main { grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; }
+  .shop-main {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 20px;
+  }
 }
 
 @media (max-width: 900px) {
-  .shop-main { grid-template-columns: 1fr; }
+  .shop-main {
+    grid-template-columns: 1fr;
+  }
   .shop-main .detail-panel {
     position: relative;
     top: auto;
@@ -372,7 +380,9 @@
 }
 
 @media (max-width: 700px) {
-  .shop-main { width: 94%; }
+  .shop-main {
+    width: 94%;
+  }
   .shop-main .fish-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 15px;
@@ -380,6 +390,10 @@
 }
 
 @media (max-width: 500px) {
-  .shop-main { width: 94%; }
-  .shop-main .fish-grid { grid-template-columns: 1fr; }
+  .shop-main {
+    width: 94%;
+  }
+  .shop-main .fish-grid {
+    grid-template-columns: 1fr;
+  }
 }

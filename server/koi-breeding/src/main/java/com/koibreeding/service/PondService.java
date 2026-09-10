@@ -246,7 +246,13 @@ public class PondService {
     }
 
     public ResultPaginationDTO handleFetchPondsByOwner(Integer id, Pageable pageable) {
-        Page<Pond> pagePond = this.pondRepository.findAllByOwner_Id(id, pageable);
+        return handleFetchPondsByOwner(id, null, pageable);
+    }
+
+    public ResultPaginationDTO handleFetchPondsByOwner(Integer id, String search, Pageable pageable) {
+        Page<Pond> pagePond = search == null || search.isBlank()
+                ? this.pondRepository.findAllByOwner_Id(id, pageable)
+                : this.pondRepository.findByOwner_IdAndNameContainingIgnoreCase(id, search.trim(), pageable);
         ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 

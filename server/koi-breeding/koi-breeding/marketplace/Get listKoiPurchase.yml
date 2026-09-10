@@ -5,10 +5,10 @@ info:
 
 http:
   method: GET
-  url: localhost:8090/koi_breeding/marketplace/koiPurchase?userId=2
+  url: localhost:8090/koi_breeding/api/v1/marketplace/koiPurchase?userId=1
   params:
     - name: userId
-      value: "2"
+      value: "1"
       type: query
   auth: inherit
 

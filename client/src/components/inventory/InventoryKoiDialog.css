@@ -1,0 +1,201 @@
+.inventory-koi-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(42, 24, 10, 0.58);
+}
+
+.inventory-koi-dialog {
+  width: min(680px, 100%);
+  max-height: min(720px, calc(100vh - 40px));
+  overflow-y: auto;
+  padding: 24px;
+  border: 4px solid #8a5527;
+  border-radius: 22px;
+  background: #fffaf0;
+  box-shadow: 0 24px 70px rgba(37, 20, 5, 0.38);
+}
+
+.inventory-koi-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.inventory-koi-dialog-eyebrow {
+  margin: 0 0 4px;
+  color: #a06b35;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.inventory-koi-dialog h2 {
+  margin: 0;
+  color: #5f3818;
+  font-size: 25px;
+}
+
+.inventory-koi-dialog-header > button {
+  border: 0;
+  background: transparent;
+  color: #69401f;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.inventory-koi-dialog-list {
+  display: grid;
+  gap: 12px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.inventory-koi-option {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.2fr) 1fr 1fr;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 13px;
+  border: 3px solid #d5ae77;
+  border-radius: 15px;
+  background: #f8ead2;
+  color: #5f3818;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.inventory-koi-option:hover,
+.inventory-koi-option.selected {
+  border-color: #e89218;
+  background: #ffe2a8;
+  transform: translateY(-2px);
+}
+
+.inventory-koi-option-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.inventory-koi-option-main img,
+.inventory-koi-option-placeholder {
+  display: grid;
+  place-items: center;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #bdeafa;
+  object-fit: contain;
+  font-size: 30px;
+}
+
+.inventory-koi-option-main span:last-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.inventory-koi-option strong,
+.inventory-koi-option small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-koi-option small {
+  color: #86623f;
+}
+
+.inventory-koi-stat {
+  display: grid;
+  gap: 5px;
+}
+
+.inventory-koi-stat-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #765537;
+  font-size: 12px;
+}
+
+.inventory-koi-progress {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ead8bd;
+}
+
+.inventory-koi-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.inventory-koi-progress .hunger {
+  background: #e89218;
+}
+.inventory-koi-progress .health {
+  background: #5a913b;
+}
+
+.inventory-koi-dialog-message,
+.inventory-koi-dialog-error {
+  margin: 18px 0;
+  text-align: center;
+}
+
+.inventory-koi-dialog-error {
+  color: #b3261e;
+  font-weight: 700;
+}
+
+.inventory-koi-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.inventory-koi-dialog-actions button {
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.inventory-koi-dialog-actions .cancel {
+  background: #ead8bd;
+  color: #5f3818;
+}
+.inventory-koi-dialog-actions .confirm {
+  background: #5a913b;
+  color: white;
+}
+.inventory-koi-dialog-actions .confirm:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 620px) {
+  .inventory-koi-option {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

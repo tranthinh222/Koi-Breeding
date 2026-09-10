@@ -24,6 +24,7 @@ import com.koibreeding.dto.request.ResMarketListKoi;
 import com.koibreeding.dto.request.ResMarketSellKoi;
 import com.koibreeding.dto.response.ResMarketDto;
 import com.koibreeding.dto.response.ResTradeDto;
+import com.koibreeding.enums.ListingStatus;
 import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.repository.MarketRepository;
 import com.koibreeding.repository.PondRepository;
@@ -48,9 +49,9 @@ public class MarketService {
         return marketRepository.findAll().stream()
                 .map(marketplace -> new ResMarketDto(
                         marketplace.getId(),
-                        marketplace.getKoi().getName(),
+                    marketplace.getKoi().getName(),
                         marketplace.getKoi().getId(),
-                        marketplace.getKoi().getName(),
+                        marketplace.getKoi().getDictionary().getImageUrl(),
                         marketplace.getPrice(),
                         marketplace.getDescription(),
                         marketplace.getSeller().getId(),
@@ -194,7 +195,7 @@ public class MarketService {
                         marketplace.getId(),
                         marketplace.getKoi().getName(),
                         marketplace.getKoi().getId(),
-                        marketplace.getKoi().getName(),
+                    marketplace.getKoi().getDictionary().getImageUrl(),
                         marketplace.getPrice(),
                         marketplace.getDescription(),
                         marketplace.getSeller().getId(),
@@ -215,17 +216,19 @@ public class MarketService {
                 .map(koi -> new ResMarketListKoi(
                         koi.getId(),
                         koi.getPond().getId(),
+                        koi.getPond().getName(),
                         koi.getName(),
                         koi.getName(),
                         koi.getGender(),
                         koi.getWeight(),
                         koi.getLength(),
-                        koi.getName()))
+                        koi.getDictionary().getImageUrl(),
+                        koi.getPrice()))
                 .toList();
     }
 
     public List<ResMarketKois> getMarketListBuyKois(Integer userId) {
-        List<Marketplace> marketKois = marketRepository.findBySellerId(userId);
+        List<Marketplace> marketKois = marketRepository.findBySellerIdAndStatus(userId, ListingStatus.ACTIVE);
         if (marketKois == null) {
             throw new RuntimeException("Your pond has not fish");
         }
@@ -233,12 +236,13 @@ public class MarketService {
                 .map(marketplace -> new ResMarketKois(
                         marketplace.getKoi().getId(),
                         marketplace.getKoi().getPond().getId(),
+                        marketplace.getKoi().getPond().getName(),
                         marketplace.getKoi().getName(),
                         marketplace.getKoi().getName(),
                         marketplace.getKoi().getGender(),
                         marketplace.getKoi().getWeight(),
                         marketplace.getKoi().getLength(),
-                        marketplace.getKoi().getName(),
+                        marketplace.getKoi().getDictionary().getImageUrl(),
                         marketplace.getPrice()))
                 .toList();
     }
@@ -266,7 +270,7 @@ public class MarketService {
                 marketplaceNew.getId(),
                 marketplaceNew.getKoi().getName(),
                 marketplaceNew.getKoi().getId(),
-                marketplaceNew.getKoi().getName(),
+                marketplaceNew.getKoi().getDictionary().getImageUrl(),
                 marketplaceNew.getPrice(),
                 marketplaceNew.getDescription(),
                 marketplace.getSeller().getId(),
@@ -332,14 +336,12 @@ public class MarketService {
                 seller.getId(),
                 BigDecimal.valueOf(marketplace.getPrice()));
 
-        pond.setOwner(buyer);
-        pondRepository.save(pond);
-
         koi.setPond(pond);
 
         koiRepository.save(koi);
 
-        marketRepository.delete(marketplace);
+        marketplace.setStatus(ListingStatus.SOLD);
+        marketRepository.save(marketplace);
 
         Trade trade = new Trade();
         trade.setSeller(seller);

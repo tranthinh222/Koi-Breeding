@@ -31,11 +31,14 @@
 .marketplace-main .fish-grid {
   display: grid;
 
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(190px, 260px));
 
   gap: 20px;
+  padding: 16px 20px 24px;
+  box-sizing: border-box;
   width: 100%;
   align-items: start;
+  justify-content: center;
 }
 
 /* =========================
@@ -56,7 +59,7 @@
   min-height: 0;
   height: auto;
 
-  margin: 0 auto;
+  margin: 0;
 
   padding: 14px;
   box-sizing: border-box;
@@ -649,6 +652,9 @@
 ========================= */
 
 .marketplace-main .detail-panel .description {
+  box-sizing: border-box;
+  max-height: 120px;
+  overflow-y: auto;
   margin: 10px 0;
 
   padding: 8px 10px;
@@ -1519,7 +1525,8 @@
 
   .marketplace-main .item-grid,
   .marketplace-main .fish-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 260px));
+    padding-inline: 12px;
   }
 }
 
@@ -1564,6 +1571,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
 
     gap: 15px;
+    padding-inline: 8px;
   }
 
   .marketplace-main .fish-card {
@@ -1575,6 +1583,7 @@
   .marketplace-main .item-grid,
   .marketplace-main .fish-grid {
     grid-template-columns: 1fr;
+    padding-inline: 4px;
   }
 
   .marketplace-main .fish-image {

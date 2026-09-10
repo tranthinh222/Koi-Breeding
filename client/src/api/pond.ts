@@ -7,75 +7,90 @@ import type { IModelPagination, IPond, IRestResponse } from "../types/backend";
 import { apiClient } from "./client";
 
 export interface Pond {
-	id: number;
-	name: string;
-	capacity: number;
-	currentKoi: number;
+  id: number;
+  name: string;
+  capacity: number;
+  currentKoi: number;
 }
 
 export interface IRequestBuyPondDTO {
-	name: string;
-	description: string;
-	price: number;
-	ownerId: number;
+  name: string;
+  description: string;
+  price: number;
+  ownerId: number;
 }
 
 export interface IResponseBuyPondDTO {
-	pond: IPond;
-	balance: number;
+  pond: IPond;
+  balance: number;
 }
 
 export interface IResponseUpgradePondDTO {
-	pond: IPond;
-	balance: number;
+  pond: IPond;
+  balance: number;
 }
 
 export const callBuyPond = (requestBuyPondDTO: IRequestBuyPondDTO) => {
-	return apiClient.post<IRestResponse<IResponseBuyPondDTO>>("/ponds", {
-		...requestBuyPondDTO,
-	});
+  return apiClient.post<IRestResponse<IResponseBuyPondDTO>>("/ponds", {
+    ...requestBuyPondDTO,
+  });
 };
 
 export const callFetchAllPonds = (query: string) => {
-	return apiClient.get<IRestResponse<IModelPagination<IPond>>>(
-		`/ponds?${query}`,
-	);
+  return apiClient.get<IRestResponse<IModelPagination<IPond>>>(
+    `/ponds?${query}`,
+  );
 };
 
 export const callUpdatePond = (pond: IPond) => {
-	return apiClient.put<IRestResponse<IPond>>("/ponds", { ...pond });
+  return apiClient.put<IRestResponse<IPond>>("/ponds", { ...pond });
 };
 
 export const callUpgradePond = (pondId: number) => {
-	return apiClient.put<IRestResponse<IResponseUpgradePondDTO>>(
-		`/ponds/upgrade?pondId=${pondId}`,
-	);
+  return apiClient.put<IRestResponse<IResponseUpgradePondDTO>>(
+    `/ponds/upgrade?pondId=${pondId}`,
+  );
 };
 
 export async function getPondsByOwner(userId: number): Promise<Pond[]> {
-	const response = await apiClient.get<IRestResponse<Pond[]>>("/ponds/owner", {
-		params: { userId },
-	});
-	return response.data.data ?? [];
+  const response = await apiClient.get<IRestResponse<Pond[]>>("/ponds/owner", {
+    params: { userId },
+  });
+  return response.data.data ?? [];
+}
+
+export async function useEnvironmentItem(
+  pondId: number,
+  itemId: number,
+  userId: number,
+  quantity: number,
+): Promise<void> {
+  await apiClient.post(
+    `/ponds/${pondId}/items/${itemId}/usages`,
+    { quantity },
+    { params: { userId } },
+  );
 }
 
 export async function getPonds(
-	page = 0,
-	size = 20,
-	owner: number,
+  page = 0,
+  size = 20,
+  owner: number,
 ): Promise<IModelPagination<IPond>> {
-	const response = await apiClient.get<IRestResponse<IModelPagination<IPond>>>(
-		"/ponds",
-		{ params: { owner, page, size } },
-	);
+  const response = await apiClient.get<IRestResponse<IModelPagination<IPond>>>(
+    "/ponds",
+    { params: { owner, page, size } },
+  );
 
-	return response.data.data ?? {
-		meta: {
-			page: page + 1,
-			pageSize: size,
-			totalPages: 0,
-			totalElements: 0,
-		},
-		result: [],
-	};
+  return (
+    response.data.data ?? {
+      meta: {
+        page: page + 1,
+        pageSize: size,
+        totalPages: 0,
+        totalElements: 0,
+      },
+      result: [],
+    }
+  );
 }

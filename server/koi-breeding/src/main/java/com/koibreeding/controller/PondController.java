@@ -1,6 +1,7 @@
 package com.koibreeding.controller;
 
-import com.koibreeding.dto.request.PondSelectDto;
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.koibreeding.domain.Pond;
+import com.koibreeding.dto.request.PondSelectDto;
 import com.koibreeding.dto.request.RequestBuyPondDTO;
 import com.koibreeding.dto.request.UsePondItemRequest;
 import com.koibreeding.dto.response.ResBuyOrUpgradePondDTO;
@@ -23,7 +25,6 @@ import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.service.PondService;
 
 import jakarta.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -72,8 +73,9 @@ public class PondController {
 
     @GetMapping("/ponds")
     public ResponseEntity<ResultPaginationDTO> getAllPondsByOwner(@RequestParam("owner") Integer ownerId,
+            @RequestParam(required = false) String search,
             Pageable pageable) {
-        ResultPaginationDTO pondList = pondService.handleFetchPondsByOwner(ownerId, pageable);
+        ResultPaginationDTO pondList = pondService.handleFetchPondsByOwner(ownerId, search, pageable);
 
         return ResponseEntity.ok(pondList);
     }

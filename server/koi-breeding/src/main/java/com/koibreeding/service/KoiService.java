@@ -6,8 +6,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.koibreeding.domain.Dictionary;
 import com.koibreeding.domain.Inventory;
@@ -15,8 +17,8 @@ import com.koibreeding.domain.Item;
 import com.koibreeding.domain.Koi;
 import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Pond;
-import com.koibreeding.dto.request.RequestMoveKoiDTO;
 import com.koibreeding.dto.request.RequestFeedKoiDTO;
+import com.koibreeding.dto.request.RequestMoveKoiDTO;
 import com.koibreeding.dto.request.RequestReleaseKoiDTO;
 import com.koibreeding.dto.response.ResFeedKoiDTO;
 import com.koibreeding.dto.response.ResItemInventory;
@@ -25,8 +27,6 @@ import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.ItemType;
 import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.util.formulas.KoiFormula;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class KoiService {
@@ -200,7 +200,6 @@ public class KoiService {
                 currentKoi.setPond(pond);
             }
 
-            currentKoi.setPond(new Pond());
             currentKoi.setLifeStage(koi.getLifeStage() != null ? koi.getLifeStage() : currentKoi.getLifeStage());
             currentKoi.setFather(koi.getFather() != null ? koi.getFather() : currentKoi.getFather());
             currentKoi.setMother(koi.getMother() != null ? koi.getMother() : currentKoi.getMother());
@@ -248,6 +247,7 @@ public class KoiService {
         return resultPaginationDTO;
     }
 
+    @Transactional(readOnly = true)
     public List<ResKoiDTO> handleFetchAllKoisInPond(Integer pondId) {
         return this.koiRepository.findAllByPond_Id(pondId).stream().map(this::convertToResKoiDTO)
                 .collect(Collectors.toList());
@@ -285,8 +285,12 @@ public class KoiService {
         resKoiDTO.setGender(koi.getGender());
         resKoiDTO.setPrice(koi.getPrice());
         resKoiDTO.setMutation(koiMutation);
-        resKoiDTO.setBornedAt(koi.getBornedAt().toInstant());
-        resKoiDTO.setPondId(koi.getPond().getId());
+        if (koi.getBornedAt() != null) {
+            resKoiDTO.setBornedAt(koi.getBornedAt().toInstant());
+        }
+        if (koi.getPond() != null) {
+            resKoiDTO.setPondId(koi.getPond().getId());
+        }
         resKoiDTO.setLifeStage(koi.getLifeStage());
         Koi father = koi.getFather();
         Koi mother = koi.getMother();
@@ -295,10 +299,14 @@ public class KoiService {
             ResKoiDTO.KoiParent fatherData = new ResKoiDTO.KoiParent();
             fatherData.setId(father.getId());
             fatherData.setName(father.getName());
-            fatherData.setImageUrl(father.getDictionary().getImageUrl());
-            Integer koiUser = koi.getPond().getOwner().getId();
-            Integer fatherUser = father.getPond().getOwner().getId();
-            fatherData.setBelongToUser(koiUser.equals(fatherUser));
+                if (father.getDictionary() != null) {
+                fatherData.setImageUrl(father.getDictionary().getImageUrl());
+                }
+                Integer koiUser = koi.getPond() != null && koi.getPond().getOwner() != null
+                    ? koi.getPond().getOwner().getId() : null;
+                Integer fatherUser = father.getPond() != null && father.getPond().getOwner() != null
+                    ? father.getPond().getOwner().getId() : null;
+                fatherData.setBelongToUser(koiUser != null && koiUser.equals(fatherUser));
             resKoiDTO.setFather(fatherData);
         }
 
@@ -306,11 +314,15 @@ public class KoiService {
             ResKoiDTO.KoiParent motherData = new ResKoiDTO.KoiParent();
             motherData.setId(mother.getId());
             motherData.setName(mother.getName());
-            motherData.setImageUrl(mother.getDictionary().getImageUrl());
-            Integer koiUser = koi.getPond().getOwner().getId();
-            Integer motherUser = mother.getPond().getOwner().getId();
-            motherData.setBelongToUser(koiUser.equals(motherUser));
-            resKoiDTO.setFather(motherData);
+                if (mother.getDictionary() != null) {
+                motherData.setImageUrl(mother.getDictionary().getImageUrl());
+                }
+                Integer koiUser = koi.getPond() != null && koi.getPond().getOwner() != null
+                    ? koi.getPond().getOwner().getId() : null;
+                Integer motherUser = mother.getPond() != null && mother.getPond().getOwner() != null
+                    ? mother.getPond().getOwner().getId() : null;
+                motherData.setBelongToUser(koiUser != null && koiUser.equals(motherUser));
+                resKoiDTO.setMother(motherData);
         }
 
         resKoiDTO.setPotential(koi.getPotential());

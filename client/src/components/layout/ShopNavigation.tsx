@@ -6,7 +6,7 @@ import {
   UserRound,
   Waves,
 } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 export default function ShopNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,7 +45,13 @@ export default function ShopNavigation() {
       </button>
 
       <button
-        className={location.pathname === "/marketplace" ? "active" : ""}
+        className={
+          ["/marketplace", "/sell", "/buy", "/transactions"].includes(
+            location.pathname,
+          )
+            ? "active"
+            : ""
+        }
         onClick={() => navigate("/marketplace")}
       >
         <ReceiptText />

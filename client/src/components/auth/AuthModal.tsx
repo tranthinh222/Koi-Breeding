@@ -22,6 +22,8 @@ interface AuthModalProps {
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_REGEX = /^[A-Za-z0-9_]{3,50}$/;
+const PASSWORD_ASCII_REGEX = /^[!-~]{8,64}$/;
 
 const PASSWORD_RULES = [
 	{
@@ -36,6 +38,10 @@ const PASSWORD_RULES = [
 	{
 		label: "At least 1 special character",
 		test: (value: string) => /[^A-Za-z0-9]/.test(value),
+	},
+	{
+		label: "Only ASCII characters, without spaces (max 64)",
+		test: (value: string) => PASSWORD_ASCII_REGEX.test(value),
 	},
 ];
 
@@ -83,6 +89,14 @@ const LOCATIONS = [
 	{ value: "BUON_MA_THUOT", label: "Buon Ma Thuot" },
 ] as const;
 
+const getLocalToday = () => {
+	const today = new Date();
+	const timezoneOffset = today.getTimezoneOffset() * 60_000;
+	return new Date(today.getTime() - timezoneOffset)
+		.toISOString()
+		.slice(0, 10);
+};
+
 export default function AuthModal({
 	isOpen,
 	mode,
@@ -116,6 +130,7 @@ export default function AuthModal({
 	const [registering, setRegistering] = useState(false);
 	const registrationInFlight = useRef(false);
 	const [registerError, setRegisterError] = useState<string | null>(null);
+	const today = getLocalToday();
 
 	// Forgot password state
 	const [forgotStep, setForgotStep] = useState<ForgotStep>("email");
@@ -176,14 +191,27 @@ export default function AuthModal({
 			setRegisterError(null);
 			setAuthNotice(null);
 
-			if (!username.trim()) throw new Error("Username is required");
+			if (!username) throw new Error("Username is required");
+			if (!USERNAME_REGEX.test(username)) {
+				throw new Error(
+					"Username must be 3-50 ASCII letters, numbers, or underscores without spaces",
+				);
+			}
 			if (!EMAIL_REGEX.test(email.trim())) {
 				throw new Error("Invalid email format");
 			}
 			if (!birthday) throw new Error("Birthday is required");
+			if (birthday > today) {
+				throw new Error("Birthday cannot be later than today");
+			}
 			if (!gender) throw new Error("Please select gender");
 			if (!location) throw new Error("Please select location");
 			if (!password) throw new Error("Password is required");
+			if (!PASSWORD_ASCII_REGEX.test(password)) {
+				throw new Error(
+					"Password must be 8-64 printable ASCII characters without spaces",
+				);
+			}
 			if (!isPasswordStrong(password)) {
 				throw new Error(
 					"Password must contain at least 8 characters, 1 uppercase letter, 1 number, and 1 special character",
@@ -333,6 +361,11 @@ export default function AuthModal({
 			setAuthNotice(null);
 
 			if (!newPassword) throw new Error("Password is required");
+			if (!PASSWORD_ASCII_REGEX.test(newPassword)) {
+				throw new Error(
+					"Password must be 8-64 printable ASCII characters without spaces",
+				);
+			}
 			if (!isPasswordStrong(newPassword)) {
 				throw new Error(
 					"Password must contain at least 8 characters, 1 uppercase letter, 1 number, and 1 special character",
@@ -496,6 +529,10 @@ export default function AuthModal({
 							name="username"
 							placeholder="Username"
 							value={username}
+							minLength={3}
+							maxLength={50}
+							pattern="[A-Za-z0-9_]+"
+							title="Use only ASCII letters, numbers, and underscores without spaces"
 							onChange={(e) => setUsername(e.target.value)}
 						/>
 					</label>
@@ -519,6 +556,7 @@ export default function AuthModal({
 							type="date"
 							name="birthday"
 							value={birthday}
+							max={today}
 							onChange={(e) => setBirthday(e.target.value)}
 							required
 						/>
@@ -644,6 +682,7 @@ export default function AuthModal({
 							name="password"
 							placeholder="Password"
 							value={password}
+							maxLength={64}
 							onChange={(e) => setPassword(e.target.value)}
 						/>
 						<button
@@ -671,6 +710,7 @@ export default function AuthModal({
 							name="confirmPassword"
 							placeholder="Confirm password"
 							value={confirmPassword}
+							maxLength={64}
 							onChange={(e) => setConfirmPassword(e.target.value)}
 						/>
 						<button
@@ -803,6 +843,7 @@ export default function AuthModal({
 								type={showNewPassword ? "text" : "password"}
 								placeholder="New password"
 								value={newPassword}
+								maxLength={64}
 								onChange={(e) => setNewPassword(e.target.value)}
 							/>
 							<button
@@ -829,6 +870,7 @@ export default function AuthModal({
 								type={showNewPassword ? "text" : "password"}
 								placeholder="Confirm new password"
 								value={confirmNewPassword}
+								maxLength={64}
 								onChange={(e) =>
 									setConfirmNewPassword(e.target.value)
 								}

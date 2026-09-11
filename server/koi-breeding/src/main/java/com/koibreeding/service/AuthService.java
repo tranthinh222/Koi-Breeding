@@ -84,6 +84,11 @@ public class AuthService {
             throw new RuntimeException("Username and email are required");
         }
 
+        if (!username.matches("^[A-Za-z0-9_]{3,50}$")) {
+            throw new RuntimeException(
+                    "Username must be 3-50 ASCII letters, numbers, or underscores without spaces");
+        }
+
         if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("Username already exists");
         }
@@ -300,9 +305,9 @@ public class AuthService {
     }
 
     private void validateStrongPassword(String password) {
-        if (password == null || password.length() < 8) {
+        if (password == null || !password.matches("^[!-~]{8,64}$")) {
             throw new RuntimeException(
-                    "Password must contain at least 8 characters, 1 uppercase letter, 1 number, and 1 special character");
+                    "Password must be 8-64 printable ASCII characters without spaces");
         }
 
         if (!password.matches(".*[A-Z].*")) {

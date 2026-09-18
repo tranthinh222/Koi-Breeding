@@ -104,6 +104,18 @@ public class KoiController {
         return ResponseEntity.ok(updatedKoi);
     }
 
+    @GetMapping("/kois/{id}/profile")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResKoiDTO> getOwnedProfile(@PathVariable Integer id, Principal principal) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please sign in to view koi profiles.");
+        }
+        Integer userId = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found."))
+                .getId();
+        return ResponseEntity.ok(koiService.fetchOwnedProfile(id, userId));
+    }
+
     @GetMapping("/kois/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Koi> getKoiById(@PathVariable Integer id) throws Exception {

@@ -297,6 +297,17 @@ public class KoiService {
         return currentKoi;
     }
 
+    @Transactional(readOnly = true)
+    public ResKoiDTO fetchOwnedProfile(Integer id, Integer userId) {
+        Koi koi = koiRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Koi not found."));
+        if (userId == null || koi.getPond() == null || koi.getPond().getOwner() == null
+                || !userId.equals(koi.getPond().getOwner().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only view profiles of koi you own.");
+        }
+        return convertToResKoiDTO(koi);
+    }
+
     public Koi handleFetchKoiById(Integer id) {
         return koiRepository.findById(id).orElse(null);
     }

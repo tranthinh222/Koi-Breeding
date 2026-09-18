@@ -1,5 +1,9 @@
-import { Mars, Venus, X } from "lucide-react";
-import type { IKoi } from "../../../types/backend";
+import { ArrowLeft, Mars, Venus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { callFetchOwnedKoiProfile } from "../../../api/koi";
+import { getApiErrorMessage } from "../../../api/client";
+import { toast } from "../../shared/Toast/toast";
+import type { IKoi, IKoiParent } from "../../../types/backend";
 import styles from "./KoiProfile.module.css";
 
 interface KoiProfileProps {
@@ -7,7 +11,43 @@ interface KoiProfileProps {
 	onClose: () => void;
 }
 
-function KoiProfile({ koi, onClose }: KoiProfileProps) {
+function KoiProfile({ koi: rootKoi, onClose }: KoiProfileProps) {
+	const [history, setHistory] = useState<IKoi[]>([]);
+	const [loadingParentId, setLoadingParentId] = useState<number | null>(null);
+	const requestVersion = useRef(0);
+	const pending = useRef(false);
+	const contentRef = useRef<HTMLDivElement>(null);
+	const koi = history.at(-1) ?? rootKoi;
+
+	useEffect(() => {
+		setHistory([]);
+		setLoadingParentId(null);
+		pending.current = false;
+		return () => { requestVersion.current++; };
+	}, [rootKoi.id]);
+
+	useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [koi.id]);
+
+	const openParent = async (parent: IKoiParent | null) => {
+		if (!parent?.isBelongToUser || pending.current) return;
+		pending.current = true;
+		setLoadingParentId(parent.id);
+		const version = ++requestVersion.current;
+		try {
+			const response = await callFetchOwnedKoiProfile(parent.id);
+			if (version !== requestVersion.current) return;
+			const profile = response.data.data;
+			if (!profile || profile.id !== parent.id) throw new Error("Failed to load parent profile.");
+			setHistory((previous) => [...previous, profile]);
+		} catch (error) {
+			if (version === requestVersion.current) toast.error(getApiErrorMessage(error, "Failed to load parent profile."));
+		} finally {
+			if (version === requestVersion.current) {
+				pending.current = false;
+				setLoadingParentId(null);
+			}
+		}
+	};
 	const normalizeScore = (score: number) =>
 		Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 0;
 	const beautifulScore = Math.round(
@@ -52,10 +92,14 @@ function KoiProfile({ koi, onClose }: KoiProfileProps) {
 			aria-label={`Koi profile: ${koi.name}`}
 		>
 			<div className={styles.toolbar}>
+				{history.length > 0 && <button type="button" className={styles.backButton}
+					disabled={loadingParentId !== null} onClick={() => setHistory((previous) => previous.slice(0, -1))}>
+					<ArrowLeft size={18} /> Back to {history.at(-2)?.name ?? rootKoi.name}
+				</button>}
 				<button
 					type="button"
 					className={styles.closeButton}
-					onClick={onClose}
+					onClick={() => { requestVersion.current++; onClose(); }}
 					aria-label="Close"
 				>
 					<X size={30} />
@@ -191,34 +235,20 @@ function KoiProfile({ koi, onClose }: KoiProfileProps) {
 							</span>
 						</div>
 						<div className={styles.parents}>
-							<div className={styles.parentCard}>
-								<div className={styles.parentCardHeader}>
-									<span>Father:</span>
-								</div>
-								<section className={styles.parentImage}>
-									<img
-										src={`${koi.father ? (koi.father.imageUrl ?? "/kois/koi-empty.png") : "/kois/koi-empty.png"}`}
-										alt="father"
-									/>
-								</section>
-								<span className={styles.parentVarient}>
-									{koi.father ? koi.father.name : "Unknown"}
-								</span>
-							</div>
-							<div className={styles.parentCard}>
-								<div className={styles.parentCardHeader}>
-									<span>Mother:</span>
-								</div>
-								<section className={styles.parentImage}>
-									<img
-										src={`${koi.mother ? (koi.mother.imageUrl ?? "/kois/koi-empty.png") : "/kois/koi-empty.png"}`}
-										alt="mother"
-									/>
-								</section>
-								<span className={styles.parentVarient}>
-									{koi.mother ? koi.mother.name : "Unknown"}
-								</span>
-							</div>
+							{([ ["Father", koi.father], ["Mother", koi.mother] ] as const).map(([label, parent]) => (
+								<button key={label} type="button" className={styles.parentCard}
+									disabled={!parent?.isBelongToUser || loadingParentId !== null}
+									onClick={() => void openParent(parent)}
+									title={!parent ? "Parent unknown" : parent.isBelongToUser ? `View ${label.toLowerCase()}'s profile` : "This parent is not owned by you"}>
+									<span className={styles.parentCardHeader}>{label}:</span>
+									<span className={styles.parentImage}>
+										<img src={parent?.imageUrl ?? "/kois/koi-empty.png"} alt={label.toLowerCase()} />
+									</span>
+									<span className={styles.parentVarient}>{parent?.name ?? "Unknown"}</span>
+									<small aria-live="polite">{loadingParentId === parent?.id ? "Loading..."
+										: !parent ? "Parent unknown" : parent.isBelongToUser ? "View profile" : "Not owned by you"}</small>
+								</button>
+							))}
 						</div>
 					</section>
 				</div>

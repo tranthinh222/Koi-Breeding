@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class KoiHealingControllerTest {
@@ -25,6 +26,23 @@ class KoiHealingControllerTest {
         users = mock(com.koibreeding.repository.UserRepository.class);
         mvc = MockMvcBuilders.standaloneSetup(new KoiController(service, users))
                 .setControllerAdvice(new GlobalExceptionHandler()).build();
+    }
+
+    @Test
+    void profileUsesAuthenticatedUserIdAndSerializesParentOwnership() throws Exception {
+        var owner = new com.koibreeding.domain.User();
+        owner.setId(1);
+        when(users.findByUsername("owner")).thenReturn(java.util.Optional.of(owner));
+        var profile = new ResKoiDTO();
+        var father = new ResKoiDTO.KoiParent();
+        father.setId(21);
+        father.setBelongToUser(true);
+        profile.setFather(father);
+        when(service.fetchOwnedProfile(20, 1)).thenReturn(profile);
+        mvc.perform(get("/api/v1/kois/20/profile").principal(() -> "owner"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.father.isBelongToUser").value(true));
+        verify(service).fetchOwnedProfile(20, 1);
     }
 
     @Test

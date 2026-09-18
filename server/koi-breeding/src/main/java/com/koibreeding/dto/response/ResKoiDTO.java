@@ -49,6 +49,7 @@ public class ResKoiDTO {
         private Integer id;
         private String name;
         private String imageUrl;
+        @com.fasterxml.jackson.annotation.JsonProperty("isBelongToUser")
         private boolean isBelongToUser;
     }
 }

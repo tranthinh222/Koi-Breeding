@@ -39,6 +39,27 @@
   cursor: pointer;
 }
 .closeButton:hover { background: var(--border-neutral); color: var(--text-primary); }
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-right: auto;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px;
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  font: inherit;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.backButton svg, .closeButton { flex-shrink: 0; }
+.parentCard { font: inherit; color: var(--text-primary); cursor: pointer; text-align: center; }
+.parentCard:disabled { cursor: default; }
+.parentCard small { color: var(--text-secondary); }
+.parentCard:not(:disabled):hover { border-color: #00aaac; }
+.parentCard:focus-visible, .backButton:focus-visible { outline: 2px solid #00aaac; outline-offset: 2px; }
 .closeButton:focus-visible, .content:focus-visible { outline: 2px solid #00aaac; outline-offset: -3px; }
 
 .content {

@@ -56,6 +56,9 @@ export const callFetchKoisInPond = (pondId: number) => {
   });
 };
 
+export const callFetchOwnedKoiProfile = (koiId: number) =>
+  apiClient.get<IRestResponse<IKoi>>(`/kois/${koiId}/profile`);
+
 export const callMoveKoi = (requestMoveKoiDTO: IRequestMoveKoiDTO) => {
   return apiClient.post<IRestResponse<IKoi>>("/kois/move", {
     ...requestMoveKoiDTO,

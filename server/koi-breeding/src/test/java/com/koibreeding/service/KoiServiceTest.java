@@ -98,6 +98,40 @@ class KoiServiceTest {
     }
 
     @Test
+    void ownedProfileIncludesParentOwnership() {
+        Koi father = new Koi();
+        father.setId(21);
+        father.setPond(koi.getPond());
+        koi.setFather(father);
+        User otherOwner = new User();
+        otherOwner.setId(2);
+        Pond otherPond = new Pond();
+        otherPond.setOwner(otherOwner);
+        Koi mother = new Koi();
+        mother.setId(22);
+        mother.setPond(otherPond);
+        koi.setMother(mother);
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+
+        var profile = koiService.fetchOwnedProfile(20, 1);
+        assertEquals(true, profile.getFather().isBelongToUser());
+        assertEquals(false, profile.getMother().isBelongToUser());
+    }
+
+    @Test
+    void profileRejectsAnotherOwner() {
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+        var error = assertThrows(ResponseStatusException.class, () -> koiService.fetchOwnedProfile(20, 2));
+        assertEquals(HttpStatus.FORBIDDEN, error.getStatusCode());
+    }
+
+    @Test
+    void profileRejectsMissingKoi() {
+        var error = assertThrows(ResponseStatusException.class, () -> koiService.fetchOwnedProfile(999, 1));
+        assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
+    }
+
+    @Test
     void moveKoiRejectsActiveBreedingWithoutChangingPond() {
         Pond originalPond = koi.getPond();
         RequestMoveKoiDTO request = new RequestMoveKoiDTO();

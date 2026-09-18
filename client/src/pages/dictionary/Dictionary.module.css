@@ -1,12 +1,14 @@
 .screen {
+	--top-space: clamp(68px, 9vh, 88px);
+	--bottom-space: clamp(72px, 10vh, 96px);
 	position: relative;
 	width: 100%;
-	min-height: 100vh;
-	min-height: 100dvh;
+	height: 100vh;
+	height: 100dvh;
+	min-height: 0;
 	display: grid;
 	place-items: center;
-	padding: clamp(16px, 3vw, 40px) clamp(12px, 3vw, 40px)
-		clamp(68px, 9vh, 96px);
+	padding: var(--top-space) clamp(12px, 3vw, 40px) var(--bottom-space);
 	box-sizing: border-box;
 	overflow: hidden;
 }
@@ -49,9 +51,9 @@
 
 .cover {
 	position: relative;
-	width: min(96vw, calc((100dvh - 80px) * 1.45), 1520px);
+	width: min(100%, calc((100dvh - var(--top-space) - var(--bottom-space)) * 1.45), 1520px);
 	aspect-ratio: 1.45 / 1;
-	max-height: calc(100dvh - 80px);
+	max-height: calc(100dvh - var(--top-space) - var(--bottom-space));
 	border: clamp(7px, 1vw, 15px) solid transparent;
 	border-radius: clamp(14px, 1.6vw, 25px);
 	background-image:
@@ -136,8 +138,8 @@
 	height: 100%;
 	border-radius: clamp(5px, 0.7vw, 10px);
 	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	grid-template-rows: repeat(2, 1fr);
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	grid-template-rows: repeat(2, minmax(0, 1fr));
 
 	gap: clamp(8px, 2.2vw, 40px);
 	padding: clamp(10px, 2.2vw, 40px);
@@ -230,9 +232,9 @@
 }
 
 .flipGroup {
-	width: min(300px, 70%);
+	width: min(420px, calc(100vw - 24px));
 	position: absolute;
-	bottom: clamp(-54px, -5vh, -42px);
+	bottom: -60px;
 	left: 50%;
 	transform: translateX(-50%);
 	display: flex;
@@ -242,7 +244,21 @@
 	z-index: 100;
 }
 
+.pageIndicator {
+	flex-shrink: 0;
+	padding: 8px 10px;
+	border: 1px solid var(--border-neutral);
+	border-radius: 8px;
+	background: var(--surface-raised);
+	color: var(--text-primary);
+	font-size: clamp(12px, 1vw, 16px);
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
 .flipButton {
+	white-space: nowrap;
 	padding: clamp(7px, 1vw, 10px) clamp(12px, 1.5vw, 20px);
 	cursor: pointer;
 	border-radius: 10px;
@@ -271,10 +287,6 @@
 @media (max-width: 700px) {
 	.screen {
 		padding-inline: 6px;
-	}
-
-	.cover {
-		width: 99vw;
 	}
 
 	.page::before,

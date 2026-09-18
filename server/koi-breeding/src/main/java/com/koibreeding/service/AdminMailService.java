@@ -1,13 +1,15 @@
 package com.koibreeding.service;
 
-import com.koibreeding.domain.User;
-import com.koibreeding.enums.UserStatus;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import com.koibreeding.domain.User;
+import com.koibreeding.enums.UserStatus;
+
+import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class AdminMailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
+            helper.setFrom(mailFrom, "Koi Breeding");
             helper.setTo(user.getEmail());
             if (mailFrom != null && !mailFrom.isBlank()) {
                 helper.setFrom(mailFrom);
@@ -71,7 +73,8 @@ public class AdminMailService {
                         </div>
                     </body>
                     </html>
-                    """.formatted(action, user.getUsername(), action, safeReason);
+                    """
+                    .formatted(action, user.getUsername(), action, safeReason);
 
             helper.setText(html, true);
             mailSender.send(message);

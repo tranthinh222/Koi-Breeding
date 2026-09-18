@@ -1,8 +1,9 @@
-import { Drumstick, Info, Move } from "lucide-react";
+import { Drumstick, HeartPulse, Info, Move } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { IKoi, IPond } from "../../../types/backend";
 import KoiProfile from "../../koi/KoiProfile/KoiProfile";
 import FeedKoiForm from "../FeedKoiForm/FeedKoiForm";
+import HealKoiForm from "../HealKoiForm/HealKoiForm";
 import PondSelectForm from "../PondSelectForm/PondSelectForm";
 import styles from "./PondCanvas.module.css";
 import {
@@ -87,6 +88,7 @@ interface PondCanvasProps {
 	onMoveKoi: (koi: IKoi, targetPond: IPond) => Promise<IKoi | null>;
 	onKoiMoved: (koi: IKoi, targetPond: IPond) => void;
 	onFeedKoi: (koi: IKoi, itemId: number) => Promise<IKoi | null>;
+	onHealKoi: (koi: IKoi, itemId: number) => Promise<IKoi | null>;
 }
 
 // Use this function to debug fish in canvas
@@ -151,6 +153,7 @@ function PondCanvas({
 	onMoveKoi,
 	onKoiMoved,
 	onFeedKoi,
+	onHealKoi,
 }: PondCanvasProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fishRef = useRef<FishState[]>([]);
@@ -163,6 +166,7 @@ function PondCanvas({
 		useState<boolean>(false);
 	const [koiToFeed, setKoiToFeed] = useState<IKoi | null>(null);
 	const [isFeeding, setIsFeeding] = useState(false);
+	const [koiToHeal, setKoiToHeal] = useState<IKoi | null>(null);
 
 	// 1. STATE LƯU TRỮ CON CÁ ĐANG ĐƯỢC CHỌN
 	const [activeFishIndex, setActiveFishIndex] = useState<number | null>(null);
@@ -537,6 +541,14 @@ function PondCanvas({
 						<span>Feed</span>
 					</button>
 					<button
+						className={styles.healFishButton}
+						disabled={(pondKoiList[activeFishIndex]?.health ?? 100) >= 100}
+						title={(pondKoiList[activeFishIndex]?.health ?? 100) >= 100 ? "HP is full" : "Use health medicine"}
+						onClick={() => setKoiToHeal(pondKoiList[activeFishIndex] ?? null)}
+					>
+						<HeartPulse /><span>Medicine</span>
+					</button>
+					<button
 						className={styles.moveFishButton}
 						onClick={() => setIsMoveFishDialogOpen(true)}
 					>
@@ -577,7 +589,7 @@ function PondCanvas({
 			{activeKoiProfile !== null && (
 				<div className={styles.overlay}>
 					<KoiProfile
-						koi={activeKoiProfile}
+						koi={pondKoiList.find((koi) => koi.id === activeKoiProfile.id) ?? activeKoiProfile}
 						onClose={() => setActiveKoiProfile(null)}
 					/>
 				</div>
@@ -597,6 +609,15 @@ function PondCanvas({
 								setIsFeeding(false);
 							}
 						}}
+					/>
+				</div>
+			)}
+			{koiToHeal !== null && (
+				<div className={styles.overlay}>
+					<HealKoiForm
+						koi={pondKoiList.find((koi) => koi.id === koiToHeal.id) ?? koiToHeal}
+						onClose={() => setKoiToHeal(null)}
+						onSubmit={async (medicine) => Boolean(await onHealKoi(koiToHeal, medicine.itemId))}
 					/>
 				</div>
 			)}

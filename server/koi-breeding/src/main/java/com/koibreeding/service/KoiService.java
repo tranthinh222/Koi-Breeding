@@ -1,6 +1,8 @@
 package com.koibreeding.service;
 
 import java.util.ArrayList;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,10 @@ import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.dto.response.ResKoiDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.EffectType;
+import com.koibreeding.dto.request.RequestHealKoiDTO;
+import com.koibreeding.dto.response.ResHealKoiDTO;
+import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.enums.BreedingStatus;
 import com.koibreeding.repository.BreedingEventRepository;
 import com.koibreeding.repository.KoiRepository;
@@ -39,6 +45,9 @@ public class KoiService {
     private final DictionaryService koiDictionaryService;
     private final PondService pondService;
     private final InventoryService inventoryService;
+    private final InventoryRepository inventoryRepository;
+    private final KoiCareService koiCareService;
+    private final EntityManager entityManager;
     // private final ItemService itemService;
 
     public KoiService(
@@ -47,7 +56,11 @@ public class KoiService {
             DictionaryService koiDictionaryService,
             PondService pondService,
             InventoryService inventoryService, KoiFormula koiFormula,
-            BreedingEventRepository breedingEventRepository) {
+            BreedingEventRepository breedingEventRepository,
+            InventoryRepository inventoryRepository, KoiCareService koiCareService, EntityManager entityManager) {
+        this.entityManager = entityManager;
+        this.inventoryRepository = inventoryRepository;
+        this.koiCareService = koiCareService;
         this.koiRepository = koiRepository;
         this.breedingEventRepository = breedingEventRepository;
         this.mutationService = mutationService;
@@ -109,11 +122,13 @@ public class KoiService {
 
     @Transactional
     public ResKoiDTO handleMoveKoi(RequestMoveKoiDTO requestMoveKoiDTO) throws Exception {
-        Koi targetKoi = this.handleFetchKoiById(requestMoveKoiDTO.getTargetKoiId());
+        Koi targetKoi = koiRepository.findById(requestMoveKoiDTO.getTargetKoiId()).orElse(null);
         if (targetKoi == null) {
             throw new Exception("Koi with id='" + requestMoveKoiDTO.getTargetKoiId() + "' does not exist.");
         }
 
+        // Refresh under a lock so a concurrent care update cannot leave stale HP/food.
+        entityManager.refresh(targetKoi, LockModeType.PESSIMISTIC_WRITE);
         if (breedingEventRepository.existsByUserAndParentKoiAndStatusNotIn(
                 targetKoi.getPond().getOwner().getId(), targetKoi.getId(),
                 List.of(BreedingStatus.COMPLETED, BreedingStatus.CANCELLED))) {
@@ -136,6 +151,7 @@ public class KoiService {
             throw new Exception("Target pond with id='" + targetPond.getId() + "' is full.");
         }
 
+        koiCareService.updateStats(targetKoi, java.time.OffsetDateTime.now());
         targetKoi.setPond(targetPond);
 
         return this.convertToResKoiDTO(this.koiRepository.save(targetKoi));
@@ -143,16 +159,18 @@ public class KoiService {
 
     @Transactional
     public ResFeedKoiDTO handleFeedKoi(Integer koiId, RequestFeedKoiDTO request) {
-        Koi koi = this.handleFetchKoiById(koiId);
+        Koi koi = koiRepository.findById(koiId).orElse(null);
         if (koi == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Koi with id '" + koiId + "' does not exist.");
         }
 
+        entityManager.refresh(koi, LockModeType.PESSIMISTIC_WRITE);
         if (koi.getPond() == null || koi.getPond().getOwner() == null
                 || !request.userId().equals(koi.getPond().getOwner().getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot feed a koi that you do not own.");
         }
 
+        koiCareService.updateStats(koi, java.time.OffsetDateTime.now());
         int currentFoodBar = koi.getFoodBar() == null ? 0 : koi.getFoodBar();
         if (currentFoodBar >= 100) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This koi is already full.");
@@ -180,6 +198,7 @@ public class KoiService {
                 .intValue();
 
         koi.setFoodBar(currentFoodBar + foodRestored);
+        if (koi.getFoodBar() > 0) koi.setHungrySince(null);
         Koi updatedKoi = koiRepository.save(koi);
         ResItemInventory remainingInventory = inventoryService.useItemFromInventory(
                 request.userId(), request.itemId(), request.quantity());
@@ -189,6 +208,47 @@ public class KoiService {
                 foodRestored,
                 request.quantity(),
                 remainingInventory.getQuantity());
+    }
+
+    @Transactional
+    public ResHealKoiDTO handleHealKoi(Integer koiId, RequestHealKoiDTO request) {
+        Koi koi = koiRepository.findById(koiId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Koi not found."));
+        entityManager.refresh(koi, LockModeType.PESSIMISTIC_WRITE);
+        if (request.userId() == null || koi.getPond() == null || koi.getPond().getOwner() == null
+                || !request.userId().equals(koi.getPond().getOwner().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot treat a koi that you do not own.");
+        }
+        if (request.quantity() == null || request.quantity() < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be at least 1.");
+        }
+        koiCareService.updateStats(koi, java.time.OffsetDateTime.now());
+        if (koi.getHealth() >= 100) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This koi already has full HP.");
+        }
+        Inventory inventory = inventoryRepository.findByUserIdAndItemId(request.userId(), request.itemId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Medicine is not in your inventory."));
+        entityManager.refresh(inventory, LockModeType.PESSIMISTIC_WRITE);
+        Item medicine = inventory.getItem();
+        if (medicine.getItemType() != ItemType.MEDICINE || medicine.getEffectType() != EffectType.HEALTH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only health medicine can be used on koi.");
+        }
+        if (medicine.getEffectValue() == null || medicine.getEffectValue().compareTo(java.math.BigDecimal.ONE) < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Medicine must restore at least 1 HP.");
+        }
+        if (inventory.getQuantity() < request.quantity()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Insufficient medicine quantity.");
+        }
+        int restored = medicine.getEffectValue().multiply(java.math.BigDecimal.valueOf(request.quantity()))
+                .min(java.math.BigDecimal.valueOf(100 - koi.getHealth())).intValue();
+        koi.setHealth(koi.getHealth() + restored);
+        int remaining = inventory.getQuantity() - request.quantity();
+        if (remaining == 0) inventoryRepository.delete(inventory);
+        else {
+            inventory.setQuantity(remaining);
+            inventoryRepository.save(inventory);
+        }
+        return new ResHealKoiDTO(convertToResKoiDTO(koiRepository.save(koi)), restored, request.quantity(), remaining);
     }
 
     public Koi handleUpdateKoi(Koi koi) {

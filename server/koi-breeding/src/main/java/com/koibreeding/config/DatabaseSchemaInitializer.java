@@ -1,6 +1,8 @@
 package com.koibreeding.config;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -10,9 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.koibreeding.enums.Location;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @Configuration
 public class DatabaseSchemaInitializer {
@@ -33,7 +34,7 @@ public class DatabaseSchemaInitializer {
             jdbcTemplate.execute("ALTER TABLE " + schema
                     + ".item ADD CONSTRAINT item_effect_type_check "
                     + "CHECK (effect_type IS NULL OR effect_type IN "
-                    + "('WATER_QUALITY', 'COOLING', 'HEATING', 'GROWTH', 'MUTATION'))");
+                    + "('WATER_QUALITY', 'COOLING', 'HEATING', 'GROWTH', 'MUTATION', 'HEALTH'))");
 
             jdbcTemplate.execute("UPDATE " + schema + ".users SET location = CASE location "
                     + "WHEN 'Ho Chi Minh City' THEN 'HO_CHI_MINH_CITY' "

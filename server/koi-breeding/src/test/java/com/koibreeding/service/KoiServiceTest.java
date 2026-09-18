@@ -29,6 +29,9 @@ import com.koibreeding.dto.request.RequestMoveKoiDTO;
 import com.koibreeding.dto.response.ResFeedKoiDTO;
 import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.EffectType;
+import com.koibreeding.dto.request.RequestHealKoiDTO;
+import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.enums.BreedingStatus;
 import com.koibreeding.repository.BreedingEventRepository;
 import com.koibreeding.repository.KoiRepository;
@@ -52,6 +55,13 @@ class KoiServiceTest {
     @Mock
     private KoiFormula koiFormula;
 
+    @Mock
+    private InventoryRepository inventoryRepository;
+    @Mock
+    private KoiCareService koiCareService;
+    @Mock
+    private jakarta.persistence.EntityManager entityManager;
+
     private KoiService koiService;
     private Koi koi;
     private Inventory inventory;
@@ -59,10 +69,11 @@ class KoiServiceTest {
     @BeforeEach
     void setUp() {
         koiService = new KoiService(koiRepository, mutationService, dictionaryService, pondService,
-                inventoryService, koiFormula, breedingEventRepository);
+                inventoryService, koiFormula, breedingEventRepository, inventoryRepository, koiCareService, entityManager);
 
         User owner = new User();
         owner.setId(1);
+        owner.setUsername("owner");
 
         Pond pond = new Pond();
         pond.setId(10);
@@ -128,7 +139,87 @@ class KoiServiceTest {
     }
 
     @Test
+    void medicineRestoresHealthAndConsumesOneItem() {
+        koi.setHealth(90);
+        inventory.getItem().setItemType(ItemType.MEDICINE);
+        inventory.getItem().setEffectType(EffectType.HEALTH);
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+        when(inventoryRepository.findByUserIdAndItemId(1, 30)).thenReturn(Optional.of(inventory));
+        when(koiRepository.save(koi)).thenReturn(koi);
+
+        var result = koiService.handleHealKoi(20, new RequestHealKoiDTO(1, 30, 1));
+
+        assertEquals(100, result.koi().getHealth());
+        assertEquals(10, result.healthRestored());
+        assertEquals(4, result.remainingItemQuantity());
+        verify(inventoryRepository).save(inventory);
+    }
+
+    @Test
+    void fullHealthDoesNotConsumeMedicine() {
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> koiService.handleHealKoi(20, new RequestHealKoiDTO(1, 30, 1)));
+        assertEquals(HttpStatus.CONFLICT, error.getStatusCode());
+        org.mockito.Mockito.verifyNoInteractions(inventoryRepository);
+        verify(koiRepository, never()).save(koi);
+    }
+
+    @Test
+    void nonOwnerCannotUseMedicine() {
+        koi.setHealth(50);
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> koiService.handleHealKoi(20, new RequestHealKoiDTO(2, 30, 1)));
+        assertEquals(HttpStatus.FORBIDDEN, error.getStatusCode());
+        org.mockito.Mockito.verifyNoInteractions(inventoryRepository, koiCareService);
+    }
+
+    @Test
+    void pondMedicineCannotHealKoi() {
+        koi.setHealth(50);
+        inventory.getItem().setItemType(ItemType.MEDICINE);
+        inventory.getItem().setEffectType(EffectType.WATER_QUALITY);
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+        when(inventoryRepository.findByUserIdAndItemId(1, 30)).thenReturn(Optional.of(inventory));
+        assertThrows(ResponseStatusException.class,
+                () -> koiService.handleHealKoi(20, new RequestHealKoiDTO(1, 30, 1)));
+        assertEquals(50, koi.getHealth());
+        verify(inventoryRepository, never()).save(inventory);
+        verify(inventoryRepository, never()).delete(inventory);
+    }
+
+    @Test
+    void insufficientMedicineDoesNotChangeHealth() {
+        koi.setHealth(50);
+        inventory.getItem().setItemType(ItemType.MEDICINE);
+        inventory.getItem().setEffectType(EffectType.HEALTH);
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+        when(inventoryRepository.findByUserIdAndItemId(1, 30)).thenReturn(Optional.of(inventory));
+        assertThrows(ResponseStatusException.class,
+                () -> koiService.handleHealKoi(20, new RequestHealKoiDTO(1, 30, 6)));
+        assertEquals(50, koi.getHealth());
+        verify(inventoryRepository, never()).save(inventory);
+    }
+
+    @Test
+    void lastMedicineIsRemovedFromInventory() {
+        koi.setHealth(0);
+        inventory.setQuantity(1);
+        inventory.getItem().setItemType(ItemType.MEDICINE);
+        inventory.getItem().setEffectType(EffectType.HEALTH);
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+        when(inventoryRepository.findByUserIdAndItemId(1, 30)).thenReturn(Optional.of(inventory));
+        when(koiRepository.save(koi)).thenReturn(koi);
+        var result = koiService.handleHealKoi(20, new RequestHealKoiDTO(1, 30, 1));
+        assertEquals(20, result.koi().getHealth());
+        assertEquals(0, result.remainingItemQuantity());
+        verify(inventoryRepository).delete(inventory);
+    }
+
+    @Test
     void feedKoiRestoresFoodBarAndConsumesInventory() {
+        koi.setHungrySince(OffsetDateTime.now().minusHours(3));
         RequestFeedKoiDTO request = new RequestFeedKoiDTO(1, 30, 2);
         ResItemInventory remaining = new ResItemInventory();
         remaining.setQuantity(3);
@@ -141,6 +232,7 @@ class KoiServiceTest {
         ResFeedKoiDTO result = koiService.handleFeedKoi(20, request);
 
         assertEquals(100, result.koi().getFoodBar());
+        assertEquals(null, koi.getHungrySince());
         assertEquals(30, result.foodRestored());
         assertEquals(2, result.itemsUsed());
         assertEquals(3, result.remainingItemQuantity());

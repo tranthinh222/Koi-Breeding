@@ -26,6 +26,22 @@ export interface IResponseFeedKoiDTO {
   remainingItemQuantity: number;
 }
 
+export interface IResponseHealKoiDTO {
+  koi: IKoi;
+  healthRestored: number;
+  itemsUsed: number;
+  remainingItemQuantity: number;
+}
+
+export interface IRequestHealKoiDTO {
+  userId: number;
+  itemId: number;
+  quantity: number;
+}
+
+export const callHealKoi = (koiId: number, request: IRequestHealKoiDTO) =>
+  apiClient.post<IRestResponse<IResponseHealKoiDTO>>(`/kois/${koiId}/heal`, request);
+
 export const callReleaseKoiToPond = (
   requestReleaseKoiDTO: IRequestReleaseKoiDTO,
 ) => {

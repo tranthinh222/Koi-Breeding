@@ -11,6 +11,7 @@ interface PondUpgradeFormProps {
 
 function PondUpgradeForm({ pond, onClose, onSubmit }: PondUpgradeFormProps) {
 	const [isProcessing, setIsProcessing] = useState<boolean>(false);
+	const MAX_LEVEL = 20;
 
 	const handleSubmit = async () => {
 		setIsProcessing(true);
@@ -90,7 +91,7 @@ function PondUpgradeForm({ pond, onClose, onSubmit }: PondUpgradeFormProps) {
 					<button
 						type="button"
 						className={styles.submitButton}
-						disabled={isProcessing}
+						disabled={isProcessing || MAX_LEVEL === pond.level}
 						onClick={handleSubmit}
 					>
 						{isProcessing ? (
@@ -99,7 +100,9 @@ function PondUpgradeForm({ pond, onClose, onSubmit }: PondUpgradeFormProps) {
 								src="/utilities/fish-loading.png"
 							/>
 						) : null}
-						<span>{20 === pond.level ? "Max" : "Upgrade"}</span>
+						<span>
+							{MAX_LEVEL === pond.level ? "Max" : "Upgrade"}
+						</span>
 					</button>
 				</div>
 			</form>

@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import com.koibreeding.domain.Koi;
 
 public interface KoiRepository extends JpaRepository<Koi, Integer> {
+    @Query("select k.id from Koi k")
+    List<Integer> findAllIds();
     List<Koi> findTop3ByOrderByIdDesc();
 
     List<Koi> findTop3ByPond_Owner_IdOrderByIdDesc(Integer ownerId);

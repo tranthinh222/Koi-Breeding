@@ -55,6 +55,10 @@ public class Koi {
     @Column(nullable = false, columnDefinition = "SMALLINT")
     private Integer foodBar = 100;
 
+    private OffsetDateTime lastCareUpdateAt = OffsetDateTime.now();
+
+    private OffsetDateTime hungrySince;
+
     @Column(nullable = false)
     private Integer price;
 

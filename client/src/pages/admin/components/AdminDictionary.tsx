@@ -34,12 +34,14 @@ export default function AdminDictionary() {
 	const [selectedItem, setSelectedItem] = useState<IKoiVarient | null>(null);
 
 	useEffect(() => {
-		const timeoutId = window.setTimeout(
-			() => setDebouncedSearch(search.trim()),
-			300,
-		);
+		const timeoutId = window.setTimeout(() => {
+			if (debouncedSearch !== search.trim()) {
+				setDebouncedSearch(search.trim());
+				setCurrentPage(0);
+			}
+		}, 400);
 		return () => window.clearTimeout(timeoutId);
-	}, [search]);
+	}, [search, debouncedSearch]);
 
 	// Load danh sách Variety cho bộ lọc và Form
 	useEffect(() => {
@@ -250,9 +252,7 @@ export default function AdminDictionary() {
 							aria-label="Search by partial or full koi name..."
 							placeholder="Enter a partial or full koi name..."
 							value={search}
-							onChange={(e) =>
-								handleFilterChange(setSearch, e.target.value)
-							}
+							onChange={(e) => setSearch(e.target.value)}
 						/>
 					</div>
 

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 public class ResMarketKois {
     Integer koiId;
     Integer pondId;
+    String pondName;
     String koiName;
     String breed;
     Gender gender;

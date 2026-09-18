@@ -116,6 +116,7 @@ export async function getMarketplaceItems(
 export interface MarketplaceKoi {
   koiId: number;
   pondId: number;
+  pondName: string;
   koiName: string;
   breed: string;
   gender: FishGender;

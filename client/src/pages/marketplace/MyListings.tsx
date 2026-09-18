@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 import "./MarketplaceManagement.css";
 
-import { getMarketBuyKois, deleteKoiFromMarket } from "../../api/marketplace";
-import { type MarketplaceKoi } from "../../api/marketplace";
-import TransactionNavigation from "../../components/marketplace/TransactionNavigation";
+import {
+  deleteKoiFromMarket,
+  getMarketBuyKois,
+  type MarketplaceKoi,
+} from "../../api/marketplace";
 import MarketplaceState from "../../components/marketplace/MarketplaceState";
+import TransactionNavigation from "../../components/marketplace/TransactionNavigation";
 import { useAuth } from "../../context/AuthContext";
 
 // interface MarketListing {
@@ -127,7 +129,8 @@ const Listings: React.FC = () => {
       setDeletingKoiId(koiId);
       setError(null);
 
-      if (!currentUserId) throw new Error("You must be signed in to manage listings.");
+      if (!currentUserId)
+        throw new Error("You must be signed in to manage listings.");
       await deleteKoiFromMarket(koiId, currentUserId);
 
       setKois((prev) => prev.filter((item) => item.koiId !== koiId));
@@ -181,19 +184,28 @@ const Listings: React.FC = () => {
             </div>
           </div>
 
-          <button
-            className="new-listing-btn"
-            onClick={() => navigate("/sell")}
-          >
+          <button className="new-listing-btn" onClick={() => navigate("/sell")}>
             ＋ Add Koi
           </button>
         </div>
 
         {/* LISTING GRID */}
         <div className="listing-grid">
-          {loading && <MarketplaceState icon="📋" title="Loading your listings" description="Retrieving your active marketplace listings..." />}
+          {loading && (
+            <MarketplaceState
+              icon="📋"
+              title="Loading your listings"
+              description="Retrieving your active marketplace listings..."
+            />
+          )}
           {!loading && !error && kois.length === 0 && (
-            <MarketplaceState icon="🏷️" title="No active listings" description="You have not listed any koi for sale yet. Choose an eligible koi to create your first listing." actionLabel="Sell a Koi" onAction={() => navigate("/sell")} />
+            <MarketplaceState
+              icon="🏷️"
+              title="No active listings"
+              description="You have not listed any koi for sale yet. Choose an eligible koi to create your first listing."
+              actionLabel="Sell a Koi"
+              onAction={() => navigate("/sell")}
+            />
           )}
           {kois.map((item) => (
             <div key={item.koiId} className="koi-card">
@@ -208,14 +220,14 @@ const Listings: React.FC = () => {
                 </div>
 
                 {/* RARITY */}
-                <div
+                {/* <div
                   className="rarity-badge"
                   style={{
                     backgroundColor: getRarityColor(item.rarity),
                   }}
                 >
                   {item.rarity}
-                </div>
+                </div> */}
 
                 {/* NAME */}
                 <div className="koi-name">
@@ -227,18 +239,20 @@ const Listings: React.FC = () => {
                 </div>
 
                 {/* POND */}
-                <p className="koi-pond">{item.pondId}</p>
+                <p className="koi-pond">
+                  {item.pondId}: {item.pondName}
+                </p>
 
                 {/* STATS */}
                 <div className="koi-stats">
                   <div className="stat-box">
-                    <span className="stat-label">Length</span>
+                    <span className="stat-label">Length(cm)</span>
 
                     <span className="stat-value">{item.length}</span>
                   </div>
 
                   <div className="stat-box">
-                    <span className="stat-label">Weight</span>
+                    <span className="stat-label">Weight(g)</span>
 
                     <span className="stat-value">{item.weight}</span>
                   </div>

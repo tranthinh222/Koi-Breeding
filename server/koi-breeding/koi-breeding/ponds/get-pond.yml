@@ -5,11 +5,7 @@ info:
 
 http:
   method: GET
-  url: "http://localhost:8090/koi_breeding/api/v1/ponds/:id"
-  params:
-    - name: id
-      value: "1"
-      type: path
+  url: http://localhost:8090/koi_breeding/api/v1/ponds/16
   auth: inherit
 
 settings:
@@ -17,3 +13,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

@@ -5,10 +5,10 @@ info:
 
 http:
   method: GET
-  url: localhost:8090/koi_breeding/ponds/owner?userId=1
+  url: localhost:8090/koi_breeding/api/v1/ponds/owner?userId=16
   params:
     - name: userId
-      value: "1"
+      value: "16"
       type: query
   body:
     type: json

@@ -80,16 +80,6 @@ export interface ShopFilters {
   gender: FishGender;
 }
 
-const categories: {
-  value: MarketplaceCategory;
-  label: string;
-}[] = [
-  { value: "ALL", label: "🐟 Breed" },
-  { value: "KOHAKU", label: "🐟 Kohaku" },
-  { value: "SHOWA", label: "🐟 Showa" },
-  { value: "OGON", label: "🐟 Ogon" },
-];
-
 const genders: {
   value: FishGender;
   label: string;
@@ -109,7 +99,7 @@ const WEIGHT_MAX = 90; // kg
 const WEIGHT_STEP = 0.1;
 
 const PRICE_MIN = 0;
-const PRICE_MAX = 50_000_000; // ₫
+const PRICE_MAX = 500_000; // Koins
 const PRICE_STEP = 100_000;
 
 export const EMPTY_FILTERS: ShopFilters = {
@@ -152,12 +142,12 @@ function RangeField({
   open,
   onToggle,
 }: RangeFieldProps) {
-  const lo = minValue === "" ? min : Number(minValue);
-
-  const hi = maxValue === "" ? max : Number(maxValue);
-
-  const safeLo = Number.isFinite(lo) ? lo : min;
-  const safeHi = Number.isFinite(hi) ? hi : max;
+  const clamp = (value: number, lower: number, upper: number) =>
+    Math.min(Math.max(value, lower), upper);
+  const parsedLo = minValue === "" ? min : Number(minValue);
+  const parsedHi = maxValue === "" ? max : Number(maxValue);
+  const safeLo = clamp(Number.isFinite(parsedLo) ? parsedLo : min, min, max);
+  const safeHi = clamp(Number.isFinite(parsedHi) ? parsedHi : max, min, max);
 
   const loPct = ((safeLo - min) / (max - min)) * 100;
 
@@ -169,13 +159,37 @@ function RangeField({
       : `${safeLo} - ${safeHi} ${unit}`;
 
   const handleMinChange = (value: number) => {
-    const newValue = Math.min(value, safeHi);
+    const newValue = Math.min(clamp(value, min, max), safeHi);
     onMinChange(String(newValue));
   };
 
   const handleMaxChange = (value: number) => {
-    const newValue = Math.max(value, safeLo);
+    const newValue = Math.max(clamp(value, min, max), safeLo);
     onMaxChange(String(newValue));
+  };
+
+  const handleMinInputChange = (value: string) => {
+    if (value === "") {
+      onMinChange(value);
+      return;
+    }
+
+    const parsedValue = Number(value);
+    if (Number.isFinite(parsedValue)) {
+      onMinChange(String(Math.min(clamp(parsedValue, min, max), safeHi)));
+    }
+  };
+
+  const handleMaxInputChange = (value: string) => {
+    if (value === "") {
+      onMaxChange(value);
+      return;
+    }
+
+    const parsedValue = Number(value);
+    if (Number.isFinite(parsedValue)) {
+      onMaxChange(String(Math.max(clamp(parsedValue, min, max), safeLo)));
+    }
   };
 
   return (
@@ -252,7 +266,7 @@ function RangeField({
               step={step}
               value={minValue}
               placeholder={String(min)}
-              onChange={(e) => onMinChange(e.target.value)}
+              onChange={(e) => handleMinInputChange(e.target.value)}
             />
 
             <span>—</span>
@@ -264,7 +278,7 @@ function RangeField({
               step={step}
               value={maxValue}
               placeholder={String(max)}
-              onChange={(e) => onMaxChange(e.target.value)}
+              onChange={(e) => handleMaxInputChange(e.target.value)}
             />
           </div>
         </div>
@@ -330,15 +344,6 @@ export default function ShopFiltersBar({
       />
 
       <OptionDropdown
-        value={draft.category}
-        options={categories}
-        placeholder="🐟 Breed"
-        onChange={(value) => update("category", value)}
-        open={openDropdown === "breed"}
-        onToggle={() => toggleDropdown("breed")}
-      />
-
-      <OptionDropdown
         value={draft.gender}
         options={genders}
         placeholder="All Genders"
@@ -376,8 +381,8 @@ export default function ShopFiltersBar({
       />
 
       <RangeField
-        label="Price (₫)"
-        unit="₫"
+        label="Price (Koins)"
+        unit="Koins"
         min={PRICE_MIN}
         max={PRICE_MAX}
         step={PRICE_STEP}

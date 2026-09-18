@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   forgotPassword,
   Login,
@@ -23,23 +23,27 @@ interface AuthModalProps {
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const USERNAME_REGEX = /^[A-Za-z0-9]+$/;
-const PASSWORD_CHARSET_REGEX = /^[\x21-\x7E]+$/;
+const USERNAME_REGEX = /^[A-Za-z0-9_]{3,50}$/;
+const PASSWORD_ASCII_REGEX = /^[!-~]{8,64}$/;
 
 const PASSWORD_RULES = [
-  {
-    label: "At least 8 characters",
-    test: (value: string) => value.length >= 8,
-  },
-  {
-    label: "At least 1 UPPERCASE character",
-    test: (value: string) => /[A-Z]/.test(value),
-  },
-  { label: "At least 1 number", test: (value: string) => /\d/.test(value) },
-  {
-    label: "At least 1 special character",
-    test: (value: string) => /[^A-Za-z0-9]/.test(value),
-  },
+	{
+		label: "At least 8 characters",
+		test: (value: string) => value.length >= 8,
+	},
+	{
+		label: "At least 1 UPPERCASE character",
+		test: (value: string) => /[A-Z]/.test(value),
+	},
+	{ label: "At least 1 number", test: (value: string) => /\d/.test(value) },
+	{
+		label: "At least 1 special character",
+		test: (value: string) => /[^A-Za-z0-9]/.test(value),
+	},
+	{
+		label: "Only ASCII characters, without spaces (max 64)",
+		test: (value: string) => PASSWORD_ASCII_REGEX.test(value),
+	},
 ];
 
 function isPasswordStrong(value: string) {

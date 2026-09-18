@@ -7,10 +7,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.koibreeding.enums.AuthProvider;
 import com.koibreeding.enums.Gender;
+import com.koibreeding.enums.Location;
 import com.koibreeding.enums.Role;
 import com.koibreeding.enums.UserStatus;
-import com.koibreeding.enums.Location;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -86,5 +87,9 @@ public class User {
     private Instant updatedAt;
     private String createdBy;
     private String updatedBy;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider provider = AuthProvider.LOCAL;
 
 }

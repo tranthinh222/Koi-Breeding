@@ -230,6 +230,20 @@
   font-weight: 700;
 }
 
+.profile-field .profile-field-error,
+.profile-field-error {
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  grid-column: 1 / -1;
+}
+
+.profile-field input[aria-invalid="true"],
+.profile-field select[aria-invalid="true"] {
+  border-color: #b42318;
+}
+
 .profile-stat-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

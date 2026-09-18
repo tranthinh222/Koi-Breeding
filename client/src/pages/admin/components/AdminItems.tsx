@@ -10,8 +10,11 @@ import {
 	type AdminItem,
 } from "../../../api/admin";
 
-const formatMoney = (value: number) => {
-	return new Intl.NumberFormat("en-US").format(value) + " Koins";
+const formatMoney = (value: number, type: string) => {
+	return (
+		new Intl.NumberFormat("en-US").format(value) +
+		(type === "CURRENCY" ? " vnđ" : " Koins")
+	);
 };
 
 export default function AdminItems() {
@@ -257,7 +260,10 @@ export default function AdminItems() {
 
 										<td>
 											<strong>
-												{formatMoney(item.price)}
+												{formatMoney(
+													item.price,
+													item.itemType,
+												)}
 											</strong>
 										</td>
 

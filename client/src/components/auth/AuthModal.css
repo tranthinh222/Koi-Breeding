@@ -617,6 +617,16 @@
 	overflow: hidden;
 }
 
+/* Keep the long location list scrollable without scrolling the register modal. */
+.auth-overlay .location-dropdown {
+	top: auto;
+	bottom: calc(100% + 8px);
+	max-height: min(280px, 40vh);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scrollbar-gutter: stable;
+}
+
 .auth-overlay .gender-option {
 	width: 100%;
 	display: flex;

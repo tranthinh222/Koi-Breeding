@@ -14,6 +14,7 @@ import com.koibreeding.util.CookieUtil;
 import com.koibreeding.util.annotation.ApiMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class AuthController {
     @PostMapping("/auth/register")
     @ApiMessage("Register success")
     public ResponseEntity<ResUserDto> register(
-            @RequestBody ResAuthDto request) {
+            @Valid @RequestBody ResAuthDto request) {
         return ResponseEntity.status(HttpStatus.OK).body(this.authService.SignUp(request));
     }
 

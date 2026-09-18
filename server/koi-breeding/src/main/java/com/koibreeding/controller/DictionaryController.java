@@ -92,6 +92,6 @@ public class DictionaryController {
 
         this.koiDictionaryService.handleDeleteDictionary(id);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

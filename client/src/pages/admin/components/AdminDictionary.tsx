@@ -2,6 +2,7 @@ import { Edit, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
 	callCreateKoiVarient,
+	callDeleteKoiVarient,
 	callFetchKoiVarient,
 	callUpdateKoiVarient,
 	callUploadKoiVarientImage,
@@ -114,18 +115,22 @@ export default function AdminDictionary() {
 		setCurrentPage(0);
 	};
 
-	const handleDelete = async (_id: number) => {
+	const handleDelete = async (id: number) => {
 		const confirmed = window.confirm(
 			"Delete this koi entry? This action cannot be undone.",
 		);
 		if (!confirmed) return;
 
 		try {
-			// await callDeleteKoiVarient(id); // Gọi API Delete
-			alert(
-				"Entry removed locally. The delete API is not connected yet.",
-			);
-			await fetchDictionary();
+			const response = await callDeleteKoiVarient(id); // Gọi API Delete
+			if (response.status === 204) {
+				alert(`Removed koi varient #${id} successfully.`);
+				await fetchDictionary();
+			} else {
+				alert(
+					`Failed to remove koi varient #${id}. The delete API is not connected yet.`,
+				);
+			}
 		} catch (error) {
 			alert("Unable to delete the dictionary entry.");
 		}

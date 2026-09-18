@@ -38,7 +38,7 @@ public class VarietyController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Variety> updateAVariety(@RequestBody Variety variety) throws Exception {
         if (!this.varietyService.isVarietyExistById(variety.getId())) {
-            throw new Exception("Variety with id '" + variety.getId() + "' is not exist.");
+            throw new RuntimeException("Variety with id '" + variety.getId() + "' is not exist.");
         }
 
         Variety updatedVariety = this.varietyService.handleUpdateVariety(variety);
@@ -50,7 +50,7 @@ public class VarietyController {
     public ResponseEntity<Variety> getVarietyById(@PathVariable Integer id) throws Exception {
         Variety fetchedVariety = varietyService.handleFetchVarietyById(id);
         if (fetchedVariety == null) {
-            throw new Exception("Variety with id '" + id + "' is not exist.");
+            throw new RuntimeException("Variety with id '" + id + "' is not exist.");
         }
 
         return ResponseEntity.ok(fetchedVariety);
@@ -67,7 +67,7 @@ public class VarietyController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteVariety(@PathVariable Integer id) throws Exception {
         if (!varietyService.isVarietyExistById(id)) {
-            throw new Exception("Variety with id '" + id + "' is not exist.");
+            throw new RuntimeException("Variety with id '" + id + "' is not exist.");
         }
 
         this.varietyService.handleDeleteVariety(id);

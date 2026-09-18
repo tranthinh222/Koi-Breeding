@@ -96,7 +96,7 @@ public class KoiController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Koi> updateAKoi(@RequestBody Koi koi) throws Exception {
         if (koiService.isKoiExistById(koi.getId())) {
-            throw new Exception("Koi with id '" + koi.getId() + "' is not exist.");
+            throw new RuntimeException("Koi with id '" + koi.getId() + "' is not exist.");
         }
 
         Koi updatedKoi = this.koiService.handleUpdateKoi(koi);
@@ -121,7 +121,7 @@ public class KoiController {
     public ResponseEntity<Koi> getKoiById(@PathVariable Integer id) throws Exception {
         Koi fetchedKoi = koiService.handleFetchKoiById(id);
         if (fetchedKoi == null) {
-            throw new Exception("Koi with id '" + id + "' is not exist.");
+            throw new RuntimeException("Koi with id '" + id + "' is not exist.");
         }
 
         return ResponseEntity.ok(fetchedKoi);
@@ -139,7 +139,7 @@ public class KoiController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteKoi(@PathVariable Integer id) throws Exception {
         if (!koiService.isKoiExistById(id)) {
-            throw new Exception("Koi with id '" + id + "' is not exist.");
+            throw new RuntimeException("Koi with id '" + id + "' is not exist.");
         }
 
         this.koiService.handleDeleteKoi(id);

@@ -1,8 +1,6 @@
 package com.koibreeding.service;
 
 import java.util.ArrayList;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,21 +18,24 @@ import com.koibreeding.domain.Koi;
 import com.koibreeding.domain.Mutation;
 import com.koibreeding.domain.Pond;
 import com.koibreeding.dto.request.RequestFeedKoiDTO;
+import com.koibreeding.dto.request.RequestHealKoiDTO;
 import com.koibreeding.dto.request.RequestMoveKoiDTO;
 import com.koibreeding.dto.request.RequestReleaseKoiDTO;
 import com.koibreeding.dto.response.ResFeedKoiDTO;
+import com.koibreeding.dto.response.ResHealKoiDTO;
 import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.dto.response.ResKoiDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
-import com.koibreeding.enums.ItemType;
-import com.koibreeding.enums.EffectType;
-import com.koibreeding.dto.request.RequestHealKoiDTO;
-import com.koibreeding.dto.response.ResHealKoiDTO;
-import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.enums.BreedingStatus;
+import com.koibreeding.enums.EffectType;
+import com.koibreeding.enums.ItemType;
 import com.koibreeding.repository.BreedingEventRepository;
+import com.koibreeding.repository.InventoryRepository;
 import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.util.formulas.KoiFormula;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 
 @Service
 public class KoiService {
@@ -79,30 +80,30 @@ public class KoiService {
     public List<ResKoiDTO> handleReleaseKoi(RequestReleaseKoiDTO requestReleaseKoiDTO) throws Exception {
         Pond requestPond = pondService.handleFetchPondById(requestReleaseKoiDTO.getPondId());
         if (requestPond == null) {
-            throw new Exception("Pond with id='" + requestReleaseKoiDTO.getPondId() + "' is not exist.");
+            throw new RuntimeException("Pond with id='" + requestReleaseKoiDTO.getPondId() + "' is not exist.");
         }
 
         Inventory requestInventory = inventoryService.handleFetchInventoryById(requestReleaseKoiDTO.getInventoryId());
         if (requestInventory == null) {
-            throw new Exception(
+            throw new RuntimeException(
                     "Item in inventory with id='" + requestReleaseKoiDTO.getInventoryId() + "' is not exist.");
         }
 
         if (requestInventory.getQuantity() < requestReleaseKoiDTO.getQuantity()) {
-            throw new Exception("Invalid number of released fish. It must be less than or equal '"
+            throw new RuntimeException("Invalid number of released fish. It must be less than or equal '"
                     + requestInventory.getQuantity() + "' but received '" + requestReleaseKoiDTO.getQuantity() + "'.");
         }
 
         Item requestItem = requestInventory.getItem();
         if (!requestItem.getItemType().equals(ItemType.KOI)) {
-            throw new Exception("Invalid item type. Item must be a KOI item");
+            throw new RuntimeException("Invalid item type. Item must be a KOI item");
         }
 
         Dictionary requestDictionary = this.koiDictionaryService
                 .handleFetchDictionaryById(requestItem.getEffectValue().intValue());
 
         if (requestDictionary == null) {
-            throw new Exception("Item value does not match any koi varient.");
+            throw new RuntimeException("Item value does not match any koi varient.");
         }
 
         List<Koi> newKoiList = new ArrayList<Koi>();
@@ -124,7 +125,7 @@ public class KoiService {
     public ResKoiDTO handleMoveKoi(RequestMoveKoiDTO requestMoveKoiDTO) throws Exception {
         Koi targetKoi = koiRepository.findById(requestMoveKoiDTO.getTargetKoiId()).orElse(null);
         if (targetKoi == null) {
-            throw new Exception("Koi with id='" + requestMoveKoiDTO.getTargetKoiId() + "' does not exist.");
+            throw new RuntimeException("Koi with id='" + requestMoveKoiDTO.getTargetKoiId() + "' does not exist.");
         }
 
         // Refresh under a lock so a concurrent care update cannot leave stale HP/food.
@@ -138,17 +139,19 @@ public class KoiService {
 
         Pond sourcePond = this.pondService.handleFetchPondById(requestMoveKoiDTO.getSourcePondId());
         if (sourcePond == null) {
-            throw new Exception("Source pond with id='" + requestMoveKoiDTO.getSourcePondId() + "' does not exist.");
+            throw new RuntimeException(
+                    "Source pond with id='" + requestMoveKoiDTO.getSourcePondId() + "' does not exist.");
         }
 
         Pond targetPond = this.pondService.handleFetchPondById(requestMoveKoiDTO.getTargetPondId());
         if (targetPond == null) {
-            throw new Exception("Target pond with id='" + requestMoveKoiDTO.getTargetPondId() + "' does not exist.");
+            throw new RuntimeException(
+                    "Target pond with id='" + requestMoveKoiDTO.getTargetPondId() + "' does not exist.");
         }
 
         long targetPondQuantity = this.handleGetKoisQuantityInPond(targetPond.getId());
         if (targetPondQuantity == targetPond.getCapacity()) {
-            throw new Exception("Target pond with id='" + targetPond.getId() + "' is full.");
+            throw new RuntimeException("Target pond with id='" + targetPond.getId() + "' is full.");
         }
 
         koiCareService.updateStats(targetKoi, java.time.OffsetDateTime.now());
@@ -198,7 +201,8 @@ public class KoiService {
                 .intValue();
 
         koi.setFoodBar(currentFoodBar + foodRestored);
-        if (koi.getFoodBar() > 0) koi.setHungrySince(null);
+        if (koi.getFoodBar() > 0)
+            koi.setHungrySince(null);
         Koi updatedKoi = koiRepository.save(koi);
         ResItemInventory remainingInventory = inventoryService.useItemFromInventory(
                 request.userId(), request.itemId(), request.quantity());
@@ -227,7 +231,8 @@ public class KoiService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This koi already has full HP.");
         }
         Inventory inventory = inventoryRepository.findByUserIdAndItemId(request.userId(), request.itemId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Medicine is not in your inventory."));
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Medicine is not in your inventory."));
         entityManager.refresh(inventory, LockModeType.PESSIMISTIC_WRITE);
         Item medicine = inventory.getItem();
         if (medicine.getItemType() != ItemType.MEDICINE || medicine.getEffectType() != EffectType.HEALTH) {
@@ -243,7 +248,8 @@ public class KoiService {
                 .min(java.math.BigDecimal.valueOf(100 - koi.getHealth())).intValue();
         koi.setHealth(koi.getHealth() + restored);
         int remaining = inventory.getQuantity() - request.quantity();
-        if (remaining == 0) inventoryRepository.delete(inventory);
+        if (remaining == 0)
+            inventoryRepository.delete(inventory);
         else {
             inventory.setQuantity(remaining);
             inventoryRepository.save(inventory);
@@ -383,14 +389,16 @@ public class KoiService {
             ResKoiDTO.KoiParent fatherData = new ResKoiDTO.KoiParent();
             fatherData.setId(father.getId());
             fatherData.setName(father.getName());
-                if (father.getDictionary() != null) {
+            if (father.getDictionary() != null) {
                 fatherData.setImageUrl(father.getDictionary().getImageUrl());
-                }
-                Integer koiUser = koi.getPond() != null && koi.getPond().getOwner() != null
-                    ? koi.getPond().getOwner().getId() : null;
-                Integer fatherUser = father.getPond() != null && father.getPond().getOwner() != null
-                    ? father.getPond().getOwner().getId() : null;
-                fatherData.setBelongToUser(koiUser != null && koiUser.equals(fatherUser));
+            }
+            Integer koiUser = koi.getPond() != null && koi.getPond().getOwner() != null
+                    ? koi.getPond().getOwner().getId()
+                    : null;
+            Integer fatherUser = father.getPond() != null && father.getPond().getOwner() != null
+                    ? father.getPond().getOwner().getId()
+                    : null;
+            fatherData.setBelongToUser(koiUser != null && koiUser.equals(fatherUser));
             resKoiDTO.setFather(fatherData);
         }
 
@@ -398,15 +406,17 @@ public class KoiService {
             ResKoiDTO.KoiParent motherData = new ResKoiDTO.KoiParent();
             motherData.setId(mother.getId());
             motherData.setName(mother.getName());
-                if (mother.getDictionary() != null) {
+            if (mother.getDictionary() != null) {
                 motherData.setImageUrl(mother.getDictionary().getImageUrl());
-                }
-                Integer koiUser = koi.getPond() != null && koi.getPond().getOwner() != null
-                    ? koi.getPond().getOwner().getId() : null;
-                Integer motherUser = mother.getPond() != null && mother.getPond().getOwner() != null
-                    ? mother.getPond().getOwner().getId() : null;
-                motherData.setBelongToUser(koiUser != null && koiUser.equals(motherUser));
-                resKoiDTO.setMother(motherData);
+            }
+            Integer koiUser = koi.getPond() != null && koi.getPond().getOwner() != null
+                    ? koi.getPond().getOwner().getId()
+                    : null;
+            Integer motherUser = mother.getPond() != null && mother.getPond().getOwner() != null
+                    ? mother.getPond().getOwner().getId()
+                    : null;
+            motherData.setBelongToUser(koiUser != null && koiUser.equals(motherUser));
+            resKoiDTO.setMother(motherData);
         }
 
         resKoiDTO.setPotential(koi.getPotential());

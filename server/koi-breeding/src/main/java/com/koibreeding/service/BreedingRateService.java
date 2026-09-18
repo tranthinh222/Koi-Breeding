@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.koibreeding.domain.BreedingRate;
@@ -53,10 +53,12 @@ public class BreedingRateService {
 
     public List<BreedingRate> findPairIncludingReverse(Integer fatherDictionaryId, Integer motherDictionaryId) {
         List<BreedingRate> direct = findPair(fatherDictionaryId, motherDictionaryId);
-        if (!direct.isEmpty()) return direct;
+        if (!direct.isEmpty())
+            return direct;
 
         List<BreedingRate> reverse = findPair(motherDictionaryId, fatherDictionaryId);
-        if (!reverse.isEmpty()) return reverse;
+        if (!reverse.isEmpty())
+            return reverse;
 
         Dictionary father = dictionaryService.handleFetchDictionaryById(fatherDictionaryId);
         Dictionary mother = dictionaryService.handleFetchDictionaryById(motherDictionaryId);
@@ -65,7 +67,8 @@ public class BreedingRateService {
         }
 
         BreedingRecipeType type = father.getVariety().getId().equals(mother.getVariety().getId())
-                ? BreedingRecipeType.PURE : BreedingRecipeType.CROSS;
+                ? BreedingRecipeType.PURE
+                : BreedingRecipeType.CROSS;
         BigDecimal half = new BigDecimal("0.5");
         // Calculated defaults only; these are not saved as breeding recipes.
         return List.of(
@@ -76,33 +79,35 @@ public class BreedingRateService {
     public BreedingRate handleCreateBreedingRate(RequestCreateOrUpdateBreedingRateDTO request) throws Exception {
         Dictionary father = dictionaryService.handleFetchDictionaryById(request.getFatherId());
         if (father == null) {
-            throw new Exception("Father with id='" + request.getFatherId() + "' does not exist");
+            throw new RuntimeException("Father with id='" + request.getFatherId() + "' does not exist");
         }
 
         Dictionary mother = dictionaryService.handleFetchDictionaryById(request.getMotherId());
         if (mother == null) {
-            throw new Exception("Mother with id='" + request.getMotherId() + "' does not exist");
+            throw new RuntimeException("Mother with id='" + request.getMotherId() + "' does not exist");
         }
 
         Dictionary target = dictionaryService.handleFetchDictionaryById(request.getChildId());
         if (target == null) {
-            throw new Exception("Target with id='" + request.getChildId() + "' does not exist");
+            throw new RuntimeException("Target with id='" + request.getChildId() + "' does not exist");
         }
 
         if (father.getVariety().getId().equals(mother.getVariety().getId())
                 && !request.getType().equals(BreedingRecipeType.PURE)) {
-            throw new Exception("Parent have the same variety, but received '" + request.getType() + "' breeding type");
+            throw new RuntimeException(
+                    "Parent have the same variety, but received '" + request.getType() + "' breeding type");
         }
 
         if (repository.findByFatherIdAndMotherIdAndChildId(father.getId(), mother.getId(), target.getId())
                 .orElse(null) == null) {
-            throw new Exception("The Breeding Recipe '" + father.getName() + "' x '" + mother.getName() + "' = '"
+            throw new RuntimeException("The Breeding Recipe '" + father.getName() + "' x '" + mother.getName() + "' = '"
                     + target.getName() + "' already exists");
         }
 
         BigDecimal total = request.getFatherRate().add(request.getMotherRate()).add(request.getTargetRate());
         if (total.compareTo(BigDecimal.valueOf(1.0)) > 0) {
-            throw new Exception("Total breeding rate (father_rate + mother_rate + target_rate) cannot exceed 100%");
+            throw new RuntimeException(
+                    "Total breeding rate (father_rate + mother_rate + target_rate) cannot exceed 100%");
         }
 
         BreedingRate newBreedingRate = new BreedingRate(null, father, mother, target, request.getType(),
@@ -115,40 +120,48 @@ public class BreedingRateService {
             throws Exception {
         BreedingRate oldBreedingRate = repository.findById(id).orElse(null);
         if (oldBreedingRate == null) {
-            throw new Exception("Breeding Rate with id='" + id + "' does not exist");
+            throw new RuntimeException("Breeding Rate with id='" + id + "' does not exist");
         }
 
         Dictionary father = dictionaryService.handleFetchDictionaryById(request.getFatherId());
         if (father == null) {
-            throw new Exception("Father with id='" + request.getFatherId() + "' does not exist");
+            throw new RuntimeException("Father with id='" + request.getFatherId() + "' does not exist");
         }
 
         Dictionary mother = dictionaryService.handleFetchDictionaryById(request.getMotherId());
         if (mother == null) {
-            throw new Exception("Mother with id='" + request.getMotherId() + "' does not exist");
+            throw new RuntimeException("Mother with id='" + request.getMotherId() + "' does not exist");
         }
 
         Dictionary target = dictionaryService.handleFetchDictionaryById(request.getChildId());
         if (target == null) {
-            throw new Exception("Target with id='" + request.getChildId() + "' does not exist");
+            throw new RuntimeException("Target with id='" + request.getChildId() + "' does not exist");
         }
 
         if (father.getVariety().getId() == mother.getVariety().getId()
                 && !request.getType().equals(BreedingRecipeType.PURE)) {
-            throw new Exception("Parent have the same variety, but received '" + request.getType() + "' breeding type");
+            throw new RuntimeException(
+                    "Parent have the same variety, but received '" + request.getType() + "' breeding type");
+        }
+
+        if (father.getVariety().getId() != mother.getVariety().getId()
+                && request.getType().equals(BreedingRecipeType.PURE)) {
+            throw new RuntimeException(
+                    "Parent have different variety, but received '" + request.getType() + "' breeding type");
         }
 
         BreedingRate checkExist = repository
                 .findByFatherIdAndMotherIdAndChildId(father.getId(), mother.getId(), target.getId()).orElse(null);
 
-        if (!checkExist.getId().equals(oldBreedingRate.getId())) {
-            throw new Exception("The Breeding Recipe '" + father.getName() + "' x '" + mother.getName() + "' = '"
+        if (checkExist != null && !checkExist.getId().equals(oldBreedingRate.getId())) {
+            throw new RuntimeException("The Breeding Recipe '" + father.getName() + "' x '" + mother.getName() + "' = '"
                     + target.getName() + "' already exists");
         }
 
         BigDecimal total = request.getFatherRate().add(request.getMotherRate()).add(request.getTargetRate());
         if (total.compareTo(BigDecimal.valueOf(1.0)) > 0) {
-            throw new Exception("Total breeding rate (father_rate + mother_rate + target_rate) cannot exceed 100%");
+            throw new RuntimeException(
+                    "Total breeding rate (father_rate + mother_rate + target_rate) cannot exceed 100%");
         }
 
         oldBreedingRate.setFather(father);

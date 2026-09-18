@@ -294,7 +294,7 @@
 
 .profile-koi-card {
   display: grid;
-  grid-template-columns: 78px minmax(0, 1fr) auto;
+  grid-template-columns: 78px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
   min-width: 0;
@@ -305,6 +305,7 @@
 }
 
 .profile-koi-image {
+  grid-row: span 2;
   display: grid;
   width: 78px;
   height: 68px;
@@ -312,6 +313,11 @@
   overflow: hidden;
   border-radius: 50%;
   background: color-mix(in srgb, var(--app-sky) 55%, var(--surface));
+}
+
+.profile-koi-card > span {
+  grid-column: 2;
+  overflow-wrap: anywhere;
 }
 
 .profile-koi-image img {
@@ -381,4 +387,7 @@
     justify-items: center;
     text-align: center;
   }
+
+  .profile-koi-image { grid-row: auto; }
+  .profile-koi-card > span { grid-column: auto; }
 }

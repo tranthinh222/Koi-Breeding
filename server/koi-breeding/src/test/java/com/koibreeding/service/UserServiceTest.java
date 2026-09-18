@@ -21,6 +21,10 @@ import static org.mockito.Mockito.when;
 public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private com.koibreeding.repository.KoiRepository koiRepository;
+    @Mock
+    private com.koibreeding.repository.TransactionRepository transactionRepository;
 
     @InjectMocks
     private UserService userService;
@@ -52,5 +56,39 @@ public class UserServiceTest {
         assertEquals(user.getGender(), result.getGender());
         assertEquals(user.getAvatarUrl(), result.getAvatarUrl());
         assertEquals(user.getLevel(), result.getLevel());
+        assertEquals(0, result.getTotalFish());
+        assertEquals(0, result.getMarketplaceSales());
+        assertEquals(java.util.List.of(), result.getMostBeautifulKoi());
+    }
+
+    @Test
+    void profileStatsCountOwnedFishAndSellFishTransactions() {
+        when(koiRepository.countByPond_Owner_Id(1)).thenReturn(12L);
+        when(transactionRepository.countByWalletUserIdAndTransactionType(
+                1, com.koibreeding.enums.TransactionType.SELL_FISH)).thenReturn(7L);
+
+        ResUserDto result = userService.convertToResUserDto(user);
+
+        assertEquals(12, result.getTotalFish());
+        assertEquals(7, result.getMarketplaceSales());
+    }
+
+    @Test
+    void profileReturnsTopKoiNamesImagesAndScoresFromDatabase() {
+        var koi = org.mockito.Mockito.mock(com.koibreeding.repository.KoiRepository.BeautifulKoiView.class);
+        when(koi.getId()).thenReturn(42);
+        when(koi.getName()).thenReturn("Sakura");
+        when(koi.getImageUrl()).thenReturn("/kois/sakura.svg");
+        when(koi.getBeautifulScore()).thenReturn(91.25);
+        when(koiRepository.findMostBeautifulByOwner(1, org.springframework.data.domain.PageRequest.of(0, 3)))
+                .thenReturn(java.util.List.of(koi));
+
+        var result = userService.convertToResUserDto(user).getMostBeautifulKoi();
+
+        assertEquals(1, result.size());
+        assertEquals(42, result.get(0).id());
+        assertEquals("Sakura", result.get(0).name());
+        assertEquals("/kois/sakura.svg", result.get(0).imageUrl());
+        assertEquals(91.25, result.get(0).beautifulScore());
     }
 }

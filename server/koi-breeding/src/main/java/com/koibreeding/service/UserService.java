@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import com.koibreeding.dto.response.ResBeautifulKoiDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -18,18 +20,26 @@ import com.koibreeding.dto.response.admin.AdminUserDto;
 import com.koibreeding.enums.Location;
 import com.koibreeding.enums.Role;
 import com.koibreeding.repository.UserRepository;
+import com.koibreeding.repository.KoiRepository;
+import com.koibreeding.repository.TransactionRepository;
+import com.koibreeding.enums.TransactionType;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final PondEnvironmentConfig environmentConfig;
     private final CloudinaryUploadService cloudinaryUploadService;
+    private final KoiRepository koiRepository;
+    private final TransactionRepository transactionRepository;
 
     public UserService(UserRepository userRepository, PondEnvironmentConfig environmentConfig,
-            CloudinaryUploadService cloudinaryUploadService) {
+            CloudinaryUploadService cloudinaryUploadService, KoiRepository koiRepository,
+            TransactionRepository transactionRepository) {
         this.userRepository = userRepository;
         this.environmentConfig = environmentConfig;
         this.cloudinaryUploadService = cloudinaryUploadService;
+        this.koiRepository = koiRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public User handleFetchUserById(Integer userId) {
@@ -54,6 +64,12 @@ public class UserService {
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .level(user.getLevel())
+                .totalFish(koiRepository.countByPond_Owner_Id(user.getId()))
+                .mostBeautifulKoi(koiRepository.findMostBeautifulByOwner(user.getId(), PageRequest.of(0, 3))
+                        .stream().map(koi -> new ResBeautifulKoiDTO(
+                                koi.getId(), koi.getName(), koi.getImageUrl(), koi.getBeautifulScore())).toList())
+                .marketplaceSales(transactionRepository.countByWalletUserIdAndTransactionType(
+                        user.getId(), TransactionType.SELL_FISH))
                 .build();
     }
 

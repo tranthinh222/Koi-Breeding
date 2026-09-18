@@ -6,9 +6,6 @@ import { useAuth } from "../../context/AuthContext";
 
 import femaleAvatar from "../../assets/avatars/female_blank_avatar.png";
 import maleAvatar from "../../assets/avatars/male_blank_avatar.png";
-import kohakuImage from "../../assets/koi/kohaku.svg";
-import showaImage from "../../assets/koi/showa_sanshoku.svg";
-import sankeImage from "../../assets/koi/taisho_sanke.svg";
 
 import ImageEditor from "./ImageEditor";
 
@@ -17,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { logoutRequest } from "../../api/auth";
 import {
 	ACCEPTED_AVATAR_TYPES,
+	type BeautifulKoi,
 	type ProfileForm,
 	type UserProfile,
 } from "../../types/profile.types";
@@ -44,12 +42,18 @@ function validateProfile(form: ProfileForm): ProfileErrors {
 	if (!form.birthday) errors.birthday = "Birthday is required.";
 	else {
 		const birthday = new Date(`${form.birthday}T00:00:00`);
-		if (!/^\d{4}-\d{2}-\d{2}$/.test(form.birthday)
-			|| Number.isNaN(birthday.getTime()) || dateValue(birthday) !== form.birthday
-			|| birthday.getFullYear() < 1) errors.birthday = "Enter a valid birthday.";
-		else if (form.birthday > dateValue(new Date())) errors.birthday = "Birthday cannot be in the future.";
+		if (
+			!/^\d{4}-\d{2}-\d{2}$/.test(form.birthday) ||
+			Number.isNaN(birthday.getTime()) ||
+			dateValue(birthday) !== form.birthday ||
+			birthday.getFullYear() < 1
+		)
+			errors.birthday = "Enter a valid birthday.";
+		else if (form.birthday > dateValue(new Date()))
+			errors.birthday = "Birthday cannot be in the future.";
 	}
-	if (form.gender !== "MALE" && form.gender !== "FEMALE") errors.gender = "Please select a gender.";
+	if (form.gender !== "MALE" && form.gender !== "FEMALE")
+		errors.gender = "Please select a gender.";
 	return errors;
 }
 
@@ -267,14 +271,24 @@ function AccountPanel({
 							required
 							disabled={saving}
 							aria-invalid={Boolean(errors.email)}
-							aria-describedby={errors.email ? "profile-email-error" : undefined}
+							aria-describedby={
+								errors.email ? "profile-email-error" : undefined
+							}
 							value={form.email}
 							onChange={onChange("email")}
 						/>
 					) : (
 						<strong>{profile.email || "Not updated."}</strong>
 					)}
-					{editing && errors.email && <small id="profile-email-error" className="profile-field-error" role="alert">{errors.email}</small>}
+					{editing && errors.email && (
+						<small
+							id="profile-email-error"
+							className="profile-field-error"
+							role="alert"
+						>
+							{errors.email}
+						</small>
+					)}
 				</label>
 
 				<label className="profile-field">
@@ -287,14 +301,26 @@ function AccountPanel({
 							max={dateValue(new Date())}
 							disabled={saving}
 							aria-invalid={Boolean(errors.birthday)}
-							aria-describedby={errors.birthday ? "profile-birthday-error" : undefined}
+							aria-describedby={
+								errors.birthday
+									? "profile-birthday-error"
+									: undefined
+							}
 							value={form.birthday}
 							onChange={onChange("birthday")}
 						/>
 					) : (
 						<strong>{formatDate(profile.birthday)}</strong>
 					)}
-					{editing && errors.birthday && <small id="profile-birthday-error" className="profile-field-error" role="alert">{errors.birthday}</small>}
+					{editing && errors.birthday && (
+						<small
+							id="profile-birthday-error"
+							className="profile-field-error"
+							role="alert"
+						>
+							{errors.birthday}
+						</small>
+					)}
 				</label>
 
 				<label className="profile-field">
@@ -305,7 +331,11 @@ function AccountPanel({
 							required
 							disabled={saving}
 							aria-invalid={Boolean(errors.gender)}
-							aria-describedby={errors.gender ? "profile-gender-error" : undefined}
+							aria-describedby={
+								errors.gender
+									? "profile-gender-error"
+									: undefined
+							}
 							value={form.gender}
 							onChange={onChange("gender")}
 						>
@@ -322,7 +352,15 @@ function AccountPanel({
 								: "Not updated."}
 						</strong>
 					)}
-					{editing && errors.gender && <small id="profile-gender-error" className="profile-field-error" role="alert">{errors.gender}</small>}
+					{editing && errors.gender && (
+						<small
+							id="profile-gender-error"
+							className="profile-field-error"
+							role="alert"
+						>
+							{errors.gender}
+						</small>
+					)}
 				</label>
 				<ProfileField
 					label="Joined at"
@@ -336,8 +374,8 @@ function AccountPanel({
 function StatisticsPanel({ profile }: { profile: UserProfile }) {
 	const stats = [
 		{ label: "Level", value: profile.level },
-		{ label: "Total Fish", value: 0 },
-		{ label: "Marketplace Sales", value: 0 },
+		{ label: "Total Fish", value: profile.totalFish },
+		{ label: "Marketplace Sales", value: profile.marketplaceSales },
 	];
 
 	return (
@@ -381,28 +419,37 @@ function AchievementsPanel() {
 	);
 }
 
-function FavoriteKoiPanel() {
-	const favoriteKoi = [
-		{ name: "Kohaku", image: kohakuImage, level: 18 },
-		{ name: "Showa", image: showaImage, level: 19 },
-		{ name: "Sanke", image: sankeImage, level: 20 },
-	];
-
+function MostBeautifulKoiPanel({ koiList }: { koiList: BeautifulKoi[] }) {
 	return (
 		<section className="profile-favorite-koi">
 			<div className="profile-section-header">
 				<span className="profile-eyebrow">Collection</span>
-				<h3>Your Favorite Koi</h3>
+				<h3>Your Most Beautiful Koi</h3>
 			</div>
 
+			{koiList.length === 0 && <p>You do not own any koi yet.</p>}
 			<div className="profile-koi-grid">
-				{favoriteKoi.map((koi) => (
-					<div className="profile-koi-card" key={koi.name}>
+				{koiList.map((koi) => (
+					<div className="profile-koi-card" key={koi.id}>
 						<div className="profile-koi-image">
-							<img src={koi.image} alt={koi.name} />
+							<img
+								src={koi.imageUrl || "/kois/koi-empty.png"}
+								alt={koi.name}
+								onError={(event) => {
+									if (
+										!event.currentTarget.src.endsWith(
+											"/kois/koi-empty.png",
+										)
+									)
+										event.currentTarget.src =
+											"/kois/koi-empty.png";
+								}}
+							/>
 						</div>
 						<strong>{koi.name}</strong>
-						<span>Lv. {koi.level}</span>
+						<span>
+							Beautiful Score: {koi.beautifulScore.toFixed(0)}/100
+						</span>
 					</div>
 				))}
 			</div>
@@ -574,7 +621,11 @@ export default function Profile() {
 		(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 			const updated = { ...form, [field]: event.target.value };
 			setForm(updated);
-			if (fieldErrors[field]) setFieldErrors((current) => ({ ...current, [field]: validateProfile(updated)[field] }));
+			if (fieldErrors[field])
+				setFieldErrors((current) => ({
+					...current,
+					[field]: validateProfile(updated)[field],
+				}));
 			setError(null);
 			setNotice(null);
 		};
@@ -640,9 +691,7 @@ export default function Profile() {
 				setEditing(false);
 				setNotice("Profile updated successfully.");
 			} catch (err) {
-				setError(
-						getApiErrorMessage(err, "Cannot save profile."),
-				);
+				setError(getApiErrorMessage(err, "Cannot save profile."));
 			} finally {
 				savePending.current = false;
 				setSaving(false);
@@ -722,7 +771,9 @@ export default function Profile() {
 							onSave={handleSave}
 						/>
 
-						{error && <ProfileMessage type="error" message={error} />}
+						{error && (
+							<ProfileMessage type="error" message={error} />
+						)}
 						{notice && (
 							<ProfileMessage type="info" message={notice} />
 						)}
@@ -742,7 +793,9 @@ export default function Profile() {
 							<AchievementsPanel />
 						</div>
 
-						<FavoriteKoiPanel />
+						<MostBeautifulKoiPanel
+							koiList={profile.mostBeautifulKoi ?? []}
+						/>
 
 						{/* Image Editor */}
 						{showEditor && selectedImage && (

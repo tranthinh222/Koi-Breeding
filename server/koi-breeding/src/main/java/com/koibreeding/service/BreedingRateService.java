@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.koibreeding.domain.BreedingRate;
 import com.koibreeding.domain.Dictionary;
@@ -51,7 +53,24 @@ public class BreedingRateService {
 
     public List<BreedingRate> findPairIncludingReverse(Integer fatherDictionaryId, Integer motherDictionaryId) {
         List<BreedingRate> direct = findPair(fatherDictionaryId, motherDictionaryId);
-        return direct.isEmpty() ? findPair(motherDictionaryId, fatherDictionaryId) : direct;
+        if (!direct.isEmpty()) return direct;
+
+        List<BreedingRate> reverse = findPair(motherDictionaryId, fatherDictionaryId);
+        if (!reverse.isEmpty()) return reverse;
+
+        Dictionary father = dictionaryService.handleFetchDictionaryById(fatherDictionaryId);
+        Dictionary mother = dictionaryService.handleFetchDictionaryById(motherDictionaryId);
+        if (father == null || mother == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Parent koi variety does not exist.");
+        }
+
+        BreedingRecipeType type = father.getVariety().getId().equals(mother.getVariety().getId())
+                ? BreedingRecipeType.PURE : BreedingRecipeType.CROSS;
+        BigDecimal half = new BigDecimal("0.5");
+        // Calculated defaults only; these are not saved as breeding recipes.
+        return List.of(
+                new BreedingRate(null, father, mother, father, type, half, half, BigDecimal.ZERO),
+                new BreedingRate(null, father, mother, mother, type, half, BigDecimal.ZERO, half));
     }
 
     public BreedingRate handleCreateBreedingRate(RequestCreateOrUpdateBreedingRateDTO request) throws Exception {

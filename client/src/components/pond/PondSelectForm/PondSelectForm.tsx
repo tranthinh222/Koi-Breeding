@@ -1,5 +1,5 @@
 import { MapPin, Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { callFetchAllPonds } from "../../../api/pond";
 import { useAuth } from "../../../context/AuthContext";
 import type { IKoi, IModelPagination, IPond } from "../../../types/backend";
@@ -10,7 +10,7 @@ interface PondSelectFormProps {
   selectedKoi: IKoi;
   currentPond: IPond;
   onClose: () => void;
-  onSubmit: (targetPond: IPond, targetKoi: IKoi) => void;
+  onSubmit: (targetPond: IPond, targetKoi: IKoi) => void | Promise<void>;
 }
 
 function PondSelectForm({
@@ -25,6 +25,8 @@ function PondSelectForm({
   const [totalPages, setTotalPages] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
   // Fetch the page data
   useEffect(() => {
@@ -101,6 +103,7 @@ function PondSelectForm({
   };
 
   const handleMoveKoi = async (pond: IPond) => {
+    if (submittingRef.current) return;
     if (pond.id === currentPond.id) {
       toast(`Koi ${selectedKoi.name} is still in this pond.`);
       return;
@@ -110,7 +113,14 @@ function PondSelectForm({
       return;
     }
 
-    onSubmit(pond, selectedKoi);
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    try {
+      await onSubmit(pond, selectedKoi);
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -120,6 +130,7 @@ function PondSelectForm({
           type="button"
           className={styles.closeButton}
           onClick={onClose}
+          disabled={isSubmitting}
           aria-label="Close"
         >
           <X size={30} />
@@ -127,7 +138,9 @@ function PondSelectForm({
 
         {/* Form Header */}
         <div className={styles.formHeader}>
-          <span className={styles.title}>Choose A Pond To Move Koi</span>
+          <span className={styles.title} aria-live="polite">
+            {isSubmitting ? "Moving koi..." : "Choose A Pond To Move Koi"}
+          </span>
           <div className={styles.searchPanel}>
             <div className={styles.searchWrapper}>
               <Search size="30" color="#a9acb1" />
@@ -156,6 +169,7 @@ function PondSelectForm({
             <div
               key={pond.id}
               className={styles.pondItem}
+              aria-disabled={isSubmitting}
               onClick={() => {
                 handleMoveKoi(pond);
               }}

@@ -84,7 +84,8 @@ interface PondCanvasProps {
 	pondKoiList: IKoi[];
 	pond: IPond;
 	justMovedKoiId?: number | null;
-	onMoveKoi: (koi: IKoi, targetPond: IPond) => void;
+	onMoveKoi: (koi: IKoi, targetPond: IPond) => Promise<IKoi | null>;
+	onKoiMoved: (koi: IKoi, targetPond: IPond) => void;
 	onFeedKoi: (koi: IKoi, itemId: number) => Promise<IKoi | null>;
 }
 
@@ -148,6 +149,7 @@ function PondCanvas({
 	pond,
 	justMovedKoiId,
 	onMoveKoi,
+	onKoiMoved,
 	onFeedKoi,
 }: PondCanvasProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -608,21 +610,23 @@ function PondCanvas({
 						}
 						currentPond={pond}
 						onClose={() => setIsMoveFishDialogOpen(false)}
-						onSubmit={(targetPond: IPond, targetKoi: IKoi) => {
+						onSubmit={async (targetPond: IPond, targetKoi: IKoi) => {
+							const movedKoi = await onMoveKoi(targetKoi, targetPond);
+							if (!movedKoi) return;
+
 							setIsMoveFishDialogOpen(false);
 
-							if (activeFishIndexRef.current !== null) {
-								fishRef.current[
-									activeFishIndexRef.current
-								].isLeaving = true;
-							}
+							const fishIndex = latestKoiListRef.current.findIndex(
+								(koi) => koi.id === targetKoi.id,
+							);
+							const fish = fishRef.current[fishIndex];
+							if (fish) fish.isLeaving = true;
 
 							setActiveFishIndex(null);
 							activeFishIndexRef.current = null;
 
-							setTimeout(() => {
-								onMoveKoi(targetKoi, targetPond);
-							}, 500);
+							await new Promise<void>((resolve) => setTimeout(resolve, 500));
+							onKoiMoved(movedKoi, targetPond);
 						}}
 					/>
 				</div>

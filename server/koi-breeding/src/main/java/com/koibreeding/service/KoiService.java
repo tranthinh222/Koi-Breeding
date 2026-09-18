@@ -25,6 +25,8 @@ import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.dto.response.ResKoiDTO;
 import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.BreedingStatus;
+import com.koibreeding.repository.BreedingEventRepository;
 import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.util.formulas.KoiFormula;
 
@@ -32,6 +34,7 @@ import com.koibreeding.util.formulas.KoiFormula;
 public class KoiService {
     private final KoiFormula koiFormula;
     private final KoiRepository koiRepository;
+    private final BreedingEventRepository breedingEventRepository;
     private final MutationService mutationService;
     private final DictionaryService koiDictionaryService;
     private final PondService pondService;
@@ -43,8 +46,10 @@ public class KoiService {
             MutationService mutationService,
             DictionaryService koiDictionaryService,
             PondService pondService,
-            InventoryService inventoryService, KoiFormula koiFormula) {
+            InventoryService inventoryService, KoiFormula koiFormula,
+            BreedingEventRepository breedingEventRepository) {
         this.koiRepository = koiRepository;
+        this.breedingEventRepository = breedingEventRepository;
         this.mutationService = mutationService;
         this.koiDictionaryService = koiDictionaryService;
         this.pondService = pondService;
@@ -102,10 +107,18 @@ public class KoiService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public ResKoiDTO handleMoveKoi(RequestMoveKoiDTO requestMoveKoiDTO) throws Exception {
         Koi targetKoi = this.handleFetchKoiById(requestMoveKoiDTO.getTargetKoiId());
         if (targetKoi == null) {
             throw new Exception("Koi with id='" + requestMoveKoiDTO.getTargetKoiId() + "' does not exist.");
+        }
+
+        if (breedingEventRepository.existsByUserAndParentKoiAndStatusNotIn(
+                targetKoi.getPond().getOwner().getId(), targetKoi.getId(),
+                List.of(BreedingStatus.COMPLETED, BreedingStatus.CANCELLED))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Cannot move a koi that is in an active breeding event.");
         }
 
         Pond sourcePond = this.pondService.handleFetchPondById(requestMoveKoiDTO.getSourcePondId());

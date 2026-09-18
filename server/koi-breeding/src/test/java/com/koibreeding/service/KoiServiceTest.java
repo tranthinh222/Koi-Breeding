@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +25,12 @@ import com.koibreeding.domain.Koi;
 import com.koibreeding.domain.Pond;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.request.RequestFeedKoiDTO;
+import com.koibreeding.dto.request.RequestMoveKoiDTO;
 import com.koibreeding.dto.response.ResFeedKoiDTO;
 import com.koibreeding.dto.response.ResItemInventory;
 import com.koibreeding.enums.ItemType;
+import com.koibreeding.enums.BreedingStatus;
+import com.koibreeding.repository.BreedingEventRepository;
 import com.koibreeding.repository.KoiRepository;
 import com.koibreeding.util.formulas.KoiFormula;
 
@@ -35,6 +39,8 @@ class KoiServiceTest {
 
     @Mock
     private KoiRepository koiRepository;
+    @Mock
+    private BreedingEventRepository breedingEventRepository;
     @Mock
     private MutationService mutationService;
     @Mock
@@ -53,7 +59,7 @@ class KoiServiceTest {
     @BeforeEach
     void setUp() {
         koiService = new KoiService(koiRepository, mutationService, dictionaryService, pondService,
-                inventoryService, koiFormula);
+                inventoryService, koiFormula, breedingEventRepository);
 
         User owner = new User();
         owner.setId(1);
@@ -78,6 +84,47 @@ class KoiServiceTest {
         inventory.setUser(owner);
         inventory.setItem(food);
         inventory.setQuantity(5);
+    }
+
+    @Test
+    void moveKoiRejectsActiveBreedingWithoutChangingPond() {
+        Pond originalPond = koi.getPond();
+        RequestMoveKoiDTO request = new RequestMoveKoiDTO();
+        request.setTargetKoiId(20);
+        request.setSourcePondId(999);
+        request.setTargetPondId(11);
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+        when(breedingEventRepository.existsByUserAndParentKoiAndStatusNotIn(
+                1, 20, List.of(BreedingStatus.COMPLETED, BreedingStatus.CANCELLED))).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> koiService.handleMoveKoi(request));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals(originalPond, koi.getPond());
+        verify(koiRepository, never()).save(koi);
+    }
+
+    @Test
+    void moveKoiSucceedsWhenNoActiveBreedingExists() throws Exception {
+        Pond targetPond = new Pond();
+        targetPond.setId(11);
+        targetPond.setOwner(koi.getPond().getOwner());
+        targetPond.setCapacity(5);
+        RequestMoveKoiDTO request = new RequestMoveKoiDTO();
+        request.setTargetKoiId(20);
+        request.setSourcePondId(10);
+        request.setTargetPondId(11);
+        when(koiRepository.findById(20)).thenReturn(Optional.of(koi));
+        when(breedingEventRepository.existsByUserAndParentKoiAndStatusNotIn(
+                1, 20, List.of(BreedingStatus.COMPLETED, BreedingStatus.CANCELLED))).thenReturn(false);
+        when(pondService.handleFetchPondById(10)).thenReturn(koi.getPond());
+        when(pondService.handleFetchPondById(11)).thenReturn(targetPond);
+        when(koiRepository.save(koi)).thenReturn(koi);
+
+        assertEquals(11, koiService.handleMoveKoi(request).getPondId());
+        assertEquals(targetPond, koi.getPond());
+        verify(koiRepository).save(koi);
     }
 
     @Test

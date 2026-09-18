@@ -20,6 +20,7 @@ import {
   callReleaseKoiToPond,
 } from "../../api/koi";
 import { getBalanceWallet } from "../../api/wallet";
+import { getApiErrorMessage } from "../../api/client";
 import ImportKoiForm from "../../components/pond/ImportKoiForm/ImportKoiForm";
 import { PondCanvas } from "../../components/pond/PondCanvas/PondCanvas";
 import PondInformation from "../../components/pond/PondInformation/PondInformation";
@@ -152,24 +153,29 @@ function Pond({
     }
   };
 
-  const handleMoveKoi = async (koi: IKoi, targetPond: IPond) => {
+  const handleMoveKoi = async (koi: IKoi, targetPond: IPond): Promise<IKoi | null> => {
     try {
-      await callMoveKoi({
+      const response = await callMoveKoi({
         targetKoiId: koi.id,
         sourcePondId: koi.pondId,
         targetPondId: targetPond.id,
       });
-      const movedKoi: IKoi = { ...koi, pondId: targetPond.id };
-
-      setKoiList((prev) => prev.filter((k) => k.id !== koi.id));
-      toast.success(`Moved ${koi.name} out of the pond!`);
-
-      setTimeout(() => {
-        onSwitchPond(targetPond, movedKoi);
-      }, 400);
+      const movedKoi = response.data.data;
+      if (!(response.data.statusCode >= 200 && response.data.statusCode < 300)
+        || !movedKoi || movedKoi.id !== koi.id || movedKoi.pondId !== targetPond.id) {
+        throw new Error(response.data.message || "Invalid move koi response.");
+      }
+      return movedKoi;
     } catch (error) {
-      toast.error(`Failed to move ${koi.name} out of the pond.`);
+      toast.error(getApiErrorMessage(error, `Failed to move ${koi.name} out of the pond.`));
+      return null;
     }
+  };
+
+  const handleKoiMoved = (movedKoi: IKoi, targetPond: IPond) => {
+    setKoiList((prev) => prev.filter((k) => k.id !== movedKoi.id));
+    toast.success(`Moved ${movedKoi.name} out of the pond!`);
+    onSwitchPond(targetPond, movedKoi);
   };
 
   const handleFeedKoi = async (
@@ -226,6 +232,7 @@ function Pond({
               pond={pond}
               justMovedKoiId={incomingKoi?.id}
               onMoveKoi={handleMoveKoi}
+              onKoiMoved={handleKoiMoved}
               onFeedKoi={handleFeedKoi}
             />
           )}

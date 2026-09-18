@@ -4289,3 +4289,29 @@ Dashboard
 	background-color: transparent !important;
 	transition: background-color 5000s ease-in-out 0s;
 }
+
+/* =========================================================
+   FIX LỖI MẤT VIỀN VÀ HIỆU ỨNG FOCUS CHO THANH SEARCH BREEDING
+========================================================= */
+
+/* Khôi phục lại viền, nền và đổ bóng mặc định */
+.admin-shell .breeding-search input[type="text"] {
+	background-color: var(--surface-secondary) !important;
+	border: 1px solid var(--border-color) !important;
+	border-radius: 14px !important;
+	box-shadow: 0 8px 25px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Khôi phục màu viền khi đưa chuột qua (hover) */
+.admin-shell .breeding-search input[type="text"]:hover {
+	border-color: rgba(14, 165, 233, 0.4) !important;
+}
+
+/* Khôi phục hiệu ứng viền xanh phát sáng khi nhấp vào (focus) */
+.admin-shell .breeding-search input[type="text"]:focus {
+	border-color: rgba(14, 165, 233, 0.65) !important;
+	box-shadow:
+		0 0 0 4px rgba(14, 165, 233, 0.08),
+		0 8px 25px rgba(15, 23, 42, 0.05) !important;
+	outline: none !important;
+}

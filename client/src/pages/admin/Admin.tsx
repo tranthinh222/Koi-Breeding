@@ -1,7 +1,4 @@
-import {
-	ArrowUpRight,
-	ChevronRight,
-} from "lucide-react";
+import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
 	getAdminDashboard,
@@ -18,8 +15,8 @@ import femaleDefaultAvatar from "../../assets/avatars/female_blank_avatar.png";
 import maleDefaultAvatar from "../../assets/avatars/male_blank_avatar.png";
 import "./Admin.css";
 import { AdminNavbar } from "./components/AdminNavbar";
-import { AdminSidebar } from "./components/AdminSidebar";
 import AdminPagination from "./components/AdminPagination";
+import { AdminSidebar } from "./components/AdminSidebar";
 import UserModerationModal from "./components/UserModerationModal";
 
 // --- IMPORT CÁC COMPONENT TỪ DASHBOARD MỚI ---
@@ -36,12 +33,14 @@ import { Panel } from "./components/dashboard/Panel";
 
 import AdminTransactions from "./components/AdminTransactions";
 
+import AdminAccount from "./components/AdminAccount";
 import AdminBreeding from "./components/AdminBreeding";
 import AdminDictionary from "./components/AdminDictionary";
 import AdminItems from "./components/AdminItems";
+import AdminSettings, {
+	type AdminPreferences,
+} from "./components/AdminSettings";
 import AdminTrades from "./components/AdminTrades";
-import AdminAccount from "./components/AdminAccount";
-import AdminSettings, { type AdminPreferences } from "./components/AdminSettings";
 
 export type MenuTab =
 	| "dashboard"
@@ -103,7 +102,11 @@ function getStatusTone(status: AdminUserStatus | null) {
 }
 
 function formatRole(role: AdminUserDto["role"]) {
-	return role === "SUPER_ADMIN" ? "Super Admin" : role === "ADMIN" ? "Admin" : "User";
+	return role === "SUPER_ADMIN"
+		? "Super Admin"
+		: role === "ADMIN"
+			? "Admin"
+			: "User";
 }
 
 function formatRelativeTime(dateValue: string | null | undefined) {
@@ -214,10 +217,17 @@ function Admin() {
 			? "dark"
 			: "light";
 	});
-	const [adminPreferences, setAdminPreferences] = useState<AdminPreferences>(() => {
-		try { return JSON.parse(localStorage.getItem("koi-admin-preferences") ?? "") as AdminPreferences; }
-		catch { return { notifications: true, compactTables: false }; }
-	});
+	const [adminPreferences, setAdminPreferences] = useState<AdminPreferences>(
+		() => {
+			try {
+				return JSON.parse(
+					localStorage.getItem("koi-admin-preferences") ?? "",
+				) as AdminPreferences;
+			} catch {
+				return { notifications: true, compactTables: false };
+			}
+		},
+	);
 
 	// State Layout cho Grid Dashboard Mới
 	const [layouts, setLayouts] = useState<Layouts>(() =>
@@ -234,7 +244,9 @@ function Admin() {
 	);
 	const [dashboardLoading, setDashboardLoading] = useState(true);
 	const [dashboardError, setDashboardError] = useState<string | null>(null);
-	const [lastDashboardUpdate, setLastDashboardUpdate] = useState<Date | null>(null);
+	const [lastDashboardUpdate, setLastDashboardUpdate] = useState<Date | null>(
+		null,
+	);
 
 	const [users, setUsers] = useState<AdminUserDto[]>([]);
 	const [usersLoading, setUsersLoading] = useState(true);
@@ -287,7 +299,10 @@ function Admin() {
 	}, [theme]);
 
 	useEffect(() => {
-		localStorage.setItem("koi-admin-preferences", JSON.stringify(adminPreferences));
+		localStorage.setItem(
+			"koi-admin-preferences",
+			JSON.stringify(adminPreferences),
+		);
 	}, [adminPreferences]);
 
 	useEffect(() => {
@@ -402,18 +417,23 @@ function Admin() {
 
 	const changeUserRole = async (user: AdminUserDto) => {
 		const nextRole = user.role === "ADMIN" ? "USER" : "ADMIN";
-		const action = nextRole === "ADMIN" ? "promote" : "remove admin access from";
-		if (!window.confirm(`Do you want to ${action} ${user.username}?`)) return;
+		const action =
+			nextRole === "ADMIN" ? "promote" : "remove admin access from";
+		if (!window.confirm(`Do you want to ${action} ${user.username}?`))
+			return;
 
 		setUsersError(null);
 		try {
 			const updatedUser = await updateAdminUserRole(user.id, nextRole);
 			setUsers((current) =>
-				current.map((item) => (item.id === updatedUser.id ? updatedUser : item)),
+				current.map((item) =>
+					item.id === updatedUser.id ? updatedUser : item,
+				),
 			);
 		} catch (error: any) {
 			setUsersError(
-				error?.response?.data?.message || "Unable to update the user's role.",
+				error?.response?.data?.message ||
+					"Unable to update the user's role.",
 			);
 		}
 	};
@@ -440,6 +460,10 @@ function Admin() {
 				<AdminNavbar
 					searchTerm={searchTerm}
 					onSearchChange={setSearchTerm}
+					onNavigate={(view) => {
+						setActiveView(view);
+						setSearchTerm("");
+					}}
 					adminName={adminProfileName}
 					adminRole={adminProfileRole}
 					adminEmail={adminProfileEmail}
@@ -456,7 +480,8 @@ function Admin() {
 									<p className="eyebrow">Overview</p>
 									<h1>Dashboard</h1>
 									<p className="page-description">
-										Monitor player activity, shop purchases, and marketplace performance.
+										Monitor player activity, shop purchases,
+										and marketplace performance.
 									</p>
 								</div>
 								<div className="dashboard-heading-actions">
@@ -474,7 +499,9 @@ function Admin() {
 										onClick={refreshDashboard}
 										disabled={dashboardLoading}
 									>
-										{dashboardLoading ? "Refreshing…" : "Refresh data"}
+										{dashboardLoading
+											? "Refreshing…"
+											: "Refresh data"}
 										<ArrowUpRight size={16} />
 									</button>
 								</div>
@@ -522,7 +549,10 @@ function Admin() {
 							<div className="dashboard-section-header">
 								<div>
 									<h2>Platform trends</h2>
-									<p>Drag or resize cards to personalize your dashboard.</p>
+									<p>
+										Drag or resize cards to personalize your
+										dashboard.
+									</p>
 								</div>
 							</div>
 
@@ -546,9 +576,7 @@ function Admin() {
 										}
 									>
 										{!dashboard?.userGrowthChart?.length ? (
-											<div
-												className="empty-state dashboard-chart-state"
-											>
+											<div className="empty-state dashboard-chart-state">
 												{dashboardLoading
 													? "Loading user growth…"
 													: "No user growth data is available yet."}
@@ -567,9 +595,12 @@ function Admin() {
 										subtitle="Listing outcomes over the last seven days"
 										openPanelMenu={panelMenuOpenId}
 										setOpenPanelMenu={setPanelMenuOpenId}
-										onView={() => setFullScreenChart("marketplace")}
+										onView={() =>
+											setFullScreenChart("marketplace")
+										}
 									>
-										{!dashboard?.marketplaceChart?.length ? (
+										{!dashboard?.marketplaceChart
+											?.length ? (
 											<div className="empty-state dashboard-chart-state">
 												{dashboardLoading
 													? "Loading marketplace activity…"
@@ -577,7 +608,9 @@ function Admin() {
 											</div>
 										) : (
 											<MarketplaceStatusChart
-												data={dashboard.marketplaceChart}
+												data={
+													dashboard.marketplaceChart
+												}
 											/>
 										)}
 									</Panel>
@@ -595,9 +628,7 @@ function Admin() {
 									>
 										{!dashboard?.koiLifeStageChart
 											?.length ? (
-											<div
-												className="empty-state dashboard-chart-state"
-											>
+											<div className="empty-state dashboard-chart-state">
 												{dashboardLoading
 													? "Loading koi life stages…"
 													: "No koi life-stage data is available yet."}
@@ -623,9 +654,7 @@ function Admin() {
 										}
 									>
 										{!dashboard?.locationChart?.length ? (
-											<div
-												className="empty-state dashboard-chart-state"
-											>
+											<div className="empty-state dashboard-chart-state">
 												{dashboardLoading
 													? "Loading player locations…"
 													: "No player location data is available yet."}
@@ -642,7 +671,10 @@ function Admin() {
 							<div className="dashboard-section-header">
 								<div>
 									<h2>Highlights</h2>
-									<p>Quick access to leading players and high-value activity.</p>
+									<p>
+										Quick access to leading players and
+										high-value activity.
+									</p>
 								</div>
 							</div>
 
@@ -718,7 +750,7 @@ function Admin() {
 															{formatMoney(
 																transaction.amount,
 															)}{" "}
-													Koins
+															Koins
 														</span>
 													</div>
 												),
@@ -732,7 +764,9 @@ function Admin() {
 									<button
 										type="button"
 										className="view-more-button"
-										onClick={() => setActiveView("transactions")}
+										onClick={() =>
+											setActiveView("transactions")
+										}
 									>
 										View transactions
 										<ChevronRight size={16} />
@@ -790,7 +824,10 @@ function Admin() {
 							<div className="page-heading">
 								<div>
 									<p className="eyebrow">Users</p>
-									<h1>Manage users, access, and account status.</h1>
+									<h1>
+										Manage users, access, and account
+										status.
+									</h1>
 								</div>
 								<button
 									type="button"
@@ -848,11 +885,14 @@ function Admin() {
 													<p>{user.email}</p>
 													<div className="user-meta-row">
 														<span>
-											Role: {formatRole(user.role)}
+															Role:{" "}
+															{formatRole(
+																user.role,
+															)}
 														</span>
 														<span>
 															Level:{" "}
-													{user.level ?? 1}
+															{user.level ?? 1}
 														</span>
 														<span>
 															Updated{" "}
@@ -863,22 +903,29 @@ function Admin() {
 													</div>
 												</div>
 											</div>
-							<div className="user-actions">
-								{currentUser?.role === "SUPER_ADMIN" &&
-									user.role !== "SUPER_ADMIN" ? (
-									<button
-										type="button"
-										className="action-button neutral"
-										onClick={() => void changeUserRole(user)}
-									>
-										{user.role === "ADMIN" ? "Remove admin role" : "Promote to admin"}
-									</button>
-								) : null}
-								{user.role === "SUPER_ADMIN" ? (
-									<span className="protected-account-note">
-										Protected account
-									</span>
-								) : user.status === "ACTIVE" ? (
+											<div className="user-actions">
+												{currentUser?.role ===
+													"SUPER_ADMIN" &&
+												user.role !== "SUPER_ADMIN" ? (
+													<button
+														type="button"
+														className="action-button neutral"
+														onClick={() =>
+															void changeUserRole(
+																user,
+															)
+														}
+													>
+														{user.role === "ADMIN"
+															? "Remove admin role"
+															: "Promote to admin"}
+													</button>
+												) : null}
+												{user.role === "SUPER_ADMIN" ? (
+													<span className="protected-account-note">
+														Protected account
+													</span>
+												) : user.status === "ACTIVE" ? (
 													<>
 														<button
 															type="button"
@@ -986,12 +1033,15 @@ function Admin() {
 					{activeView === "transactions" && <AdminTransactions />}
 					{activeView === "trade" && <AdminTrades />}
 					{activeView === "settings" && (
-						<AdminSettings theme={theme} onThemeChange={setTheme} preferences={adminPreferences} onPreferencesChange={setAdminPreferences} />
+						<AdminSettings
+							theme={theme}
+							onThemeChange={setTheme}
+							preferences={adminPreferences}
+							onPreferencesChange={setAdminPreferences}
+						/>
 					)}
 
-					{activeView === "account" && (
-						<AdminAccount />
-					)}
+					{activeView === "account" && <AdminAccount />}
 					{/* --- FULLSCREEN CHART MODAL --- */}
 					{fullScreenChart && (
 						<div
@@ -1046,7 +1096,10 @@ function Admin() {
 									)}
 									{fullScreenChart === "marketplace" && (
 										<MarketplaceStatusChart
-											data={dashboard?.marketplaceChart || []}
+											data={
+												dashboard?.marketplaceChart ||
+												[]
+											}
 										/>
 									)}
 								</div>

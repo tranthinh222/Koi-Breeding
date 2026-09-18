@@ -8,13 +8,49 @@ interface KoiProfileProps {
 }
 
 function KoiProfile({ koi, onClose }: KoiProfileProps) {
+	const normalizeScore = (score: number) =>
+		Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 0;
+	const beautifulScore = Math.round(
+		(normalizeScore(koi.patternScore) * 35 +
+			normalizeScore(koi.colorScore) * 25 +
+			normalizeScore(koi.bodyScore) * 20 +
+			normalizeScore(koi.skinScore) * 10 +
+			normalizeScore(koi.scaleScore) * 10) /
+			100,
+	);
+	const rating =
+		beautifulScore < 20
+			? 1
+			: beautifulScore < 40
+				? 2
+				: beautifulScore < 70
+					? 3
+					: beautifulScore < 90
+						? 4
+						: 5;
+	const classification = koi.mutation
+		? "Mutated"
+		: koi.father && koi.mother
+			? "Hybrid"
+			: "Genuine";
+	const classificationDescription = koi.mutation
+		? `Mutation: ${koi.mutation.name}`
+		: koi.father && koi.mother
+			? "Bred from two known parents"
+			: "No complete parent lineage recorded";
+
 	const toCapitalString = (text: string) => {
 		const firstCharacter = text.at(0)?.toUpperCase();
 		return firstCharacter + text.toLowerCase().slice(1);
 	};
 
 	return (
-		<div className={styles.card} role="dialog" aria-modal="true" aria-label={`Koi profile: ${koi.name}`}>
+		<div
+			className={styles.card}
+			role="dialog"
+			aria-modal="true"
+			aria-label={`Koi profile: ${koi.name}`}
+		>
 			<div className={styles.toolbar}>
 				<button
 					type="button"
@@ -25,7 +61,12 @@ function KoiProfile({ koi, onClose }: KoiProfileProps) {
 					<X size={30} />
 				</button>
 			</div>
-			<div className={styles.content} tabIndex={0} role="region" aria-label="Koi details">
+			<div
+				className={styles.content}
+				tabIndex={0}
+				role="region"
+				aria-label="Koi details"
+			>
 				<div className={styles.section1}>
 					<section className={styles.image}>
 						<img
@@ -43,15 +84,30 @@ function KoiProfile({ koi, onClose }: KoiProfileProps) {
 							)}
 						</div>
 						<div className={styles.ratingType}>
-							<div className={styles.rating}>
-								<img src="/utilities/star-on.svg" alt="star" />
-								<img src="/utilities/star-on.svg" alt="star" />
-								<img src="/utilities/star-off.svg" alt="star" />
-								<img src="/utilities/star-off.svg" alt="star" />
-								<img src="/utilities/star-off.svg" alt="star" />
+							<div
+								className={styles.rating}
+								role="img"
+								aria-label={`${rating} out of 5 stars; BeautifulScore ${beautifulScore.toFixed(2)} out of 100`}
+								title={`Beautiful Score: ${beautifulScore.toFixed(0)}/100`}
+							>
+								{Array.from({ length: 5 }, (_, index) => (
+									<img
+										key={index}
+										src={`/utilities/star-${index < rating ? "on" : "off"}.svg`}
+										alt=""
+									/>
+								))}
 							</div>
-							<span className={styles.typeBadge}>Genuine</span>
+							<span
+								className={styles.typeBadge}
+								title={classificationDescription}
+							>
+								{classification}
+							</span>
 						</div>
+						<p className={styles.beautifulScore}>
+							Beautiful Score: {beautifulScore.toFixed(0)}/100
+						</p>
 						<div className={styles.statsContainer}>
 							<div className={styles.statRow}>
 								<span className={styles.statLabel}>Health</span>

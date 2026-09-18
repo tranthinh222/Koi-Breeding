@@ -97,6 +97,7 @@
 .ratingType { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .rating { display: flex; padding: 4px 8px; background: var(--surface-soft); border-radius: 6px; }
 .rating > img { width: 20px; height: 20px; }
+.beautifulScore { margin: 10px 0 0; font-size: 14px; color: var(--text-secondary); }
 .typeBadge { padding: 6px 14px; background: #007b7d; color: #fff; border-radius: 6px; font-size: 15px; }
 .statsContainer { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 .statRow { display: flex; align-items: center; gap: 12px; }

@@ -64,6 +64,7 @@ export default function AdminDictionary() {
 			const queryParams = new URLSearchParams({
 				page: String(currentPage),
 				size: "8",
+				sort: "id,desc",
 			});
 			if (debouncedSearch) queryParams.set("search", debouncedSearch);
 			if (varietyFilter !== "ALL")

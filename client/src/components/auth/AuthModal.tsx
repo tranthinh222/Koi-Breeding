@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
 	forgotPassword,
 	Login,
@@ -90,6 +90,7 @@ export default function AuthModal({
 	onSwitchMode,
 }: AuthModalProps) {
 	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const { refreshCurrentUser } = useAuth();
 	const [view, setView] = useState<ViewMode>(mode);
 	const [authNotice, setAuthNotice] = useState<string | null>(null);
@@ -127,6 +128,20 @@ export default function AuthModal({
 	const [, setShowConfirmNewPassword] = useState(false);
 	const [forgotLoading, setForgotLoading] = useState(false);
 	const [forgotError, setForgotError] = useState<string | null>(null);
+
+	// useEffect to catch error from URL
+	useEffect(() => {
+		const error = searchParams.get("error");
+		if (error && isOpen) {
+			// Switch to login tab and show error message
+			switchView("login");
+			setLoginError(decodeURIComponent(error));
+
+			// Remove error param from URL for not showing the error again when press F5
+			searchParams.delete("error");
+			setSearchParams(searchParams);
+		}
+	}, [searchParams, setSearchParams, isOpen]);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -268,6 +283,20 @@ export default function AuthModal({
 		} finally {
 			setLoggingIn(false);
 		}
+	};
+
+	const handleGoogleLogin = async (e: React.MouseEvent) => {
+		e.preventDefault();
+
+		// Get Base URL of API (Ex: http://localhost:8090/koi_breeding/api/v1)
+		const apiBase: string =
+			import.meta.env.VITE_API_BASE_URL ??
+			`http://${window.location.hostname}:8090/koi_breeding/api/v1`;
+
+		// Remove '/api/v1' at the end to get the Root URL of backend, then connect to OAuth2 endpoint
+		const googleAuthUrl =
+			apiBase.replace(`/api/v1`, "") + "/oauth2/authorize/google";
+		window.location.href = googleAuthUrl;
 	};
 
 	const handleForgotSendCode = async () => {
@@ -425,7 +454,11 @@ export default function AuthModal({
 					{loggingIn ? "Logging in..." : "Login"}
 				</button>
 
-				<button className="secondary-button" type="button">
+				<button
+					className="secondary-button"
+					type="button"
+					onClick={handleGoogleLogin}
+				>
 					<svg
 						viewBox="0 0 24 24"
 						fill="none"
@@ -719,7 +752,9 @@ export default function AuthModal({
 
 				<div className="link-row">
 					<span>Other options?</span>
-					<a href="#">Google</a>
+					<a href="#" onClick={handleGoogleLogin}>
+						Google
+					</a>
 				</div>
 			</aside>
 		</div>

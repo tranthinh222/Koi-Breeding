@@ -298,6 +298,9 @@ export default function ItemDialog({
 									<option value="WATER_QUALITY">
 										WATER QUALITY
 									</option>
+									<option value="COOLING">COOLING</option>
+									<option value="HEATING">HEATING</option>
+									<option value="MUTATION">MUTATION</option>
 									<option value="OTHER">OTHER</option>
 								</select>
 							</div>

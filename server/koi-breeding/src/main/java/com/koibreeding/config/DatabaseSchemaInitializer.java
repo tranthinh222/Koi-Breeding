@@ -34,7 +34,7 @@ public class DatabaseSchemaInitializer {
             jdbcTemplate.execute("ALTER TABLE " + schema
                     + ".item ADD CONSTRAINT item_effect_type_check "
                     + "CHECK (effect_type IS NULL OR effect_type IN "
-                    + "('WATER_QUALITY', 'COOLING', 'HEATING', 'GROWTH', 'MUTATION', 'HEALTH'))");
+                    + "('WATER_QUALITY', 'COOLING', 'HEATING', 'GROWTH', 'MUTATION', 'HEALTH', 'OTHER'))");
 
             jdbcTemplate.execute("UPDATE " + schema + ".users SET location = CASE location "
                     + "WHEN 'Ho Chi Minh City' THEN 'HO_CHI_MINH_CITY' "

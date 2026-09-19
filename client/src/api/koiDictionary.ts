@@ -41,3 +41,7 @@ export const callUploadKoiVarientImage = (file: File) => {
 		{ headers: { "Content-Type": "multipart/form-data" } },
 	);
 };
+
+export const callDeleteKoiVarient = (id: number) => {
+	return apiClient.delete<IRestResponse<void>>(`/dictionaries/${id}`);
+};

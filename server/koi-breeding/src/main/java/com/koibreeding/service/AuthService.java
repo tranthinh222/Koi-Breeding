@@ -331,6 +331,7 @@ public class AuthService {
             MimeMessage message = mailSender.createMimeMessage();
 
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(mailFrom, "Koi Breeding");
 
             helper.setTo(email);
             helper.setSubject("Koi Breeding - Password Reset Code");
@@ -437,7 +438,9 @@ public class AuthService {
 
             mailSender.send(message);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Failed to send reset password email", e);
+
         }
 
     }

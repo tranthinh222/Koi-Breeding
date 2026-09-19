@@ -46,7 +46,7 @@ public class DictionaryController {
     public ResponseEntity<Dictionary> updateADictionary(@Valid @RequestBody Dictionary koiDictionary)
             throws Exception {
         if (!this.koiDictionaryService.isDictionaryExistById(koiDictionary.getId())) {
-            throw new Exception("Dictionary with id '" + koiDictionary.getId() + "' is not exist.");
+            throw new RuntimeException("Dictionary with id '" + koiDictionary.getId() + "' is not exist.");
         }
 
         Dictionary updatedDictionary = this.koiDictionaryService.handleUpdateDictionary(koiDictionary);
@@ -59,7 +59,7 @@ public class DictionaryController {
     public ResponseEntity<Dictionary> getDictionaryById(@PathVariable Integer id) throws Exception {
         Dictionary fetchedDictionary = koiDictionaryService.handleFetchDictionaryById(id);
         if (fetchedDictionary == null) {
-            throw new Exception("Dictionary with id '" + id + "' is not exist.");
+            throw new RuntimeException("Dictionary with id '" + id + "' is not exist.");
         }
 
         return ResponseEntity.ok(fetchedDictionary);
@@ -87,11 +87,11 @@ public class DictionaryController {
     @DeleteMapping("/dictionaries/{id}")
     public ResponseEntity<Void> deleteDictionary(@PathVariable Integer id) throws Exception {
         if (!koiDictionaryService.isDictionaryExistById(id)) {
-            throw new Exception("Dictionary with id '" + id + "' is not exist.");
+            throw new RuntimeException("Dictionary with id '" + id + "' is not exist.");
         }
 
         this.koiDictionaryService.handleDeleteDictionary(id);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

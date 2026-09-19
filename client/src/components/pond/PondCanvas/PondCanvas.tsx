@@ -1,8 +1,9 @@
-import { Drumstick, Info, Move } from "lucide-react";
+import { Drumstick, HeartPulse, Info, Move } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { IKoi, IPond } from "../../../types/backend";
 import KoiProfile from "../../koi/KoiProfile/KoiProfile";
 import FeedKoiForm from "../FeedKoiForm/FeedKoiForm";
+import HealKoiForm from "../HealKoiForm/HealKoiForm";
 import PondSelectForm from "../PondSelectForm/PondSelectForm";
 import styles from "./PondCanvas.module.css";
 import {
@@ -10,6 +11,7 @@ import {
 	drawKoi,
 	drawLotus,
 	handleLotusCollisions,
+	getFishSize,
 	KOI_PROPS_MAP,
 	makeFish,
 	makeLotus,
@@ -84,8 +86,10 @@ interface PondCanvasProps {
 	pondKoiList: IKoi[];
 	pond: IPond;
 	justMovedKoiId?: number | null;
-	onMoveKoi: (koi: IKoi, targetPond: IPond) => void;
+	onMoveKoi: (koi: IKoi, targetPond: IPond) => Promise<IKoi | null>;
+	onKoiMoved: (koi: IKoi, targetPond: IPond) => void;
 	onFeedKoi: (koi: IKoi, itemId: number) => Promise<IKoi | null>;
+	onHealKoi: (koi: IKoi, itemId: number) => Promise<IKoi | null>;
 }
 
 // Use this function to debug fish in canvas
@@ -148,7 +152,9 @@ function PondCanvas({
 	pond,
 	justMovedKoiId,
 	onMoveKoi,
+	onKoiMoved,
 	onFeedKoi,
+	onHealKoi,
 }: PondCanvasProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fishRef = useRef<FishState[]>([]);
@@ -161,6 +167,7 @@ function PondCanvas({
 		useState<boolean>(false);
 	const [koiToFeed, setKoiToFeed] = useState<IKoi | null>(null);
 	const [isFeeding, setIsFeeding] = useState(false);
+	const [koiToHeal, setKoiToHeal] = useState<IKoi | null>(null);
 
 	// 1. STATE LƯU TRỮ CON CÁ ĐANG ĐƯỢC CHỌN
 	const [activeFishIndex, setActiveFishIndex] = useState<number | null>(null);
@@ -236,6 +243,10 @@ function PondCanvas({
 
 	useEffect(() => {
 		latestKoiListRef.current = pondKoiList;
+        pondKoiList.forEach((koi, index) => {
+            const fish = fishRef.current[index];
+            if (fish && !fish.isLeaving) fish.size = getFishSize(koi.length);
+        });
 	}, [pondKoiList]);
 
 	useEffect(() => {
@@ -275,6 +286,7 @@ function PondCanvas({
 						box.width,
 						box.height,
 						koiImage,
+						koi.length,
 						isJustMoved,
 					);
 
@@ -322,7 +334,7 @@ function PondCanvas({
 						koi.dictionary?.imageUrl || "/kois/koi-fish-null.svg";
 
 					// isNew = true -> kích hoạt spawnProgress = 0
-					const newFish = makeFish(width, height, koiImage, true);
+					const newFish = makeFish(width, height, koiImage, koi.length, true);
 					fishRef.current.push(newFish);
 
 					// Tạo hiệu ứng gợn nước ngay tại vị trí thả
@@ -535,6 +547,14 @@ function PondCanvas({
 						<span>Feed</span>
 					</button>
 					<button
+						className={styles.healFishButton}
+						disabled={(pondKoiList[activeFishIndex]?.health ?? 100) >= 100}
+						title={(pondKoiList[activeFishIndex]?.health ?? 100) >= 100 ? "HP is full" : "Use health medicine"}
+						onClick={() => setKoiToHeal(pondKoiList[activeFishIndex] ?? null)}
+					>
+						<HeartPulse /><span>Medicine</span>
+					</button>
+					<button
 						className={styles.moveFishButton}
 						onClick={() => setIsMoveFishDialogOpen(true)}
 					>
@@ -575,7 +595,7 @@ function PondCanvas({
 			{activeKoiProfile !== null && (
 				<div className={styles.overlay}>
 					<KoiProfile
-						koi={activeKoiProfile}
+						koi={pondKoiList.find((koi) => koi.id === activeKoiProfile.id) ?? activeKoiProfile}
 						onClose={() => setActiveKoiProfile(null)}
 					/>
 				</div>
@@ -598,6 +618,15 @@ function PondCanvas({
 					/>
 				</div>
 			)}
+			{koiToHeal !== null && (
+				<div className={styles.overlay}>
+					<HealKoiForm
+						koi={pondKoiList.find((koi) => koi.id === koiToHeal.id) ?? koiToHeal}
+						onClose={() => setKoiToHeal(null)}
+						onSubmit={async (medicine) => Boolean(await onHealKoi(koiToHeal, medicine.itemId))}
+					/>
+				</div>
+			)}
 			{isMoveFishDialogOpen && (
 				<div className={styles.overlay}>
 					<PondSelectForm
@@ -608,21 +637,23 @@ function PondCanvas({
 						}
 						currentPond={pond}
 						onClose={() => setIsMoveFishDialogOpen(false)}
-						onSubmit={(targetPond: IPond, targetKoi: IKoi) => {
+						onSubmit={async (targetPond: IPond, targetKoi: IKoi) => {
+							const movedKoi = await onMoveKoi(targetKoi, targetPond);
+							if (!movedKoi) return;
+
 							setIsMoveFishDialogOpen(false);
 
-							if (activeFishIndexRef.current !== null) {
-								fishRef.current[
-									activeFishIndexRef.current
-								].isLeaving = true;
-							}
+							const fishIndex = latestKoiListRef.current.findIndex(
+								(koi) => koi.id === targetKoi.id,
+							);
+							const fish = fishRef.current[fishIndex];
+							if (fish) fish.isLeaving = true;
 
 							setActiveFishIndex(null);
 							activeFishIndexRef.current = null;
 
-							setTimeout(() => {
-								onMoveKoi(targetKoi, targetPond);
-							}, 500);
+							await new Promise<void>((resolve) => setTimeout(resolve, 500));
+							onKoiMoved(movedKoi, targetPond);
 						}}
 					/>
 				</div>

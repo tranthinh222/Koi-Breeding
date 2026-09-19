@@ -44,43 +44,20 @@ function BreedingCalculator({
     };
 
   useEffect(() => {
+    let cancelled = false;
     const handleBreeding = async () => {
       const response = await onCalculate(calcP1, calcP2);
-      const noData = response.length === 0;
-      setIsNoData(noData);
-      const result =
-        response.length > 0
-          ? response
-          : [
-              {
-                id: -1,
-                father: calcP1,
-                mother: calcP2,
-                child: calcP1,
-                type: "PURE" as const,
-                targetRate: 0.5,
-                fatherRate: 0.5,
-                motherRate: 0,
-              },
-              {
-                id: -2,
-                father: calcP1,
-                mother: calcP2,
-                child: calcP2,
-                type: "PURE" as const,
-                targetRate: 0.5,
-                fatherRate: 0,
-                motherRate: 0.5,
-              },
-            ];
+      if (cancelled) return;
+      setIsNoData(response.some((recipe) => recipe.id == null));
       setBreedingResult(
-        result.sort(
+        [...response].sort(
           (a, b) => (b.targetRate as number) - (a.targetRate as number),
         ),
       );
     };
 
     handleBreeding();
+    return () => { cancelled = true; };
   }, [calcP1, calcP2]);
 
   return (
@@ -145,14 +122,12 @@ function BreedingCalculator({
                 <div
                   className={styles.resultBar}
                   style={{
-                    width: isNoData ? "0%" : `${(res.targetRate ?? 0) * 100}%`,
+                    width: `${(res.targetRate ?? 0) * 100}%`,
                   }}
                 ></div>
               </div>
               <div className={styles.resultProb}>
-                {isNoData
-                  ? "—"
-                  : `${((res.targetRate ?? 0) * 100).toFixed(1)}%`}
+                {`${((res.targetRate ?? 0) * 100).toFixed(1)}%`}
               </div>
             </div>
           ))}

@@ -96,24 +96,24 @@ public class DictionaryService {
         Specification<Dictionary> specification = Specification.unrestricted();
 
         if (search != null && !search.isBlank()) {
-            String normalizedSearch = search.trim().toLowerCase();
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(criteriaBuilder.lower(root.get("name")), normalizedSearch));
+            String normalizedSearch = "%" + search.trim().toLowerCase() + "%";
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder
+                    .like(criteriaBuilder.lower(root.get("name")), normalizedSearch));
         }
 
         if (varietyId != null) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("variety").get("id"), varietyId));
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder
+                    .equal(root.get("variety").get("id"), varietyId));
         }
 
         if (scaleType != null) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("scaleType"), scaleType));
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder
+                    .equal(root.get("scaleType"), scaleType));
         }
 
         if (shape != null) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("shape"), shape));
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder
+                    .equal(root.get("shape"), shape));
         }
 
         Page<Dictionary> pageKoi = this.koiDictionaryRepository.findAll(specification, pageable);

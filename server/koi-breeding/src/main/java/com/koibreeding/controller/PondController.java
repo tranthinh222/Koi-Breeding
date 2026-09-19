@@ -53,7 +53,7 @@ public class PondController {
     @PutMapping("/ponds")
     public ResponseEntity<ResPondDTO> updateAPond(@RequestBody Pond pond) throws Exception {
         if (!this.pondService.isPondExistById(pond.getId())) {
-            throw new Exception("Pond with id '" + pond.getId() + "' is not exist.");
+            throw new RuntimeException("Pond with id '" + pond.getId() + "' is not exist.");
         }
 
         ResPondDTO updatedPond = this.pondService.handleUpdatePond(pond);
@@ -65,7 +65,7 @@ public class PondController {
     public ResponseEntity<ResPondDTO> getPondById(@PathVariable Integer id) throws Exception {
         ResPondDTO fetchedPond = pondService.convertToResPondDTO(pondService.handleFetchPondById(id));
         if (fetchedPond == null) {
-            throw new Exception("Pond with id '" + id + "' is not exist.");
+            throw new RuntimeException("Pond with id '" + id + "' is not exist.");
         }
 
         return ResponseEntity.ok(fetchedPond);
@@ -83,7 +83,7 @@ public class PondController {
     @DeleteMapping("/ponds/{id}")
     public ResponseEntity<Void> deletePond(@PathVariable Integer id) throws Exception {
         if (!pondService.isPondExistById(id)) {
-            throw new Exception("Pond with id '" + id + "' is not exist.");
+            throw new RuntimeException("Pond with id '" + id + "' is not exist.");
         }
 
         this.pondService.handleDeletePond(id);
@@ -102,10 +102,8 @@ public class PondController {
     // lấy danh sách hồ
     @GetMapping("/ponds/owner")
     public ResponseEntity<List<PondSelectDto>> getPondsByOwner(
-            @RequestParam Integer userId
-    ) {
-        List<PondSelectDto> pondList =
-                pondService.selectPond(userId);
+            @RequestParam Integer userId) {
+        List<PondSelectDto> pondList = pondService.selectPond(userId);
 
         return ResponseEntity.ok(pondList);
     }

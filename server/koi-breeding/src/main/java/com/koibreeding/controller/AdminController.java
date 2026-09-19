@@ -28,7 +28,6 @@ import com.koibreeding.enums.ItemType;
 import com.koibreeding.enums.TransactionStatus;
 import com.koibreeding.enums.TransactionType;
 import com.koibreeding.service.AdminService;
-import com.koibreeding.service.UserService;
 import com.koibreeding.util.annotation.ApiMessage;
 
 import jakarta.validation.Valid;
@@ -38,18 +37,22 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 public class AdminController {
-    private final UserService userService;
     private final AdminService adminService;
 
     @GetMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @ApiMessage("Fetch all users for admin")
-    public ResponseEntity<ResultPaginationDTO> getAllUsers(Pageable pageable) {
-        return ResponseEntity.ok(userService.handleFetchAllUsers(pageable));
+    public ResponseEntity<ResultPaginationDTO> getAllUsers(Pageable pageable,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) com.koibreeding.enums.Gender gender,
+            @RequestParam(required = false) com.koibreeding.enums.Role role,
+            @RequestParam(required = false) com.koibreeding.enums.UserStatus status,
+            @RequestParam(required = false) com.koibreeding.enums.Location location) {
+        return ResponseEntity.ok(adminService.handleFetchAllUsers(pageable, search, gender, role, status, location));
     }
 
     @PutMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @ApiMessage("Update user for admin")
     public ResponseEntity<AdminUserDto> updateUser(@Valid @RequestBody AdminModerationUserRequest request) {
         return ResponseEntity.ok(adminService.handleUpdateUser(request));
@@ -65,7 +68,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @ApiMessage("Delete user for admin")
     public ResponseEntity<Void> deleteUser(@RequestParam Integer id) {
         adminService.handleDeleteUser(id);
@@ -103,7 +106,7 @@ public class AdminController {
     @PostMapping("/items/addition")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReqAdminItems> addItem(
-            @RequestBody ReqAdminItems items) {
+            @Valid @RequestBody ReqAdminItems items) {
         return ResponseEntity.ok(adminService.addItem(items));
     }
 
@@ -111,7 +114,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReqAdminItems> updateItem(
             @PathVariable Integer id,
-            @RequestBody ReqAdminItems request) {
+            @Valid @RequestBody ReqAdminItems request) {
         return ResponseEntity.ok(
                 adminService.updateItem(id, request));
     }

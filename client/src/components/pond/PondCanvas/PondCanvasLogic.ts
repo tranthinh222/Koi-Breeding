@@ -55,11 +55,19 @@ interface FishImageProperties {
 	lowerFinTrace: FinTrace;
 }
 
+// Canvas width in CSS pixels, independent of the device pixel ratio.
+// Keep very small fish selectable and very large fish within a useful display size.
+function getFishSize(lengthCm: number): number {
+	const length = Number.isFinite(lengthCm) && lengthCm > 0 ? lengthCm : 30;
+	return Math.min(200, Math.max(50, length * 2));
+}
+
 // Prepare fish's state
 function makeFish(
 	width: number,
 	height: number,
 	image: HTMLImageElement,
+	lengthCm: number,
 	isNew: boolean = false,
 ): FishState {
 	const angle = Math.random() * Math.PI * 2;
@@ -73,7 +81,7 @@ function makeFish(
 		speed,
 		targetAngle: angle,
 		turnAt: 1 + Math.random() * 5,
-		size: 96 + Math.random() * 54,
+		size: getFishSize(lengthCm),
 		phase: Math.random() * Math.PI * 2,
 		image: image,
 		spawnProgress: isNew ? 0 : 1,
@@ -532,6 +540,7 @@ export {
 	debugDrawKoi,
 	drawKoi,
 	drawLotus,
+	getFishSize,
 	handleLotusCollisions,
 	makeFish,
 	makeLotus,

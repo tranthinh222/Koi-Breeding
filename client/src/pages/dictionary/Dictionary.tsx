@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { TransitionEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { callFetchKoiVarient } from "../../api/koiDictionary";
 import EmptyCard from "../../components/dictionary/EmptyCard/EmptyCard";
@@ -59,7 +60,7 @@ function Dictionary() {
 			const initialData = await fetchDictionaryData(1);
 			if (initialData) {
 				setData(initialData.result);
-				setTotalPages(initialData.meta.totalPages);
+				setTotalPages(Math.max(1, initialData.meta.totalPages));
 			}
 			setIsProcessing(false);
 		};
@@ -68,6 +69,7 @@ function Dictionary() {
 	}, []);
 
 	const handlePrev = async () => {
+		if (isProcessing || page <= 1) return;
 		setIsProcessing(true);
 		const prevPage = page - 1;
 		const previousData = await fetchDictionaryData(prevPage);
@@ -81,6 +83,7 @@ function Dictionary() {
 	};
 
 	const handleNext = async () => {
+		if (isProcessing || page >= totalPages) return;
 		setIsProcessing(true);
 		const nextPage = page + 1;
 		const nextData = await fetchDictionaryData(nextPage);
@@ -93,7 +96,8 @@ function Dictionary() {
 		}
 	};
 
-	const handlePrevTransitionEnd = () => {
+	const handlePrevTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
+		if (event.target !== event.currentTarget || event.propertyName !== "transform") return;
 		if (!isFlippedPrev) {
 			return;
 		}
@@ -114,7 +118,8 @@ function Dictionary() {
 		setIsProcessing(false);
 	};
 
-	const handleNextTransitionEnd = () => {
+	const handleNextTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
+		if (event.target !== event.currentTarget || event.propertyName !== "transform") return;
 		if (!isFlippedNext) {
 			return;
 		}
@@ -123,8 +128,6 @@ function Dictionary() {
 		if (!bookElement) {
 			return;
 		}
-
-		console.log("Adu");
 
 		bookElement.style.transition = "none";
 
@@ -157,10 +160,13 @@ function Dictionary() {
 					>
 						Flip Prev
 					</button>
+					<span className={styles.pageIndicator} role="status" aria-live="polite" aria-atomic="true">
+						Page {page} / {totalPages}
+					</span>
 					<button
 						className={styles.flipButton}
 						onClick={handleNext}
-						disabled={page === totalPages || isProcessing}
+						disabled={page >= totalPages || isProcessing}
 					>
 						Flip Next
 					</button>

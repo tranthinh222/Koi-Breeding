@@ -11,15 +11,17 @@ import {
   Thermometer,
   Undo2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   callFeedKoi,
+  callHealKoi,
   callFetchKoisInPond,
   callMoveKoi,
   callReleaseKoiToPond,
 } from "../../api/koi";
 import { getBalanceWallet } from "../../api/wallet";
+import { getApiErrorMessage } from "../../api/client";
 import ImportKoiForm from "../../components/pond/ImportKoiForm/ImportKoiForm";
 import { PondCanvas } from "../../components/pond/PondCanvas/PondCanvas";
 import PondInformation from "../../components/pond/PondInformation/PondInformation";
@@ -63,6 +65,7 @@ function Pond({
   const [isInformationDialogOpen, setIsInformationDialogOpen] =
     useState<boolean>(false);
   const [koiList, setKoiList] = useState<IKoi[]>([]);
+  const koiRevision = useRef(0);
   const [isAddKoiDialogOpen, setIsAddKoiDialogOpen] = useState<boolean>(false);
   const [isLevelingDialogOpen, setIsLevelingDialogOpen] =
     useState<boolean>(false);
@@ -104,6 +107,23 @@ function Pond({
       return () => clearTimeout(timer);
     }
   }, [incomingKoi, onClearIncomingKoi]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const refreshCare = async () => {
+      const revision = koiRevision.current;
+      try {
+        const response = await callFetchKoisInPond(pond.id);
+        if (cancelled || revision !== koiRevision.current || !response.data.data) return;
+        const updated = new Map(response.data.data.map((koi) => [koi.id, koi]));
+        setKoiList((previous) => previous.map((koi) => updated.get(koi.id) ?? koi));
+      } catch {
+        // Keep the current fish on screen if a background refresh fails.
+      }
+    };
+    const timer = window.setInterval(() => void refreshCare(), 60000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [pond.id]);
 
   const handleFetchPondKoiList = async (): Promise<IKoi[]> => {
     try {
@@ -152,30 +172,37 @@ function Pond({
     }
   };
 
-  const handleMoveKoi = async (koi: IKoi, targetPond: IPond) => {
+  const handleMoveKoi = async (koi: IKoi, targetPond: IPond): Promise<IKoi | null> => {
+    koiRevision.current++;
     try {
-      await callMoveKoi({
+      const response = await callMoveKoi({
         targetKoiId: koi.id,
         sourcePondId: koi.pondId,
         targetPondId: targetPond.id,
       });
-      const movedKoi: IKoi = { ...koi, pondId: targetPond.id };
-
-      setKoiList((prev) => prev.filter((k) => k.id !== koi.id));
-      toast.success(`Moved ${koi.name} out of the pond!`);
-
-      setTimeout(() => {
-        onSwitchPond(targetPond, movedKoi);
-      }, 400);
+      const movedKoi = response.data.data;
+      if (!(response.data.statusCode >= 200 && response.data.statusCode < 300)
+        || !movedKoi || movedKoi.id !== koi.id || movedKoi.pondId !== targetPond.id) {
+        throw new Error(response.data.message || "Invalid move koi response.");
+      }
+      return movedKoi;
     } catch (error) {
-      toast.error(`Failed to move ${koi.name} out of the pond.`);
+      toast.error(getApiErrorMessage(error, `Failed to move ${koi.name} out of the pond.`));
+      return null;
     }
+  };
+
+  const handleKoiMoved = (movedKoi: IKoi, targetPond: IPond) => {
+    setKoiList((prev) => prev.filter((k) => k.id !== movedKoi.id));
+    toast.success(`Moved ${movedKoi.name} out of the pond!`);
+    onSwitchPond(targetPond, movedKoi);
   };
 
   const handleFeedKoi = async (
     koi: IKoi,
     itemId: number,
   ): Promise<IKoi | null> => {
+    koiRevision.current++;
     try {
       const response = await callFeedKoi(koi.id, {
         userId: currentUserId as number,
@@ -184,6 +211,7 @@ function Pond({
       });
       const result = response.data.data;
       if (!result) throw new Error("The server returned no feeding result.");
+      koiRevision.current++;
 
       setKoiList((previous) =>
         previous.map((item) => (item.id === result.koi.id ? result.koi : item)),
@@ -195,6 +223,23 @@ function Pond({
     } catch (error) {
       console.error("Failed to feed koi:", error);
       toast.error(`Failed to feed ${koi.name}.`);
+      return null;
+    }
+  };
+
+  const handleHealKoi = async (koi: IKoi, itemId: number): Promise<IKoi | null> => {
+    koiRevision.current++;
+    try {
+      if (!currentUserId) throw new Error("Please sign in to use medicine.");
+      const response = await callHealKoi(koi.id, { userId: currentUserId, itemId, quantity: 1 });
+      const result = response.data.data;
+      if (!result || response.data.statusCode >= 300) throw new Error(response.data.message || "Failed to use medicine.");
+      koiRevision.current++;
+      setKoiList((previous) => previous.map((item) => item.id === result.koi.id ? result.koi : item));
+      toast.success(`${koi.name} recovered ${result.healthRestored} HP!`);
+      return result.koi;
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, `Failed to treat ${koi.name}.`));
       return null;
     }
   };
@@ -226,7 +271,9 @@ function Pond({
               pond={pond}
               justMovedKoiId={incomingKoi?.id}
               onMoveKoi={handleMoveKoi}
+              onKoiMoved={handleKoiMoved}
               onFeedKoi={handleFeedKoi}
+              onHealKoi={handleHealKoi}
             />
           )}
           {/* <DebugCanvas /> */}

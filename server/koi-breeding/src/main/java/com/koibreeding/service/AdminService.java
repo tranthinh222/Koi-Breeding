@@ -7,6 +7,10 @@ import com.koibreeding.domain.User;
 import com.koibreeding.dto.request.AdminModerationUserRequest;
 import com.koibreeding.dto.request.ReqAdminItems;
 import com.koibreeding.dto.response.ResTradeDto;
+import com.koibreeding.dto.response.ResultPaginationDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 import com.koibreeding.dto.response.ResTransactionDto;
 import com.koibreeding.dto.response.admin.AdminDashboardDto;
 import com.koibreeding.dto.response.admin.AdminUserDto;
@@ -53,14 +57,79 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
 
     private final ItemRepository itemRepository;
+    private final DictionaryRepository dictionaryRepository;
 
+
+    private Role currentManagerRole() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Administrator access required");
+        }
+        Role role = userRepository.findByUsername(authentication.getName())
+                .map(User::getRole)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Administrator access required"));
+        if (role != Role.ADMIN && role != Role.SUPER_ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Administrator access required");
+        }
+        return role;
+    }
+
+    private List<Role> manageableRoles() {
+        return currentManagerRole() == Role.SUPER_ADMIN
+                ? List.of(Role.USER, Role.ADMIN)
+                : List.of(Role.USER);
+    }
+
+    private void requireManageableUser(User user) {
+        if (!manageableRoles().contains(user.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot manage this account");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {
+        return handleFetchAllUsers(pageable, null, null, null, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public ResultPaginationDTO handleFetchAllUsers(Pageable pageable, String search, Gender gender,
+            Role role, UserStatus status, Location location) {
+        Sort sort = pageable.getSort().isSorted() ? pageable.getSort() : Sort.by(Sort.Direction.DESC, "createdAt");
+        for (Sort.Order order : sort) {
+            if (!List.of("createdAt", "username", "email", "level").contains(order.getProperty())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported user sort field");
+            }
+        }
+        Pageable sortedPage = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                sort.and(Sort.by("id")));
+        String pattern = search == null || search.isBlank() ? null
+                : "%" + search.trim().toLowerCase(java.util.Locale.ROOT)
+                        .replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
+        Page<User> pageUser = userRepository.searchManagedUsers(manageableRoles(), pattern,
+                gender, role, status, location, sortedPage);
+        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotalPages(pageUser.getTotalPages());
+        meta.setTotalElements(pageUser.getTotalElements());
+
+        resultPaginationDTO.setMeta(meta);
+
+        resultPaginationDTO.setResult(
+                pageUser.getContent()
+                        .stream()
+                        .map(userService::convertToAdminUserDto)
+                        .toList());
+
+        return resultPaginationDTO;
+    }
 
     @Transactional
     public AdminUserDto handleUpdateUser(AdminModerationUserRequest request) {
         User user = userRepository.findById(request.getId()).orElseThrow(() -> new RuntimeException("User not found"));
-        if (user.getRole() == Role.SUPER_ADMIN) {
-            throw new IllegalArgumentException("The SUPER_ADMIN account cannot be moderated");
-        }
+        requireManageableUser(user);
         //Update password implement later
 
         UserStatus currentStatus = user.getStatus();
@@ -86,6 +155,9 @@ public class AdminService {
 
     @Transactional
     public AdminUserDto handleUpdateUserRole(Integer id, Role role) {
+        if (currentManagerRole() != Role.SUPER_ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only SUPER_ADMIN can change account roles");
+        }
         if (role != Role.USER && role != Role.ADMIN) {
             throw new IllegalArgumentException("Role can only be changed to USER or ADMIN");
         }
@@ -105,9 +177,7 @@ public class AdminService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getRole() == Role.SUPER_ADMIN) {
-            throw new IllegalArgumentException("The SUPER_ADMIN account cannot be deleted");
-        }
+        requireManageableUser(user);
 
         if (user.getStatus() != UserStatus.DELETED) {
             throw new RuntimeException("Only users with DELETED status can be removed");
@@ -371,11 +441,30 @@ public class AdminService {
                 .itemType(item.getItemType())
                 .price(item.getPrice())
                 .effectType(item.getEffectType())
+                .effectValue(item.getEffectValue())
                 .build()
         );
     }
 
+    private void validateKoiDictionary(ItemType type, BigDecimal value) {
+        if (type != ItemType.KOI) return;
+        int dictionaryId;
+        try {
+            if (value == null) throw new ArithmeticException();
+            dictionaryId = value.intValueExact();
+        } catch (ArithmeticException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "KOI effect value must be a valid integer Dictionary ID");
+        }
+        if (dictionaryId <= 0 || !dictionaryRepository.existsById(dictionaryId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The selected Dictionary entry does not exist");
+        }
+    }
+
     public ReqAdminItems addItem(ReqAdminItems item){
+        if (item.getEffectValue() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Effect value is required when creating an item");
+        }
+        validateKoiDictionary(item.getItemType(), item.getEffectValue());
         Item newItem = new Item();
         newItem.setItemUrl(item.getImageUrl());
         newItem.setName(item.getNameItem());
@@ -383,7 +472,7 @@ public class AdminService {
         newItem.setItemType(item.getItemType());
         newItem.setPrice(item.getPrice());
         newItem.setEffectType(item.getEffectType());
-        newItem.setEffectValue(BigDecimal.valueOf(10));
+        newItem.setEffectValue(item.getEffectValue());
         itemRepository.save(newItem);
         return new ReqAdminItems(
                 newItem.getId(),
@@ -392,7 +481,8 @@ public class AdminService {
                 newItem.getDescription(),
                 newItem.getItemType(),
                 newItem.getPrice(),
-                newItem.getEffectType()
+                newItem.getEffectType(),
+                newItem.getEffectValue()
         );
     }
 
@@ -405,6 +495,10 @@ public class AdminService {
                 .orElseThrow(() ->
                         new RuntimeException("Item not found with id: " + id)
                 );
+
+        validateKoiDictionary(
+                request.getItemType() != null ? request.getItemType() : item.getItemType(),
+                request.getEffectValue() != null ? request.getEffectValue() : item.getEffectValue());
 
         if (request.getImageUrl() != null) {
             item.setItemUrl(request.getImageUrl());
@@ -430,6 +524,10 @@ public class AdminService {
             item.setEffectType(request.getEffectType());
         }
 
+        if (request.getEffectValue() != null) {
+            item.setEffectValue(request.getEffectValue());
+        }
+
         Item updatedItem = itemRepository.save(item);
 
         return new ReqAdminItems(
@@ -439,7 +537,8 @@ public class AdminService {
                 updatedItem.getDescription(),
                 updatedItem.getItemType(),
                 updatedItem.getPrice(),
-                updatedItem.getEffectType()
+                updatedItem.getEffectType(),
+                updatedItem.getEffectValue()
         );
     }
 

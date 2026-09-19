@@ -106,7 +106,7 @@ public class AdminController {
     @PostMapping("/items/addition")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReqAdminItems> addItem(
-            @RequestBody ReqAdminItems items) {
+            @Valid @RequestBody ReqAdminItems items) {
         return ResponseEntity.ok(adminService.addItem(items));
     }
 
@@ -114,7 +114,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReqAdminItems> updateItem(
             @PathVariable Integer id,
-            @RequestBody ReqAdminItems request) {
+            @Valid @RequestBody ReqAdminItems request) {
         return ResponseEntity.ok(
                 adminService.updateItem(id, request));
     }

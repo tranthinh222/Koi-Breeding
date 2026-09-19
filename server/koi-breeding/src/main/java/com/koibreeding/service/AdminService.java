@@ -57,6 +57,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
 
     private final ItemRepository itemRepository;
+    private final DictionaryRepository dictionaryRepository;
 
 
     private Role currentManagerRole() {
@@ -440,11 +441,30 @@ public class AdminService {
                 .itemType(item.getItemType())
                 .price(item.getPrice())
                 .effectType(item.getEffectType())
+                .effectValue(item.getEffectValue())
                 .build()
         );
     }
 
+    private void validateKoiDictionary(ItemType type, BigDecimal value) {
+        if (type != ItemType.KOI) return;
+        int dictionaryId;
+        try {
+            if (value == null) throw new ArithmeticException();
+            dictionaryId = value.intValueExact();
+        } catch (ArithmeticException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "KOI effect value must be a valid integer Dictionary ID");
+        }
+        if (dictionaryId <= 0 || !dictionaryRepository.existsById(dictionaryId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The selected Dictionary entry does not exist");
+        }
+    }
+
     public ReqAdminItems addItem(ReqAdminItems item){
+        if (item.getEffectValue() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Effect value is required when creating an item");
+        }
+        validateKoiDictionary(item.getItemType(), item.getEffectValue());
         Item newItem = new Item();
         newItem.setItemUrl(item.getImageUrl());
         newItem.setName(item.getNameItem());
@@ -452,7 +472,7 @@ public class AdminService {
         newItem.setItemType(item.getItemType());
         newItem.setPrice(item.getPrice());
         newItem.setEffectType(item.getEffectType());
-        newItem.setEffectValue(BigDecimal.valueOf(10));
+        newItem.setEffectValue(item.getEffectValue());
         itemRepository.save(newItem);
         return new ReqAdminItems(
                 newItem.getId(),
@@ -461,7 +481,8 @@ public class AdminService {
                 newItem.getDescription(),
                 newItem.getItemType(),
                 newItem.getPrice(),
-                newItem.getEffectType()
+                newItem.getEffectType(),
+                newItem.getEffectValue()
         );
     }
 
@@ -474,6 +495,10 @@ public class AdminService {
                 .orElseThrow(() ->
                         new RuntimeException("Item not found with id: " + id)
                 );
+
+        validateKoiDictionary(
+                request.getItemType() != null ? request.getItemType() : item.getItemType(),
+                request.getEffectValue() != null ? request.getEffectValue() : item.getEffectValue());
 
         if (request.getImageUrl() != null) {
             item.setItemUrl(request.getImageUrl());
@@ -499,6 +524,10 @@ public class AdminService {
             item.setEffectType(request.getEffectType());
         }
 
+        if (request.getEffectValue() != null) {
+            item.setEffectValue(request.getEffectValue());
+        }
+
         Item updatedItem = itemRepository.save(item);
 
         return new ReqAdminItems(
@@ -508,7 +537,8 @@ public class AdminService {
                 updatedItem.getDescription(),
                 updatedItem.getItemType(),
                 updatedItem.getPrice(),
-                updatedItem.getEffectType()
+                updatedItem.getEffectType(),
+                updatedItem.getEffectValue()
         );
     }
 

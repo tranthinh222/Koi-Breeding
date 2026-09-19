@@ -157,6 +157,7 @@ export interface AdminItem {
   itemType: string;
   price: number;
   effectType: string;
+  effectValue: number;
 }
 // Interface định nghĩa cấu trúc Page trả về từ Spring Boot
 export interface PageResponse<T> {
@@ -203,6 +204,7 @@ export interface AddAdminItemRequest {
   itemType: string;
   price: number;
   effectType: string;
+  effectValue: number;
 }
 
 export async function addAdminItem(

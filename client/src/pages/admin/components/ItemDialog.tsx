@@ -10,6 +10,7 @@ import {
 	type AdminItem,
 } from "../../../api/admin";
 
+import { callFetchKoiVarient } from "../../../api/koiDictionary";
 import "./ItemDialog.css";
 
 interface ItemDialogProps {
@@ -31,6 +32,71 @@ export default function ItemDialog({
 	const [itemType, setItemType] = useState("FOOD");
 	const [price, setPrice] = useState<number>(0);
 	const [effectType, setEffectType] = useState("GROWTH");
+	const [effectValue, setEffectValue] = useState("");
+	const [dictionaryOptions, setDictionaryOptions] = useState<
+		{ id: number; name: string; description?: string; imageUrl?: string }[]
+	>([]);
+	const [dictionaryLoading, setDictionaryLoading] = useState(false);
+	const [dictionaryError, setDictionaryError] = useState("");
+	const [dictionaryRetry, setDictionaryRetry] = useState(0);
+
+	useEffect(() => {
+		if (itemType !== "KOI") return;
+		let cancelled = false;
+		setDictionaryLoading(true);
+		setDictionaryError("");
+		setDictionaryOptions([]);
+		const load = async () => {
+			try {
+				const options: {
+					id: number;
+					name: string;
+					description?: string;
+					imageUrl?: string;
+				}[] = [];
+				let page = 0;
+				let totalPages = 1;
+				do {
+					const response = await callFetchKoiVarient(
+						`page=${page}&size=100&sort=id,asc`,
+					);
+					if (cancelled) return;
+					const data = response.data.data;
+					if (!data) throw new Error("Missing dictionary data");
+					for (const entry of data.result) {
+						if (entry.id != null)
+							options.push({
+								id: entry.id,
+								name: entry.name,
+								description: entry.variety?.description,
+								imageUrl: entry.imageUrl,
+							});
+					}
+					totalPages = data.meta.totalPages;
+					page++;
+				} while (page < totalPages);
+				setDictionaryOptions(options);
+			} catch {
+				if (!cancelled)
+					setDictionaryError("Unable to load Dictionary entries.");
+			} finally {
+				if (!cancelled) setDictionaryLoading(false);
+			}
+		};
+		void load();
+		return () => {
+			cancelled = true;
+		};
+	}, [itemType, dictionaryRetry]);
+
+	const selectedDictionary =
+		itemType === "KOI"
+			? dictionaryOptions.find(
+					(entry) => entry.id === Number(effectValue),
+				)
+			: undefined;
+	const itemImageUrl =
+		itemType === "KOI" ? (selectedDictionary?.imageUrl ?? "") : imageUrl;
 
 	const [loading, setLoading] = useState(false);
 	const [uploading, setUploading] = useState(false);
@@ -47,6 +113,9 @@ export default function ItemDialog({
 			setItemType(item.itemType || "FOOD");
 			setPrice(item.price || 0);
 			setEffectType(item.effectType || "GROWTH");
+			setEffectValue(
+				item.effectValue == null ? "" : String(item.effectValue),
+			);
 		}
 
 		// Reset form khi Add
@@ -57,6 +126,7 @@ export default function ItemDialog({
 			setItemType("FOOD");
 			setPrice(0);
 			setEffectType("GROWTH");
+			setEffectValue("");
 		}
 	}, [mode, item]);
 
@@ -116,18 +186,41 @@ export default function ItemDialog({
 	// =========================
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		const value = Number(effectValue);
+		if (
+			itemType === "KOI" &&
+			(dictionaryLoading ||
+				dictionaryError ||
+				!dictionaryOptions.some((entry) => entry.id === value))
+		) {
+			toast.error("Please select an available Dictionary entry.");
+			return;
+		}
+		if (
+			!effectValue.trim() ||
+			!Number.isFinite(value) ||
+			value < 0 ||
+			value > 99999999.99 ||
+			!/^\d+(\.\d{1,2})?$/.test(effectValue)
+		) {
+			toast.error(
+				"Enter an effect value from 0 to 99,999,999.99 with at most 2 decimal places.",
+			);
+			return;
+		}
 
 		try {
 			if (uploading) return;
 			setLoading(true);
 
 			const itemData = {
-				imageUrl,
+				imageUrl: itemImageUrl,
 				nameItem,
 				description,
 				itemType,
 				price,
 				effectType,
+				effectValue: value,
 			};
 
 			if (mode === "add") {
@@ -157,7 +250,7 @@ export default function ItemDialog({
 
 	return (
 		<>
-			<div className="dialog-overlay">
+			<div className="dialog-overlay item-dialog-overlay">
 				<div className="add-item-dialog">
 					{/* HEADER */}
 					<div className="dialog-header">
@@ -189,16 +282,24 @@ export default function ItemDialog({
 								<label>Image</label>
 
 								<div className="image-upload-area">
-									{imageUrl ? (
+									{itemImageUrl ? (
 										<img
-											src={imageUrl}
+											src={itemImageUrl}
 											alt="Preview"
 											className="image-preview"
 										/>
 									) : (
 										<div className="image-placeholder">
 											<Upload size={32} />
-											<span>Upload Image</span>
+											<span>
+												{itemType === "KOI"
+													? dictionaryLoading
+														? "Loading Dictionary image…"
+														: selectedDictionary
+															? "This Dictionary entry has no image"
+															: "Select a Dictionary entry to display its image"
+													: "Upload Image"}
+											</span>
 										</div>
 									)}
 
@@ -206,7 +307,11 @@ export default function ItemDialog({
 										type="file"
 										accept="image/jpeg,image/png,image/webp,image/svg+xml"
 										onChange={handleImageChange}
-										disabled={uploading || loading}
+										disabled={
+											uploading ||
+											loading ||
+											itemType === "KOI"
+										}
 									/>
 									{uploading && (
 										<div className="image-upload-status">
@@ -252,9 +357,18 @@ export default function ItemDialog({
 
 									<select
 										value={itemType}
-										onChange={(e) =>
-											setItemType(e.target.value)
-										}
+										onChange={(e) => {
+											if (
+												itemType === "KOI" &&
+												e.target.value !== "KOI"
+											) {
+												setNameItem("");
+												setDescription("");
+												setEffectType("GROWTH");
+											}
+											setItemType(e.target.value);
+											setEffectValue("");
+										}}
 									>
 										<option value="FOOD">FOOD</option>
 										<option value="KOI">KOI</option>
@@ -280,6 +394,145 @@ export default function ItemDialog({
 										}
 										required
 									/>
+								</div>
+							</div>
+
+							<div
+								className={
+									itemType === "KOI" ? "form-row" : undefined
+								}
+							>
+								{itemType === "KOI" && (
+									<div className="form-group">
+										<label htmlFor="item-dictionary">
+											Dictionary
+										</label>
+										<select
+											id="item-dictionary"
+											required
+											value={
+												dictionaryOptions.some(
+													(entry) =>
+														String(entry.id) ===
+														effectValue,
+												)
+													? effectValue
+													: ""
+											}
+											disabled={
+												dictionaryLoading ||
+												!!dictionaryError
+											}
+											onChange={(event) => {
+												setEffectValue(
+													event.target.value,
+												);
+												if (
+													event.target.value
+														.length !== 0
+												) {
+													const id =
+														event.target.value;
+													const target =
+														dictionaryOptions.find(
+															(entry) =>
+																String(
+																	entry.id,
+																) === id,
+														);
+													setNameItem(
+														target
+															? `Koi - ${target.name}`
+															: "",
+													);
+													setDescription(
+														target
+															? (target.description ??
+																	"")
+															: "",
+													);
+													setEffectType("OTHER");
+												}
+											}}
+										>
+											<option value="">
+												{dictionaryLoading
+													? "Loading Dictionary…"
+													: "Select a koi variety"}
+											</option>
+											{dictionaryOptions.map((entry) => (
+												<option
+													key={entry.id}
+													value={entry.id}
+												>
+													{entry.id} — {entry.name}
+												</option>
+											))}
+										</select>
+										{dictionaryError ? (
+											<div role="alert">
+												{dictionaryError}{" "}
+												<button
+													type="button"
+													className="cancel-button"
+													onClick={() =>
+														setDictionaryRetry(
+															(value) =>
+																value + 1,
+														)
+													}
+												>
+													Retry
+												</button>
+											</div>
+										) : !dictionaryLoading &&
+										  dictionaryOptions.length === 0 ? (
+											<small>
+												No Dictionary entries available.
+												Create one first.
+											</small>
+										) : !dictionaryLoading &&
+										  effectValue &&
+										  !dictionaryOptions.some(
+												(entry) =>
+													String(entry.id) ===
+													effectValue,
+										  ) ? (
+											<small role="alert">
+												The saved Dictionary ID is
+												unavailable. Select another
+												entry.
+											</small>
+										) : null}
+									</div>
+								)}
+								<div className="form-group">
+									<label htmlFor="item-effect-value">
+										Effect value
+									</label>
+									<input
+										id="item-effect-value"
+										type="number"
+										min="0"
+										max="99999999.99"
+										step="0.01"
+										required
+										value={effectValue}
+										readOnly={itemType === "KOI"}
+										aria-describedby="item-effect-value-help"
+										onChange={(event) =>
+											setEffectValue(event.target.value)
+										}
+									/>
+									<small id="item-effect-value-help">
+										{itemType === "KOI"
+											? "Automatically filled from the selected Dictionary entry."
+											: itemType === "CURRENCY"
+												? "Number of Koins granted per purchase."
+												: itemType === "MEDICINE"
+													? "Amount restored per use (HP for HEALTH medicine)."
+													: "Amount of the selected effect per unit (food restores the food bar)."}
+									</small>
 								</div>
 							</div>
 
@@ -319,7 +572,18 @@ export default function ItemDialog({
 							<button
 								type="submit"
 								className="primary-button"
-								disabled={loading || uploading}
+								disabled={
+									loading ||
+									uploading ||
+									(itemType === "KOI" &&
+										(dictionaryLoading ||
+											!!dictionaryError ||
+											!dictionaryOptions.some(
+												(entry) =>
+													entry.id ===
+													Number(effectValue),
+											)))
+								}
 							>
 								{loading
 									? mode === "add"

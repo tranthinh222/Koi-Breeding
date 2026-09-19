@@ -7,6 +7,7 @@ import {
 	type AdminDashboardResponse,
 	type AdminRankingUserDto,
 	type AdminUserDto,
+	type AdminUserFilters,
 	type AdminUserStatus,
 } from "../../api/admin";
 import { useAuth } from "../../context/AuthContext";
@@ -36,6 +37,7 @@ import AdminTransactions from "./components/AdminTransactions";
 import AdminAccount from "./components/AdminAccount";
 import AdminBreeding from "./components/AdminBreeding";
 import AdminDictionary from "./components/AdminDictionary";
+import UserFilters, { defaultUserFilters } from "./components/UserFilters";
 import AdminItems from "./components/AdminItems";
 import AdminSettings, {
 	type AdminPreferences,
@@ -248,6 +250,10 @@ function Admin() {
 		null,
 	);
 
+	const [userFilters, setUserFilters] = useState<AdminUserFilters>(defaultUserFilters);
+	const [userSearch, setUserSearch] = useState("");
+	const [usersRevision, setUsersRevision] = useState(0);
+	const [totalUsers, setTotalUsers] = useState(0);
 	const [users, setUsers] = useState<AdminUserDto[]>([]);
 	const [usersLoading, setUsersLoading] = useState(true);
 	const [usersError, setUsersError] = useState<string | null>(null);
@@ -281,17 +287,14 @@ function Admin() {
 		[dashboard],
 	);
 
-	const filteredUsers = useMemo(() => {
-		const normalizedTerm = searchTerm.trim().toLowerCase();
-		if (!normalizedTerm) return users;
-
-		return users.filter((user) => {
-			return [user.username, user.email, user.status ?? "", user.role]
-				.join(" ")
-				.toLowerCase()
-				.includes(normalizedTerm);
-		});
-	}, [searchTerm, users]);
+	useEffect(() => {
+		const timer = window.setTimeout(() => {
+			setUserFilters((current) => current.search === userSearch.trim()
+				? current : { ...current, search: userSearch.trim() });
+			setPage(1);
+		}, 300);
+		return () => window.clearTimeout(timer);
+	}, [userSearch]);
 
 	useEffect(() => {
 		document.documentElement.setAttribute("data-theme", theme);
@@ -358,13 +361,27 @@ function Admin() {
 			}
 		};
 
+		void loadDashboard();
+		void loadChartData();
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	useEffect(() => {
+		let cancelled = false;
+
 		const loadUsers = async () => {
 			setUsersLoading(true);
 			setUsersError(null);
 			try {
-				const response = await getAdminUsers(page, pageSize);
+				const response = await getAdminUsers(page, pageSize, userFilters);
 				if (!cancelled) {
+					const lastPage = Math.max(1, response.meta?.totalPages ?? 1);
+					if (page > lastPage) { setPage(lastPage); return; }
 					setUsers(response.result ?? []);
+					setTotalUsers(response.meta?.totalElements ?? 0);
 					setTotalPages(response.meta?.totalPages ?? 1);
 				}
 			} catch {
@@ -375,14 +392,9 @@ function Admin() {
 			}
 		};
 
-		void loadDashboard();
-		void loadChartData();
 		void loadUsers();
-
-		return () => {
-			cancelled = true;
-		};
-	}, [page, pageSize]);
+		return () => { cancelled = true; };
+	}, [page, pageSize, userFilters, usersRevision]);
 
 	const refreshDashboard = async () => {
 		setDashboardLoading(true);
@@ -400,19 +412,9 @@ function Admin() {
 		}
 	};
 
-	const refreshUsers = async (nextPage = page) => {
-		setUsersLoading(true);
-		setUsersError(null);
-		try {
-			const response = await getAdminUsers(nextPage, pageSize);
-			setUsers(response.result ?? []);
-			setPage(nextPage);
-			setTotalPages(response.meta?.totalPages ?? 1);
-		} catch {
-			setUsersError("Unable to load users from the database.");
-		} finally {
-			setUsersLoading(false);
-		}
+	const refreshUsers = (nextPage = page) => {
+		setPage(nextPage);
+		setUsersRevision((revision) => revision + 1);
 	};
 
 	const changeUserRole = async (user: AdminUserDto) => {
@@ -424,12 +426,8 @@ function Admin() {
 
 		setUsersError(null);
 		try {
-			const updatedUser = await updateAdminUserRole(user.id, nextRole);
-			setUsers((current) =>
-				current.map((item) =>
-					item.id === updatedUser.id ? updatedUser : item,
-				),
-			);
+			await updateAdminUserRole(user.id, nextRole);
+			refreshUsers();
 		} catch (error: any) {
 			setUsersError(
 				error?.response?.data?.message ||
@@ -839,6 +837,13 @@ function Admin() {
 								</button>
 							</div>
 
+							<UserFilters filters={userFilters} search={userSearch}
+                                canManageAdmins={currentUser?.role === "SUPER_ADMIN"}
+                                onSearchChange={setUserSearch}
+                                onChange={(next) => { setUserFilters(next); setPage(1); }}
+                                onReset={() => { setUserSearch(""); setUserFilters(defaultUserFilters); setPage(1); }} />
+                            <p className="users-result-count" role="status">{usersLoading ? "Loading users…" : `${totalUsers} users found`}</p>
+
 							{usersError ? (
 								<div className="inline-alert error">
 									{usersError}
@@ -850,8 +855,8 @@ function Admin() {
 									<div className="empty-state">
 										Loading users from the database...
 									</div>
-								) : filteredUsers.length ? (
-									filteredUsers.map((user) => (
+								) : users.length ? (
+									users.map((user) => (
 										<article
 											key={user.id}
 											className="user-section-card"
@@ -998,7 +1003,7 @@ function Admin() {
 									))
 								) : (
 									<div className="empty-state">
-										No user matches the current search.
+										No users match the current search and filters.
 									</div>
 								)}
 							</div>
@@ -1018,8 +1023,9 @@ function Admin() {
 							<AdminPagination
 								currentPage={Math.max(page - 1, 0)}
 								totalPages={totalPages}
+                                loading={usersLoading}
 								onPageChange={(nextPage) =>
-									void refreshUsers(nextPage + 1)
+									setPage(nextPage + 1)
 								}
 							/>
 						</div>

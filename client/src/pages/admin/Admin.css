@@ -2324,7 +2324,7 @@ Dashboard
 	background: var(--surface-tertiary);
 	color: var(--text-primary);
 
-	transform: rotate(-15deg);
+	transform: rotate(-5deg);
 }
 
 /* =========================
@@ -4336,4 +4336,56 @@ Dashboard
 .dict-modal-wrapper input[type="number"]:focus {
 	border-color: #0ea5e9 !important;
 	box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
+
+.users-filter-card {
+	display: grid;
+	gap: 16px;
+}
+
+.users-filter-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 12px;
+	align-items: end;
+}
+
+.users-filter-field {
+	display: grid;
+	gap: 6px;
+	min-width: 0;
+	font-size: 13px;
+}
+
+.users-filter-field select {
+	width: 100%;
+	min-width: 0;
+	padding: 10px 12px;
+	border: 1px solid var(--admin-border, #d1d5db);
+	border-radius: 10px;
+	background: var(--admin-surface-soft, #fff);
+	color: var(--admin-text, #0f172a);
+}
+
+[data-theme="dark"] .users-filter-field select {
+	background: #1e293b;
+	border-color: #334155;
+	color: #e2e8f0;
+}
+
+.users-result-count {
+	font-size: 13px;
+	color: var(--admin-text-muted, #64748b);
+}
+
+.users-filter-card .items-search {
+	width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.users-filter-card .items-reset-button {
+	width: auto;
+	padding: 10px 14px;
+	gap: 8px;
 }

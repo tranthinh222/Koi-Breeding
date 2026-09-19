@@ -7,6 +7,10 @@ import com.koibreeding.domain.User;
 import com.koibreeding.dto.request.AdminModerationUserRequest;
 import com.koibreeding.dto.request.ReqAdminItems;
 import com.koibreeding.dto.response.ResTradeDto;
+import com.koibreeding.dto.response.ResultPaginationDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 import com.koibreeding.dto.response.ResTransactionDto;
 import com.koibreeding.dto.response.admin.AdminDashboardDto;
 import com.koibreeding.dto.response.admin.AdminUserDto;
@@ -55,12 +59,76 @@ public class AdminService {
     private final ItemRepository itemRepository;
 
 
+    private Role currentManagerRole() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Administrator access required");
+        }
+        Role role = userRepository.findByUsername(authentication.getName())
+                .map(User::getRole)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Administrator access required"));
+        if (role != Role.ADMIN && role != Role.SUPER_ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Administrator access required");
+        }
+        return role;
+    }
+
+    private List<Role> manageableRoles() {
+        return currentManagerRole() == Role.SUPER_ADMIN
+                ? List.of(Role.USER, Role.ADMIN)
+                : List.of(Role.USER);
+    }
+
+    private void requireManageableUser(User user) {
+        if (!manageableRoles().contains(user.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot manage this account");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {
+        return handleFetchAllUsers(pageable, null, null, null, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public ResultPaginationDTO handleFetchAllUsers(Pageable pageable, String search, Gender gender,
+            Role role, UserStatus status, Location location) {
+        Sort sort = pageable.getSort().isSorted() ? pageable.getSort() : Sort.by(Sort.Direction.DESC, "createdAt");
+        for (Sort.Order order : sort) {
+            if (!List.of("createdAt", "username", "email", "level").contains(order.getProperty())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported user sort field");
+            }
+        }
+        Pageable sortedPage = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                sort.and(Sort.by("id")));
+        String pattern = search == null || search.isBlank() ? null
+                : "%" + search.trim().toLowerCase(java.util.Locale.ROOT)
+                        .replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
+        Page<User> pageUser = userRepository.searchManagedUsers(manageableRoles(), pattern,
+                gender, role, status, location, sortedPage);
+        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotalPages(pageUser.getTotalPages());
+        meta.setTotalElements(pageUser.getTotalElements());
+
+        resultPaginationDTO.setMeta(meta);
+
+        resultPaginationDTO.setResult(
+                pageUser.getContent()
+                        .stream()
+                        .map(userService::convertToAdminUserDto)
+                        .toList());
+
+        return resultPaginationDTO;
+    }
+
     @Transactional
     public AdminUserDto handleUpdateUser(AdminModerationUserRequest request) {
         User user = userRepository.findById(request.getId()).orElseThrow(() -> new RuntimeException("User not found"));
-        if (user.getRole() == Role.SUPER_ADMIN) {
-            throw new IllegalArgumentException("The SUPER_ADMIN account cannot be moderated");
-        }
+        requireManageableUser(user);
         //Update password implement later
 
         UserStatus currentStatus = user.getStatus();
@@ -86,6 +154,9 @@ public class AdminService {
 
     @Transactional
     public AdminUserDto handleUpdateUserRole(Integer id, Role role) {
+        if (currentManagerRole() != Role.SUPER_ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only SUPER_ADMIN can change account roles");
+        }
         if (role != Role.USER && role != Role.ADMIN) {
             throw new IllegalArgumentException("Role can only be changed to USER or ADMIN");
         }
@@ -105,9 +176,7 @@ public class AdminService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getRole() == Role.SUPER_ADMIN) {
-            throw new IllegalArgumentException("The SUPER_ADMIN account cannot be deleted");
-        }
+        requireManageableUser(user);
 
         if (user.getStatus() != UserStatus.DELETED) {
             throw new RuntimeException("Only users with DELETED status can be removed");

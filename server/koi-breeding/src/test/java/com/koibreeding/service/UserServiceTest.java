@@ -91,4 +91,46 @@ public class UserServiceTest {
         assertEquals("/kois/sakura.svg", result.get(0).imageUrl());
         assertEquals(91.25, result.get(0).beautifulScore());
     }
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(value = com.koibreeding.enums.Role.class, names = {"ADMIN", "SUPER_ADMIN"})
+    void adminUsernameCannotBeChanged(com.koibreeding.enums.Role role) {
+        user.setRole(role);
+        user.setUsername("admin");
+        when(userRepository.findById(1)).thenReturn(java.util.Optional.of(user));
+        User changes = new User();
+        changes.setUsername("renamed");
+        org.junit.jupiter.api.Assertions.assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> userService.handleUpdateProfile(1, changes));
+        assertEquals("admin", user.getUsername());
+        org.mockito.Mockito.verify(userRepository, org.mockito.Mockito.never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test void duplicateEmailRejectsProfileWithoutSaving() {
+        user.setEmail("original@example.com");
+        when(userRepository.findById(1)).thenReturn(java.util.Optional.of(user));
+        when(userRepository.existsByEmailIgnoreCaseAndIdNot("Taken@Example.com", 1)).thenReturn(true);
+        User changes = new User();
+        changes.setEmail(" Taken@Example.com ");
+        var error = org.junit.jupiter.api.Assertions.assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> userService.handleUpdateProfile(1, changes));
+        assertEquals(org.springframework.http.HttpStatus.CONFLICT, error.getStatusCode());
+        assertEquals("original@example.com", user.getEmail());
+        org.mockito.Mockito.verify(userRepository, org.mockito.Mockito.never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test void ownEmailCanBeSavedAndAdminUsernameStaysUnchanged() {
+        user.setRole(com.koibreeding.enums.Role.ADMIN);
+        user.setUsername("admin");
+        user.setEmail("admin@example.com");
+        when(userRepository.findById(1)).thenReturn(java.util.Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+        User changes = new User();
+        changes.setEmail(" admin@example.com ");
+        changes.setGender(Gender.FEMALE);
+        var result = userService.handleUpdateProfile(1, changes);
+        assertEquals("admin", result.getUsername());
+        assertEquals("admin@example.com", result.getEmail());
+        assertEquals(Gender.FEMALE, result.getGender());
+        org.mockito.Mockito.verify(userRepository).existsByEmailIgnoreCaseAndIdNot("admin@example.com", 1);
+    }
 }

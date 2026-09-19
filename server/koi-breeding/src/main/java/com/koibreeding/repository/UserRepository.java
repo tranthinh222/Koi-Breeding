@@ -32,6 +32,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByRole(Role role);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Integer id);
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
     long countByCreatedAtBetween(Instant start, Instant end);

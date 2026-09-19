@@ -29,8 +29,8 @@ export async function getUser(userId: number): Promise<User> {
 
 export type UpdateUserProfileRequest = Pick<
   User,
-  'username' | 'email' | 'birthday' | 'gender'
->
+  'email' | 'birthday' | 'gender'
+> & { username?: string }
 
 export async function updateUserProfile(
   userId: number,

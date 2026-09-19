@@ -7,6 +7,9 @@ import java.time.temporal.ChronoUnit;
 import org.springframework.data.domain.PageRequest;
 import com.koibreeding.dto.response.ResBeautifulKoiDTO;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import com.koibreeding.enums.Role;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -116,11 +119,21 @@ public class UserService {
     public User handleUpdateProfile(Integer userId, User userUpdate) {
         User currentUser = this.handleFetchProfileByUserId(userId);
 
-        if (userUpdate.getUsername() != null && !userUpdate.getUsername().isBlank()) {
+        boolean adminAccount = currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.SUPER_ADMIN;
+        if (adminAccount && userUpdate.getUsername() != null
+                && !userUpdate.getUsername().equals(currentUser.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Admin username cannot be changed");
+        }
+        String email = userUpdate.getEmail() == null ? null : userUpdate.getEmail().trim();
+        if (email != null && !email.isBlank()
+                && userRepository.existsByEmailIgnoreCaseAndIdNot(email, userId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already in use");
+        }
+        if (!adminAccount && userUpdate.getUsername() != null && !userUpdate.getUsername().isBlank()) {
             currentUser.setUsername(userUpdate.getUsername());
         }
-        if (userUpdate.getEmail() != null && !userUpdate.getEmail().isBlank()) {
-            currentUser.setEmail(userUpdate.getEmail());
+        if (email != null && !email.isBlank()) {
+            currentUser.setEmail(email);
         }
         if (userUpdate.getBirthday() != null) {
             currentUser.setBirthday(userUpdate.getBirthday());

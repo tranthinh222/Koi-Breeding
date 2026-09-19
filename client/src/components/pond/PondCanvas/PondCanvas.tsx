@@ -11,6 +11,7 @@ import {
 	drawKoi,
 	drawLotus,
 	handleLotusCollisions,
+	getFishSize,
 	KOI_PROPS_MAP,
 	makeFish,
 	makeLotus,
@@ -242,6 +243,10 @@ function PondCanvas({
 
 	useEffect(() => {
 		latestKoiListRef.current = pondKoiList;
+        pondKoiList.forEach((koi, index) => {
+            const fish = fishRef.current[index];
+            if (fish && !fish.isLeaving) fish.size = getFishSize(koi.length);
+        });
 	}, [pondKoiList]);
 
 	useEffect(() => {
@@ -281,6 +286,7 @@ function PondCanvas({
 						box.width,
 						box.height,
 						koiImage,
+						koi.length,
 						isJustMoved,
 					);
 
@@ -328,7 +334,7 @@ function PondCanvas({
 						koi.dictionary?.imageUrl || "/kois/koi-fish-null.svg";
 
 					// isNew = true -> kích hoạt spawnProgress = 0
-					const newFish = makeFish(width, height, koiImage, true);
+					const newFish = makeFish(width, height, koiImage, koi.length, true);
 					fishRef.current.push(newFish);
 
 					// Tạo hiệu ứng gợn nước ngay tại vị trí thả

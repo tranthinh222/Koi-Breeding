@@ -9,6 +9,7 @@ import {
 	callUpdateBreedingRate,
 	type ICreateBreedingRateRequest,
 } from "../../../api/breeding";
+import { getApiErrorMessage } from "../../../api/client";
 import { callFetchKoiVarient } from "../../../api/koiDictionary";
 import type {
 	BreedingRecipeType,
@@ -77,11 +78,47 @@ export default function BreedingManagement() {
 
 	const allFormulas = [...formulas1, ...formulas2, ...formulas3];
 	const exportMatrices = () => {
-		if (!allFormulas.length) { toast("There are no visible recipes to export."); return; }
-		const rows = [["ID", "Type", "Father", "Mother", "Child", "Target rate", "Father rate", "Mother rate"], ...allFormulas.map((f) => [f.id, f.type, f.father.name, f.mother.name, f.child.name, f.targetRate ?? 0, f.fatherRate, f.motherRate])];
-		const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
-		const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-		const anchor = document.createElement("a"); anchor.href = url; anchor.download = "breeding-recipes.csv"; anchor.click(); URL.revokeObjectURL(url);
+		if (!allFormulas.length) {
+			toast("There are no visible recipes to export.");
+			return;
+		}
+		const rows = [
+			[
+				"ID",
+				"Type",
+				"Father",
+				"Mother",
+				"Child",
+				"Target rate",
+				"Father rate",
+				"Mother rate",
+			],
+			...allFormulas.map((f) => [
+				f.id,
+				f.type,
+				f.father.name,
+				f.mother.name,
+				f.child.name,
+				f.targetRate ?? 0,
+				f.fatherRate,
+				f.motherRate,
+			]),
+		];
+		const csv = rows
+			.map((row) =>
+				row
+					.map((cell) => `"${String(cell).replaceAll('"', '""')}"`)
+					.join(","),
+			)
+			.join("\n");
+		const url = URL.createObjectURL(
+			new Blob([csv], { type: "text/csv;charset=utf-8" }),
+		);
+		const anchor = document.createElement("a");
+		anchor.href = url;
+		anchor.download = "breeding-recipes.csv";
+		anchor.click();
+		URL.revokeObjectURL(url);
 	};
 
 	useEffect(() => {
@@ -203,9 +240,8 @@ export default function BreedingManagement() {
 		try {
 			const response = await callCreateBreedingRate(formula);
 			const newRecipe: IBreedingRecipe | undefined = response.data.data;
-			console.log(`Res: ${JSON.stringify(response)}`);
 			if (newRecipe && response.status === 200) {
-				toast.success("Breeding recipe created.");
+				alert("Breeding recipe created.");
 				if (newRecipe.type === "PURE") {
 					setFormulas1((prev) => [newRecipe, ...prev]);
 				} else if (newRecipe.type === "CROSS") {
@@ -214,10 +250,18 @@ export default function BreedingManagement() {
 					setFormulas3((prev) => [newRecipe, ...prev]);
 				}
 			} else {
-				toast.error("Unable to create the breeding recipe.");
+				alert(
+					response.data.message ||
+						"Unable to create the breeding recipe.",
+				);
 			}
 		} catch (error) {
-			toast.error("Unable to create the breeding recipe.");
+			alert(
+				getApiErrorMessage(
+					error,
+					"Unable to create the breeding recipe.",
+				),
+			);
 		}
 		setIsModalOpen(false);
 	};
@@ -235,19 +279,27 @@ export default function BreedingManagement() {
 		try {
 			const response = await callDeleteBreedingRate(id);
 			if (response.status === 204) {
-				toast.success(`Recipe #${id} deleted.`);
+				alert(`Recipe #${id} deleted.`);
 				setReload1((prev) => !prev);
 				setReload2((prev) => !prev);
 				setReload3((prev) => !prev);
 			} else {
-				toast(`Recipe #${id} removed from the current view.`);
+				alert(
+					response.data.message ||
+						`Recipe #${id} removed from the current view.`,
+				);
 
 				setFormulas1((prev) => prev.filter((f) => f.id !== id));
 				setFormulas2((prev) => prev.filter((f) => f.id !== id));
 				setFormulas3((prev) => prev.filter((f) => f.id !== id));
 			}
 		} catch (error) {
-			toast.error("Unable to delete the breeding recipe.");
+			alert(
+				getApiErrorMessage(
+					error,
+					"Unable to delete the breeding recipe.",
+				),
+			);
 		}
 	};
 
@@ -264,8 +316,8 @@ export default function BreedingManagement() {
 				formula,
 			);
 			const newRow: IBreedingRecipe | undefined = response.data.data;
-			if (newRow) {
-				toast.success(`Recipe #${selectedFormula.id} updated.`);
+			if (response.status === 200 && newRow) {
+				alert(`Recipe #${selectedFormula.id} updated.`);
 				if (newRow.type === "PURE") {
 					setReload1((prev) => !prev);
 				} else if (newRow.type === "CROSS") {
@@ -273,11 +325,21 @@ export default function BreedingManagement() {
 				} else if (newRow.type === "OVERLAY") {
 					setReload3((prev) => !prev);
 				}
+			} else {
+				alert(
+					response.data.message ||
+						`Failed to update Recipe #${selectedFormula.id}.`,
+				);
 			}
 			setIsEditModalOpen(false);
 			setSelectedFormula(null);
 		} catch (error) {
-			toast.error("Unable to update the breeding recipe.");
+			alert(
+				getApiErrorMessage(
+					error,
+					"Unable to update the breeding recipe.",
+				),
+			);
 		}
 	};
 
@@ -299,8 +361,8 @@ export default function BreedingManagement() {
 						</h1>
 
 						<p className="breeding-page-subtitle">
-							Manage inheritance rates, offspring outcomes, and koi
-							breeding recipes.
+							Manage inheritance rates, offspring outcomes, and
+							koi breeding recipes.
 						</p>
 					</div>
 
@@ -342,7 +404,10 @@ export default function BreedingManagement() {
 				</div>
 
 				{/* STATISTICS */}
-				<StatCards formulasCount={totalElements} formulas={allFormulas} />
+				<StatCards
+					formulasCount={totalElements}
+					formulas={allFormulas}
+				/>
 
 				{/* TABS */}
 				<BreedingTabs
@@ -425,9 +490,24 @@ export default function BreedingManagement() {
 // STAT CARDS
 // ============================================================
 
-function StatCards({ formulasCount, formulas }: { formulasCount: number; formulas: IBreedingRecipe[] }) {
-	const averageTarget = formulas.length ? formulas.reduce((sum, item) => sum + (item.targetRate ?? 0), 0) / formulas.length : 0;
-	const highestMutation = formulas.length ? Math.max(...formulas.map((item) => Math.min(item.fatherRate, item.motherRate))) : 0;
+function StatCards({
+	formulasCount,
+	formulas,
+}: {
+	formulasCount: number;
+	formulas: IBreedingRecipe[];
+}) {
+	const averageTarget = formulas.length
+		? formulas.reduce((sum, item) => sum + (item.targetRate ?? 0), 0) /
+			formulas.length
+		: 0;
+	const highestMutation = formulas.length
+		? Math.max(
+				...formulas.map((item) =>
+					Math.min(item.fatherRate, item.motherRate),
+				),
+			)
+		: 0;
 	const stats = [
 		{
 			label: "TOTAL RECIPES",
@@ -443,7 +523,9 @@ function StatCards({ formulasCount, formulas }: { formulasCount: number; formula
 		},
 		{
 			label: "SCALE TRAIT GENES",
-			value: formulas.filter((item) => item.type === "OVERLAY").length.toString(),
+			value: formulas
+				.filter((item) => item.type === "OVERLAY")
+				.length.toString(),
 			icon: "💎",
 			detail: "Overlay recipes in this view",
 		},

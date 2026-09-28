@@ -1,14 +1,11 @@
 import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { apiClient } from "../../api/client";
+import { apiClient, getApiErrorMessage } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 
 import femaleAvatar from "../../assets/avatars/female_blank_avatar.png";
 import maleAvatar from "../../assets/avatars/male_blank_avatar.png";
-import kohakuImage from "../../assets/koi/kohaku.svg";
-import showaImage from "../../assets/koi/showa_sanshoku.svg";
-import sankeImage from "../../assets/koi/taisho_sanke.svg";
 
 import ImageEditor from "./ImageEditor";
 
@@ -17,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { logoutRequest } from "../../api/auth";
 import {
 	ACCEPTED_AVATAR_TYPES,
+	type BeautifulKoi,
 	type ProfileForm,
 	type UserProfile,
 } from "../../types/profile.types";
@@ -28,6 +26,36 @@ type ApiResponse<T> = {
 	message: string;
 	data: T;
 };
+
+type ProfileErrors = Partial<Record<keyof ProfileForm, string>>;
+
+function dateValue(date: Date) {
+	return `${date.getFullYear().toString().padStart(4, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function validateProfile(form: ProfileForm): ProfileErrors {
+	const errors: ProfileErrors = {};
+	if (!form.email.trim()) errors.email = "Email is required.";
+	else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+		errors.email = "Enter a valid email address.";
+	}
+	if (!form.birthday) errors.birthday = "Birthday is required.";
+	else {
+		const birthday = new Date(`${form.birthday}T00:00:00`);
+		if (
+			!/^\d{4}-\d{2}-\d{2}$/.test(form.birthday) ||
+			Number.isNaN(birthday.getTime()) ||
+			dateValue(birthday) !== form.birthday ||
+			birthday.getFullYear() < 1
+		)
+			errors.birthday = "Enter a valid birthday.";
+		else if (form.birthday > dateValue(new Date()))
+			errors.birthday = "Birthday cannot be in the future.";
+	}
+	if (form.gender !== "MALE" && form.gender !== "FEMALE")
+		errors.gender = "Please select a gender.";
+	return errors;
+}
 
 function getProfileUserId(
 	userId: string | undefined,
@@ -173,6 +201,7 @@ function ProfileHero({
 						type="button"
 						className="secondary"
 						onClick={onEditToggle}
+						disabled={uploading}
 					>
 						Cancel
 					</button>
@@ -211,10 +240,14 @@ function AccountPanel({
 	form,
 	editing,
 	onChange,
+	errors,
+	saving,
 }: {
 	profile: UserProfile;
 	form: ProfileForm;
 	editing: boolean;
+	errors: ProfileErrors;
+	saving: boolean;
 	onChange: (
 		field: keyof ProfileForm,
 	) => (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
@@ -234,11 +267,27 @@ function AccountPanel({
 					{editing ? (
 						<input
 							type="email"
+							id="profile-email"
+							required
+							disabled={saving}
+							aria-invalid={Boolean(errors.email)}
+							aria-describedby={
+								errors.email ? "profile-email-error" : undefined
+							}
 							value={form.email}
 							onChange={onChange("email")}
 						/>
 					) : (
 						<strong>{profile.email || "Not updated."}</strong>
+					)}
+					{editing && errors.email && (
+						<small
+							id="profile-email-error"
+							className="profile-field-error"
+							role="alert"
+						>
+							{errors.email}
+						</small>
 					)}
 				</label>
 
@@ -247,11 +296,30 @@ function AccountPanel({
 					{editing ? (
 						<input
 							type="date"
+							id="profile-birthday"
+							required
+							max={dateValue(new Date())}
+							disabled={saving}
+							aria-invalid={Boolean(errors.birthday)}
+							aria-describedby={
+								errors.birthday
+									? "profile-birthday-error"
+									: undefined
+							}
 							value={form.birthday}
 							onChange={onChange("birthday")}
 						/>
 					) : (
 						<strong>{formatDate(profile.birthday)}</strong>
+					)}
+					{editing && errors.birthday && (
+						<small
+							id="profile-birthday-error"
+							className="profile-field-error"
+							role="alert"
+						>
+							{errors.birthday}
+						</small>
 					)}
 				</label>
 
@@ -259,6 +327,15 @@ function AccountPanel({
 					<span>Gender</span>
 					{editing ? (
 						<select
+							id="profile-gender"
+							required
+							disabled={saving}
+							aria-invalid={Boolean(errors.gender)}
+							aria-describedby={
+								errors.gender
+									? "profile-gender-error"
+									: undefined
+							}
 							value={form.gender}
 							onChange={onChange("gender")}
 						>
@@ -275,8 +352,16 @@ function AccountPanel({
 								: "Not updated."}
 						</strong>
 					)}
+					{editing && errors.gender && (
+						<small
+							id="profile-gender-error"
+							className="profile-field-error"
+							role="alert"
+						>
+							{errors.gender}
+						</small>
+					)}
 				</label>
-
 				<ProfileField
 					label="Joined at"
 					value={formatDate(profile.createdAt)}
@@ -289,8 +374,8 @@ function AccountPanel({
 function StatisticsPanel({ profile }: { profile: UserProfile }) {
 	const stats = [
 		{ label: "Level", value: profile.level },
-		{ label: "Total Fish", value: 0 },
-		{ label: "Marketplace Sales", value: 0 },
+		{ label: "Total Fish", value: profile.totalFish },
+		{ label: "Marketplace Sales", value: profile.marketplaceSales },
 	];
 
 	return (
@@ -334,28 +419,37 @@ function AchievementsPanel() {
 	);
 }
 
-function FavoriteKoiPanel() {
-	const favoriteKoi = [
-		{ name: "Kohaku", image: kohakuImage, level: 18 },
-		{ name: "Showa", image: showaImage, level: 19 },
-		{ name: "Sanke", image: sankeImage, level: 20 },
-	];
-
+function MostBeautifulKoiPanel({ koiList }: { koiList: BeautifulKoi[] }) {
 	return (
 		<section className="profile-favorite-koi">
 			<div className="profile-section-header">
 				<span className="profile-eyebrow">Collection</span>
-				<h3>Your Favorite Koi</h3>
+				<h3>Your Most Beautiful Koi</h3>
 			</div>
 
+			{koiList.length === 0 && <p>You do not own any koi yet.</p>}
 			<div className="profile-koi-grid">
-				{favoriteKoi.map((koi) => (
-					<div className="profile-koi-card" key={koi.name}>
+				{koiList.map((koi) => (
+					<div className="profile-koi-card" key={koi.id}>
 						<div className="profile-koi-image">
-							<img src={koi.image} alt={koi.name} />
+							<img
+								src={koi.imageUrl || "/kois/koi-empty.png"}
+								alt={koi.name}
+								onError={(event) => {
+									if (
+										!event.currentTarget.src.endsWith(
+											"/kois/koi-empty.png",
+										)
+									)
+										event.currentTarget.src =
+											"/kois/koi-empty.png";
+								}}
+							/>
 						</div>
 						<strong>{koi.name}</strong>
-						<span>Lv. {koi.level}</span>
+						<span>
+							Beautiful Score: {koi.beautifulScore.toFixed(0)}/100
+						</span>
 					</div>
 				))}
 			</div>
@@ -374,6 +468,8 @@ export default function Profile() {
 	});
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
+	const savePending = useRef(false);
+	const [fieldErrors, setFieldErrors] = useState<ProfileErrors>({});
 	const [uploading, setUploading] = useState(false);
 	const [editing, setEditing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -523,13 +619,21 @@ export default function Profile() {
 	const handleChange =
 		(field: keyof ProfileForm) =>
 		(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-			setForm((current) => ({
-				...current,
-				[field]: event.target.value,
-			}));
+			const updated = { ...form, [field]: event.target.value };
+			setForm(updated);
+			if (fieldErrors[field])
+				setFieldErrors((current) => ({
+					...current,
+					[field]: validateProfile(updated)[field],
+				}));
+			setError(null);
+			setNotice(null);
 		};
 
 	const handleEditToggle = () => {
+		if (savePending.current) return;
+		setFieldErrors({});
+		setError(null);
 		if (profile) {
 			setForm({
 				email: profile.email ?? "",
@@ -543,7 +647,17 @@ export default function Profile() {
 	};
 
 	const handleSave = () => {
-		if (!profile) return;
+		if (!profile || savePending.current || uploading) return;
+		const errors = validateProfile(form);
+		setFieldErrors(errors);
+		setNotice(null);
+		setError(null);
+		const firstInvalid = Object.keys(errors)[0];
+		if (firstInvalid) {
+			document.getElementById(`profile-${firstInvalid}`)?.focus();
+			return;
+		}
+		savePending.current = true;
 
 		const saveProfile = async () => {
 			try {
@@ -554,9 +668,9 @@ export default function Profile() {
 				const response = await apiClient.put<ApiResponse<UserProfile>>(
 					"/users/profile",
 					{
-						email: form.email,
-						birthday: form.birthday || null,
-						gender: form.gender || null,
+						email: form.email.trim(),
+						birthday: form.birthday,
+						gender: form.gender,
 					},
 					{
 						params: { id: profile.id },
@@ -577,10 +691,9 @@ export default function Profile() {
 				setEditing(false);
 				setNotice("Profile updated successfully.");
 			} catch (err) {
-				setError(
-					err instanceof Error ? err.message : "Cannot save profile.",
-				);
+				setError(getApiErrorMessage(err, "Cannot save profile."));
 			} finally {
+				savePending.current = false;
 				setSaving(false);
 			}
 		};
@@ -630,7 +743,7 @@ export default function Profile() {
 						type="loading"
 						message="Loading user profile..."
 					/>
-				) : error ? (
+				) : error && !profile ? (
 					<ProfileMessage type="error" message={error} />
 				) : profile ? (
 					<>
@@ -658,6 +771,9 @@ export default function Profile() {
 							onSave={handleSave}
 						/>
 
+						{error && (
+							<ProfileMessage type="error" message={error} />
+						)}
 						{notice && (
 							<ProfileMessage type="info" message={notice} />
 						)}
@@ -668,6 +784,8 @@ export default function Profile() {
 								form={form}
 								editing={editing}
 								onChange={handleChange}
+								errors={fieldErrors}
+								saving={saving}
 							/>
 
 							<StatisticsPanel profile={profile} />
@@ -675,7 +793,9 @@ export default function Profile() {
 							<AchievementsPanel />
 						</div>
 
-						<FavoriteKoiPanel />
+						<MostBeautifulKoiPanel
+							koiList={profile.mostBeautifulKoi ?? []}
+						/>
 
 						{/* Image Editor */}
 						{showEditor && selectedImage && (

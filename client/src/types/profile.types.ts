@@ -1,6 +1,14 @@
 export type Gender = "MALE" | "FEMALE" | "";
 
+export type BeautifulKoi = {
+  id: number;
+  name: string;
+  imageUrl: string | null;
+  beautifulScore: number;
+};
+
 export type UserProfile = {
+  mostBeautifulKoi: BeautifulKoi[];
   id: number;
   username: string;
   email: string;
@@ -8,6 +16,8 @@ export type UserProfile = {
   gender: Gender | null;
   role?: "USER" | "ADMIN" | null;
   level: number;
+  totalFish: number;
+  marketplaceSales: number;
   avatarUrl: string | null;
   createdAt?: string;
   updatedAt?: string;

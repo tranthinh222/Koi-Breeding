@@ -19,4 +19,7 @@ public class ReqAdminItems {
     ItemType itemType;
     BigDecimal price;
     EffectType effectType;
+    @jakarta.validation.constraints.DecimalMin(value = "0", message = "Effect value must not be negative")
+    @jakarta.validation.constraints.Digits(integer = 8, fraction = 2, message = "Effect value must have at most 8 integer digits and 2 decimal places")
+    BigDecimal effectValue;
 }

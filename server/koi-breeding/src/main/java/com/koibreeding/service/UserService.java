@@ -4,32 +4,41 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import com.koibreeding.dto.response.ResBeautifulKoiDTO;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import com.koibreeding.enums.Role;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.koibreeding.config.PondEnvironmentConfig;
 import com.koibreeding.domain.User;
 import com.koibreeding.dto.response.ResUserDto;
-import com.koibreeding.dto.response.ResultPaginationDTO;
 import com.koibreeding.dto.response.admin.AdminUserDto;
 import com.koibreeding.enums.Location;
-import com.koibreeding.enums.Role;
 import com.koibreeding.repository.UserRepository;
+import com.koibreeding.repository.KoiRepository;
+import com.koibreeding.repository.TransactionRepository;
+import com.koibreeding.enums.TransactionType;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final PondEnvironmentConfig environmentConfig;
     private final CloudinaryUploadService cloudinaryUploadService;
+    private final KoiRepository koiRepository;
+    private final TransactionRepository transactionRepository;
 
     public UserService(UserRepository userRepository, PondEnvironmentConfig environmentConfig,
-            CloudinaryUploadService cloudinaryUploadService) {
+            CloudinaryUploadService cloudinaryUploadService, KoiRepository koiRepository,
+            TransactionRepository transactionRepository) {
         this.userRepository = userRepository;
         this.environmentConfig = environmentConfig;
         this.cloudinaryUploadService = cloudinaryUploadService;
+        this.koiRepository = koiRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public User handleFetchUserById(Integer userId) {
@@ -54,6 +63,12 @@ public class UserService {
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .level(user.getLevel())
+                .totalFish(koiRepository.countByPond_Owner_Id(user.getId()))
+                .mostBeautifulKoi(koiRepository.findMostBeautifulByOwner(user.getId(), PageRequest.of(0, 3))
+                        .stream().map(koi -> new ResBeautifulKoiDTO(
+                                koi.getId(), koi.getName(), koi.getImageUrl(), koi.getBeautifulScore())).toList())
+                .marketplaceSales(transactionRepository.countByWalletUserIdAndTransactionType(
+                        user.getId(), TransactionType.SELL_FISH))
                 .build();
     }
 
@@ -104,11 +119,21 @@ public class UserService {
     public User handleUpdateProfile(Integer userId, User userUpdate) {
         User currentUser = this.handleFetchProfileByUserId(userId);
 
-        if (userUpdate.getUsername() != null && !userUpdate.getUsername().isBlank()) {
+        boolean adminAccount = currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.SUPER_ADMIN;
+        if (adminAccount && userUpdate.getUsername() != null
+                && !userUpdate.getUsername().equals(currentUser.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Admin username cannot be changed");
+        }
+        String email = userUpdate.getEmail() == null ? null : userUpdate.getEmail().trim();
+        if (email != null && !email.isBlank()
+                && userRepository.existsByEmailIgnoreCaseAndIdNot(email, userId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already in use");
+        }
+        if (!adminAccount && userUpdate.getUsername() != null && !userUpdate.getUsername().isBlank()) {
             currentUser.setUsername(userUpdate.getUsername());
         }
-        if (userUpdate.getEmail() != null && !userUpdate.getEmail().isBlank()) {
-            currentUser.setEmail(userUpdate.getEmail());
+        if (email != null && !email.isBlank()) {
+            currentUser.setEmail(email);
         }
         if (userUpdate.getBirthday() != null) {
             currentUser.setBirthday(userUpdate.getBirthday());
@@ -204,27 +229,6 @@ public class UserService {
      * 
      * }
      */
-    public ResultPaginationDTO handleFetchAllUsers(Pageable pageable) {
-        Page<User> pageUser = this.userRepository.findAllByRole(Role.USER, pageable);
-        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
-        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
-
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setTotalPages(pageUser.getTotalPages());
-        meta.setTotalElements(pageUser.getTotalElements());
-
-        resultPaginationDTO.setMeta(meta);
-
-        resultPaginationDTO.setResult(
-                pageUser.getContent()
-                        .stream()
-                        .map(this::convertToAdminUserDto)
-                        .toList());
-
-        return resultPaginationDTO;
-    }
-
     public AdminUserDto convertToAdminUserDto(User user) {
         return AdminUserDto.builder()
                 .id(user.getId())

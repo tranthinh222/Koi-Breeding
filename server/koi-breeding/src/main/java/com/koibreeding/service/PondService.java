@@ -62,13 +62,13 @@ public class PondService {
     public ResBuyOrUpgradePondDTO handleBuyPond(RequestBuyPondDTO buyPondRequestDTO) throws Exception {
         User owner = userService.handleFetchUserById(buyPondRequestDTO.getOwnerId());
         if (owner == null) {
-            throw new Exception("Pond owner is not exist!");
+            throw new RuntimeException("Pond owner is not exist!");
         }
 
         BigDecimal ownerBalance = walletService.getBalanceWallet(owner.getId()).getBalance();
         BigDecimal pondPrice = BigDecimal.valueOf(buyPondRequestDTO.getPrice());
         if (ownerBalance.compareTo(pondPrice) < 0) {
-            throw new Exception("You don't have enough koins to buy this pond!");
+            throw new RuntimeException("You don't have enough koins to buy this pond!");
         }
 
         // Initialize a new pond
@@ -136,11 +136,11 @@ public class PondService {
     public ResBuyOrUpgradePondDTO handleUpgradePond(Integer pondId) throws Exception {
         Pond pond = this.handleFetchPondById(pondId);
         if (pond == null) {
-            throw new Exception("Pond with id='" + pondId + "' does not exist.");
+            throw new RuntimeException("Pond with id='" + pondId + "' does not exist.");
         }
 
         if (pond.getLevel() == levelingSystem.getPondMaxLevel()) {
-            throw new Exception("Pond is currently at max level.");
+            throw new RuntimeException("Pond is currently at max level.");
         }
 
         User owner = pond.getOwner();
@@ -148,7 +148,7 @@ public class PondService {
         BigDecimal ownerBalance = walletService.getBalanceWallet(owner.getId()).getBalance();
         BigDecimal upgradePrice = BigDecimal.valueOf(levelingSystem.getPondNextLevelPrice(pond.getLevel()));
         if (ownerBalance.compareTo(upgradePrice) < 0) {
-            throw new Exception("You don't have enough koins to upgrade this pond!");
+            throw new RuntimeException("You don't have enough koins to upgrade this pond!");
         }
 
         // Deduct owner's wallet balance

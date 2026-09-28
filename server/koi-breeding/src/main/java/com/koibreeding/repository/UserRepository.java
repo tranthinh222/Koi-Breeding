@@ -14,10 +14,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-    Page<User> findAllByRole(Role role, Pageable pageable);
+    @Query("""
+        SELECT u FROM User u WHERE u.role IN :roles
+        AND (:search IS NULL OR LOWER(u.username) LIKE :search ESCAPE '!' OR LOWER(u.email) LIKE :search ESCAPE '!')
+        AND (:gender IS NULL OR u.gender = :gender)
+        AND (:role IS NULL OR u.role = :role)
+        AND (:status IS NULL OR u.status = :status)
+        AND (:location IS NULL OR u.location = :location)
+        """)
+    Page<User> searchManagedUsers(@Param("roles") List<Role> roles,
+            @Param("search") String search,
+            @Param("gender") com.koibreeding.enums.Gender gender,
+            @Param("role") Role role,
+            @Param("status") com.koibreeding.enums.UserStatus status,
+            @Param("location") com.koibreeding.enums.Location location,
+            Pageable pageable);
     boolean existsByRole(Role role);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Integer id);
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
     long countByCreatedAtBetween(Instant start, Instant end);

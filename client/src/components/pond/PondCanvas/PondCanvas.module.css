@@ -66,6 +66,19 @@
 	gap: 5px;
 }
 
+.healFishButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #dcfce7;
+  color: #166534;
+  cursor: pointer;
+}
+.healFishButton:disabled { opacity: 0.45; cursor: not-allowed; }
+.healFishButton svg { width: 15px; height: 15px; }
 .feedFishButton svg { width: 15px; height: 15px; }
 .feedFishButton span { font-family: "Grandstander"; font-size: 14px; }
 

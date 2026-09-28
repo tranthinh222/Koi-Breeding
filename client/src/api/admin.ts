@@ -78,14 +78,25 @@ export interface AdminModerationUserRequest {
   reason?: string | null;
 }
 
+export interface AdminUserFilters {
+  search: string;
+  gender: string;
+  role: string;
+  status: string;
+  location: string;
+  sort: string;
+}
+
 export async function getAdminUsers(
   page = 1,
   pageSize = 8,
+  filters?: AdminUserFilters,
 ): Promise<AdminUsersResponse> {
   const response = await apiClient.get("/admin/users", {
     params: {
       page: Math.max(page - 1, 0),
       size: pageSize,
+      ...Object.fromEntries(Object.entries(filters ?? {}).filter(([, value]) => value !== "")),
     },
   });
 
@@ -146,6 +157,7 @@ export interface AdminItem {
   itemType: string;
   price: number;
   effectType: string;
+  effectValue: number;
 }
 // Interface định nghĩa cấu trúc Page trả về từ Spring Boot
 export interface PageResponse<T> {
@@ -192,6 +204,7 @@ export interface AddAdminItemRequest {
   itemType: string;
   price: number;
   effectType: string;
+  effectValue: number;
 }
 
 export async function addAdminItem(

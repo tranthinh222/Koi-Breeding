@@ -129,7 +129,7 @@ export interface IOwner {
 }
 
 export type ItemType = "FOOD" | "KOI" | "MEDICINE" | "CURRENCY";
-export type EffectType = "GROWTH" | "MUTATION" | "WATER_QUALITY";
+export type EffectType = "GROWTH" | "MUTATION" | "WATER_QUALITY" | "COOLING" | "HEATING" | "HEALTH";
 
 export interface IItem {
 	id: number;

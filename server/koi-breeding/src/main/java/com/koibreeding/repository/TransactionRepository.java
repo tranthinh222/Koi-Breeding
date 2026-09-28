@@ -24,6 +24,8 @@ public interface TransactionRepository
 
     boolean existsByWalletUserId(Integer userId);
 
+    long countByWalletUserIdAndTransactionType(Integer userId, TransactionType transactionType);
+
     List<Transaction> findByItemIsNull();
 
     long countByCreatedAtBetween(java.time.OffsetDateTime start, java.time.OffsetDateTime end);
